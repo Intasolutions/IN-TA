@@ -177,15 +177,15 @@ export default function About() {
   }, []);
 
   return (
-    <section ref={wrapRef} id="about" aria-label="About INTA" className="relative bg-white text-slate-900 py-20 overflow-hidden">
-      <div className="container mx-auto px-20">
+    <section ref={wrapRef} id="about" aria-label="About INTA" className="relative bg-white text-slate-900 py-20 overflow-hidden rounded-t-4xl -mt-20">
+      <div className="container mx-auto px-20 ">
         {/* intro */}
-        <div className="relative grid lg:grid-cols-12 gap-12 items-center py-12 about-reveal">
+        <div className="relative grid lg:grid-cols-12 gap-12 items-center py-40 about-reveal">
           {/* top full-bleed curve */}
          
 
           {/* bottom-right accent curve */}
-          <svg className="absolute right-0 bottom-0 w-[60%] h-[45%] pointer-events-none transform translate-x-10 translate-y-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden>
+          <svg className="absolute right-0 bottom-0 w-[70%] h-[45%] pointer-events-none transform translate-x-10 translate-y-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden>
             <path ref={bottomCurveRef} d="M600,350 C520,220 420,140 200,120" fill="none" stroke="#1f6fe6" strokeWidth="2.8" strokeLinecap="round" opacity="0.24" />
           </svg>
 
@@ -203,7 +203,7 @@ export default function About() {
                 src="/about/inta-lobby.png"
                 alt="INTA Office Lobby"
                 width={520}
-                height={600}
+                height={1000}
                 className="object-cover rounded-2xl"
                 priority
               />

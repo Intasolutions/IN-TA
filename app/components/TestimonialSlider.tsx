@@ -1,4 +1,4 @@
-// frontend/components/TestimonialSlider.tsx
+// frontend/components/TestimonialSlider.fullwidth.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -24,7 +24,7 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
   { id: 't4', name: 'Anders Holm', role: 'Founder — Craftly', quote: 'From concept to launch, the process was smooth. Their attention to micro-interaction made our product feel premium.', avatar: '/avatars/p4.jpg', company: 'Craftly' },
 ];
 
-const TEMPO = 0.60; // medium-fast buttery feel (smaller -> faster)
+const TEMPO = 0.60;
 
 export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS }: { testimonials?: Testimonial[] }) {
   const wrapRef = useRef<HTMLElement | null>(null);
@@ -34,19 +34,15 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
   const [isPlaying, setIsPlaying] = useState(true);
   const prefersReduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // rim-light + sparkle container refs
   const rimRef = useRef<HTMLDivElement | null>(null);
   const sparkleLayerRef = useRef<HTMLDivElement | null>(null);
-  // store sparkle tweens for cleanup
   const sparkleTweens = useRef<gsap.core.Tween[]>([]);
   const sparkleEls = useRef<HTMLDivElement[]>([]);
 
-  // Main marquee + card float effect
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!wrapRef.current || !trackRef.current) return;
 
-    // cleanup previous
     try { tlRef.current?.kill(); } catch {}
     floatTweens.current.forEach(t => t.kill());
     floatTweens.current = [];
@@ -58,7 +54,6 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     }
 
     const track = trackRef.current!;
-    // build width of one set (original items)
     const originals = Array.from(track.querySelectorAll<HTMLElement>('.ts-card-original'));
     if (!originals.length) return;
 
@@ -70,20 +65,16 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
       totalW += r.width + mr;
     });
 
-    // ensure track at start
     gsap.set(track, { x: 0 });
 
-    // duration scaled by width and TEMPO
     const base = Math.max(6 * TEMPO, (totalW / 90) * TEMPO);
     const duration = Math.max(6 * TEMPO, base);
 
-    // marquee timeline: move set left by totalW, then jump back -> seamless
     const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'linear' } });
     tl.to(track, { x: -totalW, duration, ease: 'linear' });
     tl.set(track, { x: 0 });
     tlRef.current = tl;
 
-    // floating micro motion per card
     const cards = Array.from(track.querySelectorAll<HTMLElement>('.ts-card'));
     cards.forEach((card, i) => {
       const t = gsap.to(card, {
@@ -98,14 +89,11 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
       floatTweens.current.push(t);
     });
 
-    // rim-light: animate along track as user scrolls through section
     if (rimRef.current && wrapRef.current) {
       try {
         const wrapEl = wrapRef.current;
         const rim = rimRef.current;
-        // set initial style
         gsap.set(rim, { x: -120, opacity: 0 });
-        // scroll-triggered scrub: travel from left to right slightly as section scrolls
         gsap.to(rim, {
           x: () => wrapEl.getBoundingClientRect().width + 160,
           opacity: 1,
@@ -122,10 +110,8 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
       } catch {}
     }
 
-    // Respect initial playing state
     if (!isPlaying) tl.pause();
 
-    // pointer interactions: pause on hover, slow on move
     const wrap = wrapRef.current!;
     let slowTO: number | null = null;
     const onEnter = () => {
@@ -151,7 +137,6 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     wrap.addEventListener('focusin', onEnter);
     wrap.addEventListener('focusout', onLeave);
 
-    // keyboard toggle: Space to pause/resume when focused inside
     const onKey = (e: KeyboardEvent) => {
       if (!(document.activeElement && wrap.contains(document.activeElement))) return;
       if (e.key === ' ' || e.key === 'Spacebar') {
@@ -174,7 +159,7 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     };
   }, [testimonials.length, isPlaying, prefersReduce]);
 
-  // Sparkles now synchronized to marquee: particles move across same distance & similar duration
+  // Sparkles (same as before)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (prefersReduce) return;
@@ -182,13 +167,11 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     const track = trackRef.current;
     if (!layer || !track) return;
 
-    // cleanup previous
     sparkleTweens.current.forEach(t => t.kill());
     sparkleTweens.current = [];
     sparkleEls.current.forEach(e => e.remove());
     sparkleEls.current = [];
 
-    // measure marquee width & duration like marquee effect
     const originals = Array.from(track.querySelectorAll<HTMLElement>('.ts-card-original'));
     if (!originals.length) return;
 
@@ -200,27 +183,21 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
       totalW += r.width + mr;
     });
 
-    // fallback to container width if something odd
     const containerWidth = track.getBoundingClientRect().width || window.innerWidth;
     const travelWidth = Math.max(totalW, containerWidth * 0.8);
 
     const base = Math.max(6 * TEMPO, (totalW / 90) * TEMPO);
     const marqueeDuration = Math.max(6 * TEMPO, base);
 
-    // create layered sparkles
     const count = 28;
     for (let i = 0; i < count; i++) {
       const el = document.createElement('div');
       el.className = 'sparkle';
-      // place inside layer
       layer.appendChild(el);
       sparkleEls.current.push(el);
 
-      // random vertical band inside the visible area (so sparks appear near cards)
       const y = gsap.utils.random(12, 120);
-      // random initial x between 0..travelWidth
       const startX = gsap.utils.random(0, travelWidth);
-      // scale & opacity
       const scale = gsap.utils.random(0.28, 0.98);
       const opacity = gsap.utils.random(0.08, 0.5);
 
@@ -232,20 +209,17 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
         transformOrigin: 'center center',
       });
 
-      // Each sparkle travels left roughly same distance as marquee but with random speed offset to create parallax
       const speedFactor = gsap.utils.random(0.6, 1.6);
       const dur = Math.max(2.4, marqueeDuration * speedFactor * gsap.utils.random(0.55, 1.18));
 
-      // horizontal travel (looping)
       const t1 = gsap.to(el, {
-        x: `-=${travelWidth + 140}`, // move left across area and a bit extra
+        x: `-=${travelWidth + 140}`,
         duration: dur,
         ease: 'linear',
         repeat: -1,
         delay: gsap.utils.random(0, 1.4),
       });
 
-      // subtle vertical float + opacity shimmer
       const t2 = gsap.to(el, {
         y: `+=${gsap.utils.random(-8, 8)}`,
         opacity: gsap.utils.random(opacity * 0.6, opacity * 1.0),
@@ -258,7 +232,6 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
       sparkleTweens.current.push(t1, t2);
     }
 
-    // cleanup
     return () => {
       try { sparkleTweens.current.forEach(t => t.kill()); } catch {}
       sparkleTweens.current = [];
@@ -285,126 +258,78 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
   };
 
   return (
-    <section ref={wrapRef} className="relative py-14 px-6 md:px-20 bg-[#fffdfb] overflow-hidden" aria-label="Client testimonials">
-      {/* sparkle background layer (container only) */}
+    <section ref={wrapRef} className="w-full relative py-16 bg-[#f9f8f6] overflow-hidden" aria-label="Client testimonials">
       <div className="pointer-events-none absolute inset-0 -z-20">
-        <div
-          ref={sparkleLayerRef}
-          id="sparkle-layer"
-          className="absolute inset-0 opacity-70"
-          style={{ overflow: 'hidden', pointerEvents: 'none' }}
-        />
-
-        {/* soft vignette to add depth */}
-        <div aria-hidden className="absolute inset-0 -z-10">
-          <div style={{ mixBlendMode: 'multiply' }} className="absolute inset-0 bg-gradient-to-b from-transparent to-[#fffaf8] opacity-80" />
-        </div>
+        <div ref={sparkleLayerRef} id="sparkle-layer" className="absolute inset-0 opacity-70" style={{ overflow: 'hidden', pointerEvents: 'none' }} />
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        <div className="mb-6">
-          <p className="text-sm font-semibold tracking-wide text-slate-600">WHAT CLIENTS SAY</p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#0b2a5f] mt-2">Trusted by teams around the world</h2>
-        </div>
-
-        <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-tl from-white to-[#f8f7f5] border border-slate-100 shadow-xl">
-          {/* left / right premium edge fades */}
-          <div
-            aria-hidden
-            className="absolute left-0 top-0 bottom-0 w-40 md:w-52 pointer-events-none -z-10"
-            style={{
-              background: 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.88) 30%, rgba(255,255,255,0) 100%)',
-              backdropFilter: 'blur(14px)',
-            }}
-          />
-          <div
-            aria-hidden
-            className="absolute right-0 top-0 bottom-0 w-40 md:w-52 pointer-events-none -z-10"
-            style={{
-              background: 'linear-gradient(270deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.88) 30%, rgba(255,255,255,0) 100%)',
-              backdropFilter: 'blur(14px)',
-            }}
-          />
-
-          {/* rim light element (thin gradient line that travels across while scrolling) */}
-          <div
-            ref={rimRef}
-            aria-hidden
-            className="absolute top-4 left-0 h-[6px] w-40 rounded-full pointer-events-none -z-5"
-            style={{
-              background: 'linear-gradient(90deg, rgba(230,240,255,0) 0%, rgba(230,240,255,0.95) 35%, rgba(230,240,255,0) 100%)',
-              filter: 'blur(12px)',
-              opacity: 0.2,
-            }}
-          />
-
-          <div
-            ref={trackRef}
-            className="flex gap-6 items-stretch will-change-transform"
-            style={{ touchAction: 'pan-y' }}
-          >
-
-            {/* First set (original) */}
-            {testimonials.map((t) => (
-              <article
-                key={`a-${t.id}`}
-                className="ts-card ts-card-original w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md"
-                role="group"
-                tabIndex={0}
-                aria-label={`${t.name}, ${t.role}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
-                    {t.avatar ? <Image src={t.avatar} alt={t.name} width={48} height={48} className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-[#eef4ff] to-[#fff]" />}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-slate-900">{t.name}</div>
-                    <div className="text-xs text-slate-500">{t.role} {t.company ? `— ${t.company}` : ''}</div>
-                  </div>
-                </div>
-                <blockquote className="text-sm text-slate-600 mt-3 flex-1">“{t.quote}”</blockquote>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="h-1.5 bg-[#1f6fe6]/10 rounded-full flex-1" />
-                  <div className="text-xs text-slate-400">Verified</div>
-                </div>
-              </article>
-            ))}
-
-            {/* Duplicate set to create seamless loop */}
-            {testimonials.map((t) => (
-              <article
-                key={`b-${t.id}`}
-                aria-hidden
-                className="ts-card w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
-                    {t.avatar ? <Image src={t.avatar} alt={t.name} width={48} height={48} className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-[#eef4ff] to-[#fff]" />}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-slate-900">{t.name}</div>
-                    <div className="text-xs text-slate-500">{t.role} {t.company ? `— ${t.company}` : ''}</div>
-                  </div>
-                </div>
-                <blockquote className="text-sm text-slate-600 mt-3 flex-1">“{t.quote}”</blockquote>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="h-1.5 bg-[#1f6fe6]/10 rounded-full flex-1" />
-                  <div className="text-xs text-slate-400">Verified</div>
-                </div>
-              </article>
-            ))}
+      <div className="relative z-10 w-full">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="mb-6 text-center">
+            <p className="text-lg font-semibold tracking-wide text-slate-600">WHAT CLIENTS SAY</p>
+           
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-slate-500">Hover to pause • Space to toggle when focused</div>
+        {/* marquee wrapper with pseudo-element shades */}
+        <div className="relative mt-6">
+          <div className="marquee-wrap mx-auto w-full">
+            <div className="relative overflow-visible rounded-2xl p-6 bg-gradient-to-tl max-w-full">
+              <div ref={rimRef} aria-hidden="true" className="absolute top-4 left-1/2 -translate-x-1/2 h-[6px] w-72 rounded-full pointer-events-none -z-10" />
+              <div ref={trackRef} className="flex gap-6 items-stretch will-change-transform px-6" style={{ touchAction: 'pan-y' }}>
+                {testimonials.map((t) => (
+                  <article key={`a-${t.id}`} className="ts-card ts-card-original w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md" role="group" tabIndex={0} aria-label={`${t.name}, ${t.role}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
+                        {t.avatar ? <Image src={t.avatar} alt={t.name} width={48} height={48} className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-[#eef4ff] to-[#fff]" />}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">{t.name}</div>
+                        <div className="text-xs text-slate-500">{t.role} {t.company ? `— ${t.company}` : ''}</div>
+                      </div>
+                    </div>
+                    <blockquote className="text-sm text-slate-600 mt-3 flex-1">“{t.quote}”</blockquote>
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="h-1.5 bg-[#1f6fe6]/10 rounded-full flex-1" />
+                      <div className="text-xs text-slate-400">Verified</div>
+                    </div>
+                  </article>
+                ))}
+
+                {testimonials.map((t) => (
+                  <article key={`b-${t.id}`} aria-hidden className="ts-card w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
+                        {t.avatar ? <Image src={t.avatar} alt={t.name} width={48} height={48} className="object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-[#eef4ff] to-[#fff]" />}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">{t.name}</div>
+                        <div className="text-xs text-slate-500">{t.role} {t.company ? `— ${t.company}` : ''}</div>
+                      </div>
+                    </div>
+                    <blockquote className="text-sm text-slate-600 mt-3 flex-1">“{t.quote}”</blockquote>
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="h-1.5 bg-[#1f6fe6]/10 rounded-full flex-1" />
+                      <div className="text-xs text-slate-400">Verified</div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 pointer-events-none -z-10 flex justify-between px-6">
+            <div aria-hidden="true" style={{ width: 160, height: 48, boxShadow: 'inset 20px 0 40px -24px rgba(11,42,95,0.06)' }} />
+            <div aria-hidden="true" style={{ width: 160, height: 48, boxShadow: 'inset -20px 0 40px -24px rgba(11,42,95,0.06)' }} />
+          </div>
+        </div>
+
       </div>
 
       <style jsx>{`
-        section { -webkit-font-smoothing: antialiased; }
         .ts-card { min-height: 150px; transition: transform 300ms cubic-bezier(.2,.9,.2,1), box-shadow 300ms ease; }
         .ts-card:focus { box-shadow: 0 18px 40px rgba(11,42,95,0.08); transform: translateY(-6px) scale(1.01); outline: none; }
 
-        /* sparkle elements (created dynamically) */
         #sparkle-layer .sparkle {
           position: absolute;
           width: 6px;
@@ -418,7 +343,6 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
           will-change: transform, opacity;
         }
 
-        /* add a slightly larger subtle glow for some sparks via nth-child when inserted */
         #sparkle-layer .sparkle:nth-child(5n) {
           width: 10px;
           height: 10px;
@@ -427,8 +351,37 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
           opacity: 0.28;
         }
 
-        /* rim-light class (visual fallback) */
-        .rim-fade { pointer-events: none; }
+        /* marquee wrapper with professional end shades */
+        .marquee-wrap {
+          --shade-width: 20rem; /* adjust how wide the shade is */
+          position: relative;
+        }
+
+        /* left and right grainy shades using pseudo elements */
+        .marquee-wrap::before,
+        .marquee-wrap::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: var(--shade-width);
+          pointer-events: none;
+          z-index: 1;
+          opacity: 1; /* your requested ~60% */
+          mix-blend-mode: normal;
+          background-repeat: repeat;
+          background-size: auto 120px;
+          /* subtle edge gradient + soft grain */
+          background-image:
+  linear-gradient(90deg, rgba(255,253,251,0.98) 0%, rgba(255,253,251,0.0) 70%),
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='noise'><feTurbulence baseFrequency='0.75' numOctaves='1' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23noise)' opacity='0.06' fill='%23fffdfb'/></svg>");
+      }
+
+        .marquee-wrap::before { left: 0; transform: translateZ(0); }
+        .marquee-wrap::after { right: 0; transform: translateZ(0) rotateY(180deg); }
+
+        /* keep the overlay visually behind cards but above container background */
+        .marquee-wrap > .relative { position: relative; z-index: 0; }
 
         @media (prefers-reduced-motion: reduce) {
           .ts-card, .ts-card * { transition: none !important; animation: none !important; transform: none !important; }

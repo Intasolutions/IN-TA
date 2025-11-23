@@ -464,3 +464,54 @@ aside .about-reveal:hover { transform: translateY(-6px); }
   opacity: 1;
   transform: translateX(120%);
 }
+.intro-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* Cinematic fade for blending with bg */
+  backdrop-filter: blur(8px);
+}
+
+.intro-title {
+  font-size: clamp(4rem, 10vw, 11rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  text-transform: uppercase;
+
+  /* Premium gradient text */
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,1) 0%,
+    rgba(180,200,255,0.85) 40%,
+    rgba(95,140,255,0.85) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* Glow */
+  text-shadow:
+    0 0 20px rgba(80,120,255,0.35),
+    0 0 40px rgba(20,40,120,0.25);
+
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+}
+
+.intro-subtitle {
+  margin-top: 1rem;
+  font-size: clamp(1.2rem, 2.3vw, 2.5rem);
+  font-weight: 300;
+
+  /* subtle opacity gradient */
+  color: rgba(255,255,255,0.75);
+
+  letter-spacing: 0.02em;
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+}
