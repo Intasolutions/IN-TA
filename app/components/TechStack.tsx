@@ -308,10 +308,7 @@ export default function TechStack(): JSX.Element {
       <div className="max-w-6xl mx-auto">
         <div className="ts-hero text-center mb-10">
           <p className="text-sm font-semibold tracking-wide text-slate-600">TECH STACK</p>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0b2a5f] mt-2">Tools we love & ship with</h2>
-          <p className="text-slate-600 mt-3 max-w-2xl mx-auto">
-            Carefully chosen tech and tools — engineered for reliability, scale and speed.
-          </p>
+         
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-4 mb-8">

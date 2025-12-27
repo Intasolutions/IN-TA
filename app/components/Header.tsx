@@ -44,14 +44,20 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#" className="hover:text-[#1f6fe6] text-white font-medium">
+            <Link href="/" className="hover:text-[#1f6fe6] text-white font-medium">
               Home
             </Link>
             <Link href="/about" className="hover:text-[#1f6fe6] text-white">
               About Us
             </Link>
-            <Link href="#" className="hover:text-[#1f6fe6] text-white">
+            <Link href="/services" className="hover:text-[#1f6fe6] text-white">
               Services
+            </Link>
+            <Link href="/portfolio" className="hover:text-[#1f6fe6] text-white">
+              Works
+            </Link>
+            <Link href="/contact" className="hover:text-[#1f6fe6] text-white">
+              Contact
             </Link>
             <button className="ml-6 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-4 py-2 font-semibold shadow-md hover:brightness-110 transition">
               Get a Quote
@@ -81,9 +87,11 @@ export default function Header() {
           }`}
         >
           <div className="flex flex-col gap-3 px-4 text-white">
-            <Link href="#" className="hover:text-[#1f6fe6]">Home</Link>
-            <Link href="#" className="hover:text-[#1f6fe6]">About Us</Link>
-            <Link href="#" className="hover:text-[#1f6fe6]">Services</Link>
+            <Link href="/" className="hover:text-[#1f6fe6]">Home</Link>
+            <Link href="/about" className="hover:text-[#1f6fe6]">About Us</Link>
+            <Link href="/services" className="hover:text-[#1f6fe6]">Services</Link>
+            <Link href="/portfolio" className="hover:text-[#1f6fe6]">Works</Link>
+            <Link href="/contact" className="hover:text-[#1f6fe6]">Contact</Link>
             <button className="w-full mt-2 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-4 py-2 font-semibold shadow-md hover:brightness-110 transition">
               Get a Quote
             </button>

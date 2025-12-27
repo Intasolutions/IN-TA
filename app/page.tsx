@@ -1,16 +1,15 @@
 import React from 'react'
-import Header from './components/Hedaer'
+import Header from "./components/Header";
 import Home from './pages/Home'
+import Footer from './components/Footer';
 
 const page = () => {
   return (
-<main>
-    <Header/>
-  
-    <div>
-<Home/>
-      </div>
-      </main>
+    <>
+      <Header />
+        <Home />
+      <Footer/>
+    </>
   )
 }
 

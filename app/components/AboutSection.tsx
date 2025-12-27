@@ -13,6 +13,7 @@ export default function About() {
   const topCurveRef = useRef<SVGPathElement | null>(null);
   const bottomCurveRef = useRef<SVGPathElement | null>(null);
   const imageRef = useRef<HTMLDivElement | null>(null);
+  const asideRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -24,11 +25,19 @@ export default function About() {
       elems.forEach((el) => (el.style.opacity = '1'));
       if (topCurveRef.current) { topCurveRef.current.style.strokeDashoffset = '0'; }
       if (bottomCurveRef.current) { bottomCurveRef.current.style.strokeDashoffset = '0'; }
+
+      // place aside at final position immediately
+      if (wrapRef.current && asideRef.current) {
+        const wrapRect = wrapRef.current.getBoundingClientRect();
+        const asideRect = asideRef.current.getBoundingClientRect();
+        const finalY = (wrapRect.top + wrapRect.height) - (asideRect.top + asideRect.height);
+        asideRef.current.style.transform = `translateY(${finalY}px)`;
+      }
       return;
     }
 
     const ctx = gsap.context(() => {
-      // reveal blocks with scroll
+      // reveal blocks with scroll (keeps original behavior)
       const reveals = gsap.utils.toArray<HTMLElement>('.about-reveal');
       gsap.set(reveals, { autoAlpha: 0, y: 18 });
       reveals.forEach((el) => {
@@ -85,9 +94,9 @@ export default function About() {
       if (imageRef.current && wrapRef.current) {
         gsap.fromTo(
           imageRef.current,
-          { yPercent: -10, rotate: -5 },
+          { yPercent: -10, rotate: -4 },
           {
-            yPercent: 10,
+            yPercent: 8,
             rotate: 0,
             ease: 'none',
             scrollTrigger: {
@@ -135,22 +144,104 @@ export default function About() {
         },
       });
 
-      // "How we work" steps reveal + connector draw
+      // "How we work" steps reveal (block)
       const steps = gsap.utils.toArray<HTMLElement>('.how-step');
-      gsap.set(steps, { autoAlpha: 0, y: 12 });
+      gsap.set(steps, { autoAlpha: 0, y: 10 });
       gsap.to(steps, {
         autoAlpha: 1,
         y: 0,
-        duration: 0.8,
+        duration: 0.75,
         ease: 'power3.out',
-        stagger: 0.14,
+        stagger: 0.12,
         scrollTrigger: {
           trigger: '#how-we-work',
-          start: 'top 85%',
+          start: 'top 86%',
           toggleActions: 'play none none reverse',
         },
       });
 
+      // How We Work title: keep it crisp and visible
+      const howTitle = document.querySelector('.how-title');
+      if (howTitle) {
+        gsap.fromTo(
+          howTitle,
+          { autoAlpha: 0, y: 22 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: howTitle,
+              start: 'top 86%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      }
+
+
+
+      // Label animation (Discover / Design / Deliver) — subtle scale + y
+      const labels = gsap.utils.toArray<HTMLElement>('.how-label');
+      gsap.set(labels, { autoAlpha: 0, y: 10, scale: 0.985 });
+      gsap.to(labels, {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        ease: 'power3.out',
+        stagger: 0.16,
+        scrollTrigger: {
+          trigger: '#how-we-work',
+          start: 'top 82%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+
+      // -------- Microtext letter-by-letter animation (refined) --------
+      const microTexts = gsap.utils.toArray<HTMLElement>('.how-micro');
+
+      microTexts.forEach((el) => {
+        // avoid double-splitting on refresh
+        if ((el as HTMLElement).dataset.split === 'true') return;
+
+        const raw = el.textContent || '';
+        // trim then preserve spaces
+        const chars = Array.from(raw);
+        const wrapped = chars
+          .map((ch) => {
+            if (ch === '\n') return '<br />';
+            if (ch === ' ') return '<span class="how-char inline-block mr-[0.17ch]">&nbsp;</span>';
+            // inline-block so transforms are smooth
+            return `<span class="how-char inline-block">${ch}</span>`;
+          })
+          .join('');
+        el.innerHTML = wrapped;
+        (el as HTMLElement).dataset.split = 'true';
+      });
+
+      const allChars = gsap.utils.toArray<HTMLElement>('.how-micro .how-char');
+      gsap.set(allChars, { autoAlpha: 0, y: 6 });
+
+      gsap.to(allChars, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.42,
+        ease: 'power3.out',
+        stagger: {
+          each: 0.022, // slightly slower for a polished read
+          from: 'start',
+        },
+        scrollTrigger: {
+          trigger: '#how-we-work',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+      // ------------------------------------------------------
+
+      // "connector-path" kept if you add SVG later
       const conn = document.querySelector<SVGPathElement>('.connector-path');
       if (conn) {
         const len = conn.getTotalLength();
@@ -168,37 +259,81 @@ export default function About() {
           },
         });
       }
+
+      // Aside slide-to-bottom (no pin)
+      if (wrapRef.current && asideRef.current) {
+        gsap.set(asideRef.current, { y: 0 });
+
+        gsap.to(asideRef.current, {
+          y: () => {
+            const wrapRect = wrapRef.current!.getBoundingClientRect();
+            const asideRect = asideRef.current!.getBoundingClientRect();
+            const finalY = (wrapRect.top + wrapRect.height) - (asideRect.top + asideRect.height);
+            return Math.max(finalY, 0);
+          },
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrapRef.current!,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.7,
+            invalidateOnRefresh: true,
+          },
+        });
+      }
     }, wrapRef);
 
     return () => {
-      try { ctx.revert(); } catch {}
-      try { ScrollTrigger.getAll().forEach((t) => t.kill()); } catch {}
+      try { ctx.revert(); } catch { }
+      try { ScrollTrigger.getAll().forEach((t) => t.kill()); } catch { }
     };
   }, []);
 
   return (
-    <section ref={wrapRef} id="about" aria-label="About INTA" className="relative bg-white text-slate-900 py-20 overflow-hidden rounded-t-4xl -mt-20">
+    <section
+      ref={wrapRef}
+      id="about"
+      aria-label="About INTA"
+      className="relative bg-[#f9f8f6] text-slate-900 py-20 overflow-hidden rounded-t-4xl -mt-20"
+    >
       <div className="container mx-auto px-20 ">
         {/* intro */}
         <div className="relative grid lg:grid-cols-12 gap-12 items-center py-40 about-reveal">
-          {/* top full-bleed curve */}
-         
-
           {/* bottom-right accent curve */}
-          <svg className="absolute right-0 bottom-0 w-[70%] h-[45%] pointer-events-none transform translate-x-10 translate-y-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden>
-            <path ref={bottomCurveRef} d="M600,350 C520,220 420,140 200,120" fill="none" stroke="#1f6fe6" strokeWidth="2.8" strokeLinecap="round" opacity="0.24" />
+          <svg
+            className="absolute right-0 bottom-0 w-[70%] h-[45%] pointer-events-none transform translate-x-10 translate-y-10"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 600 400"
+            preserveAspectRatio="none"
+            aria-hidden
+          >
+            <path
+              ref={bottomCurveRef}
+              d="M600,350 C520,220 420,140 200,120"
+              fill="none"
+              stroke="#1f6fe6"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              opacity="0.24"
+            />
           </svg>
 
           {/* left: number + tilted image */}
           <div className="lg:col-span-6 flex flex-col lg:flex-row items-center justify-center gap-8 relative z-10">
             <div className="text-center lg:text-left about-reveal z-10">
-              <div className="text-sm font-semibold tracking-wider text-slate-700 mb-1">YEARS OF EXPERIENCE</div>
+              <div className="text-sm font-semibold tracking-wider text-slate-700 mb-1">
+                YEARS OF EXPERIENCE
+              </div>
               <div className="text-[6rem] md:text-[7rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] leading-none">
-                8<span className="text-[#1f6fe6] align-top text-[3rem]">+</span>
+                8
+                <span className="text-[#1f6fe6] align-top text-[3rem]">+</span>
               </div>
             </div>
 
-            <div ref={imageRef} className="relative transform -rotate-5 rounded-2xl overflow-hidden shadow-elev about-reveal z-10">
+            <div
+              ref={imageRef}
+              className="relative transform -rotate-5 rounded-2xl overflow-hidden shadow-elev about-reveal z-10"
+            >
               <Image
                 src="/about/inta-lobby.png"
                 alt="INTA Office Lobby"
@@ -230,7 +365,15 @@ export default function About() {
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-6 py-3 font-semibold shadow-md hover:brightness-110 transition"
               >
                 Our Story
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
                 </svg>
               </a>
@@ -243,12 +386,16 @@ export default function About() {
           <div className="grid md:grid-cols-3 gap-6">
             <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>
+                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-black-500">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2v20" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
                 </div>
                 <div>
                   <h5 className="font-semibold text-slate-900">Design System</h5>
-                  <p className="text-sm text-slate-600 mt-1">Reusable components and tokenized styles for faster, consistent builds.</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Reusable components and tokenized styles for faster, consistent builds.
+                  </p>
                 </div>
               </div>
             </article>
@@ -256,11 +403,15 @@ export default function About() {
             <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12h18" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 12h18" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
                 </div>
                 <div>
                   <h5 className="font-semibold text-slate-900">Scalable Apps</h5>
-                  <p className="text-sm text-slate-600 mt-1">Architecture designed for scale and maintainability — testing & CI included.</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Architecture designed for scale and maintainability — testing &amp; CI included.
+                  </p>
                 </div>
               </div>
             </article>
@@ -268,11 +419,20 @@ export default function About() {
             <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 9h-5l-2 9-2-9H5l7-9z" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3l7 9h-5l-2 9-2-9H5l7-9z"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900">Data & Insights</h5>
-                  <p className="text-sm text-slate-600 mt-1">User behaviour and analytics integrated from day one to inform product decisions.</p>
+                  <h5 className="font-semibold text-slate-900">Data &amp; Insights</h5>
+                  <p className="text-sm text-slate-600 mt-1">
+                    User behaviour and analytics integrated from day one to inform product decisions.
+                  </p>
                 </div>
               </div>
             </article>
@@ -297,46 +457,68 @@ export default function About() {
 
         {/* timeline / values */}
         <div className="mt-14 grid lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-2 about-reveal">
-            <h4 className="text-xl font-semibold mb-3">How we work</h4>
-            <ol className="space-y-6 text-slate-700">
-              <li>
-                <div className="flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-full bg-inta-500/10 text-inta-500 flex items-center justify-center font-semibold">1</div>
-                  <div>
-                    <div className="font-semibold text-slate-900">Discover</div>
-                    <div className="text-sm text-slate-600">Research, stakeholder interviews and rapid discovery workshops.</div>
-                  </div>
-                </div>
-              </li>
+          {/* HOW WE WORK + spotlight */}
+          <div className="lg:col-span-2 about-reveal relative" id="how-we-work">
 
-              <li>
-                <div className="flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-full bg-inta-500/10 text-inta-500 flex items-center justify-center font-semibold">2</div>
-                  <div>
-                    <div className="font-semibold text-slate-900">Design</div>
-                    <div className="text-sm text-slate-600">Wireframes, prototypes and design systems for rapid validation.</div>
-                  </div>
-                </div>
-              </li>
 
-              <li>
-                <div className="flex items-start gap-4">
-                  <div className="w-9 h-9 rounded-full bg-inta-500/10 text-inta-500 flex items-center justify-center font-semibold">3</div>
+            <div className="relative">
+              <h4 className="how-title text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] mb-6 leading-tight">
+                How We Work
+              </h4>
+
+              <div className="relative pl-6 border-l-2 border-slate-200 space-y-10 how-steps">
+                {/* Step 1 */}
+                <div className="flex items-start gap-4 how-step">
+                  <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-[#0b2a5f] to-[#1f6fe6] text-white flex items-center justify-center font-bold shadow-md">
+                    1
+                  </div>
                   <div>
-                    <div className="font-semibold text-slate-900">Deliver</div>
-                    <div className="text-sm text-slate-600">Engineering, testing, and operational handoff with observability.</div>
+                    {/* Labels + micro text now light color for contrast */}
+                    <div className="how-label font-semibold text-xl text-slate-900">Discover</div>
+                    <p className="how-micro text-slate-600 mt-1">
+                      Research, stakeholder interviews and rapid discovery workshops.
+                    </p>
                   </div>
                 </div>
-              </li>
-            </ol>
+
+                {/* Step 2 */}
+                <div className="flex items-start gap-4 how-step">
+                  <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-[#0b2a5f] to-[#1f6fe6] text-white flex items-center justify-center font-bold shadow-md">
+                    2
+                  </div>
+                  <div>
+                    <div className="how-label font-semibold text-xl text-slate-900">Design</div>
+                    <p className="how-micro text-slate-600 mt-1">
+                      Wireframes, prototypes and design systems for rapid validation.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex items-start gap-4 how-step">
+                  <div className="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-[#0b2a5f] to-[#1f6fe6] text-white flex items-center justify-center font-bold shadow-md">
+                    3
+                  </div>
+                  <div>
+                    <div className="how-label font-semibold text-xl text-slate-900">Deliver</div>
+                    <p className="how-micro text-slate-600 mt-1">
+                      Engineering, testing, and operational handoff with observability.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <aside className="about-reveal bg-gradient-to-br from-[#0b2a5f] to-[#1f6fe6] text-white rounded-2xl p-6 shadow-elev">
+          {/* Our values aside */}
+          <aside
+            ref={asideRef}
+            className="about-reveal bg-gradient-to-br from-[#0b2a5f] to-[#1f6fe6] text-white rounded-2xl p-6 shadow-elev"
+          >
             <h5 className="font-semibold mb-2">Our values</h5>
             <ul className="space-y-3 text-sm">
               <li>Product clarity over feature clutter</li>
-              <li>Empathy with users & teams</li>
+              <li>Empathy with users &amp; teams</li>
               <li>Relentless quality and ownership</li>
             </ul>
           </aside>

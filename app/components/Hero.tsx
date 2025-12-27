@@ -19,18 +19,19 @@ const SLIDES: Slide[] = [
   {
     id: 's1',
     title: 'UI / UX\nDESIGN',
-    video: '/test1.mp4',
+    embed: "https://www.youtube.com/embed/k2maqlyUuVw?si=3xPemYxoq_5Codm4",
     poster: '/videos/slide-1-poster.jpg',
     cta: { text: 'View Projects', href: '#projects' },
   },
   {
     id: 's2',
     title: 'PRODUCT\nDESIGN',
-    video: '/test1.mp4',
+    embed: "https://www.youtube.com/embed/k2maqlyUuVw?si=3xPemYxoq_5Codm4",
     poster: '/videos/slide-2-poster.jpg',
     cta: { text: 'See Work', href: '#projects' },
   },
 ];
+
 
 export default function HeroSlider({ autoplay = true, interval = 7000 }: { autoplay?: boolean; interval?: number }) {
   const [index, setIndex] = useState(0);
@@ -55,7 +56,7 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
     const nextVid = nextSlide?.querySelector('video') as HTMLVideoElement | null;
     if (nextVid) {
       nextVid.currentTime = 0;
-      nextVid.play().catch(() => {});
+      nextVid.play().catch(() => { });
     }
 
     if (tlRef.current) { tlRef.current.kill(); tlRef.current = null; }
@@ -98,7 +99,7 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
     });
 
     const firstVid = slideRefs.current[index]?.querySelector('video') as HTMLVideoElement | null;
-    if (firstVid) firstVid.play().catch(() => {});
+    if (firstVid) firstVid.play().catch(() => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -160,8 +161,8 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
 
     // clear previous
     animRefs.current.forEach(a => {
-      try { a.intro?.kill(); } catch {}
-      try { a.parallax?.kill(); } catch {}
+      try { a.intro?.kill(); } catch { }
+      try { a.parallax?.kill(); } catch { }
     });
     animRefs.current = [];
 
@@ -209,15 +210,15 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
 
       // cleanup per slide trigger on unmount - ScrollTrigger global cleanup below also handles it
       return () => {
-        try { introTrigger.kill(); } catch {}
+        try { introTrigger.kill(); } catch { }
       };
     });
 
     return () => {
-      try { ScrollTrigger.getAll().forEach(t => t.kill()); } catch {}
+      try { ScrollTrigger.getAll().forEach(t => t.kill()); } catch { }
       animRefs.current.forEach(a => {
-        try { a.intro?.kill(); } catch {}
-        try { a.parallax?.kill(); } catch {}
+        try { a.intro?.kill(); } catch { }
+        try { a.parallax?.kill(); } catch { }
       });
       animRefs.current = [];
     };
@@ -226,9 +227,9 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
 
   useEffect(() => {
     return () => {
-      try { tlRef.current?.kill(); } catch {}
-      try { animRefs.current.forEach(a => { a.intro?.kill(); a.parallax?.kill(); }); } catch {}
-      try { ScrollTrigger.getAll().forEach(t => t.kill()); } catch {}
+      try { tlRef.current?.kill(); } catch { }
+      try { animRefs.current.forEach(a => { a.intro?.kill(); a.parallax?.kill(); }); } catch { }
+      try { ScrollTrigger.getAll().forEach(t => t.kill()); } catch { }
       if (autoplayRef.current) { window.clearInterval(autoplayRef.current); autoplayRef.current = null; }
     };
   }, []);
@@ -254,13 +255,14 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
             {SLIDES.map((s, i) => (
               <div
                 key={s.id}
-                ref={(el) => (slideRefs.current[i] = el)}
+                ref={(el) => { slideRefs.current[i] = el; }}
                 className="absolute inset-0 w-full h-full flex items-stretch justify-center"
                 style={{ willChange: 'opacity, transform' }}
               >
                 {/* background */}
                 <div className="absolute inset-0">
-                  {s.video && (
+                  {/* Video (local file) */}
+                  {s.video && !s.embed && (
                     <video
                       className="w-full h-full object-cover hero-video"
                       src={s.video}
@@ -272,25 +274,50 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
                       preload="auto"
                     />
                   )}
-                  {s.poster && (
-                    <div className="absolute inset-0 bg-center bg-cover sm:opacity-0" style={{ backgroundImage: `url(${s.poster})` }} />
+
+                  {/* YouTube / iframe embed */}
+                  {s.embed && (
+                    // Note: add autoplay=1&mute=1 if you want it to autoplay muted.
+                    // You may prefer to only add autoplay when the slide is active.
+                    <iframe
+                      className="w-full h-full object-cover rounded-none"
+                      src={`${s.embed}${s.embed.includes('?') ? '&' : '?'}autoplay=1&mute=1&controls=0&rel=0&modestbranding=1`}
+                      title={s.title || 'Embedded video'}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      loading="lazy"
+                    />
                   )}
+
+                  {/* Poster / placeholder (keeps showing under video/iframe for a moment or when video not present) */}
+                  {s.poster && (
+                    <div
+                      className="absolute inset-0 bg-center bg-cover"
+                      style={{ backgroundImage: `url(${s.poster})` }}
+                      aria-hidden="true"
+                    />
+                  )}
+
+                  {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-r from-[#0b2a5f]/70 via-[#1f6fe6]/55 to-[#0b2a5f]/70 mix-blend-multiply" />
                 </div>
 
 
-<div className="relative z-10 flex items-center w-full h-full">
-  <div
-    ref={(el) => (contentRefs.current[i] = el)}
-    className="container mx-auto px-6 py-8 h-full flex items-center"
-  >
-    <div className="w-full lg:max-w-2xl lg:ml-auto lg:text-right">
-      <h2 className="hero-heading text-6xl md:text-7xl lg:text-[4rem] font-extrabold leading-[1.05] text-white whitespace-pre-line">
-        {s.title}
-      </h2>
 
-      {/* tightened spacing below heading */}
-      {/* <div className="mt-5 flex gap-3 justify-center lg:justify-end">
+                <div className="relative z-10 flex items-center w-full h-full">
+                  <div
+                    ref={(el) => { contentRefs.current[i] = el; }}
+                    className="container mx-auto px-6 py-8 h-full flex items-center"
+                  >
+                    <div className="w-full lg:max-w-2xl lg:ml-auto lg:text-right">
+                      <h2 className="hero-heading text-6xl md:text-7xl lg:text-[4rem] font-extrabold leading-[1.05] text-white whitespace-pre-line">
+                        {s.title}
+                      </h2>
+
+                      {/* tightened spacing below heading */}
+                      {/* <div className="mt-5 flex gap-3 justify-center lg:justify-end">
         {s.cta && (
           <Link
             href={s.cta.href}
@@ -306,9 +333,9 @@ export default function HeroSlider({ autoplay = true, interval = 7000 }: { autop
           Contact Us
         </Link>
       </div> */}
-    </div>
-  </div>
-</div>
+                    </div>
+                  </div>
+                </div>
 
 
               </div>

@@ -1,0 +1,687 @@
+// app/services/page.animated.tsx
+'use client';
+
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import Link from 'next/link';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import CTA from '../../components/CTA';
+
+gsap.registerPlugin(ScrollTrigger);
+
+type Service = {
+    id: string;
+    title: string;
+    slug: string;
+    short: string;
+    features: string[];
+    color?: string;
+    icon?: React.ReactNode;
+};
+
+const SERVICES: Service[] = [
+    {
+        id: 's-web',
+        title: 'Web Design',
+        slug: '/services/web-design',
+        short: 'Modern, responsive web interfaces focused on conversions and performance.',
+        features: ['Figma → UI', 'Responsive', 'Design systems'],
+        color: '#0b2a5f',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M7 9h10M7 13h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        id: 's-mobile',
+        title: 'Mobile App',
+        slug: '/services/mobile-app',
+        short: 'Native & cross-platform apps crafted for performance and delightful UX.',
+        features: ['iOS / Android', 'React Native', 'Tested'],
+        color: '#1f6fe6',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <rect x="7.5" y="2.5" width="9" height="19" rx="2.2" stroke="currentColor" strokeWidth="1.4" />
+                <circle cx="12" cy="18.2" r="0.9" fill="currentColor" />
+            </svg>
+        ),
+    },
+    {
+        id: 's-custom',
+        title: 'Custom Software',
+        slug: '/services/custom-software',
+        short: 'Bespoke backend systems, integrations and developer-friendly APIs.',
+        features: ['Architecture', 'APIs', 'Scalable'],
+        color: '#0b6a9a',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        id: 's-video',
+        title: 'Video Production',
+        slug: '/services/video-production',
+        short: 'Concept → shoot → edit — storytelling for brand and product motion.',
+        features: ['Storyboard', 'Editing', 'Motion design'],
+        color: '#114b8c',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <rect x="2.8" y="5" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M20 9l3-2v10l-3-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        id: 's-digimark',
+        title: 'Digital Marketing',
+        slug: '/services/digital-marketing',
+        short: 'Data-driven campaigns: paid ads, content, and lifecycle marketing.',
+        features: ['Ads', 'Content', 'Funnel'],
+        color: '#1a73e8',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <path d="M3 12h6l3-8 3 16 3-6h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        id: 's-graphic',
+        title: 'Graphic & Logo Design',
+        slug: '/services/graphic-design',
+        short: 'Brand systems, logos and visual assets that scale across touchpoints.',
+        features: ['Branding', 'Illustration', 'Assets'],
+        color: '#0b2a5f',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <path d="M4 20l7-16 9 8-7 8H4z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        id: 's-seo',
+        title: 'SEO',
+        slug: '/services/seo',
+        short: 'Technical & content SEO that moves organic metrics and traffic.',
+        features: ['Audit', 'On-page', 'Technical'],
+        color: '#0b6a9a',
+        icon: (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
+                <path d="M12 20c4.418 0 8-3.582 8-8S16.418 4 12 4 4 7.582 4 12s3.582 8 8 8z" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M8 12.5l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+];
+
+export default function ServicesPage(): JSX.Element {
+    const [query, setQuery] = useState('');
+    const [activeTag, setActiveTag] = useState<string | null>(null);
+
+    const heroRef = useRef<HTMLElement | null>(null);
+    const cardsRef = useRef<HTMLDivElement | null>(null);
+
+    const chips = useMemo(() => Array.from(new Set(SERVICES.flatMap((s) => s.features))).slice(0, 8), []);
+    const filtered = useMemo(
+        () =>
+            SERVICES.filter((s) => {
+                const q = query.trim().toLowerCase();
+                if (activeTag && !s.features.includes(activeTag)) return false;
+                if (!q) return true;
+                return (
+                    s.title.toLowerCase().includes(q) ||
+                    s.short.toLowerCase().includes(q) ||
+                    s.features.join(' ').toLowerCase().includes(q)
+                );
+            }),
+        [query, activeTag]
+    );
+
+    
+
+    const TILT_CONFIG = {
+  maxRotate: 20,        // degrees (keep under 8 for premium feel)
+  maxTranslate: 10,    // px
+  perspective: 900,   // depth
+  easing: 'power3.out',
+  hoverScale: 1.035,
+};
+
+
+    useEffect(() => {
+        const prefersReduce =
+            typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Collect removers so we can detach any event listeners we add.
+        const removers: (() => void)[] = [];
+
+        // Use gsap.context with heroRef as scope — we will still create an explicit selector 'q'
+        const ctx = gsap.context(() => {
+            // create a scoped selector q(...) tied to heroRef.current if present, otherwise fall back to document
+            const root = heroRef.current ?? document;
+            const q = gsap.utils.selector(root as Element | Document);
+
+            // HERO: clip-path wipe for .ab-hero-title lines
+            gsap.fromTo(
+                q('.ab-hero-title'),
+                { autoAlpha: 0, y: 26, clipPath: 'inset(60% 0% 60% 0%)' },
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    clipPath: 'inset(0% 0% 0% 0%)',
+                    duration: 1.6,
+                    ease: 'power3.out',
+                    stagger: 0.06,
+                    scrollTrigger: { trigger: heroRef.current ?? q('.ab-hero')[0] ?? '.ab-hero', start: 'top 92%' },
+                }
+            );
+
+            // Generic reveal for other sections (scoped to root where possible)
+            const reveals = (root as Element | Document).querySelectorAll ? Array.from((root as Element).querySelectorAll('.reveal')) : Array.from(document.querySelectorAll('.reveal'));
+            gsap.set(reveals as HTMLElement[], { autoAlpha: 0, y: 18 });
+            reveals.forEach((el) => {
+                ScrollTrigger.create({
+                    trigger: el,
+                    start: 'top 90%',
+                    onEnter: () => {
+                        if (prefersReduce) {
+                            gsap.set(el as HTMLElement, { autoAlpha: 1, y: 0 });
+                            return;
+                        }
+                        gsap.to(el as HTMLElement, { autoAlpha: 1, y: 0, duration: 1.05, ease: 'power3.out' });
+                    },
+                });
+            });
+
+            // CARD REVEALS + HOVER TILT
+            const container = cardsRef.current;
+            if (container) {
+                const cardEls = Array.from(container.querySelectorAll<HTMLElement>('.service-card'));
+                gsap.set(cardEls, { y: 18, opacity: 0, scale: 0.996 });
+
+                // reveal using ScrollTrigger.batch for performance
+                ScrollTrigger.batch(cardEls, {
+                    start: 'top 92%',
+                    onEnter: (batch) => {
+                        gsap.to(batch, {
+                            y: 0,
+                            opacity: 1,
+                            scale: 1,
+                            duration: 0.8,
+                            ease: 'expo.out',
+                            stagger: 0.06,
+                        });
+                    },
+                });
+
+                if (!prefersReduce) {
+                    cardEls.forEach((card) => {
+                        const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+if (!isFinePointer) return;
+
+                        const iconWrap = card.querySelector<HTMLElement>('.card-icon-wrap');
+                        let raf: number | null = null;
+
+const onEnter = () => {
+  gsap.set(card, {
+    transformPerspective: TILT_CONFIG.perspective,
+    transformStyle: 'preserve-3d',
+  });
+
+  gsap.to(card, {
+    y: -8,
+    scale: TILT_CONFIG.hoverScale,
+    boxShadow: `
+      0 10px 30px rgba(11,42,95,0.12),
+      0 32px 72px rgba(11,42,95,0.20)
+    `,
+    duration: 0.4,
+    ease: TILT_CONFIG.easing,
+  });
+};
+
+
+const onLeave = () => {
+  if (raf) cancelAnimationFrame(raf);
+
+  gsap.to(card, {
+    rotateX: 0,
+    rotateY: 0,
+    x: 0,
+    y: 0,
+    scale: 1,
+    boxShadow: `
+      0 1px 2px rgba(11,42,95,0.04),
+      0 8px 24px rgba(11,42,95,0.08)
+    `,
+    duration: 0.7,
+    ease: 'power4.out',
+  });
+
+  if (iconWrap) {
+    gsap.to(iconWrap, {
+      x: 0,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      ease: 'power3.out',
+    });
+  }
+};
+
+
+                       const onMove = (ev: PointerEvent) => {
+  if (prefersReduce) return;
+
+  if (raf) cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => {
+    const rect = card.getBoundingClientRect();
+
+    // Normalized cursor position (-0.5 → 0.5)
+    const x = (ev.clientX - rect.left) / rect.width - 0.5;
+    const y = (ev.clientY - rect.top) / rect.height - 0.5;
+
+    const rotateY = x * TILT_CONFIG.maxRotate;
+    const rotateX = -y * TILT_CONFIG.maxRotate;
+
+    const translateX = x * TILT_CONFIG.maxTranslate;
+    const translateY = y * TILT_CONFIG.maxTranslate;
+
+    gsap.to(card, {
+      rotateX,
+      rotateY,
+      x: translateX * 0.15,
+      y: -8 + translateY * 0.12,
+      scale: TILT_CONFIG.hoverScale,
+      transformPerspective: TILT_CONFIG.perspective,
+      duration: 0.35,
+      ease: TILT_CONFIG.easing,
+      overwrite: true,
+    });
+
+    if (iconWrap) {
+      gsap.to(iconWrap, {
+        x: -translateX * 0.25,
+        y: -translateY * 0.25,
+        duration: 0.4,
+        ease: TILT_CONFIG.easing,
+        overwrite: true,
+      });
+    }
+  });
+};
+
+
+                        const onFocus = () => onEnter();
+                        const onBlur = () => onLeave();
+
+                        card.addEventListener('pointermove', onMove, { passive: true });
+                        card.addEventListener('pointerenter', onEnter);
+                        card.addEventListener('pointerleave', onLeave);
+                        card.addEventListener('focus', onFocus);
+                        card.addEventListener('blur', onBlur);
+
+                        // push remover
+                        removers.push(() => {
+                            card.removeEventListener('pointermove', onMove as EventListener);
+                            card.removeEventListener('pointerenter', onEnter);
+                            card.removeEventListener('pointerleave', onLeave);
+                            card.removeEventListener('focus', onFocus);
+                            card.removeEventListener('blur', onBlur);
+                            if (raf) cancelAnimationFrame(raf);
+                        });
+                    });
+                }
+            }
+
+            // CTA micro interactions
+            const rootDoc = document;
+            const ctas = Array.from(rootDoc.querySelectorAll<HTMLElement>('.btn-cta'));
+            if (!prefersReduce && ctas.length) {
+                ctas.forEach((btn) => {
+                    const icon = btn.querySelector<HTMLElement>('.cta-icon');
+                    const enter = () => gsap.to(btn, { scale: 1.03, y: -3, boxShadow: '0 18px 40px rgba(11,42,95,0.14)', duration: 0.28, ease: 'power3.out' });
+                    const leave = () => gsap.to(btn, { scale: 1, y: 0, boxShadow: '0 10px 30px rgba(11,42,95,0.06)', duration: 0.45, ease: 'power3.out' });
+                    const down = () => gsap.to(btn, { scale: 0.98, y: 0, duration: 0.12, ease: 'power3.out' });
+                    const up = () => {
+                        gsap.to(btn, { scale: 1.02, y: -2, duration: 0.18, ease: 'power3.out' });
+                        if (icon) gsap.fromTo(icon, { x: 0 }, { x: 6, duration: 0.26, yoyo: true, repeat: 1, ease: 'sine.inOut' });
+                    };
+
+                    btn.addEventListener('pointerenter', enter);
+                    btn.addEventListener('pointerleave', leave);
+                    btn.addEventListener('pointerdown', down);
+                    btn.addEventListener('pointerup', up);
+                    btn.addEventListener('focus', enter);
+                    btn.addEventListener('blur', leave);
+
+                    removers.push(() => {
+                        btn.removeEventListener('pointerenter', enter);
+                        btn.removeEventListener('pointerleave', leave);
+                        btn.removeEventListener('pointerdown', down);
+                        btn.removeEventListener('pointerup', up);
+                        btn.removeEventListener('focus', enter);
+                        btn.removeEventListener('blur', leave);
+                    });
+                });
+            }
+        }, heroRef);
+
+        // cleanup: remove DOM listeners then revert GSAP context (which kills timelines/ScrollTrigger)
+        return () => {
+            removers.forEach((r) => {
+                try {
+                    r();
+                } catch (e) {
+                    // ignore
+                }
+            });
+            ctx.revert();
+        };
+    }, [filtered]);
+
+    return (
+        <main className="bg-[#fbf9f5] min-h-screen pb-24 px-6 md:px-12" style={{ ['--logo' as any]: '#1f6fe6', ['--muted' as any]: '#94a3b8' }}>
+            <style jsx>{`
+        :root {
+          --primary: var(--logo);
+          --muted: var(--muted);
+          --card-shadow: 0 16px 40px rgba(11, 42, 95, 0.08);
+        }
+        .svc-hero {
+          max-width: 1120px;
+          margin: 0 auto;
+          padding-top: 48px;
+          padding-bottom: 32px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 18px;
+        }
+        @media (min-width: 1024px) {
+          .svc-hero {
+            grid-template-columns: 1fr 420px;
+          }
+        }
+
+        .reveal-line {
+          display: block;
+          overflow: hidden;
+        }
+        .reveal-line > span {
+          display: inline-block;
+          transform: translateY(0);
+        }
+
+        .service-card {
+  position: relative;
+  border-radius: 18px;
+  padding: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+
+  box-shadow:
+    0 1px 2px rgba(11, 42, 95, 0.04),
+    0 8px 24px rgba(11, 42, 95, 0.08);
+
+  transition:
+    transform 420ms cubic-bezier(.16,1,.3,1),
+    box-shadow 420ms cubic-bezier(.16,1,.3,1),
+    border-color 320ms ease;
+
+  will-change: transform, box-shadow;
+    transform-style: flat;
+}
+
+.service-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    120% 120% at 50% 0%,
+    var(--accent-faded, rgba(31,111,230,0.15)),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+
+.service-card:hover::after,
+.service-card:focus::after {
+  opacity: 1;
+}
+
+
+        .card-top {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+        .card-icon-wrap {
+          width: 56px;
+          height: 56px;
+          border-radius: 14px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(250, 250, 255, 0.6));
+          box-shadow: 0 6px 20px rgba(11, 42, 95, 0.06);
+          transition: transform 260ms ease, box-shadow 260ms ease;
+          flex: 0 0 56px;
+        }
+        .card-title {
+          font-size: 1.04rem;
+          font-weight: 700;
+          color: #0b2a5f;
+          letter-spacing: -0.02em;
+        }
+        .card-desc {
+          margin-top: 8px;
+          color: #475569;
+          font-size: 0.95rem;
+        }
+
+        .chip {
+          font-size: 0.72rem;
+          padding: 6px 8px;
+          border-radius: 999px;
+          background: #fbfbfe;
+          color: #475569;
+          border: 1px solid rgba(15, 23, 42, 0.04);
+        }
+
+        .card-footer {
+          margin-top: 14px;
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          justify-content: flex-start;
+        }
+
+        .btn-cta {
+          padding: 8px 12px;
+          border-radius: 999px;
+          font-weight: 600;
+          background: white;
+          border: 1px solid rgba(11, 42, 95, 0.06);
+          transition: transform 160ms ease, box-shadow 240ms ease;
+        }
+
+        .learn-link {
+          color: var(--navy, #0b2a5f);
+          font-weight: 650;
+        }
+
+        .service-card:focus {
+          outline: none;
+          box-shadow: 0 24px 60px rgba(11, 42, 95, 0.12);
+          transform: translateY(-6px) scale(1.02);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .service-card,
+          .card-icon-wrap,
+          .btn-cta {
+            transition: none !important;
+            animation: none !important;
+            transform: none !important;
+          }
+        }
+      `}</style>
+
+            {/* HERO */}
+            <section ref={heroRef as any} className="ab-hero svc-hero max-w-6xl mx-auto reveal">
+                <div>
+                    <p className="text-sm font-semibold tracking-wider text-slate-600 mb-3">OUR SERVICES</p>
+
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#0b2a5f] leading-tight">
+                        <span className="reveal-line">
+                            <span className="ab-hero-title">Product-focused services</span>
+                        </span>
+                        <span className="reveal-line">
+                            <span className="ab-hero-title">that ship results.</span>
+                        </span>
+                    </h1>
+
+                    <p className="mt-4 text-slate-600 max-w-2xl">
+                        We combine strategy, modern design, and engineering craft to deliver product experiences that scale. Pick a
+                        service to learn more or enquire directly.
+                    </p>
+
+                    <div className="mt-6 flex items-center gap-4">
+                        <Link href="/contact" className="btn-primary primary-cta inline-flex items-center gap-3 rounded-full px-5 py-3 font-semibold text-white shadow-lg focus:ring-4 focus:ring-[#1f6fe6]/20">
+                            <span>Enquire now</span>
+                            <svg className="w-4 h-4 cta-icon" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </Link>
+                        <Link href="/portfolio" className="inline-flex items-center gap-2 px-4 py-3 rounded-full border border-slate-100 bg-white text-slate-700">
+                            View portfolio
+                        </Link>
+                    </div>
+
+                    <div className="mt-8 flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="relative flex-1">
+                            <input
+                                aria-label="Search services"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="Search services or features (e.g. 'Figma', 'APIs')"
+                                className="w-full rounded-full border border-slate-100 bg-white px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1f6fe6]/10"
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                            {chips.map((c) => (
+                                <button
+                                    key={c}
+                                    onClick={() => setActiveTag(activeTag === c ? null : c)}
+                                    className={`text-xs px-3 py-2 rounded-full border ${activeTag === c ? 'bg-[#1f6fe6] text-white border-transparent' : 'bg-white text-slate-700 border-slate-100'} transition`}
+                                >
+                                    {c}
+                                </button>
+                            ))}
+                            {activeTag && (
+                                <button onClick={() => setActiveTag(null)} className="text-xs px-3 py-2 rounded-full border bg-white text-slate-500 border-slate-100">
+                                    Clear
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="hidden md:flex items-center justify-end">
+                    <div className="rounded-2xl p-6 bg-white border border-slate-100 shadow-lg" style={{ boxShadow: 'var(--card-shadow)' }}>
+                        <h5 className="text-sm font-semibold text-slate-700">Why choose us</h5>
+                        <p className="mt-3 text-sm text-slate-600">
+                            Cross-disciplinary teams, fast feedback loops, and engineering-first execution — so your product ships on
+                            schedule.
+                        </p>
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                            <div className="p-3 rounded-lg bg-[#fbfbfe] text-center">
+                                <div className="text-lg font-extrabold text-[#0b2a5f]">9</div>
+                                <div className="text-xs text-slate-500 mt-1">Years</div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-[#fbfbfe] text-center">
+                                <div className="text-lg font-extrabold text-[#0b2a5f]">128</div>
+                                <div className="text-xs text-slate-500 mt-1">Projects</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SERVICES GRID */}
+            <section className="max-w-6xl mx-auto mt-8">
+                <div ref={cardsRef as any} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filtered.map((svc) => (
+                        <article
+                            key={svc.id}
+                            className="service-card svc-reveal"
+                            tabIndex={0}
+                            role="article"
+                            aria-labelledby={`${svc.id}-title`}
+                            style={{
+                                ['--accent' as any]: svc.color || '#1f6fe6',
+                                ['--accent-faded' as any]: (svc.color || '#1f6fe6') + '33',
+                                boxShadow: '0 16px 40px rgba(11,42,95,0.08)',
+                            }}
+                        >
+                            <div className="card-top">
+                                <div className="card-icon-wrap" aria-hidden>
+                                    <div style={{ color: svc.color || 'currentColor' }}>{svc.icon}</div>
+                                </div>
+
+                                <div>
+                                    <h3 id={`${svc.id}-title`} className="card-title">
+                                        {svc.title}
+                                    </h3>
+                                    <p className="card-desc">{svc.short}</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                {svc.features.map((f) => (
+                                    <span key={f} className="chip">
+                                        {f}
+                                    </span>
+                                ))}
+                            </div>
+
+                            <div className="card-footer">
+                                <Link href={svc.slug} className="learn-link inline-flex items-center gap-2 px-4 py-3 rounded-full border border-slate-100 bg-white text-slate-700" aria-label={`Learn more about ${svc.title}`}>
+                                    Learn more →
+                                </Link>
+                                <Link href="/contact" className="btn-primary primary-cta inline-flex items-center gap-3 rounded-full gap-2 text-sm px-3 py-2 rounded-full border border-slate-100 hover:bg-slate-50">
+                                    Enquire
+                                </Link>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+
+                {filtered.length === 0 && <div className="mt-10 text-center text-slate-600">No services match your search. Try a different keyword or clear filters.</div>}
+            </section>
+
+            {/* FOOT CTA */}
+            <section className="reveal max-w-6xl mx-auto px-6 md:px-12 mt-12">
+                <CTA
+                    title="Ready to build something meaningful?"
+                    subtitle="Let's talk about product strategy, engineering, and delivery."
+                    primaryLabel="Book a call"
+                    primaryHref="/contact"
+                    secondaryLabel="View works"
+                    secondaryHref="/portfolio"
+                    particleColor="#ffffff"
+                    particleEnabled={true}
+                    className="card-premium"
+                />
+            </section>
+
+        </main>
+    );
+}

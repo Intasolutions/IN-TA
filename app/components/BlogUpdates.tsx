@@ -28,7 +28,7 @@ const BLOGS: Blog[] = [
   { id: 'b5', title: 'Observability for Modern Frontends', date: 'Jun 02, 2025', tag: 'Infra', image: '/images/blog5.jpg' },
 ];
 
-export default function BlogUpdates(): JSX.Element {
+export default function BlogUpdates() {
   const prefersReduce =
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -36,7 +36,7 @@ export default function BlogUpdates(): JSX.Element {
   const itemsRef = useRef<HTMLDivElement[]>([]);
   const wrapRef = useRef<HTMLElement | null>(null);
   const autoplayRef = useRef<gsap.core.Tween | null>(null);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const tlRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
   const rimRef = useRef<HTMLDivElement | null>(null);
   const innerParallaxRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -51,8 +51,8 @@ export default function BlogUpdates(): JSX.Element {
     if (typeof window === 'undefined' || !wrapRef.current) return;
 
     // cleanup
-    try { autoplayRef.current?.kill(); } catch {}
-    try { tlRef.current?.kill(); } catch {}
+    try { autoplayRef.current?.kill(); } catch { }
+    try { tlRef.current?.kill(); } catch { }
 
     if (prefersReduce) {
       // ensure visible and no motion
@@ -100,11 +100,11 @@ export default function BlogUpdates(): JSX.Element {
     tlRef.current = autoplay;
 
     return () => {
-      try { autoplay.kill(); } catch {}
-      try { progressTween.kill(); } catch {}
-      try { floatTweens.forEach(t => t.kill()); } catch {}
+      try { autoplay.kill(); } catch { }
+      try { progressTween.kill(); } catch { }
+      try { floatTweens.forEach(t => t.kill()); } catch { }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, prefersReduce]);
 
   // Non-overlapping advance with rim sweep and parallax-in animation for incoming card
@@ -131,7 +131,7 @@ export default function BlogUpdates(): JSX.Element {
       const rim = rimRef.current;
       gsap.killTweensOf(rim);
       gsap.set(rim, { x: -120, opacity: 0 });
-      gsap.to(rim, { x:  (wrapRef.current?.getBoundingClientRect().width ?? 900) + 120, opacity: 1, duration: 0.9 * TEMPO, ease: 'power2.out' });
+      gsap.to(rim, { x: (wrapRef.current?.getBoundingClientRect().width ?? 900) + 120, opacity: 1, duration: 0.9 * TEMPO, ease: 'power2.out' });
       gsap.to(rim, { opacity: 0, duration: 0.6 * TEMPO, delay: 0.36 * TEMPO });
     }
 
@@ -150,7 +150,7 @@ export default function BlogUpdates(): JSX.Element {
             gsap.killTweensOf(progressRef.current);
             gsap.set(progressRef.current, { width: '0%' });
             gsap.to(progressRef.current, { width: '100%', duration: AUTOPLAY_SECONDS, ease: 'linear', repeat: -1 });
-          } catch {}
+          } catch { }
         }
         animLock.current = false;
       },
@@ -177,25 +177,25 @@ export default function BlogUpdates(): JSX.Element {
 
     let slowTO: number | null = null;
     const onEnter = () => {
-      try { autoplayRef.current?.pause(); } catch {}
-      try { gsap.killTweensOf(progressRef.current); } catch {}
+      try { autoplayRef.current?.pause(); } catch { }
+      try { gsap.killTweensOf(progressRef.current); } catch { }
     };
     const onLeave = () => {
-      try { autoplayRef.current?.resume(); } catch {}
+      try { autoplayRef.current?.resume(); } catch { }
       // restart progress tween
       try {
         gsap.killTweensOf(progressRef.current);
         gsap.set(progressRef.current, { width: '0%' });
         gsap.to(progressRef.current, { width: '100%', duration: AUTOPLAY_SECONDS, ease: 'linear', repeat: -1 });
-      } catch {}
+      } catch { }
     };
     const onMove = () => {
       if (!autoplayRef.current) return;
       // slow motion feeling on pointer move
-      try { gsap.to(autoplayRef.current, { timeScale: 0.18, duration: 0.18, ease: 'power3.out' }); } catch {}
+      try { gsap.to(autoplayRef.current, { timeScale: 0.18, duration: 0.18, ease: 'power3.out' }); } catch { }
       if (slowTO) window.clearTimeout(slowTO);
       slowTO = window.setTimeout(() => {
-        try { gsap.to(autoplayRef.current!, { timeScale: 1, duration: 0.6, ease: 'power3.out' }); } catch {}
+        try { gsap.to(autoplayRef.current!, { timeScale: 1, duration: 0.6, ease: 'power3.out' }); } catch { }
       }, 420);
     };
 
@@ -206,11 +206,11 @@ export default function BlogUpdates(): JSX.Element {
     wrap.addEventListener('focusout', onLeave);
 
     return () => {
-      try { wrap.removeEventListener('pointerenter', onEnter); } catch {}
-      try { wrap.removeEventListener('pointerleave', onLeave); } catch {}
-      try { wrap.removeEventListener('pointermove', onMove); } catch {}
-      try { wrap.removeEventListener('focusin', onEnter); } catch {}
-      try { wrap.removeEventListener('focusout', onLeave); } catch {}
+      try { wrap.removeEventListener('pointerenter', onEnter); } catch { }
+      try { wrap.removeEventListener('pointerleave', onLeave); } catch { }
+      try { wrap.removeEventListener('pointermove', onMove); } catch { }
+      try { wrap.removeEventListener('focusin', onEnter); } catch { }
+      try { wrap.removeEventListener('focusout', onLeave); } catch { }
       if (slowTO) window.clearTimeout(slowTO);
     };
   }, [prefersReduce]);
@@ -243,9 +243,9 @@ export default function BlogUpdates(): JSX.Element {
     wrap.addEventListener('pointercancel', onLeave);
 
     return () => {
-      try { wrap.removeEventListener('pointermove', onMove); } catch {}
-      try { wrap.removeEventListener('pointerleave', onLeave); } catch {}
-      try { wrap.removeEventListener('pointercancel', onLeave); } catch {}
+      try { wrap.removeEventListener('pointermove', onMove); } catch { }
+      try { wrap.removeEventListener('pointerleave', onLeave); } catch { }
+      try { wrap.removeEventListener('pointercancel', onLeave); } catch { }
       cancelAnimationFrame(raf);
     };
   }, [active, prefersReduce]);
@@ -261,17 +261,17 @@ export default function BlogUpdates(): JSX.Element {
 
   // controls
   const onPrev = () => {
-    try { autoplayRef.current?.restart(true); } catch {}
+    try { autoplayRef.current?.restart(true); } catch { }
     advance(-1, { animateRim: true, resetProgressAfter: true });
   };
   const onNext = () => {
-    try { autoplayRef.current?.restart(true); } catch {}
+    try { autoplayRef.current?.restart(true); } catch { }
     advance(1, { animateRim: true, resetProgressAfter: true });
   };
 
   const onDot = (i: number) => {
     if (i === active) return;
-    try { autoplayRef.current?.restart(true); } catch {}
+    try { autoplayRef.current?.restart(true); } catch { }
     advance((i - active + BLOGS.length) % BLOGS.length, { animateRim: true, resetProgressAfter: true });
   };
 
@@ -400,7 +400,7 @@ export default function BlogUpdates(): JSX.Element {
             <div className="mt-6 rounded-2xl overflow-hidden bg-gradient-to-r from-[#eef6ff] to-white border border-slate-100 p-4 shadow">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-lg bg-white/60 flex items-center justify-center border">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v18" stroke="#0b2a5f" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v18" stroke="#0b2a5f" strokeWidth="1.2" strokeLinecap="round" /></svg>
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-slate-900">Weekly round-up</div>
