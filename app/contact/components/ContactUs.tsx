@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import ContactForm from './ContactForm';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -59,47 +60,13 @@ export default function ContactPage() {
         {/* LEFT – MESSAGE FORM */}
         <div className="reveal bg-white/70 backdrop-blur-xl rounded-[32px] p-10 shadow-[0_40px_120px_rgba(0,0,0,0.08)]">
           {!sent ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
+            <ContactForm
+              onSuccess={() => {
+                // analytics event and then show the success screen
+                try { (window as any).dataLayer?.push?.({ event: 'contactFormSuccess' }); } catch { }
                 setSent(true);
               }}
-              className="space-y-6"
-            >
-              <p className="text-black text-sm">
-                Start the conversation 👋
-              </p>
-
-              <div className="chat-bubble text-black">
-                Hi, I’m  
-                <input required placeholder="your name" />
-              </div>
-
-              <div className="chat-bubble text-black">
-                You can reach me at  
-                <input required type="email" placeholder="email address" />
-              </div>
-
-              <div className="chat-bubble text-black  ">
-                I’m looking for help with  
-                <select>
-                  <option>Custom Software</option>
-                  <option>Web / App Development</option>
-                  <option>Branding & Design</option>
-                  <option>Digital Marketing</option>
-                  <option>Other</option>
-                </select>
-              </div>
-
-              <div className="chat-bubble text-black">
-                Here’s a bit more detail  
-                <textarea rows={3} placeholder="Tell us about your idea…" />
-              </div>
-
-              <button className="primary-btn w-full mt-6">
-                Send message →
-              </button>
-            </form>
+            />
           ) : (
             <div className="text-center py-20">
               <div className="text-5xl mb-6">🚀</div>

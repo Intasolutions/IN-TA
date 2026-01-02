@@ -17,9 +17,11 @@ type Service = {
     features: string[];
     color?: string;
     icon?: React.ReactNode;
+    iconSvg?: string; // optional inline svg from backend
+    iconPath?: string; // optional path to an asset
 };
 
-const SERVICES: Service[] = [
+const FALLBACK_SERVICES: Service[] = [
     {
         id: 's-web',
         title: 'Web Design',
@@ -117,17 +119,75 @@ const SERVICES: Service[] = [
     },
 ];
 
+
+
 export default function ServicesPage(): JSX.Element {
     const [query, setQuery] = useState('');
     const [activeTag, setActiveTag] = useState<string | null>(null);
 
+    const [services, setServices] = useState<Service[]>(FALLBACK_SERVICES);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+        const aborter = new AbortController();
+        setLoading(true);
+
+        fetch(`${apiBase}/api/services/`, { signal: aborter.signal })
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to fetch services');
+                return res.json();
+            })
+            .then((data) => {
+                const resolveUrl = (p: string | null) => {
+                    if (!p) return null;
+                    if (p.startsWith('http://') || p.startsWith('https://')) return p;
+                    // preserve public assets (like `/placeholders/...`) as-is so Next
+                    // can serve them from the `public/` folder. Only prefix backend
+                    // media paths so they point at the Django server.
+                    if (p.startsWith('/')) {
+                        if (p.startsWith('/media/')) return `${apiBase}${p}`;
+                        return p;
+                    }
+                    try {
+                        // resolve relative paths against apiBase
+                        return new URL(p, apiBase).toString();
+                    } catch {
+                        return null;
+                    }
+                };
+
+                const mapped: Service[] = (data || []).map((s: any) => ({
+                    id: s.slug ?? s.id ?? s.title,
+                    title: s.title,
+                    slug: s.slug,
+                    short: s.short_description ?? s.short ?? '',
+                    features: (s.features || []).map((f: any) => (typeof f === 'string' ? f : f.name ?? '')),
+                    color: s.color ?? '',
+                    iconSvg: s.icon_svg ?? '',
+                    iconPath: resolveUrl(s.icon_path ?? '') ?? '',
+                }));
+                setServices(mapped);
+                setError(null);
+            })
+            .catch((err) => {
+                if (err.name === 'AbortError') return;
+                console.error('Error fetching services:', err);
+                setError('Unable to load services — using local data.');
+            })
+            .finally(() => setLoading(false));
+
+        return () => aborter.abort();
+    }, []);
+
     const heroRef = useRef<HTMLElement | null>(null);
     const cardsRef = useRef<HTMLDivElement | null>(null);
 
-    const chips = useMemo(() => Array.from(new Set(SERVICES.flatMap((s) => s.features))).slice(0, 8), []);
+    const chips = useMemo(() => Array.from(new Set(services.flatMap((s) => s.features))).slice(0, 8), [services]);
     const filtered = useMemo(
         () =>
-            SERVICES.filter((s) => {
+            services.filter((s) => {
                 const q = query.trim().toLowerCase();
                 if (activeTag && !s.features.includes(activeTag)) return false;
                 if (!q) return true;
@@ -137,7 +197,7 @@ export default function ServicesPage(): JSX.Element {
                     s.features.join(' ').toLowerCase().includes(q)
                 );
             }),
-        [query, activeTag]
+        [query, activeTag, services]
     );
 
     
@@ -432,7 +492,7 @@ const onLeave = () => {
     border-color 320ms ease;
 
   will-change: transform, box-shadow;
-    transform-style: flat;
+    transform-style: preserve-3d;
 }
 
 .service-card::after {
@@ -617,6 +677,8 @@ const onLeave = () => {
 
             {/* SERVICES GRID */}
             <section className="max-w-6xl mx-auto mt-8">
+                {loading && <div className="text-sm text-slate-500 mb-4">Loading services…</div>}
+                {error && <div className="text-sm text-amber-600 mb-4">{error}</div>}
                 <div ref={cardsRef as any} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filtered.map((svc) => (
                         <article
@@ -633,7 +695,15 @@ const onLeave = () => {
                         >
                             <div className="card-top">
                                 <div className="card-icon-wrap" aria-hidden>
-                                    <div style={{ color: svc.color || 'currentColor' }}>{svc.icon}</div>
+                                    <div style={{ color: svc.color || 'currentColor' }}>
+                                        {svc.iconSvg ? (
+                                            <span dangerouslySetInnerHTML={{ __html: svc.iconSvg }} />
+                                        ) : svc.iconPath ? (
+                                            <img src={svc.iconPath} alt="" width={28} height={28} />
+                                        ) : (
+                                            svc.icon
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div>
