@@ -63,6 +63,23 @@ function SplitChars({ text }: { text: string }) {
 }
 
 export default function PortfolioCinematicPanels(): JSX.Element {
+
+
+  type Project = {
+    id: number;
+    title: string;
+    slug: string;
+    summary: string;
+    hero: string | null;
+    tags: { name: string; slug: string }[];
+    external_url?: string;
+    featured: boolean;
+    order: number;
+    is_active: boolean;
+  };
+
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const heroRef = useRef<HTMLDivElement | null>(null);
   const panelsWrapRef = useRef<HTMLDivElement | null>(null);
@@ -75,6 +92,45 @@ export default function PortfolioCinematicPanels(): JSX.Element {
   };
 
   useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const backend = `${protocol}//${hostname}:8000`;
+
+        const res = await fetch(`${backend}/api/portfolio/projects/`);
+        if (!res.ok) throw new Error('Failed to fetch projects');
+
+        const data: Project[] = await res.json();
+
+        const cleaned = data
+          .filter(p => p.is_active)
+          .sort((a, b) => a.order - b.order)
+          .map(p => ({
+            ...p,
+            hero: p.hero
+              ? p.hero.startsWith('http')
+                ? p.hero
+                : `${backend}${p.hero}`
+              : '/placeholders/g1.png',
+          }));
+
+        setProjects(cleaned);
+      } catch (err) {
+        console.error('Portfolio fetch failed', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProjects();
+  }, []);
+
+
+
+
+  useEffect(() => {
+    if (!projects.length) return;
     if (typeof window === 'undefined') return;
     if (!wrapRef.current) return;
 
@@ -337,7 +393,7 @@ export default function PortfolioCinematicPanels(): JSX.Element {
         console.warn('[PortfolioCinematicPanels] ctx.revert() failed', e);
       }
     };
-  }, []);
+  }, [projects.length]);
 
   // pointer tilt (desktop)
   useEffect(() => {
@@ -404,14 +460,15 @@ export default function PortfolioCinematicPanels(): JSX.Element {
           >
             Our Craft
           </h1>
-         
+
         </div>
       </div>
 
       {/* PANELS WRAPPER (initially hidden under hero, revealed by hero timeline) */}
       <div ref={panelsWrapRef} className="relative -mt-0 z-10">
         <div className="w-full">
-          {PANELS.map((p, idx) => (
+          {projects.map((p, idx) => (
+
             <div
               key={p.id}
               ref={addPanelRef}
@@ -426,7 +483,7 @@ export default function PortfolioCinematicPanels(): JSX.Element {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundImage: `url(${PANEL_IMAGES[idx]})`,
+                    backgroundImage: `url(${p.hero})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center center',
                     filter: 'blur(28px) brightness(0.62) saturate(1.05)',
@@ -449,8 +506,8 @@ export default function PortfolioCinematicPanels(): JSX.Element {
                 >
                   <img
                     className="panel-centered-img"
-                    src={PANEL_IMAGES[idx]}
-                    alt={`${p.title} — screenshot`}
+                    src={p.hero}
+                    alt={`${p.title} screenshot`}
                     style={{
                       width: 'auto',
                       height: '84vh',
@@ -541,30 +598,30 @@ export default function PortfolioCinematicPanels(): JSX.Element {
 
                       <p className="panel-subtitle mt-3 text-base md:text-lg text-white/80 max-w-2xl" aria-hidden>
                         <span style={{ display: 'inline-block' }}>
-                          <SplitChars text={p.subtitle} />
+                          <SplitChars text={p.summary} />
                           <span className="type-cursor inline-block ml-1 text-white/90" aria-hidden>|</span>
                         </span>
                       </p>
 
                       <div className="mt-4 flex flex-wrap gap-2">
-                        <span className="panel-chip inline-block px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.92)' }}>UX</span>
-                        <span className="panel-chip inline-block px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.92)' }}>Motion</span>
-                        <span className="panel-chip inline-block px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.92)' }}>Brand</span>
+
+                        {p.tags.map((tag) => (
+                          <span key={tag.slug} className="panel-chip inline-block px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.92)' }}>
+                            {tag.name}
+                          </span>
+                        ))}
                       </div>
 
                       <div className="mt-6 flex items-center gap-4">
-                        <button
+                        <a
+                          href={p.external_url || `/portfolio/${p.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="panel-cta px-5 py-2 rounded-full font-medium"
-                          style={{
-                            background: 'linear-gradient(90deg,#1f6fe6,#0b2a5f)',
-                            color: 'white',
-                            boxShadow: '0 8px 30px rgba(31,111,230,0.18)',
-                            border: 'none',
-                          }}
-                          aria-label={`View ${p.title}`}
                         >
                           View project
-                        </button>
+                        </a>
+
 
                         <a
                           className="panel-cta inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"

@@ -1,15 +1,16 @@
 import React from 'react'
 import Header1 from '../components/Header1'
 import PortfolioPage from './components/portfolio'
-import Footer from '../components/Footer'
+
 import SmoothScroll from '../components/SmoothScroll'
+import Footer1 from '../components/Footersecond'
 
 const page = () => {
   return (
 <SmoothScroll>
 <Header1/>
 <PortfolioPage/>
-<Footer/>
+<Footer1/>
 </SmoothScroll>
   )
 }

@@ -17,16 +17,12 @@ type Testimonial = {
   company?: string;
 };
 
-const DEFAULT_TESTIMONIALS: Testimonial[] = [
-  { id: 't1', name: 'Priya Sharma', role: 'Head of Product — LuxHomes', quote: 'They redesigned our product experience and the conversion lift was obvious. Motion, detail and performance — all top tier.', avatar: '/portfolio/qma.png', company: 'LuxHomes' },
-  { id: 't2', name: 'Rahul Mehta', role: 'CTO — BlueCart', quote: 'Engineering quality and design sensibility in one team. We shipped faster with fewer regressions — highly recommended.', avatar: '/avatars/p2.jpg', company: 'BlueCart' },
-  { id: 't3', name: 'Sara Lee', role: 'Marketing Lead — Nova', quote: 'The campaigns and motion work lifted engagement and brand recall. The videos simply performed across channels.', avatar: '/avatars/p3.jpg', company: 'Nova' },
-  { id: 't4', name: 'Anders Holm', role: 'Founder — Craftly', quote: 'From concept to launch, the process was smooth. Their attention to micro-interaction made our product feel premium.', avatar: '/avatars/p4.jpg', company: 'Craftly' },
-];
+// Static data removed as per user request
+
 
 const TEMPO = 0.60;
 
-export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS }: { testimonials?: Testimonial[] }) {
+export default function TestimonialSlider() {
   const [data, setData] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +69,8 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
   // Use fetched data if available, otherwise fall back to props (which defaults to static)
   // But strictly speaking we should probably just use the fetched data if we want backend integration.
   // Let's use fetched data if we have it, else defaults.
-  const activeTestimonials = data.length > 0 ? data : testimonials;
+  // Use fetched data only
+  const activeTestimonials = data;
 
   const wrapRef = useRef<HTMLElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -336,6 +333,9 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
             <div className="relative overflow-visible rounded-2xl p-6 bg-gradient-to-tl max-w-full">
               <div ref={rimRef} aria-hidden="true" className="absolute top-4 left-1/2 -translate-x-1/2 h-[6px] w-72 rounded-full pointer-events-none -z-10" />
               <div ref={trackRef} className="flex gap-6 items-stretch will-change-transform px-6" style={{ touchAction: 'pan-y' }}>
+
+
+                {/* Original set for measurement and first part of loop */}
                 {activeTestimonials.map((t) => (
                   <article key={`a-${t.id}`} className="ts-card ts-card-original w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md" role="group" tabIndex={0} aria-label={`${t.name}, ${t.role}`}>
                     <div className="flex items-center gap-3">

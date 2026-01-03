@@ -176,7 +176,7 @@ function ResilientImage({
           const el = e.currentTarget as HTMLImageElement;
           el.onerror = null;
           el.src = '/placeholders/g1.png';
-        } catch {}
+        } catch { }
       }}
     />
   );
@@ -240,7 +240,7 @@ export default function PortfolioPage() {
         requestAnimationFrame(() => {
           try {
             ScrollTrigger.refresh();
-          } catch {}
+          } catch { }
         });
       })
       .catch((err) => {
@@ -251,7 +251,7 @@ export default function PortfolioPage() {
         requestAnimationFrame(() => {
           try {
             ScrollTrigger.refresh();
-          } catch {}
+          } catch { }
         });
       })
       .finally(() => setLoading(false));
@@ -308,9 +308,9 @@ function Hero() {
         mounted = false;
         try {
           if (lenis && lenis.destroy) lenis.destroy();
-        } catch {}
+        } catch { }
       };
-    } catch {}
+    } catch { }
   }, []);
 
   useLayoutEffect(() => {
@@ -679,6 +679,7 @@ function GalleryGrid({ items }: { items: any[] }) {
           let lastRY = 0;
 
           const onMove = (ev: PointerEvent) => {
+            if (!card) return;
             const r = card.getBoundingClientRect();
             const px = (ev.clientX - r.left) / r.width;
             const py = (ev.clientY - r.top) / r.height;
