@@ -631,7 +631,7 @@ const onLeave = () => {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search services or features (e.g. 'Figma', 'APIs')"
-                                className="w-full rounded-full border border-slate-100 bg-white px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1f6fe6]/10"
+                                className="w-full rounded-full border border-slate-100 bg-white px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1f6fe6]/10 text-black"
                             />
                         </div>
 
