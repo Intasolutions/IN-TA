@@ -27,6 +27,7 @@ urlpatterns = [
     # API routes (services app)
     path('api/', include('services.urls')),
     path('api/portfolio/', include('portfolio.urls')),
+    path('api/home/', include('home.urls')),
     path('api/contact/', include('contact.urls')),
     # simple health check
     path('', lambda request: HttpResponse('OK')),

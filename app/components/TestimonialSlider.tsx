@@ -27,6 +27,54 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
 const TEMPO = 0.60;
 
 export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS }: { testimonials?: Testimonial[] }) {
+  const [data, setData] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Use either props or fetched data, but default to props if provided
+  // If no props provided, we fetch.
+  // Actually the component prop default is DEFAULT_TESTIMONIALS so it always has data.
+  // We want to override if we can fetch from API? 
+  // The user request is to "make backend for that".
+  // So we should fetch from backend.
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Construct backend URL dynamically based on current hostname
+        // This assumes backend is always on port 8000 of the same host
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const backendUrl = `${protocol}//${hostname}:8000`;
+
+        const res = await fetch(`${backendUrl}/api/home/testimonials/`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const json = await res.json();
+        if (Array.isArray(json) && json.length > 0) {
+          // Map backend fields to frontend fields
+          const mapped: Testimonial[] = json.map((item: any) => ({
+            id: item.id.toString(),
+            name: item.name,
+            role: item.role || '',
+            quote: item.quote,
+            avatar: item.avatar ? (item.avatar.startsWith('http') ? item.avatar : `${backendUrl}${item.avatar}`) : undefined,
+            company: item.company || '',
+          }));
+          setData(mapped);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Use fetched data if available, otherwise fall back to props (which defaults to static)
+  // But strictly speaking we should probably just use the fetched data if we want backend integration.
+  // Let's use fetched data if we have it, else defaults.
+  const activeTestimonials = data.length > 0 ? data : testimonials;
+
   const wrapRef = useRef<HTMLElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
@@ -42,8 +90,10 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!wrapRef.current || !trackRef.current) return;
+    // Removed loading check to allow animation to start immediately with default data
+    // If data loads later, the effect will re-run correctly.
 
-    try { tlRef.current?.kill(); } catch {}
+    try { tlRef.current?.kill(); } catch { }
     floatTweens.current.forEach(t => t.kill());
     floatTweens.current = [];
 
@@ -54,73 +104,82 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     }
 
     const track = trackRef.current!;
-    const originals = Array.from(track.querySelectorAll<HTMLElement>('.ts-card-original'));
-    if (!originals.length) return;
+    // Important: querySelectorAll might not find elements if they are not rendered yet.
+    // We need to make sure we depend on activeTestimonials.
 
-    let totalW = 0;
-    originals.slice(0, testimonials.length).forEach(el => {
-      const r = el.getBoundingClientRect();
-      const style = getComputedStyle(el);
-      const mr = parseFloat(style.marginRight || '0');
-      totalW += r.width + mr;
-    });
+    // We need to wait for render.
+    const runAnimation = () => {
+      const originals = Array.from(track.querySelectorAll<HTMLElement>('.ts-card-original'));
+      if (!originals.length) return;
 
-    gsap.set(track, { x: 0 });
-
-    const base = Math.max(6 * TEMPO, (totalW / 90) * TEMPO);
-    const duration = Math.max(6 * TEMPO, base);
-
-    const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'linear' } });
-    tl.to(track, { x: -totalW, duration, ease: 'linear' });
-    tl.set(track, { x: 0 });
-    tlRef.current = tl;
-
-    const cards = Array.from(track.querySelectorAll<HTMLElement>('.ts-card'));
-    cards.forEach((card, i) => {
-      const t = gsap.to(card, {
-        y: gsap.utils.random(-6, -2),
-        rotation: gsap.utils.random(-0.6, 0.6),
-        duration: gsap.utils.random(2.2 * TEMPO, 3.8 * TEMPO),
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        delay: i * 0.04,
+      let totalW = 0;
+      originals.slice(0, activeTestimonials.length).forEach(el => {
+        const r = el.getBoundingClientRect();
+        const style = getComputedStyle(el);
+        const mr = parseFloat(style.marginRight || '0');
+        totalW += r.width + mr;
       });
-      floatTweens.current.push(t);
-    });
 
-    if (rimRef.current && wrapRef.current) {
-      try {
-        const wrapEl = wrapRef.current;
-        const rim = rimRef.current;
-        gsap.set(rim, { x: -120, opacity: 0 });
-        gsap.to(rim, {
-          x: () => wrapEl.getBoundingClientRect().width + 160,
-          opacity: 1,
-          duration: 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: wrapEl,
-            start: 'top 95%',
-            end: 'bottom 15%',
-            scrub: 0.9,
-            invalidateOnRefresh: true,
-          },
+      gsap.set(track, { x: 0 });
+
+      const base = Math.max(6 * TEMPO, (totalW / 90) * TEMPO);
+      const duration = Math.max(6 * TEMPO, base);
+
+      const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'linear' } });
+      tl.to(track, { x: -totalW, duration, ease: 'linear' });
+      tl.set(track, { x: 0 });
+      tlRef.current = tl;
+
+      const cards = Array.from(track.querySelectorAll<HTMLElement>('.ts-card'));
+      cards.forEach((card, i) => {
+        const t = gsap.to(card, {
+          y: gsap.utils.random(-6, -2),
+          rotation: gsap.utils.random(-0.6, 0.6),
+          duration: gsap.utils.random(2.2 * TEMPO, 3.8 * TEMPO),
+          yoyo: true,
+          repeat: -1,
+          ease: 'sine.inOut',
+          delay: i * 0.04,
         });
-      } catch {}
-    }
+        floatTweens.current.push(t);
+      });
 
-    if (!isPlaying) tl.pause();
+      if (rimRef.current && wrapRef.current) {
+        try {
+          const wrapEl = wrapRef.current;
+          const rim = rimRef.current;
+          gsap.set(rim, { x: -120, opacity: 0 });
+          gsap.to(rim, {
+            x: () => wrapEl.getBoundingClientRect().width + 160,
+            opacity: 1,
+            duration: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: wrapEl,
+              start: 'top 95%',
+              end: 'bottom 15%',
+              scrub: 0.9,
+              invalidateOnRefresh: true,
+            },
+          });
+        } catch { }
+      }
+
+      if (!isPlaying) tl.pause();
+    };
+
+    // Small delay to ensure DOM is ready? logic was fine before.
+    runAnimation();
 
     const wrap = wrapRef.current!;
     let slowTO: number | null = null;
     const onEnter = () => {
-      try { tlRef.current?.pause(); } catch {}
+      try { tlRef.current?.pause(); } catch { }
       floatTweens.current.forEach(t => t.pause());
       setIsPlaying(false);
     };
     const onLeave = () => {
-      try { tlRef.current?.resume(); } catch {}
+      try { tlRef.current?.resume(); } catch { }
       floatTweens.current.forEach(t => t.resume());
       setIsPlaying(true);
     };
@@ -147,17 +206,17 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     window.addEventListener('keydown', onKey);
 
     return () => {
-      try { wrap.removeEventListener('pointerenter', onEnter); } catch {}
-      try { wrap.removeEventListener('pointerleave', onLeave); } catch {}
-      try { wrap.removeEventListener('pointermove', onMove); } catch {}
-      try { wrap.removeEventListener('focusin', onEnter); } catch {}
-      try { wrap.removeEventListener('focusout', onLeave); } catch {}
-      try { window.removeEventListener('keydown', onKey); } catch {}
+      try { wrap.removeEventListener('pointerenter', onEnter); } catch { }
+      try { wrap.removeEventListener('pointerleave', onLeave); } catch { }
+      try { wrap.removeEventListener('pointermove', onMove); } catch { }
+      try { wrap.removeEventListener('focusin', onEnter); } catch { }
+      try { wrap.removeEventListener('focusout', onLeave); } catch { }
+      try { window.removeEventListener('keydown', onKey); } catch { }
       if (slowTO) window.clearTimeout(slowTO);
-      try { tlRef.current?.kill(); } catch {}
+      try { tlRef.current?.kill(); } catch { }
       floatTweens.current.forEach(t => t.kill());
     };
-  }, [testimonials.length, isPlaying, prefersReduce]);
+  }, [activeTestimonials.length, isPlaying, prefersReduce]); // Depend on activeTestimonials
 
   // Sparkles (same as before)
   useEffect(() => {
@@ -176,7 +235,7 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     if (!originals.length) return;
 
     let totalW = 0;
-    originals.slice(0, testimonials.length).forEach(el => {
+    originals.slice(0, activeTestimonials.length).forEach(el => {
       const r = el.getBoundingClientRect();
       const style = getComputedStyle(el);
       const mr = parseFloat(style.marginRight || '0');
@@ -233,12 +292,12 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
     }
 
     return () => {
-      try { sparkleTweens.current.forEach(t => t.kill()); } catch {}
+      try { sparkleTweens.current.forEach(t => t.kill()); } catch { }
       sparkleTweens.current = [];
-      try { sparkleEls.current.forEach(e => e.remove()); } catch {}
+      try { sparkleEls.current.forEach(e => e.remove()); } catch { }
       sparkleEls.current = [];
     };
-  }, [testimonials.length, prefersReduce]);
+  }, [activeTestimonials.length, prefersReduce]);
 
   const togglePlay = () => {
     if (prefersReduce) return;
@@ -267,7 +326,7 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="mb-6 text-center">
             <p className="text-lg font-semibold tracking-wide text-slate-600">WHAT CLIENTS SAY</p>
-           
+
           </div>
         </div>
 
@@ -277,7 +336,7 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
             <div className="relative overflow-visible rounded-2xl p-6 bg-gradient-to-tl max-w-full">
               <div ref={rimRef} aria-hidden="true" className="absolute top-4 left-1/2 -translate-x-1/2 h-[6px] w-72 rounded-full pointer-events-none -z-10" />
               <div ref={trackRef} className="flex gap-6 items-stretch will-change-transform px-6" style={{ touchAction: 'pan-y' }}>
-                {testimonials.map((t) => (
+                {activeTestimonials.map((t) => (
                   <article key={`a-${t.id}`} className="ts-card ts-card-original w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md" role="group" tabIndex={0} aria-label={`${t.name}, ${t.role}`}>
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
@@ -296,7 +355,7 @@ export default function TestimonialSlider({ testimonials = DEFAULT_TESTIMONIALS 
                   </article>
                 ))}
 
-                {testimonials.map((t) => (
+                {activeTestimonials.map((t) => (
                   <article key={`b-${t.id}`} aria-hidden className="ts-card w-[320px] min-w-[260px] md:w-[360px] md:min-w-[320px] rounded-2xl bg-white p-5 flex flex-col gap-3 border border-slate-100 shadow-md">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex-shrink-0">
