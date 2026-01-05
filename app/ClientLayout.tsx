@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import MaskReveal from './components/MaskReveal';
 import SmoothScroll from './components/SmoothScroll';
+import PageLoader from './components/PageLoader';
 
 export default function ClientLayout({
   children,
@@ -11,18 +12,26 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [showMask, setShowMask] = useState(true);
+  const [showMask, setShowMask] = useState(false);
   const [routeKey, setRouteKey] = useState(pathname);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const prevPath = useRef(pathname);
 
-  // Trigger mask on route change
   useEffect(() => {
-    setShowMask(true);
-    setRouteKey(pathname);
+    if (prevPath.current !== pathname) {
+      setShowMask(true);
+      setRouteKey(pathname);
+      prevPath.current = pathname;
+    }
   }, [pathname]);
 
   return (
     <>
-      {showMask && (
+      {isFirstLoad && (
+        <PageLoader onDone={() => setIsFirstLoad(false)} />
+      )}
+
+      {!isFirstLoad && showMask && (
         <MaskReveal
           triggerKey={routeKey}
           onComplete={() => setShowMask(false)}

@@ -40,7 +40,9 @@ export default function Header1() {
     if (!headerRef.current) return;
 
     const update = () => {
-      setHeaderH(headerRef.current!.getBoundingClientRect().height);
+      if (headerRef.current) {
+        setHeaderH(headerRef.current.getBoundingClientRect().height);
+      }
     };
 
     update();
@@ -279,16 +281,16 @@ export default function Header1() {
         /> */}
 
         {/* Menu Card */}
-       <div
-  className="relative z-10 mx-4 mt-4
+        <div
+          className="relative z-10 mx-4 mt-4
              rounded-2xl bg-white
              shadow-2xl px-6 pt-6 pb-4 space-y-2
              overflow-y-auto"
-  style={{
-    maxHeight: `calc(100vh - ${headerH + 24}px)`,
-    paddingBottom: `calc(1rem + env(safe-area-inset-bottom))`,
-  }}
->
+          style={{
+            maxHeight: `calc(100vh - ${headerH + 24}px)`,
+            paddingBottom: `calc(1rem + env(safe-area-inset-bottom))`,
+          }}
+        >
 
           {links.map((l, i) => (
             <Link
