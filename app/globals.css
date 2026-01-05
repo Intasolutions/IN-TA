@@ -516,18 +516,7 @@ aside .about-reveal:hover { transform: translateY(-6px); }
   opacity: 1;
   transform: translateX(120%);
 }
-.intro-wrapper {
-  position: absolute;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 
-  /* Cinematic fade for blending with bg */
-  backdrop-filter: blur(8px);
-}
 
 .intro-title {
   font-size: clamp(4rem, 10vw, 11rem);
@@ -735,4 +724,13 @@ aside .about-reveal:hover { transform: translateY(-6px); }
   .label {
     @apply block text-sm font-medium text-slate-800 mb-1;
   }
+}
+[data-reveal] {
+  will-change: transform, opacity, filter;
+}
+.logo img {
+  filter: drop-shadow(0 0 18px rgba(100,140,255,0.45));
+}
+html {
+  background-color: #000;
 }

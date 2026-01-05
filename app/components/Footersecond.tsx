@@ -11,7 +11,7 @@ export default function Footer1() {
         {/* LEFT — Logo + Brand */}
         <div className="flex items-center gap-3 text-center md:text-left">
           <Image
-            src="/logo.svg" // 🔁 replace with your actual logo path
+            src="/logo/logo-inta.png" // 🔁 replace with your actual logo path
             alt="YourCompany logo"
             width={32}
             height={32}
