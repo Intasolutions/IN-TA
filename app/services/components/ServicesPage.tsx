@@ -6,6 +6,8 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CTA from '../../components/CTA';
+import { useReveal } from '../../context/RevealContext';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,114 +20,65 @@ type Service = {
     color?: string;
     icon?: React.ReactNode;
     iconSvg?: string; // optional inline svg from backend
+    iconKey?: string; // mapped from backend
     iconPath?: string; // optional path to an asset
 };
 
-const FALLBACK_SERVICES: Service[] = [
-    {
-        id: 's-web',
-        title: 'Web Design',
-        slug: '/services/web-design',
-        short: 'Modern, responsive web interfaces focused on conversions and performance.',
-        features: ['Figma → UI', 'Responsive', 'Design systems'],
-        color: '#0b2a5f',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.4" />
-                <path d="M7 9h10M7 13h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 's-mobile',
-        title: 'Mobile App',
-        slug: '/services/mobile-app',
-        short: 'Native & cross-platform apps crafted for performance and delightful UX.',
-        features: ['iOS / Android', 'React Native', 'Tested'],
-        color: '#1f6fe6',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <rect x="7.5" y="2.5" width="9" height="19" rx="2.2" stroke="currentColor" strokeWidth="1.4" />
-                <circle cx="12" cy="18.2" r="0.9" fill="currentColor" />
-            </svg>
-        ),
-    },
-    {
-        id: 's-custom',
-        title: 'Custom Software',
-        slug: '/services/custom-software',
-        short: 'Bespoke backend systems, integrations and developer-friendly APIs.',
-        features: ['Architecture', 'APIs', 'Scalable'],
-        color: '#0b6a9a',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 's-video',
-        title: 'Video Production',
-        slug: '/services/video-production',
-        short: 'Concept → shoot → edit — storytelling for brand and product motion.',
-        features: ['Storyboard', 'Editing', 'Motion design'],
-        color: '#114b8c',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <rect x="2.8" y="5" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" />
-                <path d="M20 9l3-2v10l-3-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 's-digimark',
-        title: 'Digital Marketing',
-        slug: '/services/digital-marketing',
-        short: 'Data-driven campaigns: paid ads, content, and lifecycle marketing.',
-        features: ['Ads', 'Content', 'Funnel'],
-        color: '#1a73e8',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <path d="M3 12h6l3-8 3 16 3-6h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 's-graphic',
-        title: 'Graphic & Logo Design',
-        slug: '/services/graphic-design',
-        short: 'Brand systems, logos and visual assets that scale across touchpoints.',
-        features: ['Branding', 'Illustration', 'Assets'],
-        color: '#0b2a5f',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <path d="M4 20l7-16 9 8-7 8H4z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 's-seo',
-        title: 'SEO',
-        slug: '/services/seo',
-        short: 'Technical & content SEO that moves organic metrics and traffic.',
-        features: ['Audit', 'On-page', 'Technical'],
-        color: '#0b6a9a',
-        icon: (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden>
-                <path d="M12 20c4.418 0 8-3.582 8-8S16.418 4 12 4 4 7.582 4 12s3.582 8 8 8z" stroke="currentColor" strokeWidth="1.4" />
-                <path d="M8 12.5l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-];
+/* ---------- ICONS ---------- */
+const CodeIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M8 10l-4 4 4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 10l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+const UXIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M7 8h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M7 12h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+);
+const MobileIcon = () => (
+    <svg width="24" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M12 19h.01" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+);
+const VideoIcon = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M3 5h13v14H3z" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M16 8l5 4-5 4V8z" fill="currentColor" />
+    </svg>
+);
+const MarketingIcon = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M4 12h16M12 4v16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+);
+const SEOIcon = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20z" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M2 12h20M12 2v20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+);
 
+const getIcon = (key?: string) => {
+    switch (key) {
+        case 'code': return <CodeIcon />;
+        case 'ux': return <UXIcon />;
+        case 'mobile': return <MobileIcon />;
+        case 'video': return <VideoIcon />;
+        case 'marketing': return <MarketingIcon />;
+        case 'seo': return <SEOIcon />;
+        default: return null;
+    }
+};
 
-
-export default function ServicesPage(): JSX.Element {
+export default function ServicesPage() {
     const [query, setQuery] = useState('');
     const [activeTag, setActiveTag] = useState<string | null>(null);
 
-    const [services, setServices] = useState<Service[]>(FALLBACK_SERVICES);
+    const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -143,15 +96,11 @@ export default function ServicesPage(): JSX.Element {
                 const resolveUrl = (p: string | null) => {
                     if (!p) return null;
                     if (p.startsWith('http://') || p.startsWith('https://')) return p;
-                    // preserve public assets (like `/placeholders/...`) as-is so Next
-                    // can serve them from the `public/` folder. Only prefix backend
-                    // media paths so they point at the Django server.
                     if (p.startsWith('/')) {
                         if (p.startsWith('/media/')) return `${apiBase}${p}`;
                         return p;
                     }
                     try {
-                        // resolve relative paths against apiBase
                         return new URL(p, apiBase).toString();
                     } catch {
                         return null;
@@ -166,6 +115,7 @@ export default function ServicesPage(): JSX.Element {
                     features: (s.features || []).map((f: any) => (typeof f === 'string' ? f : f.name ?? '')),
                     color: s.color ?? '',
                     iconSvg: s.icon_svg ?? '',
+                    iconKey: s.icon_key,
                     iconPath: resolveUrl(s.icon_path ?? '') ?? '',
                 }));
                 setServices(mapped);
@@ -200,58 +150,69 @@ export default function ServicesPage(): JSX.Element {
         [query, activeTag, services]
     );
 
-    
-
+    // ... inside ServicesPage component
     const TILT_CONFIG = {
-  maxRotate: 20,        // degrees (keep under 8 for premium feel)
-  maxTranslate: 10,    // px
-  perspective: 900,   // depth
-  easing: 'power3.out',
-  hoverScale: 1.035,
-};
+        maxRotate: 20,
+        maxTranslate: 10,
+        perspective: 900,
+        easing: 'power3.out',
+        hoverScale: 1.035,
+    };
 
+    const { isRevealed } = useReveal();
 
     useEffect(() => {
+        if (!isRevealed) return; // wait
+
         const prefersReduce =
             typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // Collect removers so we can detach any event listeners we add.
         const removers: (() => void)[] = [];
 
-        // Use gsap.context with heroRef as scope — we will still create an explicit selector 'q'
         const ctx = gsap.context(() => {
-            // create a scoped selector q(...) tied to heroRef.current if present, otherwise fall back to document
-            const root = heroRef.current ?? document;
-            const q = gsap.utils.selector(root as Element | Document);
+            // Ensure we are selecting within the component to avoid conflicts
+            // Use heroRef as scope if possible, or fall back to document but be careful
+            // Actually, scoping to the main container is best.
+
+            // Explicitly reveal the Hero container immediately once isRevealed is true
+            // This prevents the "Blank Page" issue if ScrollTrigger doesn't fire immediately
+            if (heroRef.current) {
+                gsap.to(heroRef.current, { autoAlpha: 1, duration: 1, ease: 'power2.out' });
+            }
 
             // HERO: clip-path wipe for .ab-hero-title lines
             gsap.fromTo(
-                q('.ab-hero-title'),
-                { autoAlpha: 0, y: 26, clipPath: 'inset(60% 0% 60% 0%)' },
+                '.ab-hero-title',
+                { autoAlpha: 0, y: 36, clipPath: 'inset(60% 0% 60% 0%)', filter: 'blur(10px)' },
                 {
                     autoAlpha: 1,
                     y: 0,
                     clipPath: 'inset(0% 0% 0% 0%)',
+                    filter: 'blur(0px)',
                     duration: 1.6,
-                    ease: 'power3.out',
-                    stagger: 0.06,
-                    scrollTrigger: { trigger: heroRef.current ?? q('.ab-hero')[0] ?? '.ab-hero', start: 'top 92%' },
+                    ease: 'power4.out',
+                    stagger: 0.08,
+                    clearProps: 'filter'
                 }
             );
 
-            // Generic reveal for other sections (scoped to root where possible)
-            const reveals = (root as Element | Document).querySelectorAll ? Array.from((root as Element).querySelectorAll('.reveal')) : Array.from(document.querySelectorAll('.reveal'));
-            gsap.set(reveals as HTMLElement[], { autoAlpha: 0, y: 18 });
+            // Generic reveal - scope to current component refs
+            // Exclude the hero if we handled it above, or let it be harmless
+            const reveals = gsap.utils.toArray<HTMLElement>('.reveal:not(.svc-hero)');
+
             reveals.forEach((el) => {
                 ScrollTrigger.create({
                     trigger: el,
-                    start: 'top 90%',
+                    start: 'top 90%', // Trigger slightly earlier
                     onEnter: () => {
                         if (prefersReduce) {
-                            gsap.set(el as HTMLElement, { autoAlpha: 1, y: 0 });
+                            gsap.set(el, { autoAlpha: 1, y: 0 });
                             return;
                         }
-                        gsap.to(el as HTMLElement, { autoAlpha: 1, y: 0, duration: 1.05, ease: 'power3.out' });
+                        gsap.fromTo(el,
+                            { autoAlpha: 0, y: 40, filter: 'blur(10px)' },
+                            { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1.1, ease: 'power3.out', clearProps: 'filter' }
+                        );
                     },
                 });
             });
@@ -260,131 +221,111 @@ export default function ServicesPage(): JSX.Element {
             const container = cardsRef.current;
             if (container) {
                 const cardEls = Array.from(container.querySelectorAll<HTMLElement>('.service-card'));
-                gsap.set(cardEls, { y: 18, opacity: 0, scale: 0.996 });
+                // Use fromTo instead of set to handle initial state if it wasn't set by CSS (though we will set it)
+                // But better to enforce it here as well for cards
 
-                // reveal using ScrollTrigger.batch for performance
                 ScrollTrigger.batch(cardEls, {
                     start: 'top 92%',
                     onEnter: (batch) => {
-                        gsap.to(batch, {
-                            y: 0,
-                            opacity: 1,
-                            scale: 1,
-                            duration: 0.8,
-                            ease: 'expo.out',
-                            stagger: 0.06,
-                        });
+                        gsap.fromTo(batch,
+                            { y: 60, autoAlpha: 0, scale: 0.95, filter: 'blur(8px)' },
+                            {
+                                y: 0,
+                                autoAlpha: 1,
+                                scale: 1,
+                                filter: 'blur(0px)',
+                                duration: 1.1,
+                                ease: 'expo.out',
+                                stagger: 0.08,
+                                clearProps: 'filter'
+                            });
                     },
                 });
 
                 if (!prefersReduce) {
                     cardEls.forEach((card) => {
                         const isFinePointer = window.matchMedia('(pointer: fine)').matches;
-if (!isFinePointer) return;
-
+                        if (!isFinePointer) return;
+                        // ... (rest of hover code unchanged)
                         const iconWrap = card.querySelector<HTMLElement>('.card-icon-wrap');
                         let raf: number | null = null;
-
-const onEnter = () => {
-  gsap.set(card, {
-    transformPerspective: TILT_CONFIG.perspective,
-    transformStyle: 'preserve-3d',
-  });
-
-  gsap.to(card, {
-    y: -8,
-    scale: TILT_CONFIG.hoverScale,
-    boxShadow: `
-      0 10px 30px rgba(11,42,95,0.12),
-      0 32px 72px rgba(11,42,95,0.20)
-    `,
-    duration: 0.4,
-    ease: TILT_CONFIG.easing,
-  });
-};
-
-
-const onLeave = () => {
-  if (raf) cancelAnimationFrame(raf);
-
-  gsap.to(card, {
-    rotateX: 0,
-    rotateY: 0,
-    x: 0,
-    y: 0,
-    scale: 1,
-    boxShadow: `
-      0 1px 2px rgba(11,42,95,0.04),
-      0 8px 24px rgba(11,42,95,0.08)
-    `,
-    duration: 0.7,
-    ease: 'power4.out',
-  });
-
-  if (iconWrap) {
-    gsap.to(iconWrap, {
-      x: 0,
-      y: 0,
-      scale: 1,
-      duration: 0.6,
-      ease: 'power3.out',
-    });
-  }
-};
-
-
-                       const onMove = (ev: PointerEvent) => {
-  if (prefersReduce) return;
-
-  if (raf) cancelAnimationFrame(raf);
-  raf = requestAnimationFrame(() => {
-    const rect = card.getBoundingClientRect();
-
-    // Normalized cursor position (-0.5 → 0.5)
-    const x = (ev.clientX - rect.left) / rect.width - 0.5;
-    const y = (ev.clientY - rect.top) / rect.height - 0.5;
-
-    const rotateY = x * TILT_CONFIG.maxRotate;
-    const rotateX = -y * TILT_CONFIG.maxRotate;
-
-    const translateX = x * TILT_CONFIG.maxTranslate;
-    const translateY = y * TILT_CONFIG.maxTranslate;
-
-    gsap.to(card, {
-      rotateX,
-      rotateY,
-      x: translateX * 0.15,
-      y: -8 + translateY * 0.12,
-      scale: TILT_CONFIG.hoverScale,
-      transformPerspective: TILT_CONFIG.perspective,
-      duration: 0.35,
-      ease: TILT_CONFIG.easing,
-      overwrite: true,
-    });
-
-    if (iconWrap) {
-      gsap.to(iconWrap, {
-        x: -translateX * 0.25,
-        y: -translateY * 0.25,
-        duration: 0.4,
-        ease: TILT_CONFIG.easing,
-        overwrite: true,
-      });
-    }
-  });
-};
-
-
+                        const onEnter = () => {
+                            gsap.set(card, {
+                                transformPerspective: TILT_CONFIG.perspective,
+                                transformStyle: 'preserve-3d',
+                            });
+                            gsap.to(card, {
+                                y: -8,
+                                scale: TILT_CONFIG.hoverScale,
+                                boxShadow: `0 10px 30px rgba(11,42,95,0.12), 0 32px 72px rgba(11,42,95,0.20)`,
+                                duration: 0.4,
+                                ease: TILT_CONFIG.easing,
+                            });
+                        };
+                        // ...
+                        const onLeave = () => {
+                            if (raf) cancelAnimationFrame(raf);
+                            gsap.to(card, {
+                                rotateX: 0,
+                                rotateY: 0,
+                                x: 0,
+                                y: 0,
+                                scale: 1,
+                                boxShadow: `0 1px 2px rgba(11,42,95,0.04), 0 8px 24px rgba(11,42,95,0.08)`,
+                                duration: 0.7,
+                                ease: 'power4.out',
+                            });
+                            if (iconWrap) {
+                                gsap.to(iconWrap, {
+                                    x: 0,
+                                    y: 0,
+                                    scale: 1,
+                                    duration: 0.6,
+                                    ease: 'power3.out',
+                                });
+                            }
+                        };
+                        // ...
+                        const onMove = (ev: PointerEvent) => {
+                            if (prefersReduce) return;
+                            if (raf) cancelAnimationFrame(raf);
+                            raf = requestAnimationFrame(() => {
+                                const rect = card.getBoundingClientRect();
+                                const x = (ev.clientX - rect.left) / rect.width - 0.5;
+                                const y = (ev.clientY - rect.top) / rect.height - 0.5;
+                                const rotateY = x * TILT_CONFIG.maxRotate;
+                                const rotateX = -y * TILT_CONFIG.maxRotate;
+                                const translateX = x * TILT_CONFIG.maxTranslate;
+                                const translateY = y * TILT_CONFIG.maxTranslate;
+                                gsap.to(card, {
+                                    rotateX,
+                                    rotateY,
+                                    x: translateX * 0.15,
+                                    y: -8 + translateY * 0.12,
+                                    scale: TILT_CONFIG.hoverScale,
+                                    transformPerspective: TILT_CONFIG.perspective,
+                                    duration: 0.35,
+                                    ease: TILT_CONFIG.easing,
+                                    overwrite: true,
+                                });
+                                if (iconWrap) {
+                                    gsap.to(iconWrap, {
+                                        x: -translateX * 0.25,
+                                        y: -translateY * 0.25,
+                                        duration: 0.4,
+                                        ease: TILT_CONFIG.easing,
+                                        overwrite: true,
+                                    });
+                                }
+                            });
+                        };
                         const onFocus = () => onEnter();
                         const onBlur = () => onLeave();
-
                         card.addEventListener('pointermove', onMove, { passive: true });
                         card.addEventListener('pointerenter', onEnter);
                         card.addEventListener('pointerleave', onLeave);
                         card.addEventListener('focus', onFocus);
                         card.addEventListener('blur', onBlur);
-
-                        // push remover
                         removers.push(() => {
                             card.removeEventListener('pointermove', onMove as EventListener);
                             card.removeEventListener('pointerenter', onEnter);
@@ -430,18 +371,13 @@ const onLeave = () => {
             }
         }, heroRef);
 
-        // cleanup: remove DOM listeners then revert GSAP context (which kills timelines/ScrollTrigger)
         return () => {
             removers.forEach((r) => {
-                try {
-                    r();
-                } catch (e) {
-                    // ignore
-                }
+                try { r(); } catch (e) { }
             });
             ctx.revert();
         };
-    }, [filtered]);
+    }, [filtered, isRevealed]);
 
     return (
         <main className="bg-[#fbf9f5] min-h-screen pb-24 px-6 md:px-12" style={{ ['--logo' as any]: '#1f6fe6', ['--muted' as any]: '#94a3b8' }}>
@@ -473,6 +409,12 @@ const onLeave = () => {
         .reveal-line > span {
           display: inline-block;
           transform: translateY(0);
+        }
+        
+        /* Ensure initial hidden state for cards to avoid flash */
+        .service-card {
+           opacity: 0;
+           visibility: hidden;
         }
 
         .service-card {
@@ -594,16 +536,16 @@ const onLeave = () => {
       `}</style>
 
             {/* HERO */}
-            <section ref={heroRef as any} className="ab-hero svc-hero max-w-6xl mx-auto reveal">
+            <section ref={heroRef as any} className="ab-hero svc-hero max-w-6xl mx-auto reveal" style={{ opacity: 0, visibility: 'hidden' }}>
                 <div>
                     <p className="text-sm font-semibold tracking-wider text-slate-600 mb-3">OUR SERVICES</p>
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#0b2a5f] leading-tight">
                         <span className="reveal-line">
-                            <span className="ab-hero-title">Product-focused services</span>
+                            <span className="ab-hero-title" style={{ opacity: 0, visibility: 'hidden' }}>Product-focused services</span>
                         </span>
                         <span className="reveal-line">
-                            <span className="ab-hero-title">that ship results.</span>
+                            <span className="ab-hero-title" style={{ opacity: 0, visibility: 'hidden' }}>that ship results.</span>
                         </span>
                     </h1>
 
@@ -698,6 +640,8 @@ const onLeave = () => {
                                     <div style={{ color: svc.color || 'currentColor' }}>
                                         {svc.iconSvg ? (
                                             <span dangerouslySetInnerHTML={{ __html: svc.iconSvg }} />
+                                        ) : svc.iconKey ? (
+                                            getIcon(svc.iconKey)
                                         ) : svc.iconPath ? (
                                             <img src={svc.iconPath} alt="" width={28} height={28} />
                                         ) : (

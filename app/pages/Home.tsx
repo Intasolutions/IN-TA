@@ -8,16 +8,12 @@ import TechStack from '../components/TechStack';
 import TestimonialSlider from '../components/TestimonialSlider';
 import BlogUpdates from '../components/BlogUpdates';
 import PortfolioCinematicPanels from '../components/PortfolioSection';
-import usePageReveal from '../hooks/usePageReveal';
-console.log('HOME MOUNTED');
 
 
 const Home = () => {
-  usePageReveal();
-
   return (
-    <main className="overflow-hidden">
-      <section >
+    <main>
+      <section>
         <HeroSlider />
       </section>
 
@@ -25,27 +21,28 @@ const Home = () => {
         <About />
       </section>
 
-      <section >
+      <section>
         <Services />
       </section>
 
-      <section >
+      <section>
         <PortfolioCinematicPanels />
       </section>
 
-      <section >
+      <section>
         <TechStack />
       </section>
 
-      <section >
+      <section>
         <TestimonialSlider />
       </section>
 
-      <section >
+      <section>
         <BlogUpdates />
       </section>
     </main>
   );
 };
+
 
 export default Home;

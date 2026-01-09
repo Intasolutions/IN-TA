@@ -6,6 +6,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from '@studio-freight/lenis';
 import CTA from '../../components/CTA';
+import { useReveal } from '../../context/RevealContext';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -284,12 +286,14 @@ export default function PortfolioPage() {
   );
 }
 
-/* -------------------- HERO -------------------- */
+// ... (Internal Hero definition)
+// ... (Internal Hero definition)
 function Hero() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const floatRef = useRef<HTMLDivElement | null>(null);
   const lenisRef = useRef<any>(null);
+  const { isRevealed } = useReveal();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -315,6 +319,7 @@ function Hero() {
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!isRevealed) return; // Wait for reveal
 
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -323,9 +328,15 @@ function Hero() {
 
       if (titleRef.current) {
         const lines = titleRef.current.querySelectorAll('.reveal-line > span');
-        gsap.set(lines, { y: 36, autoAlpha: 0, transformOrigin: 'center left', willChange: 'transform, opacity' });
+        // Note: opacity:0 visibility:hidden set in render
+
         if (!prefersReduce) {
-          tl.to(lines, { y: 0, autoAlpha: 1, duration: 2.1, stagger: 0.34, ease: 'power3.out' }, 0.08);
+          tl.fromTo(lines,
+            { y: 36, autoAlpha: 0, filter: 'blur(8px)', transformOrigin: 'center left' },
+            { y: 0, autoAlpha: 1, filter: 'blur(0px)', duration: 2.1, stagger: 0.34, ease: 'power3.out', clearProps: 'filter' },
+            0.08
+          );
+
           tl.fromTo(
             titleRef.current.querySelectorAll('.reveal-line:nth-child(2) > span'),
             { x: 8 },
@@ -338,6 +349,9 @@ function Hero() {
       }
 
       if (floatRef.current && wrapRef.current && !prefersReduce) {
+        // ensure visibility for animation start
+        gsap.set(floatRef.current, { autoAlpha: 1 });
+
         const floatTL = gsap.timeline({ repeat: -1, yoyo: true });
         floatTL.to(floatRef.current, { y: -12, rotation: 0.6, duration: 3.6, ease: 'sine.inOut' });
 
@@ -374,8 +388,8 @@ function Hero() {
 
       tl.fromTo(
         '.hero-cta',
-        { y: 12, autoAlpha: 0, scale: 0.98 },
-        { y: 0, autoAlpha: 1, scale: 1, duration: 1, stagger: 0.26, ease: 'power2.out' },
+        { y: 12, autoAlpha: 0, scale: 0.98, filter: 'blur(4px)' },
+        { y: 0, autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1, stagger: 0.26, ease: 'power2.out', clearProps: 'filter' },
         '<0.14'
       );
 
@@ -383,7 +397,7 @@ function Hero() {
     }, wrapRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [isRevealed]); // Added dependency
 
   return (
     <section className="relative overflow-hidden pt-20 pb-12">
@@ -392,27 +406,27 @@ function Hero() {
           <p className="text-sm text-slate-500 uppercase mb-4">Our Work</p>
           <h1 ref={titleRef} className="font-extrabold text-[54px] leading-[0.95] text-[#0b2b57] max-w-2xl">
             <span className="reveal-line block overflow-hidden">
-              <span>We craft websites & platforms</span>
+              <span style={{ opacity: 0, visibility: 'hidden' }}>We craft websites & platforms</span>
             </span>
             <span className="reveal-line block overflow-hidden">
-              <span>that scale — engineered to perform.</span>
+              <span style={{ opacity: 0, visibility: 'hidden' }}>that scale — engineered to perform.</span>
             </span>
           </h1>
           <p className="mt-6 text-slate-600 max-w-xl">
             Product-first engineering for web, mobile, and cloud infrastructure. From UX to backend, we ship resilient, maintainable systems.
           </p>
           <div className="mt-8 flex gap-4">
-            <a className="hero-cta inline-flex items-center gap-3 bg-[#0b2b57] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-shadow transform-gpu will-change-transform">
+            <a className="hero-cta inline-flex items-center gap-3 bg-[#0b2b57] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-shadow transform-gpu will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               Start a project →
             </a>
-            <a className="hero-cta inline-flex items-center gap-3 border border-slate-200 px-5 py-3 rounded-full text-slate-700 transform-gpu will-change-transform">
+            <a className="hero-cta inline-flex items-center gap-3 border border-slate-200 px-5 py-3 rounded-full text-slate-700 transform-gpu will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               View case studies
             </a>
           </div>
         </div>
 
         <div ref={wrapRef} className="w-1/2 relative">
-          <div ref={floatRef} className="relative ml-auto w-[520px] h-[360px]">
+          <div ref={floatRef} className="relative ml-auto w-[520px] h-[360px]" style={{ visibility: 'visible' }}>
             <div className="absolute right-0 top-0 w-[420px] h-[260px] rounded-2xl overflow-hidden shadow-2xl bg-white">
               <Image src="/placeholders/hero-device.png" alt="hero device" width={1200} height={800} className="object-cover w-full h-full" />
             </div>
@@ -429,11 +443,13 @@ function Hero() {
 /* -------------------- FEATURED LIST (backend-safe animations) -------------------- */
 function FeaturedList({ projects }: { projects: any[] }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const { isRevealed } = useReveal();
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
     if (!containerRef.current) return;
     if (!projects || projects.length === 0) return;
+    if (!isRevealed) return; // wait
 
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -450,12 +466,9 @@ function FeaturedList({ projects }: { projects: any[] }) {
 
           if (!mask || !image || !text) return;
 
+          // Initial state is handled via inline styles in render generally, but for dynamic lists we might rely on fromTo immediately if in view
           if (!prefersReduce) {
-            gsap.set(mask, { y: 80, clipPath: 'inset(100% 0% 0% 0%)' });
-            gsap.set(image, { y: 40, scale: 1.08 });
-            gsap.set(shadow, { opacity: 0, boxShadow: '0 0 0 rgba(11,42,95,0)' });
-            gsap.set(text, { y: 36, autoAlpha: 0 });
-            if (visit) gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
+               // fromTo will handle it
           } else {
             gsap.set([mask, image, shadow, text, visit].filter(Boolean), { clearProps: 'all' });
           }
@@ -468,21 +481,24 @@ function FeaturedList({ projects }: { projects: any[] }) {
               toggleActions: 'play none none reset',
               onLeaveBack: () => {
                 if (prefersReduce) return;
-                gsap.set(mask, { y: 80, clipPath: 'inset(100% 0% 0% 0%)' });
-                gsap.set(image, { y: 40, scale: 1.08 });
-                gsap.set(shadow, { opacity: 0, boxShadow: '0 0 0 rgba(11,42,95,0)' });
-                gsap.set(text, { y: 36, autoAlpha: 0 });
-                if (visit) gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
+                 gsap.set(mask, { y: 80, clipPath: 'inset(100% 0% 0% 0%)' });
+                 gsap.set(image, { y: 40, scale: 1.08 });
+                 gsap.set(shadow, { opacity: 0, boxShadow: '0 0 0 rgba(11,42,95,0)' });
+                 gsap.set(text, { y: 36, autoAlpha: 0 });
+                 if (visit) gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
               },
             },
           });
-
-          tl.to(mask, { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 1.1 });
-          tl.to(image, { y: 0, scale: 1, duration: 1.15 }, '-=0.8');
-          tl.to(shadow, { opacity: 1, boxShadow: '0 30px 80px rgba(11,42,95,0.14)', duration: 0.6 }, '-=0.7');
-          tl.to(text, { y: 0, autoAlpha: 1, duration: 0.9 }, '-=0.65');
+          
+          if (!prefersReduce) {
+            tl.fromTo(mask, { clipPath: 'inset(100% 0% 0% 0%)', y: 80 }, { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 1.1 });
+            tl.fromTo(image, { y: 40, scale: 1.08 }, { y: 0, scale: 1, duration: 1.15 }, '-=0.8');
+            tl.fromTo(shadow, { opacity: 0, boxShadow: '0 0 0 rgba(11,42,95,0)' }, { opacity: 1, boxShadow: '0 30px 80px rgba(11,42,95,0.14)', duration: 0.6 }, '-=0.7');
+            tl.fromTo(text, { y: 36, autoAlpha: 0, filter: 'blur(8px)' }, { y: 0, autoAlpha: 1, filter: 'blur(0px)', duration: 0.9, clearProps: 'filter' }, '-=0.65');
+          }
 
           if (visit && !prefersReduce) {
+             gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
             const showBtn = () => {
               visit.classList.add('show-shimmer');
               gsap.to(visit, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' });
@@ -520,7 +536,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
         if (trg && containerRef.current?.contains(trg)) t.kill(true);
       });
     };
-  }, [projects]);
+  }, [projects, isRevealed]);
 
   return (
     <div ref={containerRef} className="space-y-28">
@@ -550,7 +566,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
           </div>
 
           <div className="col-span-5">
-            <div className="project-text max-w-xl">
+            <div className="project-text max-w-xl" style={{ opacity: 0 }}>
               <p className="text-sm text-slate-500 uppercase">Featured project</p>
               <h2 className="mt-4 text-3xl font-semibold text-[#0b2b57]">{p.title}</h2>
               <p className="mt-4 text-slate-600">{p.summary}</p>

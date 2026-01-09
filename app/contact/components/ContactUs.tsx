@@ -4,31 +4,37 @@ import React, { useEffect, useRef, useState } from 'react';
 import ContactForm from './ContactForm';
 import gsap from 'gsap';
 
+
+import { useReveal } from '../../context/RevealContext';
+
 export default function ContactPage() {
   const root = useRef<HTMLElement | null>(null);
   const [sent, setSent] = useState(false);
+  const { isRevealed } = useReveal();
 
   useEffect(() => {
-    if (!root.current) return;
+    if (!root.current || !isRevealed) return; // wait for reveal
 
     const ctx = gsap.context(() => {
       /* ---------------- HERO TEXT (APPLE STYLE) ---------------- */
+      // Content already hidden via inline styles
       gsap.fromTo(
         '.hero-line',
         {
           yPercent: 120,
-          opacity: 0,
+          autoAlpha: 0,
           filter: 'blur(10px)',
           letterSpacing: '0.08em',
         },
         {
           yPercent: 0,
-          opacity: 1,
+          autoAlpha: 1,
           filter: 'blur(0px)',
           letterSpacing: '0em',
-          duration: 1.4,
+          duration: 3,
           ease: 'power4.out',
           stagger: 0.14,
+          clearProps: 'filter'
         }
       );
 
@@ -37,16 +43,17 @@ export default function ContactPage() {
         '.hero-sub',
         {
           y: 24,
-          opacity: 0,
+          autoAlpha: 0,
           filter: 'blur(6px)',
         },
         {
           y: 0,
-          opacity: 1,
+          autoAlpha: 1,
           filter: 'blur(0px)',
-          duration: 1,
+          duration: 1.4,
           ease: 'power3.out',
           delay: 0.6,
+          clearProps: 'filter'
         }
       );
 
@@ -55,21 +62,24 @@ export default function ContactPage() {
         '.reveal',
         {
           y: 40,
-          opacity: 0,
+          autoAlpha: 0,
+          filter: 'blur(12px)'
         },
         {
           y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: 'power3.out',
+          autoAlpha: 1,
+          filter: 'blur(0px)',
+          duration: 1.25,
+          ease: 'power4.out',
           stagger: 0.12,
-          delay: 0.95, // micro delay after hero
+          delay: 0.95,
+          clearProps: 'filter'
         }
       );
     }, root);
 
     return () => ctx.revert();
-  }, []);
+  }, [isRevealed]);
 
   return (
     <main
@@ -80,19 +90,19 @@ export default function ContactPage() {
       <section className="max-w-5xl mx-auto text-center mb-24">
         <h1 className="text-4xl md:text-6xl font-extrabold text-[#0b2a5f] leading-tight">
           <span className="block overflow-hidden">
-            <span className="hero-line block will-change-transform">
+            <span className="hero-line block will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               Let’s talk about
             </span>
           </span>
           <span className="block overflow-hidden">
-            <span className="hero-line block will-change-transform">
+            <span className="hero-line block will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               what you’re building.
             </span>
           </span>
         </h1>
 
-        <p className="hero-sub mt-6 text-lg text-slate-600 max-w-2xl mx-auto">
-          Whether it’s a product, platform, or idea —  
+        <p className="hero-sub mt-6 text-lg text-slate-600 max-w-2xl mx-auto" style={{ opacity: 0, visibility: 'hidden' }}>
+          Whether it’s a product, platform, or idea —
           we help you turn it into something real.
         </p>
       </section>
@@ -100,7 +110,7 @@ export default function ContactPage() {
       {/* ---------------- CONTENT ---------------- */}
       <section className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
         {/* LEFT – FORM */}
-        <div className="reveal bg-white/70 backdrop-blur-xl rounded-[32px] p-10 shadow-[0_40px_120px_rgba(0,0,0,0.08)]">
+        <div className="reveal bg-white/70 backdrop-blur-xl rounded-[32px] p-10 shadow-[0_40px_120px_rgba(0,0,0,0.08)]" style={{ opacity: 0, visibility: 'hidden' }}>
           {!sent ? (
             <ContactForm
               onSuccess={() => {
@@ -108,7 +118,7 @@ export default function ContactPage() {
                   (window as any).dataLayer?.push?.({
                     event: 'contactFormSuccess',
                   });
-                } catch {}
+                } catch { }
                 setSent(true);
               }}
             />
@@ -126,7 +136,7 @@ export default function ContactPage() {
         </div>
 
         {/* RIGHT – INFO */}
-        <div className="reveal flex flex-col gap-10">
+        <div className="reveal flex flex-col gap-10" style={{ opacity: 0, visibility: 'hidden' }}>
           <div className="glass-card">
             <h3 className="section-title">What happens next</h3>
             <div className="timeline">
@@ -235,4 +245,3 @@ export default function ContactPage() {
     </main>
   );
 }
-  

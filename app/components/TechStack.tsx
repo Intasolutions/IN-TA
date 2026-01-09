@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReveal } from '../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,6 +39,7 @@ export default function TechStack(): JSX.Element {
   const bgLayerA = useRef<HTMLDivElement | null>(null);
   const bgLayerB = useRef<HTMLDivElement | null>(null);
   const toolCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const { isRevealed } = useReveal();
 
   // loops/handlers
   const cardLoops = useRef<Map<HTMLElement, gsap.core.Timeline>>(new Map());
@@ -46,7 +48,7 @@ export default function TechStack(): JSX.Element {
   const handlers = useRef<Map<HTMLElement, { enter: any; leave: any }>>(new Map());
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isRevealed) return;
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const ctx = gsap.context(() => {
@@ -137,7 +139,7 @@ export default function TechStack(): JSX.Element {
                   y: floatY * 0.12,
                   duration: 4.0 * TEMPO,
                 }, '>');
-                
+
                 // small initial offset per index so they don't sync
                 cardTl.pause();
                 gsap.delayedCall(idx * (0.06 * TEMPO), () => cardTl.play(0));
@@ -204,11 +206,11 @@ export default function TechStack(): JSX.Element {
             // Hover & focus handlers (pause loops, show tooltip)
             if (!handlers.current.has(el)) {
               const onEnter = () => {
-                try { cardLoops.current.get(el)?.pause(); } catch {}
+                try { cardLoops.current.get(el)?.pause(); } catch { }
                 try {
                   const logo = el.querySelector<HTMLElement>('.ts-logo');
                   if (logo) logoLoops.current.get(logo)?.pause();
-                } catch {}
+                } catch { }
                 gsap.to(el, { scale: 1.06, y: -6, duration: 0.16 * TEMPO, ease: 'power2.out' });
                 if (tooltip) {
                   gsap.killTweensOf(tooltip);
@@ -216,11 +218,11 @@ export default function TechStack(): JSX.Element {
                 }
               };
               const onLeave = () => {
-                try { cardLoops.current.get(el)?.resume(); } catch {}
+                try { cardLoops.current.get(el)?.resume(); } catch { }
                 try {
                   const logo = el.querySelector<HTMLElement>('.ts-logo');
                   if (logo) logoLoops.current.get(logo)?.resume();
-                } catch {}
+                } catch { }
                 gsap.to(el, { scale: 1.0, y: 0, duration: 0.5 * TEMPO, ease: 'power3.out' });
                 if (tooltip) {
                   gsap.killTweensOf(tooltip);
@@ -270,28 +272,28 @@ export default function TechStack(): JSX.Element {
       // cleanup
       try {
         handlers.current.forEach((h, el) => {
-          try { el.removeEventListener('pointerenter', h.enter); } catch {}
-          try { el.removeEventListener('pointerleave', h.leave); } catch {}
-          try { el.removeEventListener('focus', h.enter); } catch {}
-          try { el.removeEventListener('blur', h.leave); } catch {}
+          try { el.removeEventListener('pointerenter', h.enter); } catch { }
+          try { el.removeEventListener('pointerleave', h.leave); } catch { }
+          try { el.removeEventListener('focus', h.enter); } catch { }
+          try { el.removeEventListener('blur', h.leave); } catch { }
         });
         handlers.current.clear();
-      } catch {}
+      } catch { }
 
-      try { cardLoops.current.forEach((tl) => tl.kill()); } catch {}
-      try { logoLoops.current.forEach((tl) => tl.kill()); } catch {}
+      try { cardLoops.current.forEach((tl) => tl.kill()); } catch { }
+      try { logoLoops.current.forEach((tl) => tl.kill()); } catch { }
       cardLoops.current.clear();
       logoLoops.current.clear();
 
       try {
         sheenIntervals.current.forEach((id) => window.clearInterval(id));
-      } catch {}
+      } catch { }
       sheenIntervals.current.clear();
 
-      try { ctx.revert(); } catch {}
-      try { ScrollTrigger.getAll().forEach((t) => t.kill()); } catch {}
+      try { ctx.revert(); } catch { }
+      try { ScrollTrigger.getAll().forEach((t) => t.kill()); } catch { }
     };
-  }, []);
+  }, [isRevealed]);
 
   return (
     <section ref={wrapRef} id="tech-stack" className="relative bg-[#fbf9f5] py-24 px-6 md:px-20 overflow-hidden">
@@ -308,7 +310,7 @@ export default function TechStack(): JSX.Element {
       <div className="max-w-6xl mx-auto">
         <div className="ts-hero text-center mb-10">
           <p className="text-sm font-semibold tracking-wide text-slate-600">TECH STACK</p>
-         
+
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
@@ -321,7 +323,7 @@ export default function TechStack(): JSX.Element {
           {tools.map((t) => (
             <div
               key={t.id}
-              ref={(el) => (toolCardRefs.current[t.id] = el)}
+              ref={(el) => { toolCardRefs.current[t.id] = el; }}
               className="ts-card relative rounded-2xl bg-white/90 backdrop-blur-sm p-4 md:p-6 flex items-center justify-center flex-col gap-3 border border-slate-100 shadow-lg"
               aria-label={t.name}
               tabIndex={0}
@@ -357,7 +359,7 @@ export default function TechStack(): JSX.Element {
         <div className="mt-10 flex items-center justify-center">
           <a href="#contact" className="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-6 py-3 font-semibold shadow-lg hover:scale-[1.02] transition-transform">
             Work with our stack →
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </a>
         </div>
       </div>

@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReveal } from '../context/RevealContext';
 
 if (typeof window !== 'undefined') {
   try {
@@ -62,8 +63,8 @@ function SplitChars({ text }: { text: string }) {
   );
 }
 
-export default function PortfolioCinematicPanels(): JSX.Element {
-
+export default function PortfolioCinematicPanels(): React.JSX.Element {
+  const { isRevealed } = useReveal();
 
   type Project = {
     id: number;
@@ -132,6 +133,7 @@ export default function PortfolioCinematicPanels(): JSX.Element {
   useEffect(() => {
     if (!projects.length) return;
     if (typeof window === 'undefined') return;
+    if (!isRevealed) return;
     if (!wrapRef.current) return;
 
     let ctx: gsap.Context | null = null;
@@ -393,7 +395,7 @@ export default function PortfolioCinematicPanels(): JSX.Element {
         console.warn('[PortfolioCinematicPanels] ctx.revert() failed', e);
       }
     };
-  }, [projects.length]);
+  }, [projects.length, isRevealed]);
 
   // pointer tilt (desktop)
   useEffect(() => {
@@ -506,7 +508,7 @@ export default function PortfolioCinematicPanels(): JSX.Element {
                 >
                   <img
                     className="panel-centered-img"
-                    src={p.hero}
+                    src={p.hero || ''}
                     alt={`${p.title} screenshot`}
                     style={{
                       width: 'auto',

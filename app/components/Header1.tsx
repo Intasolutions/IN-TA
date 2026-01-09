@@ -11,6 +11,7 @@ import {
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useReveal } from '../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +25,7 @@ export default function Header1() {
   const menuRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const menuItemsRef = useRef<HTMLAnchorElement[]>([]);
-  const menuTl = useRef<gsap.core.Timeline>();
+  const menuTl = useRef<gsap.core.Timeline | null>(null);
 
   const logoDark = useRef<HTMLImageElement>(null);
   const logoLight = useRef<HTMLImageElement>(null);
@@ -112,7 +113,11 @@ export default function Header1() {
   }, [open]);
 
   /* ---------------- Header scroll animation ---------------- */
+  const { isRevealed } = useReveal();
+
   useGSAP(() => {
+    if (!isRevealed) return;
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: document.body,
@@ -270,8 +275,8 @@ export default function Header1() {
       <div
         ref={menuRef}
         style={{ top: headerH }}
-        className="md:hidden fixed inset-x-0 z-[9999]
-                   opacity-0 pointer-events-none"
+        className={`md:hidden fixed inset-x-0 z-[9999] 
+          ${open ? 'pointer-events-auto' : 'pointer-events-none'}`}
       >
         {/* Backdrop */}
         {/* <div

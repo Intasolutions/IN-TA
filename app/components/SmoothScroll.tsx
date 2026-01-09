@@ -8,8 +8,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => 1 - Math.pow(1 - t, 3),
-      smooth: true,
-      smoothTouch: true,
+
       touchMultiplier: 3.8,
     })
 

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReveal } from '../../context/RevealContext';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -214,10 +216,12 @@ export default function AboutPage() {
     const statRefs = useRef<Record<string, HTMLDivElement | null>>({});
     const teamCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+    const { isRevealed } = useReveal();
     const [prefersReduce, setPrefersReduce] = useState(true);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
+        if (!isRevealed) return; // Wait for mask reveal
 
         let media: MediaQueryList | null = null;
         const onMediaChange = (e: MediaQueryListEvent) => setPrefersReduce(!!e.matches);
@@ -236,25 +240,68 @@ export default function AboutPage() {
         const cardRemovers: Array<() => void> = [];
 
         const ctx = gsap.context(() => {
-            const reveals = gsap.utils.toArray<HTMLElement>('.reveal');
-            gsap.set(reveals, { autoAlpha: 0, y: 18 });
+            // Exclude hero elements (and the hero section itself) from generic scroll triggers
+            // Using JS filter for reliability over complex CSS selectors
+            const reveals = gsap.utils.toArray<HTMLElement>('.reveal').filter(el => !el.closest('.ab-hero'));
+
+            // NOTE: Elements already hidden via inline style (opacity:0, visibility:hidden)
+            // No need for initial set() of autoAlpha: 0.
+
             reveals.forEach((el) => {
                 ScrollTrigger.create({
                     trigger: el,
                     start: 'top 90%',
                     onEnter: () => {
+                        // Only animate if revealed
+                        if (!isRevealed && !prefersReduce) {
+                            // If mask not done, ensure it stays hidden
+                            return;
+                        }
+
                         if (prefersReduce) { gsap.set(el, { autoAlpha: 1, y: 0 }); return; }
-                        gsap.to(el, { autoAlpha: 1, y: 0, duration: 1.05, ease: 'power3.out' });
+
+                        gsap.fromTo(el,
+                            { autoAlpha: 0, y: 40, filter: 'blur(12px)' },
+                            { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1.25, ease: 'power4.out', clearProps: 'filter' }
+                        );
                     },
                 });
             });
 
-            gsap.fromTo(
-                '.ab-hero-title',
-                { autoAlpha: 0, y: 26, clipPath: 'inset(60% 0% 60% 0%)' },
-                { autoAlpha: 1, y: 0, clipPath: 'inset(0% 0% 0% 0%)', duration: 3.1, ease: 'power3.out', stagger: 0.06, scrollTrigger: { trigger: '.ab-hero', start: 'top 92%' } }
-            );
+            // Special handling for Hero Title - wait for isRevealed explicitly if needed, but ScrollTrigger mostly handles it as it enters view.
+            // However, Hero is surely in view at top.
+            if (isRevealed) {
+                // Explicit Hero Sequence
+                const tl = gsap.timeline();
 
+                // Hero Text & Elements
+                tl.fromTo(
+                    '.hero-reveal-text',
+                    { autoAlpha: 0, y: 40, clipPath: 'inset(60% 0% 60% 0%)', filter: 'blur(12px)' },
+                    { autoAlpha: 1, y: 0, clipPath: 'inset(0% 0% 0% 0%)', filter: 'blur(0px)', duration: 1.6, ease: 'power4.out', stagger: 0.15, clearProps: 'filter' }
+                    , 0);
+
+                // Other hero elements that were excluded from generic reveals
+                const heroReveals = gsap.utils.toArray<HTMLElement>('.ab-hero .reveal');
+                if (heroReveals.length) {
+                    tl.fromTo(heroReveals,
+                        { autoAlpha: 0, y: 30, filter: 'blur(10px)' },
+                        { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out', stagger: 0.1, clearProps: 'filter' }
+                        , 0.2); // slight delay after text starts
+                }
+            }
+            ScrollTrigger.refresh(true);
+            // 🛟 SAFETY: force-show hero elements if already in viewport (reload fix)
+            const heroEls = gsap.utils.toArray<HTMLElement>('.ab-hero .reveal');
+
+            heroEls.forEach((el) => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight) {
+                    gsap.set(el, { autoAlpha: 1, y: 0, clearProps: 'filter' });
+                }
+            });
+
+            
             STATS.forEach((s) => {
                 const el = statRefs.current[s.id];
                 if (!el) return;
@@ -503,7 +550,7 @@ export default function AboutPage() {
         };
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isRevealed]);
 
     const particleEnabled = !prefersReduce;
     const themeBlue = '#1f6fe6';
@@ -520,19 +567,27 @@ export default function AboutPage() {
                 </div>
             </div>
 
-            {/* HERO */}
+            {/* HERO SECTION */}
             <section className="ab-hero reveal max-w-6xl mx-auto px-6 md:px-12 pt-20 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 <div className="lg:col-span-7">
-                    <p className="text-sm font-semibold tracking-wider text-slate-600 mb-3">ABOUT US</p>
-                    <h1 className="ab-hero-title text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-[#0b2a5f]">
-                        Where creativity meets engineering — we build dependable digital products.
+                    <p className="text-sm font-semibold tracking-wider text-slate-600 mb-3 reveal" style={{ opacity: 0, visibility: 'hidden' }}>ABOUT US</p>
+                    <h1 className="ab-hero-title text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-[#0b2a5f]">
+                        <span className="block overflow-hidden">
+                            <span className="hero-reveal-text block" style={{ opacity: 0, visibility: 'hidden' }}>Where creativity meets</span>
+                        </span>
+                        <span className="block overflow-hidden">
+                            <span className="hero-reveal-text block" style={{ opacity: 0, visibility: 'hidden' }}>engineering — we build</span>
+                        </span>
+                        <span className="block overflow-hidden">
+                            <span className="hero-reveal-text block" style={{ opacity: 0, visibility: 'hidden' }}>dependable digital products.</span>
+                        </span>
                     </h1>
-                    <p className="mt-6 text-slate-600 max-w-2xl">
+                    <p className="mt-6 text-slate-600 max-w-2xl reveal" style={{ opacity: 0, visibility: 'hidden' }}>
                         We are a multidisciplinary IT studio focused on product-grade engineering, UX, and measurable growth.
                         From product strategy to launch and scale — we partner end-to-end with startups and enterprises.
                     </p>
 
-                    <div className="mt-8 flex gap-4">
+                    <div className="mt-8 flex gap-4 reveal" style={{ opacity: 0, visibility: 'hidden' }}>
                         <Link href="/contact" className="btn-cta primary-cta inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-5 py-3 font-semibold shadow-lg transition-transform will-change-transform focus:outline-none focus:ring-4 focus:ring-[#1f6fe6]/20">
                             <span>Start a project</span>
                             <svg className="cta-icon ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -547,7 +602,7 @@ export default function AboutPage() {
                 </div>
 
                 <div className="lg:col-span-5 flex justify-center lg:justify-end items-center">
-                    <div ref={heroCardRef} className="hero-card relative w-full max-w-md rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-2xl transform-gpu will-change-transform">
+                    <div ref={heroCardRef} className="hero-card relative w-full max-w-md rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-2xl transform-gpu will-change-transform reveal" style={{ opacity: 0, visibility: 'hidden' }}>
                         <div ref={heroBlobRef} className="hero-blob absolute -left-12 -top-10 w-44 h-36 rounded-full bg-gradient-to-br from-[#e6f0ff] to-transparent opacity-60 mix-blend-screen blur-2xl pointer-events-none" />
                         <div className="relative h-56">
                             <Image src="/about/inta-lobby.png" alt="office" fill className="object-cover" sizes="(min-width:1024px) 35vw, 100vw" />

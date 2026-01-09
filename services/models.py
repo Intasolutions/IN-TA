@@ -33,8 +33,22 @@ class Service(models.Model):
 
     # Visual/UX fields used by the frontend
     color = models.CharField(max_length=24, blank=True, help_text="Hex color used for accent (e.g. #1f6fe6)")
-    icon_path = models.CharField(max_length=255, blank=True, help_text="Optional path or name for an icon or animation file")
-    icon_svg = models.TextField(blank=True, help_text="Optional inline SVG markup (stored as text)")
+    ICON_CHOICES = [
+    ("code", "Code"),
+    ("ux", "UX / Design"),
+    ("mobile", "Mobile App"),
+    ("video", "Video"),
+    ("marketing", "Marketing"),
+    ("seo", "SEO"),
+    ]
+
+    icon_key = models.CharField(
+    max_length=20,
+    choices=ICON_CHOICES,
+    default="code",
+    help_text="Icon identifier used by frontend"
+    )
+
 
     # Admin/UI helpers
     order = models.IntegerField(default=0, help_text="Sort order for listing services (low->high)")

@@ -10,7 +10,7 @@ export default function PageLoader({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     const tl = gsap.timeline({
       defaults: { ease: 'power4.out' },
-      onComplete: () => requestAnimationFrame(onDone),
+      onComplete: () => { requestAnimationFrame(onDone); },
     });
 
     tl.from('.logo', {

@@ -5,18 +5,21 @@ import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReveal } from '../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Refresh HMR
 export default function About() {
   const wrapRef = useRef<HTMLElement | null>(null);
   const topCurveRef = useRef<SVGPathElement | null>(null);
   const bottomCurveRef = useRef<SVGPathElement | null>(null);
   const imageRef = useRef<HTMLDivElement | null>(null);
   const asideRef = useRef<HTMLDivElement | null>(null);
+  const { isRevealed } = useReveal();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isRevealed) return;
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (prefersReduce) {
@@ -266,8 +269,9 @@ export default function About() {
 
         gsap.to(asideRef.current, {
           y: () => {
-            const wrapRect = wrapRef.current!.getBoundingClientRect();
-            const asideRect = asideRef.current!.getBoundingClientRect();
+            if (!wrapRef.current || !asideRef.current) return 0;
+            const wrapRect = wrapRef.current.getBoundingClientRect();
+            const asideRect = asideRef.current.getBoundingClientRect();
             const finalY = (wrapRect.top + wrapRect.height) - (asideRect.top + asideRect.height);
             return Math.max(finalY, 0);
           },
@@ -287,7 +291,7 @@ export default function About() {
       try { ctx.revert(); } catch { }
       try { ScrollTrigger.getAll().forEach((t) => t.kill()); } catch { }
     };
-  }, []);
+  }, [isRevealed]);
 
   return (
     <section
