@@ -276,7 +276,7 @@ export default function BlogUpdates() {
   };
 
   return (
-    <section ref={wrapRef} className="relative py-20 px-6 md:px-20 bg-[#fbfaf8]">
+    <section ref={wrapRef} className="relative py-20 px-6 md:px-20 bg-[#fbfaf8] overflow-hidden">
       {/* soft layered glows behind cards */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-20">
         <div className="absolute left-[-6%] top-[-8%] w-[44%] h-[88%]">

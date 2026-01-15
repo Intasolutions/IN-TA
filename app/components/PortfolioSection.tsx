@@ -164,9 +164,9 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             t.to(heroEl, { y: -36, ease: 'power1.out', duration: 1 }, 0);
             t.to(heroEl, { autoAlpha: 0, ease: 'power1.out', duration: 0.9 }, 0.45);
 
-            // reveal panels container by translating from below into view
-            gsap.set(panelsEl, { y: 120, autoAlpha: 0 });
-            t.to(panelsEl, { y: 0, autoAlpha: 1, duration: 0.9, ease: 'power3.out' }, 0.28);
+            // CROSS-FADE: Panels fade in in-place (no slide from bottom)
+            gsap.set(panelsEl, { y: 0, autoAlpha: 0 });
+            t.to(panelsEl, { autoAlpha: 1, duration: 1, ease: 'sine.inOut' }, 0.35);
           }
         } catch (err) {
           // eslint-disable-next-line no-console
@@ -182,24 +182,30 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
           const centerImg = panelEl.querySelector<HTMLImageElement>('.panel-centered-img');
           const contentCard = panelEl.querySelector<HTMLElement>('.panel-card');
 
-          // MAIN reveal (scrubbed subtle lift)
-          gsap.fromTo(
-            panelEl,
-            { autoAlpha: 0, y: 40 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: panelEl,
-                start: 'top 72%',
-                end: 'top 28%',
-                scrub: true,
-                onEnter: () => setActiveIndex(i),
-                onEnterBack: () => setActiveIndex(i),
-              },
-            }
-          );
+          // MAIN reveal
+          if (i === 0) {
+            // First panel: visible immediately (controlled by wrapper cross-fade)
+            gsap.set(panelEl, { autoAlpha: 1, y: 0 });
+          } else {
+            // Subsequent panels: fade in as they slide up (sticky)
+            gsap.fromTo(
+              panelEl,
+              { autoAlpha: 0, y: 0 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: panelEl,
+                  start: 'top 75%', // trigger slightly earlier as it comes into view
+                  end: 'top 25%',
+                  scrub: true,
+                  onEnter: () => setActiveIndex(i),
+                  onEnterBack: () => setActiveIndex(i),
+                },
+              }
+            );
+          }
 
           // parallax layers
           if (bg) {
@@ -467,14 +473,14 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
       </div>
 
       {/* PANELS WRAPPER (initially hidden under hero, revealed by hero timeline) */}
-      <div ref={panelsWrapRef} className="relative -mt-0 z-10">
+      <div ref={panelsWrapRef} className="relative -mt-[100vh] z-10">
         <div className="w-full">
           {projects.map((p, idx) => (
 
             <div
               key={p.id}
               ref={addPanelRef}
-              className="relative h-screen flex items-center justify-center overflow-hidden"
+              className="sticky top-0 h-screen flex items-center justify-center overflow-hidden"
               role="region"
               aria-labelledby={`${p.id}-title`}
             >
