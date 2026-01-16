@@ -12,6 +12,7 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ("title", "slug", "featured", "order", "is_active")
+    list_editable = ["is_active"]
     list_filter = ("featured", "is_active")
     search_fields = ("title", "summary", "role")
     prepopulated_fields = {"slug": ("title",)}
@@ -22,5 +23,6 @@ class ProjectAdmin(admin.ModelAdmin):
 @admin.register(GalleryItem)
 class GalleryItemAdmin(admin.ModelAdmin):
     list_display = ("title", "order", "is_active")
+    list_editable = ["is_active"]
     ordering = ("order",)
 

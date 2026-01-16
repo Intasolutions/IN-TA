@@ -4,7 +4,7 @@ from .serializers import ProjectSerializer, GalleryItemSerializer
 
 
 class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Project.objects.filter(is_active=True).order_by("-featured", "order", "title")
+    queryset = Project.objects.all().order_by("-featured", "order", "title")
     serializer_class = ProjectSerializer
     lookup_field = "slug"
 
@@ -14,5 +14,5 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class GalleryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = GalleryItem.objects.filter(is_active=True).order_by("order")
+    queryset = GalleryItem.objects.all().order_by("order")
     serializer_class = GalleryItemSerializer

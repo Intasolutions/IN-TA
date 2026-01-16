@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/portfolio/', include('portfolio.urls')),
     path('api/home/', include('home.urls')),
     path('api/contact/', include('contact.urls')),
+    path('api/blog/', include('blog.urls')),
     # simple health check
     path('', lambda request: HttpResponse('OK')),
 ]

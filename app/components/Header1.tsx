@@ -1,327 +1,197 @@
+// frontend/components/Header1.tsx
 'use client';
 
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-import { useReveal } from '../context/RevealContext';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function Header1() {
-  const [open, setOpen] = useState(false);
-  const [headerH, setHeaderH] = useState(0);
-
-  const headerRef = useRef<HTMLElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  
+  const lastScrollY = useRef(0);
   const menuRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const menuItemsRef = useRef<HTMLAnchorElement[]>([]);
-  const menuTl = useRef<gsap.core.Timeline | null>(null);
+  const tl = useRef<gsap.core.Timeline | null>(null);
 
-  const logoDark = useRef<HTMLImageElement>(null);
-  const logoLight = useRef<HTMLImageElement>(null);
+  // --- 1. SCROLL BEHAVIOR ---
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 20);
 
-  const top = useRef<SVGRectElement>(null);
-  const mid = useRef<SVGRectElement>(null);
-  const bot = useRef<SVGRectElement>(null);
-
-  const links = ['Home', 'About', 'Services', 'Portfolio', 'Contact'];
-
-  /* ---------------- Measure header height dynamically ---------------- */
-  useLayoutEffect(() => {
-    if (!headerRef.current) return;
-
-    const update = () => {
-      if (headerRef.current) {
-        setHeaderH(headerRef.current.getBoundingClientRect().height);
+      // Hide header on scroll down (if > 100px), show on scroll up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
       }
+      lastScrollY.current = currentScrollY;
     };
 
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  /* ---------------- Body lock (iOS safe) ---------------- */
+  // --- 2. MENU ANIMATION SETUP ---
   useEffect(() => {
-    if (open) {
+    const ctx = gsap.context(() => {
+      tl.current = gsap.timeline({ paused: true });
+
+      // Slide Menu Down (Keep the dark premium menu for contrast)
+      tl.current.to(menuRef.current, {
+        yPercent: 100,
+        duration: 0.6,
+        ease: 'power4.inOut',
+        display: 'flex'
+      });
+
+      // Animate Links
+      tl.current.fromTo('.mobile-link', 
+        { y: 60, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power2.out' },
+        '-=0.2'
+      );
+    }, menuRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // --- 3. TOGGLE HANDLER ---
+  useEffect(() => {
+    if (isMobileOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
+      tl.current?.play();
     } else {
       document.body.style.overflow = '';
-      document.body.style.touchAction = '';
+      tl.current?.reverse();
     }
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
-    };
-  }, [open]);
+  }, [isMobileOpen]);
 
-  /* ---------------- Close on REAL scroll intent (mobile only) ---------------- */
-  useEffect(() => {
-    if (!open) return;
-
-    let lastY = window.scrollY;
-
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (
-        window.innerWidth < 768 &&
-        Math.abs(y - lastY) > 14
-      ) {
-        setOpen(false);
-      }
-      lastY = y;
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [open]);
-
-  /* ---------------- Swipe down to close ---------------- */
-  useEffect(() => {
-    if (!open || window.innerWidth >= 768) return;
-
-    let startY = 0;
-
-    const onTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches[0].clientY - startY > 44) {
-        setOpen(false);
-      }
-    };
-
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-
-    return () => {
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-    };
-  }, [open]);
-
-  /* ---------------- Header scroll animation ---------------- */
-  const { isRevealed } = useReveal();
-
-  useGSAP(() => {
-    if (!isRevealed) return;
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: document.body,
-        start: 'top top',
-        end: '+=120',
-        scrub: 0.5,
-        onToggle: self => {
-          open ? self.disable() : self.enable();
-        },
-      },
-    });
-
-    tl.to(overlayRef.current, { opacity: 1 }, 0)
-      .to(
-        headerRef.current,
-        {
-          paddingTop: '0.5rem',
-          paddingBottom: '0.5rem',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 10px 20px rgba(0,0,0,.15)',
-        },
-        0
-      )
-      .to('.nav-link', { color: '#fff' }, 0)
-      .to(logoDark.current, { opacity: 0 }, 0)
-      .to(logoLight.current, { opacity: 1 }, 0);
-  }, [open]);
-
-  /* ---------------- Mobile menu animation ---------------- */
-  useGSAP(() => {
-    menuTl.current = gsap.timeline({ paused: true });
-
-    menuTl.current
-      .fromTo(
-        menuRef.current,
-        { y: -18, opacity: 0, scale: 0.97 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.45,
-          ease: 'power3.out',
-        }
-      )
-      .fromTo(
-        menuItemsRef.current,
-        { y: 16, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          stagger: 0.06,
-          duration: 0.35,
-          ease: 'power3.out',
-        },
-        '-=0.22'
-      )
-      .to(top.current, { y: 7, rotate: 45, duration: 0.25 }, 0)
-      .to(mid.current, { opacity: 0, duration: 0.2 }, 0)
-      .to(bot.current, { y: -7, rotate: -45, duration: 0.25 }, 0);
-  }, []);
-
-  useEffect(() => {
-    if (!menuTl.current) return;
-    open ? menuTl.current.play() : menuTl.current.reverse();
-  }, [open]);
-
-  /* ---------------- Backdrop fade ---------------- */
-  useEffect(() => {
-    if (!backdropRef.current) return;
-    gsap.to(backdropRef.current, {
-      opacity: open ? 1 : 0,
-      duration: 0.25,
-      ease: 'power2.out',
-      pointerEvents: open ? 'auto' : 'none',
-    });
-  }, [open]);
+  const navLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'Work', href: '/portfolio' },
+    { name: 'About', href: '/about' },
+    { name: 'Services', href: '/services' },
+    { name: 'Contact', href: '/contact' },
+  ];
 
   return (
     <>
-      {/* HEADER */}
       <header
-        ref={headerRef}
-        className="sticky top-0 z-50 bg-[#f8f6f1]"
+        className={`fixed top-0 left-0 w-full z-[60] transition-transform duration-500
+          ${isVisible ? 'translate-y-0' : '-translate-y-full'}
+        `}
       >
-        <div
-          ref={overlayRef}
-          className="absolute inset-0 opacity-0 bg-gradient-to-r
-                     from-[#071428] via-[#0b2a5f] to-[#13243a]
-                     pointer-events-none"
+        {/* Glass Background Panel (Light Version) */}
+        <div 
+          className={`absolute inset-0 transition-opacity duration-300
+            ${isScrolled && !isMobileOpen ? 'opacity-100' : 'opacity-0'}
+            bg-[#f8f6f1]/80 backdrop-blur-md border-b border-black/5 shadow-sm
+          `} 
         />
 
-        <div className="relative z-10 max-w-[1320px] mx-auto
-                        flex items-center justify-between
-                        px-4 py-4">
-          {/* Logo */}
-          <Link href="/" className="relative w-[140px] h-[32px]">
-            <Image
-              ref={logoDark}
-              src="/logo/logo-inta-dark.png"
-              alt="INTA"
-              fill
-              priority
-              className="object-contain"
-            />
-            <Image
-              ref={logoLight}
-              src="/logo/logo-inta-light.png"
-              alt="INTA"
-              fill
-              priority
-              className="object-contain opacity-0"
-            />
+        <div className="relative max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
+          
+          {/* --- LOGO SECTION --- */}
+          {/* Kept the premium gradient box because it looks great as a badge on light backgrounds too */}
+          <Link href="/" className="relative z-[70] group flex items-center gap-3 shrink-0">
+             <div className="relative h-12 w-20 md:h-16 md:w-20 shrink-0 rounded-xl bg-gradient-to-br from-slate-950 via-[#0a0e24] to-blue-950 border border-blue-800/30 shadow-lg shadow-blue-900/10 ring-1 ring-inset ring-white/5 overflow-hidden flex items-center justify-center p-2">
+                <img 
+                  src="/logo/logo-inta-light.png" 
+                  alt="Inta Solutions" 
+                  className="w-full h-full object-contain drop-shadow-sm" 
+                />
+             </div>
+             
+             {/* Text: Dark on Desktop (Light background), White when Mobile Menu is open */}
+             <span className={`font-bold tracking-wider uppercase whitespace-nowrap transition-colors duration-300
+               text-xs md:text-sm 
+               ${isMobileOpen ? 'text-white' : 'text-slate-800 group-hover:text-blue-600'}
+             `}>
+               In-ta Solutions
+             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            <nav className="flex gap-8 font-medium">
-              {links.map(l => (
-                <Link
-                  key={l}
-                  href={l === 'Home' ? '/' : `/${l.toLowerCase()}`}
-                  className="nav-link text-black hover:text-[#1f6fe6]"
-                >
-                  {l}
-                </Link>
-              ))}
-            </nav>
-
-            <Link
+          {/* DESKTOP NAV (BLACK TEXT) */}
+          <nav className="hidden md:flex items-center gap-8 relative z-[70]">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                href={link.href}
+                className="text-sm font-semibold text-slate-800 hover:text-blue-600 transition-all duration-300 relative group"
+              >
+                {link.name}
+                {/* Underline animation (Blue) */}
+                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-600 transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+            
+            <Link 
               href="/contact"
-              className="rounded-full px-5 py-2.5
-                         bg-gradient-to-r from-[#0b63d9] to-[#1f6fe6]
-                         text-white font-semibold shadow-md"
+              className="ml-4 px-6 py-2.5 rounded-full bg-slate-900 hover:bg-blue-600 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 shadow-lg shadow-slate-900/20 hover:shadow-blue-600/30"
             >
               Get a Quote
             </Link>
-          </div>
+          </nav>
 
-          {/* Mobile button */}
-          <button
-            onClick={() => setOpen(v => !v)}
-            className="md:hidden p-2"
-            aria-label="Menu"
+          {/* BURGER MENU BUTTON (Dark bars for light bg) */}
+          <button 
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            className={`md:hidden relative z-[70] w-12 h-12 flex items-center justify-center rounded-lg border transition-colors backdrop-blur-sm
+              ${isMobileOpen ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-black/5 bg-black/5 hover:bg-black/10'}
+            `}
+            aria-label="Toggle Menu"
           >
-            <svg width="22" height="16" viewBox="0 0 22 16">
-              <rect ref={top} width="22" height="2" rx="1" />
-              <rect ref={mid} y="7" width="22" height="2" rx="1" />
-              <rect ref={bot} y="14" width="22" height="2" rx="1" />
-            </svg>
+            <div className="flex flex-col gap-1.5 items-center justify-center w-6">
+                <span className={`h-0.5 rounded-full transition-all duration-300 ease-in-out ${isMobileOpen ? 'bg-white w-6 rotate-45 translate-y-2' : 'bg-slate-900 w-6'}`} />
+                <span className={`h-0.5 rounded-full transition-all duration-300 ease-in-out ${isMobileOpen ? 'bg-white w-0 opacity-0' : 'bg-slate-900 w-4'}`} />
+                <span className={`h-0.5 rounded-full transition-all duration-300 ease-in-out ${isMobileOpen ? 'bg-white w-6 -rotate-45 -translate-y-2' : 'bg-slate-900 w-6'}`} />
+            </div>
           </button>
         </div>
       </header>
 
-      {/* MOBILE MENU */}
-      <div
+      {/* MOBILE FULLSCREEN MENU (Kept Dark for Premium Contrast) */}
+      <div 
         ref={menuRef}
-        style={{ top: headerH }}
-        className={`md:hidden fixed inset-x-0 z-[9999] 
-          ${open ? 'pointer-events-auto' : 'pointer-events-none'}`}
+        className="fixed inset-0 z-[50] bg-[#020617] hidden flex-col items-center justify-center -translate-y-full"
       >
-        {/* Backdrop */}
-        {/* <div
-          ref={backdropRef}
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm opacity-0"
-        /> */}
-
-        {/* Menu Card */}
-        <div
-          className="relative z-10 mx-4 mt-4
-             rounded-2xl bg-white
-             shadow-2xl px-6 pt-6 pb-4 space-y-2
-             overflow-y-auto"
-          style={{
-            maxHeight: `calc(100vh - ${headerH + 24}px)`,
-            paddingBottom: `calc(1rem + env(safe-area-inset-bottom))`,
-          }}
-        >
-
-          {links.map((l, i) => (
-            <Link
-              key={l}
-              ref={el => {
-                if (el) menuItemsRef.current[i] = el;
-              }}
-              href={l === 'Home' ? '/' : `/${l.toLowerCase()}`}
-              onClick={() => setOpen(false)}
-              className="block py-3 text-lg font-semibold
-                         text-[#0b2a5f] hover:text-[#1f6fe6]"
+        {/* Background Ambient Glow */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px]" />
+        </div>
+        
+        {/* Links Container */}
+        <div className="flex flex-col items-center gap-6 text-center relative z-10 w-full px-6">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name}
+              href={link.href}
+              onClick={() => setIsMobileOpen(false)}
+              className="mobile-link text-4xl font-bold text-white/90 hover:text-blue-400 transition-colors tracking-tight will-change-transform"
             >
-              {l}
+              {link.name}
             </Link>
           ))}
+           
+           <div className="mobile-link mt-8 w-full max-w-[200px]">
+              <Link 
+                href="/contact"
+                onClick={() => setIsMobileOpen(false)}
+                className="flex items-center justify-center w-full px-6 py-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold tracking-wide shadow-xl shadow-blue-900/30 transition-all"
+              >
+                Get a Quote
+              </Link>
+           </div>
+        </div>
 
-          <Link
-            href="/contact"
-            onClick={() => setOpen(false)}
-            className="block w-full mt-4 rounded-full py-3
-                       text-center bg-gradient-to-r
-                       from-[#0b63d9] to-[#1f6fe6]
-                       text-white font-semibold shadow-lg"
-          >
-            Get a Quote
-          </Link>
+        {/* Footer Brand */}
+        <div className="absolute bottom-10 left-0 w-full text-center mobile-link opacity-50">
+             <span className="text-[10px] uppercase tracking-[0.3em] text-white/30">
+                Inta Solutions Pvt Ltd
+             </span>
         </div>
       </div>
     </>

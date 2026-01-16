@@ -14,47 +14,39 @@ if (typeof window !== 'undefined') {
   }
 }
 
-/**
- * Full component:
- * - Initial full-screen "Our Craft" hero (brand gradient background)
- * - On scroll: hero zooms & fades -> panels revealed
- * - Panels keep the cinematic visuals & text animations we've built previously
- *
- * NOTE: This file references your uploaded logo at `/mnt/data/logo.jpg`
- * (developer-provided local path).
- */
+// --- ROBUST UTILITY COMPONENTS ---
 
-const PANEL_IMAGES: string[] = [
-  '/portfolio/cel.png',
-  '/portfolio/qma.png',
-  '/portfolio/bg3.jpg',
-];
-
-const PANELS = [
-  { id: 'panel-1', title: 'Spatial Experiences', subtitle: 'Immersive product storytelling' },
-  { id: 'panel-2', title: 'Design in Motion', subtitle: 'Cinematic visuals & depth' },
-  { id: 'panel-3', title: 'Studio Quality', subtitle: 'Premium visual identity delivered' },
-];
-
+// Splits text into words for stagger animation
 function SplitWords({ text }: { text: string }) {
+  if (!text) return null;
   return (
-    <>
+    <span aria-label={text} className="inline-block leading-tight">
       {text.split(' ').map((w, i) => (
-        <span key={i} className="split-word inline-block mr-2" aria-hidden>
+        <span
+          key={i}
+          className="split-word inline-block mr-2 md:mr-3 will-change-transform will-change-opacity"
+          style={{ opacity: 0 }} // Initially hidden to prevent FOUC
+        >
           {w}
         </span>
       ))}
-    </>
+    </span>
   );
 }
 
+// Splits text into chars for typing/focus animation
 function SplitChars({ text }: { text: string }) {
+  if (!text) return null;
   return (
     <>
       {Array.from(text).map((ch, i) => {
         const disp = ch === ' ' ? '\u00A0' : ch;
         return (
-          <span key={i} className="split-char inline-block" aria-hidden>
+          <span
+            key={i}
+            className="split-char inline-block will-change-transform will-change-opacity"
+            style={{ opacity: 0 }} // Initially hidden
+          >
             {disp}
           </span>
         );
@@ -80,18 +72,14 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
   };
 
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const heroRef = useRef<HTMLDivElement | null>(null);
   const panelsWrapRef = useRef<HTMLDivElement | null>(null);
-  const panelRefs = useRef<HTMLDivElement[]>([]);
-  panelRefs.current = [];
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // We do NOT clear refs here. Instead we rely on index-based assignment.
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const addPanelRef = (el: HTMLDivElement | null) => {
-    if (el && !panelRefs.current.includes(el)) panelRefs.current.push(el);
-  };
-
+  // 1. DATA FETCHING
   useEffect(() => {
     async function fetchProjects() {
       try {
@@ -103,102 +91,103 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
         if (!res.ok) throw new Error('Failed to fetch projects');
 
         const data: Project[] = await res.json();
-
         const cleaned = data
           .filter(p => p.is_active)
           .sort((a, b) => a.order - b.order)
           .map(p => ({
             ...p,
             hero: p.hero
-              ? p.hero.startsWith('http')
-                ? p.hero
-                : `${backend}${p.hero}`
+              ? p.hero.startsWith('http') ? p.hero : `${backend}${p.hero}`
               : '/placeholders/g1.png',
           }));
-
         setProjects(cleaned);
       } catch (err) {
         console.error('Portfolio fetch failed', err);
-      } finally {
-        setLoading(false);
       }
     }
-
     fetchProjects();
   }, []);
 
-
-
-
+  // 2. ANIMATION LOGIC
   useEffect(() => {
     if (!projects.length) return;
     if (typeof window === 'undefined') return;
-    if (!isRevealed) return;
     if (!wrapRef.current) return;
 
     let ctx: gsap.Context | null = null;
 
     try {
       ctx = gsap.context(() => {
-        // 1) HERO: pin + zoom/fade timeline that reveals panels below
-        try {
-          const heroEl = heroRef.current;
-          const panelsEl = panelsWrapRef.current;
 
-          if (heroEl && panelsEl) {
-            // timeline: pin the whole section while hero animation runs
-            const t = gsap.timeline({
-              scrollTrigger: {
-                trigger: wrapRef.current!,
-                start: 'top top',
-                end: '+=120%', // length of pin — adjust for slower/faster reveal
-                scrub: 0.7,
-                pin: true,
-                anticipatePin: 1,
-                // markers: true,
-              },
-            });
+        // --- A. HERO ANIMATION ---
+        const heroLogo = heroRef.current?.querySelector('.hero-logo-wrap');
+        const heroTitleParts = heroRef.current?.querySelectorAll('.hero-anim-text');
+        const scrollHint = heroRef.current?.querySelector('.scroll-hint');
 
-            // hero zoom and gentle upward shift + fade out as we scroll
-            t.to(heroEl, { scale: 1.06, ease: 'sine.out', duration: 1 }, 0);
-            t.to(heroEl, { y: -36, ease: 'power1.out', duration: 1 }, 0);
-            t.to(heroEl, { autoAlpha: 0, ease: 'power1.out', duration: 0.9 }, 0.45);
+        const entranceTL = gsap.timeline({ delay: 0.1 });
 
-            // CROSS-FADE: Panels fade in in-place (no slide from bottom)
-            gsap.set(panelsEl, { y: 0, autoAlpha: 0 });
-            t.to(panelsEl, { autoAlpha: 1, duration: 1, ease: 'sine.inOut' }, 0.35);
-          }
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.warn('[PortfolioCinematicPanels] hero animation failed', err);
+        if (heroLogo) {
+          entranceTL.fromTo(heroLogo,
+            { autoAlpha: 0, y: 20 },
+            { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power3.out' }
+          );
         }
 
-        // 2) Panels: existing per-panel animations (parallax, micro zoom, text emphasis)
+        if (heroTitleParts && heroTitleParts.length > 0) {
+          entranceTL.fromTo(heroTitleParts,
+            { y: '50%', autoAlpha: 0, filter: 'blur(10px)' },
+            { y: '0%', autoAlpha: 1, filter: 'blur(0px)', duration: 1.2, stagger: 0.15, ease: 'power3.out' },
+            '-=0.8'
+          );
+        }
+
+        if (scrollHint) {
+          entranceTL.fromTo(scrollHint,
+            { autoAlpha: 0 },
+            { autoAlpha: 1, duration: 1, delay: 0.2 },
+            '-=0.5'
+          );
+        }
+
+        // --- B. SCROLL ZOOM EXIT ---
+        const heroEl = heroRef.current;
+        const panelsEl = panelsWrapRef.current;
+        if (heroEl && panelsEl) {
+          const t = gsap.timeline({
+            scrollTrigger: {
+              trigger: wrapRef.current!,
+              start: 'top top',
+              end: '+=100%',
+              scrub: 0.5,
+              pin: true,
+              anticipatePin: 1,
+            },
+          });
+          // Fade out hero
+          t.to(heroEl, { scale: 1.1, filter: 'blur(10px)', autoAlpha: 0, ease: 'power2.in', duration: 1 }, 0);
+          // Fade in panels
+          gsap.set(panelsEl, { autoAlpha: 0 });
+          t.to(panelsEl, { autoAlpha: 1, duration: 0.6, ease: 'power1.inOut' }, 0.3);
+        }
+
+        // --- C. PANEL & CARD ANIMATIONS ---
         panelRefs.current.forEach((panelEl, i) => {
           if (!panelEl) return;
-          const bg = panelEl.querySelector<HTMLElement>('.panel-bg');
-          const mid = panelEl.querySelector<HTMLElement>('.panel-mid');
-          const fg = panelEl.querySelector<HTMLElement>('.panel-fg');
+
           const centerImg = panelEl.querySelector<HTMLImageElement>('.panel-centered-img');
           const contentCard = panelEl.querySelector<HTMLElement>('.panel-card');
 
-          // MAIN reveal
-          if (i === 0) {
-            // First panel: visible immediately (controlled by wrapper cross-fade)
-            gsap.set(panelEl, { autoAlpha: 1, y: 0 });
-          } else {
-            // Subsequent panels: fade in as they slide up (sticky)
-            gsap.fromTo(
-              panelEl,
-              { autoAlpha: 0, y: 0 },
+          // C1. Basic Panel Appearance
+          if (i !== 0) {
+            gsap.fromTo(panelEl,
+              { autoAlpha: 0 },
               {
                 autoAlpha: 1,
-                y: 0,
                 ease: 'none',
                 scrollTrigger: {
                   trigger: panelEl,
-                  start: 'top 75%', // trigger slightly earlier as it comes into view
-                  end: 'top 25%',
+                  start: 'top 85%', // Triggers earlier to ensure visibility
+                  end: 'top 20%',
                   scrub: true,
                   onEnter: () => setActiveIndex(i),
                   onEnterBack: () => setActiveIndex(i),
@@ -207,473 +196,270 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             );
           }
 
-          // parallax layers
-          if (bg) {
-            gsap.to(bg, {
-              scale: 1.04,
-              y: -22,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: panelEl,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 0.9,
-              },
-            });
-          }
-          if (mid) {
-            gsap.to(mid, {
-              y: -38,
-              x: -6,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: panelEl,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 1.0,
-              },
-            });
-          }
-          if (fg) {
-            gsap.to(fg, {
-              y: -64,
-              x: -10,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: panelEl,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 1.2,
-              },
-            });
-          }
-
-          // center image micro-zoom
+          // C2. Image Parallax (Simple & Robust)
           if (centerImg) {
-            try {
-              gsap.fromTo(
-                centerImg,
-                { scale: 1.0 },
-                {
-                  scale: 1.035,
-                  ease: 'sine.out',
-                  scrollTrigger: {
-                    trigger: panelEl,
-                    start: 'top bottom',
-                    end: 'bottom top',
-                    scrub: 0.85,
-                  },
-                }
-              );
-              gsap.to(centerImg, {
-                y: -10,
+            gsap.fromTo(centerImg,
+              { scale: 1.0, y: 0 },
+              {
+                scale: 1.05, y: -20,
                 ease: 'none',
-                scrollTrigger: {
-                  trigger: panelEl,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: 0.85,
-                },
-              });
-            } catch (e) {
-              // ignore
-            }
+                scrollTrigger: { trigger: panelEl, start: 'top bottom', end: 'bottom top', scrub: 0.5 }
+              }
+            );
           }
 
-          // content card entrance (polished)
+          // --- C3. TEXT REVEAL ANIMATION (FIXED) ---
           if (contentCard) {
-            gsap.set(contentCard, { autoAlpha: 1, y: 6, scale: 0.995 });
-            const cardTL = gsap.timeline({
+            const titleWords = contentCard.querySelectorAll('.split-word');
+            const subtitleChars = contentCard.querySelectorAll('.split-char');
+            const chips = contentCard.querySelectorAll('.panel-chip');
+            const ctas = contentCard.querySelectorAll('.panel-cta');
+
+            // 1. Reset everything to hidden state immediately
+            gsap.set(contentCard, { autoAlpha: 0, y: 40 });
+            if (titleWords.length) gsap.set(titleWords, { autoAlpha: 0, y: 20, filter: 'blur(8px)' });
+            if (subtitleChars.length) gsap.set(subtitleChars, { autoAlpha: 0, filter: 'blur(5px)' });
+            if (chips.length) gsap.set(chips, { autoAlpha: 0, scale: 0.9 });
+            if (ctas.length) gsap.set(ctas, { autoAlpha: 0, y: 10 });
+
+            // 2. Create Timeline
+            const tl = gsap.timeline({
               scrollTrigger: {
-                trigger: panelEl,
-                start: 'top 70%',
-                end: 'top 36%',
-                toggleActions: 'play reverse play reverse',
-              },
+                trigger: contentCard, // Trigger on the card itself!
+                start: 'top 85%',     // Start when card top is near bottom of screen
+                end: 'bottom top',
+                toggleActions: 'play none none reverse', // Play on enter, reverse on leave up
+              }
             });
 
-            // subtle lift / reveal
-            cardTL.to(contentCard, { y: 0, scale: 1, duration: 0.48, ease: 'power3.out' }, 0);
+            // Card Reveal
+            tl.to(contentCard, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0);
 
-            // title: word-by-word slide/punch (ensure split-word spans present)
-            const titleWords = contentCard.querySelectorAll<HTMLElement>('.split-word');
+            // Title Reveal (Blurry Fly In)
             if (titleWords.length) {
-              gsap.set(titleWords, { autoAlpha: 1, y: 18, scale: 0.985, transformOrigin: 'center' });
-              cardTL.to(
-                titleWords,
-                {
-                  y: 0,
-                  autoAlpha: 1,
-                  scale: 1,
-                  duration: 0.5,
-                  ease: 'power3.out',
-                  stagger: { each: 0.06, from: 'start' },
-                },
-                0.06
-              );
-
-              // title sweep accent
-              const titleSweep = contentCard.querySelector<HTMLElement>('.title-sweep');
-              if (titleSweep) {
-                gsap.set(titleSweep, { scaleX: 0, autoAlpha: 0.9, transformOrigin: 'left center' });
-                cardTL.to(titleSweep, { scaleX: 1.12, duration: 0.52, ease: 'power2.out' }, 0.12);
-                cardTL.to(titleSweep, { autoAlpha: 0, duration: 0.4, ease: 'power2.out' }, '>-0.08');
-              }
-            }
-
-            // subtitle typing emphasis
-            const subtitleChars = contentCard.querySelectorAll<HTMLElement>('.split-char');
-            const cursor = contentCard.querySelector<HTMLElement>('.type-cursor');
-            if (subtitleChars.length) {
-              gsap.set(subtitleChars, { autoAlpha: 1, y: 4, color: 'rgba(245,247,250,0.92)' });
-              if (cursor) gsap.set(cursor, { autoAlpha: 1 });
-
-              const typingTL = gsap.timeline({ defaults: { ease: 'none' } });
-              typingTL.to(subtitleChars, {
-                color: '#ffffff',
-                textShadow: '0 8px 20px rgba(255,255,255,0.06)',
-                duration: 0.06,
-                stagger: { each: 0.03, from: 'start' },
-              }, 0.12);
-              typingTL.to(subtitleChars, {
-                color: 'rgba(245,247,250,0.9)',
-                textShadow: 'none',
+              tl.to(titleWords, {
+                autoAlpha: 1,
+                y: 0,
+                filter: 'blur(0px)',
                 duration: 0.8,
-                delay: 0.06,
-              }, '+=0.02');
-              if (cursor) typingTL.to(cursor, { autoAlpha: 0.85, duration: 0.18 }, '-=0.12');
-
-              cardTL.add(typingTL, '>-0.02');
-            } else {
-              const subtitleEl = contentCard.querySelector<HTMLElement>('.panel-subtitle');
-              if (subtitleEl) {
-                gsap.set(subtitleEl, { autoAlpha: 1, y: 8 });
-                cardTL.to(subtitleEl, { y: 0, duration: 0.45, ease: 'power3.out' }, '-=0.18');
-              }
+                stagger: 0.05,
+                ease: 'power4.out'
+              }, 0.1);
             }
 
-            // chips / ctas micro pop
-            const chips = contentCard.querySelectorAll<HTMLElement>('.panel-chip');
+            // Subtitle Focus In
+            if (subtitleChars.length) {
+              tl.to(subtitleChars, {
+                autoAlpha: 1,
+                filter: 'blur(0px)',
+                duration: 0.6,
+                stagger: 0.01,
+                ease: 'power2.out'
+              }, 0.3);
+            }
+
+            // Chips Pop
             if (chips.length) {
-              gsap.set(chips, { autoAlpha: 1, y: 6, scale: 0.985 });
-              cardTL.to(chips, { autoAlpha: 1, y: 0, scale: 1, duration: 0.36, stagger: 0.06, ease: 'power3.out' }, '-=0.22');
+              tl.to(chips, {
+                autoAlpha: 1,
+                scale: 1,
+                duration: 0.5,
+                stagger: 0.05,
+                ease: 'back.out(1.5)'
+              }, 0.5);
             }
 
-            const ctas = contentCard.querySelectorAll<HTMLElement>('.panel-cta');
+            // CTA Slide
             if (ctas.length) {
-              gsap.set(ctas, { autoAlpha: 1, y: 8, scale: 0.986 });
-              cardTL.to(ctas, { autoAlpha: 1, y: 0, scale: 1, duration: 0.44, stagger: 0.06, ease: 'power3.out' }, '-=0.18');
+              tl.to(ctas, {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.5,
+                ease: 'power2.out'
+              }, 0.6);
             }
           }
         });
 
-        // breathing fog subtle movement
-        const fogs = gsap.utils.toArray<HTMLElement>('.panel-fog');
-        fogs.forEach((f, idx) => {
-          gsap.to(f, {
-            xPercent: idx % 2 === 0 ? -5 : 5,
-            yPercent: idx % 2 === 0 ? -3 : 3,
-            duration: 28,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-            delay: idx * 0.6,
-          });
-        });
       }, wrapRef);
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('[PortfolioCinematicPanels] init error', err);
+      console.error('[Portfolio] init error', err);
     }
 
-    try {
-      ScrollTrigger.refresh();
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('[PortfolioCinematicPanels] ScrollTrigger.refresh() failed', e);
-    }
-
+    // Delayed refresh to handle transition/reveal timing
+    const t = setTimeout(() => ScrollTrigger.refresh(), 800);
     return () => {
-      try {
-        if (ctx) ctx.revert();
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('[PortfolioCinematicPanels] ctx.revert() failed', e);
-      }
+      clearTimeout(t);
+      if (ctx) ctx.revert();
     };
   }, [projects.length, isRevealed]);
 
-  // pointer tilt (desktop)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handle = (ev: PointerEvent) => {
-      if (window.innerWidth < 960) return;
-      const activePanel = panelRefs.current[activeIndex];
-      if (!activePanel) return;
-      const card = activePanel.querySelector<HTMLElement>('.panel-card');
-      if (!card) return;
-      const rect = card.getBoundingClientRect();
-      const x = (ev.clientX - rect.left) / rect.width - 0.5;
-      const y = (ev.clientY - rect.top) / rect.height - 0.5;
-      const rotY = x * 6;
-      const rotX = -y * 6;
-      gsap.to(card, { rotationY: rotY, rotationX: rotX, transformPerspective: 900, transformOrigin: 'center', duration: 0.45, ease: 'power3.out' });
-    };
-
-    const reset = () => {
-      const activePanel = panelRefs.current[activeIndex];
-      if (!activePanel) return;
-      const card = activePanel.querySelector<HTMLElement>('.panel-card');
-      if (!card) return;
-      gsap.to(card, { rotationY: 0, rotationX: 0, duration: 0.6, ease: 'power3.out' });
-    };
-
-    window.addEventListener('pointermove', handle, { passive: true });
-    window.addEventListener('pointerleave', reset);
-    window.addEventListener('scroll', reset, { passive: true });
-
-    return () => {
-      window.removeEventListener('pointermove', handle);
-      window.removeEventListener('pointerleave', reset);
-      window.removeEventListener('scroll', reset);
-    };
-  }, [activeIndex]);
-
   return (
-    <section ref={wrapRef} id="portfolio-cinematic" className="relative w-full overflow-hidden" aria-label="Cinematic portfolio panels">
-      {/* HERO (full-bleed brand gradient) */}
+    <section
+      ref={wrapRef}
+      id="portfolio-cinematic"
+      className="relative w-full overflow-hidden bg-[#020617]"
+      aria-label="Cinematic portfolio panels"
+    >
+
+      {/* HERO SECTION */}
       <div
         ref={heroRef}
-        className="relative h-screen w-full flex items-center justify-center text-center"
-        style={{
-          background: 'linear-gradient(180deg, #1f6fe6 0%, #0b2a5f 60%, #07172a 100%)', // brand gradient
-          color: 'white',
-          zIndex: 40,
-          willChange: 'transform, opacity',
-        }}
+        className="relative h-screen w-full flex flex-col items-center justify-center text-center overflow-hidden"
+        style={{ zIndex: 40, willChange: 'transform, opacity' }}
       >
-        <div style={{ maxWidth: 1200, padding: '0 28px' }}>
-          <img src="/logo/logo-inta.png" alt="logo" style={{ width: 222, height: 222, objectFit: 'contain', margin: '0 auto 18px' }} />
-          <h1
-            className="hero-title"
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute inset-0 bg-[#020617]" />
+          <div className="hero-glow absolute top-[-20%] left-[50%] -translate-x-1/2 w-[80vw] h-[80vw] bg-[#1f6fe6] opacity-20 blur-[120px] rounded-full mix-blend-screen animate-pulse-slow" />
+          <div className="hero-glow absolute bottom-[-10%] left-[20%] w-[40vw] h-[40vw] bg-[#6366f1] opacity-10 blur-[100px] rounded-full mix-blend-screen" />
+          <div
+            className="absolute inset-0 opacity-[0.04] pointer-events-none"
             style={{
-              fontSize: 'clamp(48px, 10vw, 140px)',
-              lineHeight: 0.88,
-              margin: 0,
-              fontWeight: 900,
-              letterSpacing: '-0.02em',
-              transformOrigin: 'center',
-              textShadow: '0 18px 60px rgba(2,6,23,0.6)',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat',
             }}
-          >
-            Our Craft
+          />
+          <div className="absolute inset-0 bg-radial-vignette" />
+        </div>
+
+        <div className="relative z-10 px-6 max-w-[1400px] w-full flex flex-col items-center">
+          <div className="hero-logo-wrap mb-8 md:mb-12 inline-flex items-center justify-center overflow-hidden">
+            <div className="glass-pill px-5 py-2 md:px-6 md:py-3 rounded-full flex items-center gap-3 border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl cursor-default">
+              <img src="/logo/logo-inta.png" alt="logo" className="w-6 h-6 md:w-8 md:h-8 object-contain drop-shadow-lg" />
+              <span className="text-xs md:text-sm font-semibold tracking-widest text-blue-100 uppercase">Inta Solutions</span>
+            </div>
+          </div>
+
+          <h1 className="hero-title font-black leading-[0.9] tracking-tight text-white select-none text-center">
+            <div className="overflow-hidden">
+              <div className="hero-anim-text block bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/60 pb-2 md:pb-4">
+                Solutions
+              </div>
+            </div>
+            <div className="overflow-hidden">
+              <div className="hero-anim-text block text-transparent bg-clip-text bg-gradient-to-br from-[#94b3ff] to-white/70">
+                We’ve Built
+              </div>
+            </div>
           </h1>
 
+          <div className="overflow-hidden mt-8 md:mt-10 max-w-lg mx-auto">
+            <p className="hero-anim-text text-lg md:text-xl text-blue-200/60 font-light leading-relaxed">
+              Crafting digital ecosystems with precision, depth, and cinematic fidelity.
+            </p>
+          </div>
+        </div>
+
+        <div className="scroll-hint absolute bottom-8 md:bottom-12 flex flex-col items-center gap-3">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">Scroll to Explore</span>
+          <div className="w-[1px] h-12 md:h-16 bg-gradient-to-b from-blue-500/0 via-blue-400/50 to-blue-500/0 overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-1/2 bg-white/80 blur-[1px] animate-scroll-drop" />
+          </div>
         </div>
       </div>
 
-      {/* PANELS WRAPPER (initially hidden under hero, revealed by hero timeline) */}
-      <div ref={panelsWrapRef} className="relative -mt-[100vh] z-10">
+      {/* PANELS WRAPPER */}
+      <div ref={panelsWrapRef} className="relative -mt-[100vh] z-10 opacity-0">
         <div className="w-full">
           {projects.map((p, idx) => (
-
             <div
               key={p.id}
-              ref={addPanelRef}
+              ref={(el) => { panelRefs.current[idx] = el; }}
               className="sticky top-0 h-screen flex items-center justify-center overflow-hidden"
               role="region"
               aria-labelledby={`${p.id}-title`}
             >
-              {/* Background image blurred cover */}
               <div className="absolute inset-0 panel-bg will-change-transform" aria-hidden>
-                <div
-                  aria-hidden
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundImage: `url(${p.hero})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center center',
-                    filter: 'blur(28px) brightness(0.62) saturate(1.05)',
-                    transform: 'scale(1.06)',
-                    zIndex: 0,
-                  }}
-                />
-                <div
-                  aria-hidden
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 6,
-                    pointerEvents: 'none',
-                    padding: '3vh 4vw',
-                  }}
-                >
-                  <img
-                    className="panel-centered-img"
-                    src={p.hero || ''}
-                    alt={`${p.title} screenshot`}
-                    style={{
-                      width: 'auto',
-                      height: '84vh',
-                      maxWidth: '100%',
-                      objectFit: 'contain',
-                      display: 'block',
-                      borderRadius: 12,
-                      boxShadow: '0 24px 80px rgba(2,6,23,0.45)',
-                      transformOrigin: 'center center',
-                      zIndex: 6,
-                    }}
-                  />
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${p.hero})`, backgroundSize: 'cover', backgroundPosition: 'center center', filter: 'blur(32px) brightness(0.55) saturate(1.1)', transform: 'scale(1.1)', zIndex: 0 }} />
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6, pointerEvents: 'none', padding: '3vh 4vw' }}>
+                  <img className="panel-centered-img" src={p.hero || ''} alt={`${p.title} screenshot`} style={{ width: 'auto', height: '80vh', maxWidth: '100%', objectFit: 'contain', display: 'block', borderRadius: 16, boxShadow: '0 24px 80px rgba(2,6,23,0.55)', transformOrigin: 'center center', zIndex: 6 }} />
                 </div>
+                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.4) 100%)', zIndex: 8, pointerEvents: 'none' }} />
+              </div>
+
+              {/* Card Container */}
+              <div className="relative z-20 text-center w-full max-w-4xl px-4 md:px-6 pointer-events-none flex justify-center">
                 <div
-                  aria-hidden
+                  className="panel-card pointer-events-auto relative w-full max-w-2xl rounded-3xl px-6 py-8 md:px-10 md:py-10 transform-gpu"
                   style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.28) 100%)',
-                    zIndex: 8,
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
-
-              {/* Mid accents */}
-              <div className="absolute inset-0 panel-mid pointer-events-none" aria-hidden>
-                <div style={{ position: 'absolute', left: '-10%', top: '10%', width: '70%', height: '70%', background: 'radial-gradient(closest-side at 20% 30%, rgba(255,255,255,0.02), transparent 30%)', filter: 'blur(46px)' }} />
-                <div style={{ position: 'absolute', right: '-8%', bottom: '-6%', width: '60%', height: '60%', background: 'radial-gradient(closest-side at 30% 30%, rgba(0,0,0,0.04), transparent 30%)', filter: 'blur(72px)' }} />
-              </div>
-
-              {/* Fog/bloom */}
-              <div className="absolute inset-0 panel-fg pointer-events-none" aria-hidden>
-                <div className="panel-fog absolute left-1/4 top-1/4 w-[60%] h-[60%] rounded-full opacity-40 mix-blend-screen" style={{ background: 'radial-gradient(circle at 40% 35%, rgba(255,255,255,0.06), rgba(31,111,230,0.02) 25%, transparent 60%)', filter: 'blur(68px)' }} />
-                <div className="panel-fog absolute right-0 bottom-0 w-[40%] h-[40%] rounded-full opacity-30 mix-blend-screen" style={{ background: 'radial-gradient(circle at 60% 60%, rgba(15,91,255,0.06), rgba(0,0,0,0.02) 30%, transparent 80%)', filter: 'blur(84px)' }} />
-              </div>
-
-              {/* Main content card (upgraded visuals) */}
-              <div className="relative z-20 text-center max-w-4xl px-6">
-                <div
-                  className="panel-card mx-auto max-w-3xl rounded-3xl px-6 py-8 transform-gpu"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(8,12,24,0.66), rgba(11,42,95,0.50))',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    boxShadow: '0 30px 60px rgba(2,6,23,0.6)',
-                    backdropFilter: 'blur(8px)',
+                    background: 'rgba(8, 12, 24, 0.75)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: '0 40px 100px -10px rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
                   }}
                 >
-                  <div className="flex items-start gap-4">
-                    <div style={{ width: 6, height: 72, borderRadius: 12, background: 'linear-gradient(180deg,#1f6fe6,#0b2a5f)' }} />
+                  <div className="flex flex-col md:flex-row items-start gap-6">
+                    <div className="hidden md:block w-1.5 h-20 rounded-full bg-gradient-to-b from-[#1f6fe6] to-[#0b2a5f] flex-shrink-0 mt-2" />
+
                     <div className="flex-1 text-left">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/6 flex items-center justify-center">
-                            <img src="/logo/logo-inta.png" alt="logo" className="w-full h-full object-contain" />
-                          </div>
-                          <div className="text-xs text-white/70">
-                            <div className="font-semibold">IN-TA Solutions</div>
-                          </div>
+                      <div className="flex items-center gap-3 mb-4 opacity-80">
+                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center p-1.5">
+                          <img src="/logo/logo-inta.png" alt="logo" className="w-full h-full object-contain" />
                         </div>
+                        <span className="text-xs font-bold tracking-wider text-blue-200 uppercase">IN-TA Solutions</span>
                       </div>
 
-                      <div className="mt-4 relative overflow-visible">
-                        <h3 id={`${p.id}-title`} className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight text-white">
-                          <span className="title-wrap inline-block">
-                            <SplitWords text={p.title} />
-                          </span>
-                        </h3>
+                      <h3 id={`${p.id}-title`} className="text-3xl md:text-5xl font-extrabold tracking-tight leading-none text-white mb-3">
+                        <SplitWords text={p.title} />
+                      </h3>
 
-                        <span
-                          className="title-sweep"
-                          aria-hidden
-                          style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: '18%',
-                            height: '64%',
-                            width: '100%',
-                            background:
-                              'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.18), rgba(255,255,255,0.06))',
-                            transformOrigin: 'left center',
-                            pointerEvents: 'none',
-                            borderRadius: 6,
-                            mixBlendMode: 'screen',
-                          }}
-                        />
-                      </div>
-
-                      <p className="panel-subtitle mt-3 text-base md:text-lg text-white/80 max-w-2xl" aria-hidden>
-                        <span style={{ display: 'inline-block' }}>
-                          <SplitChars text={p.summary} />
-                          <span className="type-cursor inline-block ml-1 text-white/90" aria-hidden>|</span>
-                        </span>
+                      <p className="text-base md:text-lg text-white/70 max-w-xl font-light leading-relaxed">
+                        <SplitChars text={p.summary} />
                       </p>
 
-                      <div className="mt-4 flex flex-wrap gap-2">
-
+                      <div className="mt-5 flex flex-wrap gap-2">
                         {p.tags.map((tag) => (
-                          <span key={tag.slug} className="panel-chip inline-block px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.92)' }}>
+                          <span key={tag.slug} className="panel-chip inline-block px-3 py-1 rounded-full text-[11px] uppercase tracking-wide font-semibold"
+                            style={{ background: 'rgba(255,255,255,0.06)', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.05)' }}>
                             {tag.name}
                           </span>
                         ))}
                       </div>
 
-                      <div className="mt-6 flex items-center gap-4">
+                      <div className="mt-8">
                         <a
                           href={p.external_url || `/portfolio/${p.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="panel-cta px-5 py-2 rounded-full font-medium"
+                          className="panel-cta inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-medium text-sm text-white bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] hover:brightness-110 transition-all shadow-lg shadow-blue-900/40 group"
                         >
-                          View project
-                        </a>
-
-
-                        <a
-                          className="panel-cta inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
-                          style={{
-                            border: '1px solid rgba(31,111,230,0.26)',
-                            color: 'rgba(255,255,255,0.9)',
-                            background: 'transparent',
-                          }}
-                          href="#"
-                          aria-label="More details"
-                        >
-                          Details
+                          View Case Study
+                          <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
                         </a>
                       </div>
+
                     </div>
                   </div>
                 </div>
-
-                <div className="mt-8 flex items-center justify-center">
-                  <div className="w-24 h-0.5 bg-white/12 rounded-full" />
-                </div>
               </div>
+
             </div>
           ))}
         </div>
       </div>
 
       <style jsx>{`
-        /* visual helpers */
+        .hero-title { font-size: clamp(48px, 10vw, 120px); }
+        .bg-radial-vignette { background: radial-gradient(circle at center, transparent 30%, rgba(2,6,23,0.95) 100%); }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.15; transform: translate(-50%, 0) scale(1); }
+            50% { opacity: 0.25; transform: translate(-50%, 0) scale(1.15); }
+        }
+        .animate-pulse-slow { animation: pulse-slow 8s ease-in-out infinite; }
+        @keyframes scroll-drop {
+            0% { top: -100%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .animate-scroll-drop { animation: scroll-drop 2.5s cubic-bezier(0.77, 0, 0.175, 1) infinite; }
+        .glass-pill { transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s; }
+        .glass-pill:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -5px rgba(31, 111, 230, 0.4); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
         .panel-bg, .panel-mid, .panel-fg { will-change: transform, opacity; transform: translate3d(0,0,0); }
-        .panel-card { transition: box-shadow .25s ease, transform .25s ease; }
-        .panel-card:hover { transform: translateY(-6px) scale(1.002); box-shadow: 0 48px 120px rgba(2,6,23,0.7); }
-        .split-word { display: inline-block; white-space: pre; }
-        .split-char { display: inline-block; white-space: pre; transform: translateY(6px); opacity: 0; }
-        .type-cursor { display: inline-block; opacity: 1; animation: blink 0.9s steps(2, start) infinite; color: rgba(255,255,255,0.9); }
-        .panel-chip { transition: transform .22s ease, box-shadow .22s ease; }
-        .panel-chip:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(2,6,23,0.28); }
-        .panel-cta { transition: transform .18s ease, box-shadow .18s ease; }
-        .panel-cta:hover { transform: translateY(-3px); }
-        @keyframes blink { 0%,49%{opacity:1}50%,100%{opacity:0} }
-        @media (max-width: 1024px) {
-          .panel-fg, .panel-mid { display: none; }
-          .panel-centered-img { height: 56vh !important; }
-          .hero-title { font-size: 48px !important; }
+        @media (max-width: 768px) {
+            .panel-centered-img { height: 50vh !important; }
         }
       `}</style>
     </section>

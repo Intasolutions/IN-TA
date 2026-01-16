@@ -18,14 +18,14 @@ type Blog = {
   date: string;
   tag?: string;
   image?: string;
+  content?: string;
 };
 
-const BLOGS: Blog[] = [
-  { id: 'b1', title: 'Designing Scalable Design Systems', date: 'Oct 06, 2025', tag: 'Design', image: '/portfolio/qma.png' },
-  { id: 'b2', title: 'Performance-first Next.js Patterns', date: 'Sep 21, 2025', tag: 'Engineering', image: '/images/blog2.jpg' },
-  { id: 'b3', title: 'Creative Direction for Product Videos', date: 'Aug 30, 2025', tag: 'Motion', image: '/images/blog3.jpg' },
-  { id: 'b4', title: 'Growth Loops: From Acquisition to Retention', date: 'Jul 18, 2025', tag: 'Growth', image: '/images/blog4.jpg' },
-  { id: 'b5', title: 'Observability for Modern Frontends', date: 'Jun 02, 2025', tag: 'Infra', image: '/images/blog5.jpg' },
+// Fallback data in case API fails or is empty
+const FALLBACK_BLOGS: Blog[] = [
+  { id: 'b1', title: 'Designing Scalable Design Systems', date: 'Oct 06, 2025', tag: 'Design', image: '/portfolio/qma.png', content: 'Explore the principles and practices behind creating design systems that can grow and adapt with your product. Learn how to build a robust foundation for consistent and efficient design.' },
+  { id: 'b2', title: 'Performance-first Next.js Patterns', date: 'Sep 21, 2025', tag: 'Engineering', image: '/images/blog2.jpg', content: 'Dive into advanced Next.js patterns focused on maximizing application performance. Discover techniques for optimizing rendering, data fetching, and bundle sizes to deliver lightning-fast user experiences.' },
+  { id: 'b3', title: 'Creative Direction for Product Videos', date: 'Aug 30, 2025', tag: 'Motion', image: '/images/blog3.jpg', content: 'Uncover the art of creative direction for compelling product videos. From concept development to final execution, learn how to craft narratives that resonate with your audience and showcase your product effectively.' },
 ];
 
 export default function BlogUpdates() {
@@ -33,6 +33,16 @@ export default function BlogUpdates() {
     typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const [active, setActive] = useState(0);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Form states
+  const [formName, setFormName] = useState('');
+  const [formPhone, setFormPhone] = useState('');
+  const [formInterest, setFormInterest] = useState('Web Development');
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+  // Animation refs
   const itemsRef = useRef<HTMLDivElement[]>([]);
   const wrapRef = useRef<HTMLElement | null>(null);
   const autoplayRef = useRef<gsap.core.Tween | null>(null);
@@ -42,13 +52,54 @@ export default function BlogUpdates() {
   const innerParallaxRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const animLock = useRef(false);
 
+  // Fetch blogs on mount
   useEffect(() => {
-    itemsRef.current = itemsRef.current.slice(0, BLOGS.length);
+    async function fetchBlogs() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/api/blog/posts/');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+
+        // Map backend data to frontend needed format if necessary
+        // Assuming backend returns { id, title, date, tag, image, ... }
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((item: any) => {
+            let img = item.image || '/images/blog-placeholder.jpg';
+            // If it's a relative path from django, prepend backend url
+            if (img.startsWith('/media/')) {
+              img = `http://127.0.0.1:8000${img}`;
+            }
+            return {
+              id: item.id.toString(),
+              title: item.title,
+              date: item.date, // Format date if needed
+              tag: item.tag || 'Update',
+              image: img,
+              content: item.content || '',
+            };
+          });
+          setBlogs(mapped);
+        } else {
+          setBlogs(FALLBACK_BLOGS);
+        }
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+        setBlogs(FALLBACK_BLOGS);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchBlogs();
   }, []);
+
+  // Sync ref array with blogs length
+  useEffect(() => {
+    itemsRef.current = itemsRef.current.slice(0, blogs.length);
+  }, [blogs]);
 
   // autoplay timeline + progress bar + floating micro motion for images
   useEffect(() => {
-    if (typeof window === 'undefined' || !wrapRef.current) return;
+    if (typeof window === 'undefined' || !wrapRef.current || blogs.length === 0) return;
 
     // cleanup
     try { autoplayRef.current?.kill(); } catch { }
@@ -64,7 +115,7 @@ export default function BlogUpdates() {
       return;
     }
 
-    // marquee-like autoplay: using a simple repeating tween (we restart on manual interactions)
+    // marquee-like autoplay
     const autoplay = gsap.to({}, {
       duration: AUTOPLAY_SECONDS,
       repeat: -1,
@@ -72,14 +123,14 @@ export default function BlogUpdates() {
     });
     autoplayRef.current = autoplay;
 
-    // progress bar tween: continuously fill each AUTOPLAY_SECONDS, restarts when autoplay restarts
+    // progress bar tween
     const progressTween = gsap.fromTo(
       progressRef.current,
       { width: '0%' },
       { width: '100%', duration: AUTOPLAY_SECONDS, ease: 'linear', repeat: -1, paused: false }
     );
 
-    // subtle image float for each visible item's media block
+    // subtle image float
     const floatTweens: gsap.core.Tween[] = [];
     itemsRef.current.forEach((el, idx) => {
       const media = innerParallaxRefs.current[idx];
@@ -96,7 +147,6 @@ export default function BlogUpdates() {
       floatTweens.push(t);
     });
 
-    // store timeline so we can pause/resume elsewhere
     tlRef.current = autoplay;
 
     return () => {
@@ -105,14 +155,14 @@ export default function BlogUpdates() {
       try { floatTweens.forEach(t => t.kill()); } catch { }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, prefersReduce]);
+  }, [active, prefersReduce, blogs]);
 
-  // Non-overlapping advance with rim sweep and parallax-in animation for incoming card
+  // Non-overlapping advance
   const advance = (delta: number, opts?: { animateRim?: boolean; resetProgressAfter?: boolean }) => {
-    if (animLock.current) return;
+    if (animLock.current || blogs.length === 0) return;
     animLock.current = true;
 
-    const next = (active + delta + BLOGS.length) % BLOGS.length;
+    const next = (active + delta + blogs.length) % blogs.length;
     const currentEl = itemsRef.current[active];
     const nextEl = itemsRef.current[next];
 
@@ -122,11 +172,11 @@ export default function BlogUpdates() {
       return;
     }
 
-    // Prepare z order and initial states
+    // Prepare z order
     gsap.set(nextEl, { zIndex: 6, pointerEvents: 'auto' });
     gsap.set(currentEl, { zIndex: 5 });
 
-    // small rim sweep for premium feel
+    // rim sweep
     if (opts?.animateRim && rimRef.current) {
       const rim = rimRef.current;
       gsap.killTweensOf(rim);
@@ -135,16 +185,13 @@ export default function BlogUpdates() {
       gsap.to(rim, { opacity: 0, duration: 0.6 * TEMPO, delay: 0.36 * TEMPO });
     }
 
-    // timeline where OUT completes before IN starts (small gap)
+    // timeline
     const tl = gsap.timeline({
       defaults: { ease: 'power3.out' },
       onComplete: () => {
-        // cleanup outgoing
         gsap.set(currentEl, { autoAlpha: 0, y: 0, scale: 1, zIndex: 1, pointerEvents: 'none', clearProps: 'transform' });
-        // normalize incoming
         gsap.set(nextEl, { autoAlpha: 1, y: 0, scale: 1, zIndex: 2, clearProps: 'transform' });
         setActive(next);
-        // reset progress tween so progress bar restarts cleanly
         if (opts?.resetProgressAfter && progressRef.current) {
           try {
             gsap.killTweensOf(progressRef.current);
@@ -156,14 +203,13 @@ export default function BlogUpdates() {
       },
     });
 
-    // OUT: quick upward exit
+    // OUT
     tl.to(currentEl, { y: -32, autoAlpha: 0, scale: 0.994, duration: 0.26 * TEMPO, ease: 'power2.in' }, 0);
 
-    // small gap before the incoming starts
     const gap = 0.06 * TEMPO;
     tl.set(nextEl, { y: -70, autoAlpha: 0, scale: 0.996 }, `> ${gap}`);
 
-    // IN: drop in with slight horizontal parallax and tiny overshoot then settle
+    // IN
     tl.fromTo(nextEl, { x: -8 }, { x: 0, duration: 0.58 * TEMPO, ease: 'cubic.out' }, `> ${gap}`);
     tl.to(nextEl, { y: 0, autoAlpha: 1, scale: 1.02, duration: 0.62 * TEMPO, ease: 'cubic.out' }, `> ${gap}`);
     tl.to(nextEl, { scale: 1, duration: 0.36 * TEMPO, ease: 'power2.out' }, '>-0.06');
@@ -182,7 +228,6 @@ export default function BlogUpdates() {
     };
     const onLeave = () => {
       try { autoplayRef.current?.resume(); } catch { }
-      // restart progress tween
       try {
         gsap.killTweensOf(progressRef.current);
         gsap.set(progressRef.current, { width: '0%' });
@@ -191,7 +236,6 @@ export default function BlogUpdates() {
     };
     const onMove = () => {
       if (!autoplayRef.current) return;
-      // slow motion feeling on pointer move
       try { gsap.to(autoplayRef.current, { timeScale: 0.18, duration: 0.18, ease: 'power3.out' }); } catch { }
       if (slowTO) window.clearTimeout(slowTO);
       slowTO = window.setTimeout(() => {
@@ -215,7 +259,7 @@ export default function BlogUpdates() {
     };
   }, [prefersReduce]);
 
-  // pointer micro-parallax for the active card image
+  // pointer micro-parallax
   useEffect(() => {
     if (!wrapRef.current || prefersReduce) return;
     const wrap = wrapRef.current;
@@ -257,7 +301,7 @@ export default function BlogUpdates() {
       gsap.set(el, { autoAlpha: i === active ? 1 : 0, y: 0, scale: 1, pointerEvents: i === active ? 'auto' : 'none' });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [blogs]);
 
   // controls
   const onPrev = () => {
@@ -272,8 +316,41 @@ export default function BlogUpdates() {
   const onDot = (i: number) => {
     if (i === active) return;
     try { autoplayRef.current?.restart(true); } catch { }
-    advance((i - active + BLOGS.length) % BLOGS.length, { animateRim: true, resetProgressAfter: true });
+    advance((i - active + blogs.length) % blogs.length, { animateRim: true, resetProgressAfter: true });
   };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName || !formPhone) return;
+
+    setFormStatus('submitting');
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/blog/subscribe/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formName,
+          phone: formPhone,
+          interest: formInterest
+        })
+      });
+
+      if (!res.ok) throw new Error('Submission failed');
+
+      setFormStatus('success');
+      setFormName('');
+      setFormPhone('');
+    } catch (err) {
+      console.error(err);
+      setFormStatus('error');
+    }
+  };
+
+  if (loading) return (
+    <section className="py-20 px-6 md:px-20 bg-[#fbfaf8] flex items-center justify-center min-h-[600px]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b2a5f]"></div>
+    </section>
+  );
 
   return (
     <section ref={wrapRef} className="relative py-20 px-6 md:px-20 bg-[#fbfaf8] overflow-hidden">
@@ -297,7 +374,7 @@ export default function BlogUpdates() {
 
           <div className="relative">
             <div className="relative rounded-3xl overflow-hidden border border-slate-100 bg-white shadow-2xl p-6 md:p-8">
-              {/* rim light (thin traveling glow) */}
+              {/* rim light helper */}
               <div
                 ref={rimRef}
                 aria-hidden
@@ -309,62 +386,69 @@ export default function BlogUpdates() {
                 }}
               />
 
-              {/* autoplay progress bar (thin at bottom-left) */}
+              {/* autoplay progress bar */}
               <div className="absolute left-6 bottom-6 w-[38%] md:w-[28%] h-2 rounded-full bg-[#eef5ff]/60 -z-5">
                 <div ref={progressRef} className="h-full rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6]" style={{ width: '0%' }} />
               </div>
 
               <div className="relative h-72 md:h-80 overflow-hidden">
-                {BLOGS.slice(0, 5).map((b, i) => (
-                  <div
-                    key={b.id}
-                    ref={(el) => { if (el) itemsRef.current[i] = el; }}
-                    className={`absolute inset-0 p-4 md:p-6 rounded-2xl flex gap-6 items-stretch will-change-transform`}
-                    aria-hidden={i !== active}
-                    role="group"
-                    tabIndex={i === active ? 0 : -1}
-                    style={{ pointerEvents: i === active ? 'auto' : 'none' }}
-                  >
-                    <div className="w-1/3 hidden md:block relative rounded-xl overflow-hidden">
-                      {b.image ? (
-                        <div
-                          ref={(el) => { if (el) innerParallaxRefs.current[i] = el; }}
-                          className="absolute inset-0"
-                        >
-                          <Image src={b.image} alt={b.title} fill className="object-cover" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#0b2a5f]/36" />
-                        </div>
-                      ) : (
-                        <div className="bg-slate-100 w-full h-full" />
-                      )}
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-xs font-semibold text-[#0b2a5f] px-3 py-1 rounded-full bg-[#eaf4ff]">{b.tag}</span>
-                          <time className="text-xs text-slate-400">{b.date}</time>
-                        </div>
-                        <h3 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">{b.title}</h3>
+                {blogs.length > 0 ? (
+                  blogs.slice(0, 5).map((b, i) => (
+                    <div
+                      key={b.id}
+                      ref={(el) => { if (el) itemsRef.current[i] = el; }}
+                      className={`absolute inset-0 p-4 md:p-6 rounded-2xl flex gap-6 items-stretch will-change-transform`}
+                      aria-hidden={i !== active}
+                      role="group"
+                      tabIndex={i === active ? 0 : -1}
+                      style={{ pointerEvents: i === active ? 'auto' : 'none' }}
+                    >
+                      <div className="w-1/3 hidden md:block relative rounded-xl overflow-hidden">
+                        {b.image ? (
+                          <div
+                            ref={(el) => { if (el) innerParallaxRefs.current[i] = el; }}
+                            className="absolute inset-0"
+                          >
+                            <Image src={b.image} alt={b.title} fill className="object-cover" unoptimized />
+                            <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#0b2a5f]/36" />
+                          </div>
+                        ) : (
+                          <div className="bg-slate-100 w-full h-full" />
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-4 mt-6">
-                        <a href="#" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white shadow hover:brightness-105 transition">
-                          Read article
-                        </a>
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="text-xs font-semibold text-[#0b2a5f] px-3 py-1 rounded-full bg-[#eaf4ff]">{b.tag}</span>
+                            <time className="text-xs text-slate-400">{b.date}</time>
+                          </div>
+                          <h3 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight mb-2">{b.title}</h3>
+                          {b.content && (
+                            <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4">
+                              {b.content}
+                            </p>
+                          )}
+                        </div>
 
-                        <div className="ml-auto flex items-center gap-3 text-sm text-slate-500">
-                          <button onClick={() => { onPrev(); }} aria-label="Previous" className="p-2 rounded-md bg-white border shadow-sm hover:scale-[0.98] transition" title="Previous">‹</button>
-                          <button onClick={() => { onNext(); }} aria-label="Next" className="p-2 rounded-md bg-white border shadow-sm hover:scale-[0.98] transition" title="Next">›</button>
+                        <div className="flex items-center gap-4 mt-auto">
+
+
+                          <div className="ml-auto flex items-center gap-3 text-sm text-slate-500">
+                            <button onClick={() => { onPrev(); }} aria-label="Previous" className="p-2 rounded-md bg-white border shadow-sm hover:scale-[0.98] transition" title="Previous">‹</button>
+                            <button onClick={() => { onNext(); }} aria-label="Next" className="p-2 rounded-md bg-white border shadow-sm hover:scale-[0.98] transition" title="Next">›</button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-full text-slate-500">No blogs found.</div>
+                )}
               </div>
 
               <div className="mt-4 flex items-center gap-3 justify-center md:justify-start">
-                {BLOGS.slice(0, 5).map((b, i) => (
+                {blogs.slice(0, 5).map((b, i) => (
                   <button
                     key={`dot-${b.id}`}
                     onClick={() => onDot(i)}
@@ -384,16 +468,49 @@ export default function BlogUpdates() {
             <div className="rounded-3xl p-6 md:p-8 bg-white border border-slate-100 shadow-xl">
               <h4 className="text-lg font-extrabold text-[#0b2a5f] mb-2">Request latest guide</h4>
               <p className="text-sm text-slate-600 mb-4">Tell us who you are and which product you’re interested in. We’ll send the latest blog pack & resources.</p>
-              <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-4">
-                <input className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200" placeholder="Your full name" />
-                <input className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200" placeholder="+91 90000 00000" />
-                <select className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200">
+
+              <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
+                <input
+                  className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200 text-black"
+                  placeholder="Your full name"
+                  value={formName}
+                  onChange={e => setFormName(e.target.value)}
+                  disabled={formStatus === 'submitting' || formStatus === 'success'}
+                />
+                <input
+                  className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200 text-black "
+                  placeholder="+91 90000 00000"
+                  value={formPhone}
+                  onChange={e => setFormPhone(e.target.value)}
+                  disabled={formStatus === 'submitting' || formStatus === 'success'}
+                />
+                <select
+                  className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200  text-black"
+                  value={formInterest}
+                  onChange={e => setFormInterest(e.target.value)}
+                  disabled={formStatus === 'submitting' || formStatus === 'success'}
+                >
                   <option>Web Development</option>
                   <option>UI/UX Design</option>
                   <option>App Development</option>
                   <option>Video Production</option>
                 </select>
-                <button className="w-full inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 text-sm font-semibold text-white shadow bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6]">Send me resources</button>
+
+                {formStatus === 'success' ? (
+                  <div className="mt-2 p-3 rounded-xl bg-green-50 text-green-700 text-sm font-semibold text-center">
+                    Thanks! We've received your request.
+                  </div>
+                ) : (
+                  <button
+                    disabled={formStatus === 'submitting'}
+                    className="w-full inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 text-sm font-semibold text-white shadow bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] disabled:opacity-70"
+                  >
+                    {formStatus === 'submitting' ? 'Sending...' : 'Send me resources'}
+                  </button>
+                )}
+                {formStatus === 'error' && (
+                  <div className="text-red-500 text-xs text-center">Something went wrong. Please try again.</div>
+                )}
               </form>
             </div>
 
