@@ -401,7 +401,7 @@ function Hero() {
 
   return (
     <section className="relative overflow-hidden pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-6 flex items-start gap-12">
+      <div className="max-w-7xl mx-auto px-6 flex items-start gap-12 mt-10">
         <div className="w-1/2">
           <p className="text-sm text-slate-500 uppercase mb-4">Our Work</p>
           <h1 ref={titleRef} className="font-extrabold text-[54px] leading-[0.95] text-[#0b2b57] max-w-2xl">
@@ -426,11 +426,10 @@ function Hero() {
         </div>
 
         <div ref={wrapRef} className="w-1/2 relative">
-          <div ref={floatRef} className="relative ml-auto w-[520px] h-[360px]" style={{ visibility: 'visible' }}>
-            <div className="absolute right-0 top-0 w-[420px] h-[260px] rounded-2xl overflow-hidden shadow-2xl bg-white">
-              <Image src="/placeholders/hero-device.png" alt="hero device" width={1200} height={800} className="object-cover w-full h-full" />
+          <div ref={floatRef} className="relative ml-auto w-[520px] h-[260px]" style={{ visibility: 'visible' }}>
+            <div className="absolute right-0 top-0 bottom-0 w-[420px] h-[260px] rounded-2xl overflow-hidden shadow-2xl ">
+              <Image src="/portfolio/portfoliohero.png" alt="hero device" width={1200} height={800} className="object-cover object-top w-full h-full" />
             </div>
-            <div className="absolute right-6 bottom-0 w-[420px] h-[120px] rounded-2xl bg-white/60 -z-10 blur-sm" />
           </div>
 
           <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-3xl opacity-30 bg-gradient-to-tr from-[#f7f5f3] to-[#fff]" />
@@ -468,7 +467,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
 
           // Initial state is handled via inline styles in render generally, but for dynamic lists we might rely on fromTo immediately if in view
           if (!prefersReduce) {
-               // fromTo will handle it
+            // fromTo will handle it
           } else {
             gsap.set([mask, image, shadow, text, visit].filter(Boolean), { clearProps: 'all' });
           }
@@ -481,15 +480,15 @@ function FeaturedList({ projects }: { projects: any[] }) {
               toggleActions: 'play none none reset',
               onLeaveBack: () => {
                 if (prefersReduce) return;
-                 gsap.set(mask, { y: 80, clipPath: 'inset(100% 0% 0% 0%)' });
-                 gsap.set(image, { y: 40, scale: 1.08 });
-                 gsap.set(shadow, { opacity: 0, boxShadow: '0 0 0 rgba(11,42,95,0)' });
-                 gsap.set(text, { y: 36, autoAlpha: 0 });
-                 if (visit) gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
+                gsap.set(mask, { y: 80, clipPath: 'inset(100% 0% 0% 0%)' });
+                gsap.set(image, { y: 40, scale: 1.08 });
+                gsap.set(shadow, { opacity: 0, boxShadow: '0 0 0 rgba(11,42,95,0)' });
+                gsap.set(text, { y: 36, autoAlpha: 0 });
+                if (visit) gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
               },
             },
           });
-          
+
           if (!prefersReduce) {
             tl.fromTo(mask, { clipPath: 'inset(100% 0% 0% 0%)', y: 80 }, { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 1.1 });
             tl.fromTo(image, { y: 40, scale: 1.08 }, { y: 0, scale: 1, duration: 1.15 }, '-=0.8');
@@ -498,7 +497,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
           }
 
           if (visit && !prefersReduce) {
-             gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
+            gsap.set(visit, { autoAlpha: 0, scale: 0.85 });
             const showBtn = () => {
               visit.classList.add('show-shimmer');
               gsap.to(visit, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' });

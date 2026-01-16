@@ -537,7 +537,7 @@ export default function ServicesPage() {
 
             {/* HERO */}
             <section ref={heroRef as any} className="ab-hero svc-hero max-w-6xl mx-auto reveal" style={{ opacity: 0, visibility: 'hidden' }}>
-                <div>
+                <div className='mt-10'>
                     <p className="text-sm font-semibold tracking-wider text-slate-600 mb-3">OUR SERVICES</p>
 
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#0b2a5f] leading-tight">
