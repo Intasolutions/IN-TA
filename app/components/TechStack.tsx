@@ -31,7 +31,7 @@ const tools: Tool[] = [
   { id: 'tailwind', name: 'Tailwind', logo: '/logos/tailwind.svg', accent: '#06b6d4' },
 ];
 
-export default function TechStack(): JSX.Element {
+export default function TechStack() {
   const containerRef = useRef<HTMLElement>(null);
   const row1Ref = useRef<HTMLDivElement>(null);
   const row2Ref = useRef<HTMLDivElement>(null);

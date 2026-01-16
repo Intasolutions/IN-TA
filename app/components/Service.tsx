@@ -83,8 +83,8 @@ const CommonButton: React.FC<CommonButtonProps> = ({
           duration: 0.78,
           ease: 'power2.out',
           paused: true,
-          onStart: () => (sheen.style.opacity = '0.95'),
-          onComplete: () => (sheen.style.opacity = '0'),
+          onStart: () => { sheen.style.opacity = '0.95'; },
+          onComplete: () => { sheen.style.opacity = '0'; },
         });
       } catch { }
     };
@@ -259,8 +259,9 @@ export default function Services() {
     }
 
     // Wait a tick for DOM update
+    let ctx: any;
     const timer = setTimeout(() => {
-      const ctx = gsap.context(() => {
+      ctx = gsap.context(() => {
         gsap.fromTo(
           '.svc-hero',
           { autoAlpha: 0, y: 22 },
@@ -300,7 +301,8 @@ export default function Services() {
                   ease: 'expo.out',
                   stagger: { each: 0.06, from: 'start' },
                   onComplete: () => {
-                    batch.forEach((card, idx) => {
+                    batch.forEach((c, idx) => {
+                      const card = c as HTMLElement;
                       if (!cardLoops.current.has(card)) {
                         const pulseScale = gsap.utils.random(1.02, 1.06);
                         const settleScale = gsap.utils.random(1.003, 1.016);
@@ -494,8 +496,8 @@ export default function Services() {
                     <h4 className="text-lg font-semibold text-slate-900">{s.title}</h4>
                     <p className="text-sm text-slate-600 mt-2 line-clamp-3">{s.long_description || s.short_description}</p>
 
-                
-                  
+
+
                   </div>
                 </div>
               </article>
