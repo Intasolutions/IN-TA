@@ -466,8 +466,10 @@ export default function BlogUpdates() {
         <aside className="lg:col-span-5">
           <div className="lg:sticky top-28">
             <div className="rounded-3xl p-6 md:p-8 bg-white border border-slate-100 shadow-xl">
-              <h4 className="text-lg font-extrabold text-[#0b2a5f] mb-2">Request latest guide</h4>
-              <p className="text-sm text-slate-600 mb-4">Tell us who you are and which product you’re interested in. We’ll send the latest blog pack & resources.</p>
+              {/* Title change: more professional inquiry focus */}
+              <h4 className="text-lg font-extrabold text-[#0b2a5f] mb-2">Work with us</h4>
+              {/* Paragraph change: focus on starting a project */}
+              <p className="text-sm text-slate-600 mb-4">Have a project in mind? Share your details and we’ll reach out to discuss how we can build your solution.</p>
 
               <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
                 <input
@@ -484,28 +486,30 @@ export default function BlogUpdates() {
                   onChange={e => setFormPhone(e.target.value)}
                   disabled={formStatus === 'submitting' || formStatus === 'success'}
                 />
+                {/* Select options: updated to match professional services */}
                 <select
                   className="mt-2 block w-full rounded-xl border px-4 py-3 border-slate-200  text-black"
                   value={formInterest}
                   onChange={e => setFormInterest(e.target.value)}
                   disabled={formStatus === 'submitting' || formStatus === 'success'}
                 >
-                  <option>Web Development</option>
-                  <option>UI/UX Design</option>
-                  <option>App Development</option>
-                  <option>Video Production</option>
+                  <option>Enterprise Web Solutions</option>
+                  <option>Mobile App Development</option>
+                  <option>UI/UX Design Strategy</option>
+                  <option>System Architecture</option>
                 </select>
 
                 {formStatus === 'success' ? (
                   <div className="mt-2 p-3 rounded-xl bg-green-50 text-green-700 text-sm font-semibold text-center">
-                    Thanks! We've received your request.
+                    Message received. We'll be in touch shortly.
                   </div>
                 ) : (
                   <button
                     disabled={formStatus === 'submitting'}
                     className="w-full inline-flex items-center justify-center gap-3 rounded-full px-5 py-3 text-sm font-semibold text-white shadow bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] disabled:opacity-70"
                   >
-                    {formStatus === 'submitting' ? 'Sending...' : 'Send me resources'}
+                    {/* Button text change */}
+                    {formStatus === 'submitting' ? 'Sending...' : 'Send Inquiry'}
                   </button>
                 )}
                 {formStatus === 'error' && (
@@ -517,11 +521,15 @@ export default function BlogUpdates() {
             <div className="mt-6 rounded-2xl overflow-hidden bg-gradient-to-r from-[#eef6ff] to-white border border-slate-100 p-4 shadow">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-lg bg-white/60 flex items-center justify-center border">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v18" stroke="#0b2a5f" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    {/* Changed icon path slightly to a "shield" for security trust */}
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#0b2a5f" strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-slate-900">Weekly round-up</div>
-                  <div className="text-xs text-slate-500">Short summaries from our team — delivered each Monday.</div>
+                  {/* Bottom badge content update */}
+                  <div className="text-sm font-semibold text-slate-900">Secure Inquiry</div>
+                  <div className="text-xs text-slate-500">Your information is confidential and protected.</div>
                 </div>
               </div>
             </div>

@@ -50,7 +50,7 @@ export default function Footer1() {
 
         {/* RIGHT — Copyright */}
         <div className="text-sm text-slate-500 text-center md:text-right">
-          © {new Date().getFullYear()} YourCompany. All rights reserved.
+          © {new Date().getFullYear()} IN-TA Solutions Pvt. Ltd. All rights reserved.
         </div>
 
       </div>

@@ -325,13 +325,16 @@ export default function About() {
           {/* left: number + tilted image */}
           <div className="lg:col-span-6 flex flex-col lg:flex-row items-center justify-center gap-8 relative z-10">
             <div className="text-center lg:text-left about-reveal z-10">
-              <div className="text-sm font-semibold tracking-wider text-slate-700 mb-1">
-                YEARS OF EXPERIENCE
+              <div className="text-sm font-bold tracking-[0.2em] text-slate-500 mb-1 uppercase">
+                Professional Milestone
               </div>
               <div className="text-[6rem] md:text-[7rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] leading-none">
-                8
+                2
                 <span className="text-[#1f6fe6] align-top text-[3rem]">+</span>
               </div>
+              <p className="text-slate-600 font-medium mt-2">
+                Years of Engineering Excellence
+              </p>
             </div>
 
             <div
@@ -351,16 +354,18 @@ export default function About() {
 
           {/* right: text content */}
           <div className="lg:col-span-6 space-y-5 z-10">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900">What We Do</h2>
-            <p className="text-lg text-slate-700 leading-relaxed">
-              We are a team of web and mobile app developers delivering high-quality, scalable
-              digital products. Over the years, we’ve evolved alongside technology—merging design,
-              data, and engineering to build systems that empower businesses and elevate user
-              experiences.
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+              Engineering Digital Excellence
+            </h2>
+            <p className="text-lg text-slate-700 leading-relaxed mt-4">
+              We are a specialized team of architects and developers dedicated to deploying
+              scalable, high-performance digital products. By integrating cutting-edge design
+              with robust engineering, we build intelligent systems that empower enterprises
+              and redefine user engagement.
             </p>
-            <p className="text-lg text-slate-700 leading-relaxed">
-              Our focus is on crafting reliable web applications, custom digital solutions,
-              and enterprise systems that grow with your vision.
+            <p className="text-lg text-slate-700 leading-relaxed mt-4">
+              Our expertise lies in architecting reliable web ecosystems and custom enterprise
+              solutions designed to evolve in lockstep with your business ambitions.
             </p>
 
             <div className="pt-4">
@@ -388,54 +393,52 @@ export default function About() {
         {/* features */}
         <div className="mt-16 features-grid">
           <div className="grid md:grid-cols-3 gap-6">
+            {/* Card 1 */}
             <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-black-500">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M12 2v20" stroke="white" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900">Design System</h5>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Reusable components and tokenized styles for faster, consistent builds.
+                  <h5 className="font-bold text-slate-900">Strategic Design Systems</h5>
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                    Accelerating deployment through modular frameworks to ensure visual consistency across your digital ecosystem.
                   </p>
                 </div>
               </div>
             </article>
 
+            {/* Card 2 */}
             <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-white">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M3 12h18" stroke="white" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900">Scalable Apps</h5>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Architecture designed for scale and maintainability — testing &amp; CI included.
+                  <h5 className="font-bold text-slate-900">Enterprise Architecture</h5>
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                    Engineered for high-load performance and long-term maintainability with automated CI/CD workflows.
                   </p>
                 </div>
               </div>
             </article>
 
+            {/* Card 3 */}
             <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center text-white">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 3l7 9h-5l-2 9-2-9H5l7-9z"
-                      stroke="white"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
+                    <path d="M12 3l7 9h-5l-2 9-2-9H5l7-9z" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div>
-                  <h5 className="font-semibold text-slate-900">Data &amp; Insights</h5>
-                  <p className="text-sm text-slate-600 mt-1">
-                    User behaviour and analytics integrated from day one to inform product decisions.
+                  <h5 className="font-bold text-slate-900">Data-Driven Intelligence</h5>
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                    Integrated behavioral analytics to provide actionable insights and drive informed strategic product decisions.
                   </p>
                 </div>
               </div>
@@ -444,23 +447,28 @@ export default function About() {
         </div>
 
         {/* stats strip */}
-        <div className="mt-12 stats-row bg-slate-50 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="stat text-center md:text-left">
-            <div className="text-2xl font-extrabold text-slate-900">120+</div>
-            <div className="text-sm text-slate-600">Projects delivered</div>
-          </div>
+        <div className="mt-12 stats-row bg-slate-50 rounded-2xl p-6 flex flex-row items-center justify-center gap-12 md:gap-24">
           <div className="stat text-center">
-            <div className="text-2xl font-extrabold text-slate-900">45</div>
-            <div className="text-sm text-slate-600">Two-sided teams</div>
+            <div className="text-2xl md:text-3xl font-extrabold text-slate-900">20+</div>
+            <div className="text-xs md:text-sm font-semibold text-slate-600 uppercase tracking-wide">
+              Projects Delivered
+            </div>
           </div>
-          <div className="stat text-center md:text-right">
-            <div className="text-2xl font-extrabold text-slate-900">98%</div>
-            <div className="text-sm text-slate-600">Client satisfaction</div>
+
+          {/* Vertical Divider for a professional touch */}
+          <div className="w-px h-10 bg-slate-200"></div>
+
+          <div className="stat text-center">
+            <div className="text-2xl md:text-3xl font-extrabold text-slate-900">100%</div>
+            <div className="text-xs md:text-sm font-semibold text-slate-600 uppercase tracking-wide">
+              Client Satisfaction
+            </div>
           </div>
         </div>
 
         {/* timeline / values */}
         <div className="mt-14 grid lg:grid-cols-3 gap-8 items-start">
+
           {/* HOW WE WORK + spotlight */}
           <div className="lg:col-span-2 about-reveal relative" id="how-we-work">
 
@@ -519,11 +527,20 @@ export default function About() {
             ref={asideRef}
             className="about-reveal bg-gradient-to-br from-[#0b2a5f] to-[#1f6fe6] text-white rounded-2xl p-6 shadow-elev"
           >
-            <h5 className="font-semibold mb-2">Our values</h5>
-            <ul className="space-y-3 text-sm">
-              <li>Product clarity over feature clutter</li>
-              <li>Empathy with users &amp; teams</li>
-              <li>Relentless quality and ownership</li>
+            <h5 className="font-bold mb-4 uppercase tracking-wider text-xs opacity-90">Our Core Values</h5>
+            <ul className="space-y-4 text-sm font-medium">
+              <li className="flex items-start gap-2">
+                <span className="opacity-70">•</span>
+                Strategic clarity over feature complexity
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="opacity-70">•</span>
+                User-centric empathy & stakeholder alignment
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="opacity-70">•</span>
+                Uncompromising quality & end-to-end ownership
+              </li>
             </ul>
           </aside>
         </div>

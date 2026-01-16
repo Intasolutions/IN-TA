@@ -77,29 +77,29 @@ function VisitButton({ href, label = 'Visit' }: { href: string; label?: string }
 const FALLBACK_FEATURED = [
   {
     id: 'saas-01',
-    title: 'Nimbus — B2B SaaS Platform',
+    title: 'Nimbus — Enterprise SaaS Architecture',
     role: 'Product + Engineering',
-    summary: 'Multi-tenant SaaS with real-time analytics, RBAC, and scalable microservices. Built with React, Node.js, Postgres, and AWS.',
+    summary: 'A multi-tenant B2B ecosystem featuring real-time analytics and granular RBAC. Engineered for high-load scalability and secure microservices.',
     hero: '/placeholders/saas-hero.png',
-    tags: ['React', 'Node', 'AWS', 'Postgres'],
+    tags: ['React', 'Node.js', 'Postgres', 'AWS'],
     href: 'https://example.com/nimbus',
   },
   {
     id: 'web-01',
-    title: 'Intalite — Marketing Website',
+    title: 'Intalite — Digital Experience Platform',
     role: 'UX + Frontend',
-    summary: 'High-conversion marketing site with CMS integration, A/B experiments, and animated product storytelling.',
+    summary: 'A high-conversion digital presence optimized for lead generation. Features enterprise CMS integration and performance-driven product storytelling.',
     hero: '/placeholders/web-hero.png',
-    tags: ['Next.js', 'Tailwind', 'A/B Testing'],
+    tags: ['Next.js', 'Tailwind', 'Performance Optimization'],
     href: 'https://example.com/intalite',
   },
   {
     id: 'infra-01',
-    title: 'Atlas — Enterprise Integration',
-    role: 'Backend & DevOps',
-    summary: 'Event-driven architecture, streaming data pipelines, and infra as code for 99.99% uptime.',
+    title: 'Atlas — System Integration & DevOps',
+    role: 'Backend & Infrastructure',
+    summary: 'Mission-critical event-driven architecture and automated data pipelines designed for 99.99% uptime and industrial-grade reliability.',
     hero: '/placeholders/infra-hero.png',
-    tags: ['Kubernetes', 'Kafka', 'Terraform'],
+    tags: ['Kubernetes', 'Cloud Infrastructure', 'Automation'],
     href: 'https://example.com/atlas',
   },
 ];
@@ -274,11 +274,11 @@ export default function PortfolioPage() {
       </section>
       <section className="max-w-7xl mx-auto px-6 pb-32">
         <CTA
-          title="Let’s build something extraordinary"
-          subtitle="We design and build websites, web apps, and cloud platforms — engineered for performance and reliability."
-          primaryLabel="Start a project"
+          title="Partner with us for your next digital milestone"
+          subtitle="We engineer high-performance web applications and cloud infrastructure designed for global scalability and absolute reliability."
+          primaryLabel="Start a Consultation"
           primaryHref="/contact"
-          secondaryLabel="Contact us"
+          secondaryLabel="Speak with an Expert"
           secondaryHref="/contact"
         />
       </section>
@@ -409,7 +409,7 @@ function Hero() {
               <span style={{ opacity: 0, visibility: 'hidden' }}>We craft websites & platforms</span>
             </span>
             <span className="reveal-line block overflow-hidden">
-              <span style={{ opacity: 0, visibility: 'hidden' }}>that scale — engineered to perform.</span>
+              <span style={{ opacity: 0, visibility: 'hidden' }}>that scale - engineered to perform.</span>
             </span>
           </h1>
           <p className="mt-6 text-slate-600 max-w-xl">

@@ -102,7 +102,7 @@ export default function ContactPage() {
         </h1>
 
         <p className="hero-sub mt-6 text-lg text-slate-600 max-w-2xl mx-auto" style={{ opacity: 0, visibility: 'hidden' }}>
-          Whether it’s a product, platform, or idea —
+          Whether it’s a product, platform, or idea -
           we help you turn it into something real.
         </p>
       </section>
@@ -167,8 +167,8 @@ export default function ContactPage() {
 
           <div className="soft-contact">
             <p>Prefer a direct conversation?</p>
-            <div className="contact-row">📧 hello@yourcompany.com</div>
-            <div className="contact-row">📞 +91 00000 00000</div>
+            <div className="contact-row">📧 hello@y.com</div>
+            <div className="contact-row">📞 +91 </div>
           </div>
         </div>
       </section>

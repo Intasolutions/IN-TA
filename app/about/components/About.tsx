@@ -11,25 +11,42 @@ import { useReveal } from '../../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/**
- * About page with premium particle/starfield for selected cards only
- * - ParticleCanvas accepts a color prop (hex) so CTA can stay white while story cards use theme blue
- * - ParticleCanvas will only be rendered for "Our story" cards and the CTA card as requested
- * - Respects prefers-reduced-motion
- */
-
 const TEAM = [
-    { id: 'm1', name: 'Asha Kapoor', role: 'Head of Engineering', avatar: '/avatars/p1.jpg' },
-    { id: 'm2', name: 'Rohit Nair', role: 'Product Lead', avatar: '/avatars/p2.jpg' },
-    { id: 'm3', name: 'Maya Singh', role: 'Design Director', avatar: '/avatars/p3.jpg' },
-    { id: 'm4', name: 'Dev Patel', role: 'CTO', avatar: '/avatars/p4.jpg' },
+    { 
+      id: 'm1', 
+      name: 'Akash A', 
+      role: 'Project Manager', 
+      avatar: '/avatars/p1 - Copy.png',
+      desc: 'Expert in agile delivery and stakeholder management, ensuring projects align with strategic business goals.' 
+    },
+    { 
+      id: 'm2', 
+      name: 'Vijay P N', 
+      role: 'Software Engineer', 
+      avatar: '/avatars/vijay.jpg',
+      desc: 'Specializing in full-stack development and high-performance applications with a focus on clean, scalable code.' 
+    },
+    { 
+      id: 'm3', 
+      name: 'Christin Johny', 
+      role: 'System Architect', 
+      avatar: '/avatars/christin-1.png',
+      desc: 'Architecting robust, event-driven infrastructures and cloud-native systems for maximum reliability and scale.' 
+    },
+    { 
+      id: 'm4', 
+      name: 'Arun Rag', 
+      role: 'Head of Marketing & Sales', 
+      avatar: '/avatars/unni.png',
+      desc: 'Driving market expansion and strategic partnerships through data-led digital growth and brand positioning.' 
+    },
 ];
 
 const STATS = [
-    { id: 's1', label: 'Projects', value: 128 },
-    { id: 's2', label: 'Clients', value: 64 },
-    { id: 's3', label: 'Years', value: 9 },
-    { id: 's4', label: 'Countries', value: 12 },
+    { id: 's1', label: 'Projects', value: `20+` },
+    { id: 's2', label: 'Clients', value: 20 },
+    { id: 's3', label: 'Years', value: `2+` },
+    { id: 's4', label: 'Countries', value: 3 },
 ];
 
 type Particle = { x: number; y: number; vx: number; vy: number; r: number; alpha: number; tw: number };
@@ -268,8 +285,6 @@ export default function AboutPage() {
                 });
             });
 
-            // Special handling for Hero Title - wait for isRevealed explicitly if needed, but ScrollTrigger mostly handles it as it enters view.
-            // However, Hero is surely in view at top.
             if (isRevealed) {
                 // Explicit Hero Sequence
                 const tl = gsap.timeline();
@@ -301,7 +316,7 @@ export default function AboutPage() {
                 }
             });
 
-            
+
             STATS.forEach((s) => {
                 const el = statRefs.current[s.id];
                 if (!el) return;
@@ -571,20 +586,35 @@ export default function AboutPage() {
             <section className="ab-hero reveal max-w-6xl mx-auto px-6 md:px-12 pt-20 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 <div className="lg:col-span-7">
                     <p className="text-sm font-semibold tracking-wider text-slate-600 mb-3 reveal" style={{ opacity: 0, visibility: 'hidden' }}>ABOUT US</p>
-                    <h1 className="ab-hero-title text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-[#0b2a5f]">
-                        <span className="block overflow-hidden">
-                            <span className="hero-reveal-text block" style={{ opacity: 0, visibility: 'hidden' }}>Where creativity meets</span>
+                    <h1 className="ab-hero-title leading-tight text-[#0b2a5f]">
+                        {/* Line 1: The Vision */}
+                        <span className="block overflow-hidden mb-2">
+                            <span className="hero-reveal-text block text-2xl md:text-3xl font-bold opacity-70"
+                                style={{ opacity: 0, visibility: 'hidden' }}>
+                                Design with purpose.
+                            </span>
                         </span>
-                        <span className="block overflow-hidden">
-                            <span className="hero-reveal-text block" style={{ opacity: 0, visibility: 'hidden' }}>engineering — we build</span>
+
+                        {/* Line 2: The Core (Largest) */}
+                        <span className="block overflow-hidden mb-2">
+                            <span className="hero-reveal-text block text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter"
+                                style={{ opacity: 0, visibility: 'hidden' }}>
+                                Built for performance.
+                            </span>
                         </span>
+
+                        {/* Line 3: The Result */}
                         <span className="block overflow-hidden">
-                            <span className="hero-reveal-text block" style={{ opacity: 0, visibility: 'hidden' }}>dependable digital products.</span>
+                            <span className="hero-reveal-text block text-xl md:text-2xl font-medium text-slate-500 uppercase tracking-widest"
+                                style={{ opacity: 0, visibility: 'hidden' }}>
+                                Engineering Resilient Systems
+                            </span>
                         </span>
                     </h1>
-                    <p className="mt-6 text-slate-600 max-w-2xl reveal" style={{ opacity: 0, visibility: 'hidden' }}>
-                        We are a multidisciplinary IT studio focused on product-grade engineering, UX, and measurable growth.
-                        From product strategy to launch and scale — we partner end-to-end with startups and enterprises.
+                    <p className="mt-8 text-base md:text-lg text-slate-600 max-w-2xl leading-relaxed reveal" style={{ opacity: 0, visibility: 'hidden' }}>
+                        We are a specialized software engineering firm dedicated to high-performance architecture,
+                        user-centric design, and strategic growth. From initial product roadmap to global deployment
+                        and scaling - we provide end-to-end partnership for growth-stage startups and established enterprises.
                     </p>
 
                     <div className="mt-8 flex gap-4 reveal" style={{ opacity: 0, visibility: 'hidden' }}>
@@ -626,12 +656,22 @@ export default function AboutPage() {
                     </p>
 
                     <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {['Discovery', 'Build', 'Grow', 'Support'].map((title) => (
-                            <div key={title} className="rounded-2xl p-5 bg-white border border-slate-100 shadow-md reveal card-premium relative overflow-hidden">
-                                {/* Particle only for story cards (theme blue) */}
+                        {[
+                            { title: 'Strategy & Discovery', desc: 'Aligning business goals with a research-backed product roadmap.' },
+                            { title: 'Engineering & Build', desc: 'Deploying high-performance systems with enterprise-grade code.' },
+                            { title: 'Strategic Growth', desc: 'Scaling your digital presence through data-driven optimization.' },
+                            { title: 'Enterprise Support', desc: 'Ensuring long-term reliability with 24/7 technical excellence.' }
+                        ].map((item) => (
+                            <div key={item.title} className="rounded-2xl p-5 bg-white border border-slate-100 shadow-md reveal card-premium relative overflow-hidden">
                                 <ParticleCanvas enabled={particleEnabled} color={themeBlue} />
-                                <div className="text-sm font-semibold text-slate-900">{title}</div>
-                                <p className="mt-2 text-sm text-slate-600">Short line explaining the step.</p>
+                                <div className="relative z-10">
+                                    <div className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                                        {item.title}
+                                    </div>
+                                    <p className="mt-1 text-sm text-slate-600 leading-snug">
+                                        {item.desc}
+                                    </p>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -641,8 +681,7 @@ export default function AboutPage() {
                     <div className="rounded-2xl p-6 bg-white border border-slate-100 shadow-lg reveal relative overflow-hidden">
                         {/* removed particle from Studio highlights as requested */}
                         <h5 className="text-sm font-semibold text-slate-700">Studio highlights</h5>
-                        <p className="mt-3 text-slate-600">We ship polished products that scale — with observability, automated testing, and cross-platform workflows.</p>
-
+                        <p className="mt-3 text-slate-600">We ship polished products that scale - with observability, automated testing, and cross-platform workflows.</p>
                         <div className="mt-6 grid grid-cols-2 gap-4">
                             {STATS.map((s) => (
                                 <div key={s.id} ref={(el) => { statRefs.current[s.id] = el; }} className="p-4 bg-[#fbfbfe] rounded-xl reveal relative overflow-hidden">
@@ -657,29 +696,23 @@ export default function AboutPage() {
 
             {/* TEAM */}
             <section className="reveal max-w-6xl mx-auto px-6 md:px-12 mt-12">
-                <h3 className="text-3xl font-extrabold text-[#0b2a5f]">The team</h3>
-                <p className="text-slate-600 mt-2 max-w-2xl">Multidisciplinary engineers, designers, and product thinkers.</p>
+                <h3 className="text-3xl font-extrabold text-[#0b2a5f] ">The team</h3>
 
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-10">
                     {TEAM.map((m) => (
                         <div
                             key={m.id}
                             ref={(el) => { teamCardRefs.current[m.id] = el; }}
-                            className="team-card relative p-6 rounded-3xl bg-white border border-slate-100 shadow-lg overflow-visible transform-gpu will-change-transform"
+                            className="team-card relative p-6 rounded-3xl pt-10 bg-white border border-slate-100 shadow-lg overflow-visible transform-gpu will-change-transform"
                         >
                             <div className="absolute -top-8 left-6 w-20 h-20 rounded-full overflow-hidden ring-4 ring-white shadow-xl bg-slate-100">
-                                <Image src={m.avatar} alt={m.name} width={80} height={80} className="object-cover team-avatar" />
+                                <Image src={m.avatar} alt={m.name} width={80} height={80} className="object-fit team-avatar" />
                             </div>
 
                             <div className="mt-12">
                                 <div className="text-lg font-semibold text-slate-900">{m.name}</div>
                                 <div className="text-sm text-slate-500 mt-1">{m.role}</div>
-                                <p className="text-sm text-slate-600 mt-3">Experienced in building scalable systems and delightful user experiences — full-stack & product-focused.</p>
-
-                                {/* <div className="mt-4 flex gap-3">
-                                    <Link href={`/team/${m.id}`} className="text-xs px-3 py-2 rounded-full border border-slate-100 hover:bg-slate-50">View profile</Link>
-                                    <Link href={`mailto:${m.name.replace(' ', '.').toLowerCase()}@example.com`} className="text-xs px-3 py-2 rounded-full border border-slate-100 hover:bg-slate-50">Contact</Link>
-                                </div> */}
+                                <p className="text-sm text-slate-600 mt-3">{m.desc}</p>
                             </div>
                         </div>
                     ))}
@@ -703,8 +736,10 @@ export default function AboutPage() {
 
                         <div className="md:w-1/3 reveal relative overflow-hidden">
                             <div className="rounded-2xl p-5 bg-[#fbfbfe] border border-slate-100">
-                                <div className="text-sm font-semibold text-slate-900">Project approach</div>
-                                <p className="text-sm text-slate-600 mt-2">We iterate quickly with continuous delivery, close design-engineering collaboration, and measurable KPIs.</p>
+                                <div className="text-sm font-bold text-slate-900 uppercase tracking-wide">Methodology</div>
+                                <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                                    We utilize agile iteration and continuous delivery to ensure seamless design-engineering collaboration and performance-driven results.
+                                </p>
                             </div>
                         </div>
                     </div>

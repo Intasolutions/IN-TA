@@ -600,16 +600,16 @@ export default function ServicesPage() {
                     <div className="rounded-2xl p-6 bg-white border border-slate-100 shadow-lg" style={{ boxShadow: 'var(--card-shadow)' }}>
                         <h5 className="text-sm font-semibold text-slate-700">Why choose us</h5>
                         <p className="mt-3 text-sm text-slate-600">
-                            Cross-disciplinary teams, fast feedback loops, and engineering-first execution — so your product ships on
-                            schedule.
+                            Cross-disciplinary expertise, rapid iteration cycles, and engineering-led execution
+                            designed to deliver scalable solutions with uncompromising reliability.
                         </p>
                         <div className="mt-4 grid grid-cols-2 gap-3">
                             <div className="p-3 rounded-lg bg-[#fbfbfe] text-center">
-                                <div className="text-lg font-extrabold text-[#0b2a5f]">9</div>
+                                <div className="text-lg font-extrabold text-[#0b2a5f]">2</div>
                                 <div className="text-xs text-slate-500 mt-1">Years</div>
                             </div>
                             <div className="p-3 rounded-lg bg-[#fbfbfe] text-center">
-                                <div className="text-lg font-extrabold text-[#0b2a5f]">128</div>
+                                <div className="text-lg font-extrabold text-[#0b2a5f]">20</div>
                                 <div className="text-xs text-slate-500 mt-1">Projects</div>
                             </div>
                         </div>
@@ -684,11 +684,11 @@ export default function ServicesPage() {
             {/* FOOT CTA */}
             <section className="reveal max-w-6xl mx-auto px-6 md:px-12 mt-12">
                 <CTA
-                    title="Ready to build something meaningful?"
-                    subtitle="Let's talk about product strategy, engineering, and delivery."
-                    primaryLabel="Book a call"
+                    title="Ready to engineer your strategic vision?"
+                    subtitle="Let's discuss your product roadmap, enterprise engineering, and full-cycle delivery."
+                    primaryLabel="Schedule a Consultation"
                     primaryHref="/contact"
-                    secondaryLabel="View works"
+                    secondaryLabel="View Our Portfolio"
                     secondaryHref="/portfolio"
                     particleColor="#ffffff"
                     particleEnabled={true}
