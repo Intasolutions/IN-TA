@@ -53,19 +53,19 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       aria-live="polite"
     >
       {/* Header */}
-    <div>
-  <p className="text-sm font-medium text-blue-600">
-    Start the conversation 👋
-  </p>
+      <div>
+        <p className="text-sm font-medium text-blue-600">
+          Start the conversation 👋
+        </p>
 
-  <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-    Tell us about your project
-  </h2>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+          Tell us about your project
+        </h2>
 
-  <p className="mt-1 text-sm text-slate-600">
-    We usually respond within 24 hours.
-  </p>
-</div>
+        <p className="mt-1 text-sm text-slate-600">
+          We usually respond within 24 hours.
+        </p>
+      </div>
 
 
       {error && (

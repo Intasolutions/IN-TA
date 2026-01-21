@@ -5,13 +5,13 @@ import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from '@studio-freight/lenis';
+// Make sure these paths match your project structure
 import CTA from '../../components/CTA';
 import { useReveal } from '../../context/RevealContext';
 
-
 gsap.registerPlugin(ScrollTrigger);
 
-/* -------------------- VisitButton Component (reusable) -------------------- */
+/* -------------------- VisitButton Component -------------------- */
 function VisitButton({ href, label = 'Visit' }: { href: string; label?: string }) {
   return (
     <a
@@ -77,7 +77,7 @@ function VisitButton({ href, label = 'Visit' }: { href: string; label?: string }
 const FALLBACK_FEATURED = [
   {
     id: 'saas-01',
-    title: 'Nimbus — Enterprise SaaS Architecture',
+    title: 'Nimbus — Enterprise SaaS',
     role: 'Product + Engineering',
     summary: 'A multi-tenant B2B ecosystem featuring real-time analytics and granular RBAC. Engineered for high-load scalability and secure microservices.',
     hero: '/placeholders/saas-hero.png',
@@ -86,20 +86,20 @@ const FALLBACK_FEATURED = [
   },
   {
     id: 'web-01',
-    title: 'Intalite — Digital Experience Platform',
+    title: 'Intalite — Digital DXP',
     role: 'UX + Frontend',
     summary: 'A high-conversion digital presence optimized for lead generation. Features enterprise CMS integration and performance-driven product storytelling.',
     hero: '/placeholders/web-hero.png',
-    tags: ['Next.js', 'Tailwind', 'Performance Optimization'],
+    tags: ['Next.js', 'Tailwind', 'Performance'],
     href: 'https://example.com/intalite',
   },
   {
     id: 'infra-01',
-    title: 'Atlas — System Integration & DevOps',
+    title: 'Atlas — DevOps System',
     role: 'Backend & Infrastructure',
     summary: 'Mission-critical event-driven architecture and automated data pipelines designed for 99.99% uptime and industrial-grade reliability.',
     hero: '/placeholders/infra-hero.png',
-    tags: ['Kubernetes', 'Cloud Infrastructure', 'Automation'],
+    tags: ['Kubernetes', 'Cloud', 'Automation'],
     href: 'https://example.com/atlas',
   },
 ];
@@ -108,9 +108,9 @@ const FALLBACK_GALLERY = [
   { id: 'g1', title: 'Mobile App', image: '/placeholders/g1.png', href: 'https://example.com/mobile' },
   { id: 'g2', title: 'E-commerce', image: '/placeholders/g2.png', href: 'https://example.com/ecommerce' },
   { id: 'g3', title: 'Internal CRM', image: '/placeholders/g3.png', href: 'https://example.com/crm' },
-  { id: 'g4', title: 'Analytics Dashboard', image: '/placeholders/g4.png', href: 'https://example.com/analytics' },
+  { id: 'g4', title: 'Analytics', image: '/placeholders/g4.png', href: 'https://example.com/analytics' },
   { id: 'g5', title: 'Design System', image: '/placeholders/g5.png', href: 'https://example.com/design' },
-  { id: 'g6', title: 'Automation Suite', image: '/placeholders/g6.png', href: 'https://example.com/automation' },
+  { id: 'g6', title: 'Automation', image: '/placeholders/g6.png', href: 'https://example.com/automation' },
 ];
 
 /* -------------------- Resilient client Image helper -------------------- */
@@ -238,7 +238,6 @@ export default function PortfolioPage() {
 
         setError(null);
 
-        // IMPORTANT: refresh triggers after backend data paints
         requestAnimationFrame(() => {
           try {
             ScrollTrigger.refresh();
@@ -249,7 +248,6 @@ export default function PortfolioPage() {
         if (err.name === 'AbortError') return;
         console.error('Portfolio fetch error:', err);
         setError('Unable to load portfolio — showing local examples.');
-
         requestAnimationFrame(() => {
           try {
             ScrollTrigger.refresh();
@@ -262,17 +260,17 @@ export default function PortfolioPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#fbf8f5] text-slate-900">
+    <main className="min-h-screen bg-[#fbf8f5] text-slate-900 overflow-x-hidden">
       <Hero />
-      <section className="max-w-7xl mx-auto px-6 py-28">
+      <section className="max-w-7xl mx-auto px-6 py-16 lg:py-28">
         {loading && <div className="text-sm text-slate-500 mb-4">Loading portfolio…</div>}
         {error && <div className="text-sm text-amber-600 mb-4">{error}</div>}
         <FeaturedList projects={projects} />
       </section>
-      <section className="max-w-7xl mx-auto px-6 pb-24">
+      <section className="max-w-7xl mx-auto px-6 pb-16 lg:pb-24">
         <GalleryGrid items={galleryItems} />
       </section>
-      <section className="max-w-7xl mx-auto px-6 pb-32">
+      <section className="max-w-7xl mx-auto px-6 pb-20 lg:pb-32">
         <CTA
           title="Partner with us for your next digital milestone"
           subtitle="We engineer high-performance web applications and cloud infrastructure designed for global scalability and absolute reliability."
@@ -286,8 +284,6 @@ export default function PortfolioPage() {
   );
 }
 
-// ... (Internal Hero definition)
-// ... (Internal Hero definition)
 function Hero() {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
@@ -319,7 +315,7 @@ function Hero() {
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!isRevealed) return; // Wait for reveal
+    if (!isRevealed) return;
 
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -328,15 +324,12 @@ function Hero() {
 
       if (titleRef.current) {
         const lines = titleRef.current.querySelectorAll('.reveal-line > span');
-        // Note: opacity:0 visibility:hidden set in render
-
         if (!prefersReduce) {
           tl.fromTo(lines,
             { y: 36, autoAlpha: 0, filter: 'blur(8px)', transformOrigin: 'center left' },
             { y: 0, autoAlpha: 1, filter: 'blur(0px)', duration: 2.1, stagger: 0.34, ease: 'power3.out', clearProps: 'filter' },
             0.08
           );
-
           tl.fromTo(
             titleRef.current.querySelectorAll('.reveal-line:nth-child(2) > span'),
             { x: 8 },
@@ -349,7 +342,6 @@ function Hero() {
       }
 
       if (floatRef.current && wrapRef.current && !prefersReduce) {
-        // ensure visibility for animation start
         gsap.set(floatRef.current, { autoAlpha: 1 });
 
         const floatTL = gsap.timeline({ repeat: -1, yoyo: true });
@@ -397,14 +389,14 @@ function Hero() {
     }, wrapRef);
 
     return () => ctx.revert();
-  }, [isRevealed]); // Added dependency
+  }, [isRevealed]);
 
   return (
-    <section className="relative overflow-hidden pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-6 flex items-start gap-12 mt-10">
-        <div className="w-1/2">
+    <section className="relative overflow-hidden pt-12 pb-12 lg:pt-20">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-12 mt-6 lg:mt-10">
+        <div className="w-full lg:w-1/2 relative z-10">
           <p className="text-sm text-slate-500 uppercase mb-4">Our Work</p>
-          <h1 ref={titleRef} className="font-extrabold text-[54px] leading-[0.95] text-[#0b2b57] max-w-2xl">
+          <h1 ref={titleRef} className="font-extrabold text-4xl md:text-5xl lg:text-[54px] leading-[1.1] lg:leading-[0.95] text-[#0b2b57] max-w-2xl">
             <span className="reveal-line block overflow-hidden">
               <span style={{ opacity: 0, visibility: 'hidden' }}>We craft websites & platforms</span>
             </span>
@@ -412,10 +404,10 @@ function Hero() {
               <span style={{ opacity: 0, visibility: 'hidden' }}>that scale - engineered to perform.</span>
             </span>
           </h1>
-          <p className="mt-6 text-slate-600 max-w-xl">
+          <p className="mt-6 text-slate-600 max-w-xl text-base lg:text-lg">
             Product-first engineering for web, mobile, and cloud infrastructure. From UX to backend, we ship resilient, maintainable systems.
           </p>
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex flex-wrap gap-4">
             <a className="hero-cta inline-flex items-center gap-3 bg-[#0b2b57] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-shadow transform-gpu will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               Start a project →
             </a>
@@ -425,13 +417,12 @@ function Hero() {
           </div>
         </div>
 
-        <div ref={wrapRef} className="w-1/2 relative">
-          <div ref={floatRef} className="relative ml-auto w-[520px] h-[260px]" style={{ visibility: 'visible' }}>
-            <div className="absolute right-0 top-0 bottom-0 w-[420px] h-[260px] rounded-2xl overflow-hidden shadow-2xl ">
+        <div ref={wrapRef} className="w-full lg:w-1/2 relative flex justify-center lg:block">
+          <div ref={floatRef} className="relative w-full max-w-[500px] lg:max-w-none aspect-[16/10] lg:w-[520px] lg:h-[260px] lg:ml-auto" style={{ visibility: 'visible' }}>
+            <div className="absolute inset-0 lg:right-0 lg:left-auto lg:top-0 lg:bottom-0 lg:w-[420px] lg:h-[260px] rounded-2xl overflow-hidden shadow-2xl">
               <Image src="/portfolio/portfoliohero.png" alt="hero device" width={1200} height={800} className="object-cover object-top w-full h-full" />
             </div>
           </div>
-
           <div className="pointer-events-none absolute -inset-6 rounded-3xl blur-3xl opacity-30 bg-gradient-to-tr from-[#f7f5f3] to-[#fff]" />
         </div>
       </div>
@@ -439,16 +430,13 @@ function Hero() {
   );
 }
 
-/* -------------------- FEATURED LIST (backend-safe animations) -------------------- */
 function FeaturedList({ projects }: { projects: any[] }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { isRevealed } = useReveal();
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!containerRef.current) return;
-    if (!projects || projects.length === 0) return;
-    if (!isRevealed) return; // wait
+    if (!containerRef.current || !projects.length || !isRevealed) return;
 
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -465,10 +453,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
 
           if (!mask || !image || !text) return;
 
-          // Initial state is handled via inline styles in render generally, but for dynamic lists we might rely on fromTo immediately if in view
-          if (!prefersReduce) {
-            // fromTo will handle it
-          } else {
+          if (prefersReduce) {
             gsap.set([mask, image, shadow, text, visit].filter(Boolean), { clearProps: 'all' });
           }
 
@@ -502,34 +487,27 @@ function FeaturedList({ projects }: { projects: any[] }) {
               visit.classList.add('show-shimmer');
               gsap.to(visit, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'back.out(1.8)' });
             };
-
             const hideBtn = () => {
               visit.classList.remove('show-shimmer');
               gsap.to(visit, { autoAlpha: 0, scale: 0.85, duration: 0.3, ease: 'power2.inOut' });
             };
-
             section.addEventListener('pointerenter', showBtn);
             section.addEventListener('pointerleave', hideBtn);
-
             (section as any).__btnCleanup = () => {
               section.removeEventListener('pointerenter', showBtn);
               section.removeEventListener('pointerleave', hideBtn);
             };
           }
         });
-
         ScrollTrigger.refresh();
       }, containerRef);
-
       return () => ctx.revert();
     });
 
     return () => {
       cancelAnimationFrame(raf);
-
       const sections = containerRef.current?.querySelectorAll('.project-section') || [];
       sections.forEach((section: any) => section.__btnCleanup && section.__btnCleanup());
-
       ScrollTrigger.getAll().forEach((t) => {
         const trg = (t as any).trigger as Element | undefined;
         if (trg && containerRef.current?.contains(trg)) t.kill(true);
@@ -538,10 +516,10 @@ function FeaturedList({ projects }: { projects: any[] }) {
   }, [projects, isRevealed]);
 
   return (
-    <div ref={containerRef} className="space-y-28">
+    <div ref={containerRef} className="space-y-16 lg:space-y-28">
       {projects.map((p, idx) => (
-        <article key={p.id} className="project-section grid grid-cols-12 gap-8 items-center">
-          <div className={`col-span-7 ${idx % 2 === 1 ? 'order-last' : ''}`}>
+        <article key={p.id} className="project-section grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
+          <div className={`col-span-1 lg:col-span-7 ${idx % 2 === 1 ? 'lg:order-last' : ''}`}>
             <div className="relative will-change-transform">
               <div className="image-mask rounded-3xl overflow-hidden relative">
                 <ResilientImage
@@ -549,29 +527,27 @@ function FeaturedList({ projects }: { projects: any[] }) {
                   alt={p.title}
                   width={1300}
                   height={760}
-                  className="project-image object-cover w-full h-[420px]"
-                  sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                  className="project-image object-cover w-full h-[280px] sm:h-[350px] lg:h-[420px]"
+                  sizes="(min-width:1024px) 60vw, 100vw"
                 />
-
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="pointer-events-auto">
                     <VisitButton href={p.href} label={`Visit ${p.title}`} />
                   </div>
                 </div>
               </div>
-
               <div className="image-shadow absolute inset-0 rounded-3xl pointer-events-none" />
             </div>
           </div>
 
-          <div className="col-span-5">
-            <div className="project-text max-w-xl" style={{ opacity: 0 }}>
+          <div className="col-span-1 lg:col-span-5">
+            <div className="project-text max-w-xl mx-auto lg:mx-0" style={{ opacity: 0 }}>
               <p className="text-sm text-slate-500 uppercase">Featured project</p>
-              <h2 className="mt-4 text-3xl font-semibold text-[#0b2b57]">{p.title}</h2>
-              <p className="mt-4 text-slate-600">{p.summary}</p>
-              <div className="mt-6 flex flex-wrap gap-2">
+              <h2 className="mt-2 lg:mt-4 text-2xl lg:text-3xl font-semibold text-[#0b2b57]">{p.title}</h2>
+              <p className="mt-3 lg:mt-4 text-slate-600 text-sm lg:text-base">{p.summary}</p>
+              <div className="mt-4 lg:mt-6 flex flex-wrap gap-2">
                 {p.tags.map((t: string) => (
-                  <span key={t} className="text-xs px-3 py-1 rounded-full bg-slate-100">
+                  <span key={t} className="text-xs px-3 py-1 rounded-full bg-slate-100 border border-slate-200/50">
                     {t}
                   </span>
                 ))}
@@ -584,30 +560,33 @@ function FeaturedList({ projects }: { projects: any[] }) {
   );
 }
 
-/* -------------------- GALLERY GRID (backend-safe animations) -------------------- */
 function GalleryGrid({ items }: { items: any[] }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!rootRef.current) return;
-    if (!items || items.length === 0) return;
+    if (!rootRef.current || !items.length) return;
 
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.innerWidth < 768;
 
     const raf = requestAnimationFrame(() => {
       const ctx = gsap.context(() => {
         const cards = gsap.utils.toArray<HTMLElement>('.card-3d');
-
+        
         if (!prefersReduce) {
-          gsap.set(cards, { autoAlpha: 0, y: 24, scale: 0.99 });
+          gsap.set(cards, { autoAlpha: 0, y: 32, scale: 0.98 });
+          
           cards.forEach((c) => {
             const inner = c.querySelector('.card-inner');
-            if (inner) gsap.set(inner, { rotateX: 8, rotateY: -6, y: 18, scale: 0.986, transformStyle: 'preserve-3d' });
+            if (inner) gsap.set(inner, { rotateX: 8, rotateY: 0, y: 0, scale: 1, transformStyle: 'preserve-3d' });
+            
             const img = c.querySelector('img');
-            if (img) gsap.set(img, { scale: 1.04 });
+            if (img) gsap.set(img, { scale: 1.1 });
+            
             const floating = c.querySelector('.card-floating');
-            if (floating) gsap.set(floating, { y: 18, autoAlpha: 0 });
+            if (floating) gsap.set(floating, { y: 12, autoAlpha: 0 });
+            
             const visit = c.querySelector('.visit-btn-component');
             if (visit) gsap.set(visit, { autoAlpha: 0, scale: 0.78, transformOrigin: 'center' });
           });
@@ -616,75 +595,58 @@ function GalleryGrid({ items }: { items: any[] }) {
         }
 
         const batchTriggers = ScrollTrigger.batch(cards, {
-          start: 'top 92%',
-          batchMax: 8,
+          start: 'top bottom', // Triggers as soon as top of card hits bottom of viewport
+          batchMax: isMobile ? 2 : 8,
+          
           onEnter: (batch) => {
             if (prefersReduce) return;
             const tl = gsap.timeline();
+            
+            tl.to(batch, {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              ease: 'power3.out',
+              stagger: { each: isMobile ? 0.1 : 0.15, from: 'start' } 
+            }, 0);
 
-            tl.to(
-              batch,
-              {
-                autoAlpha: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.95,
-                ease: 'power3.out',
-                stagger: { each: 0.16, from: 'start' },
-              },
-              0
-            );
+            tl.to(batch.map((b: any) => b.querySelector('.card-inner')), {
+              rotateX: 0,
+              duration: 0.8,
+              ease: 'power2.out',
+              stagger: { each: isMobile ? 0.1 : 0.15, from: 'start' }
+            }, 0);
 
-            tl.to(
-              batch.map((b: any) => b.querySelector('.card-inner')),
-              {
-                rotateX: 0,
-                rotateY: 0,
-                y: 0,
-                scale: 1,
-                duration: 0.9,
-                ease: 'expo.out',
-                stagger: { each: 0.16, from: 'start' },
-              },
-              0.04
-            );
+            tl.to(batch.map((b: any) => b.querySelector('img')), {
+              scale: 1,
+              duration: 0.8,
+              ease: 'power3.out',
+              stagger: { each: isMobile ? 0.1 : 0.15, from: 'start' }
+            }, 0);
 
-            tl.to(
-              batch.map((b: any) => b.querySelector('img')),
-              {
-                scale: 1,
-                duration: 0.85,
-                ease: 'power3.out',
-                stagger: { each: 0.16, from: 'start' },
-              },
-              0.04
-            );
-
-            tl.to(
-              batch.map((b: any) => b.querySelector('.card-floating')),
-              {
-                y: 0,
-                autoAlpha: 1,
-                duration: 0.6,
-                ease: 'power3.out',
-                stagger: { each: 0.16, from: 'start' },
-              },
-              0.16
-            );
+            tl.to(batch.map((b: any) => b.querySelector('.card-floating')), {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.5,
+              ease: 'back.out(1.5)',
+              stagger: { each: isMobile ? 0.1 : 0.15, from: 'start' }
+            }, 0.2);
           },
           onLeaveBack: (batch) => {
             if (prefersReduce) return;
-            gsap.to(batch, { autoAlpha: 0, y: 24, duration: 0.6, ease: 'power2.out', stagger: 0.03 });
+            if (!isMobile) {
+               gsap.to(batch, { autoAlpha: 0, y: 32, duration: 0.5, ease: 'power2.in' });
+            }
           },
         });
 
         cards.forEach((card: any) => {
-          if (prefersReduce) return;
+          if (prefersReduce || isMobile) return;
 
           const el = card.querySelector('.card-inner') as HTMLElement | null;
           const img = card.querySelector('img') as HTMLImageElement | null;
           const shine = card.querySelector('.card-shine') as HTMLElement | null;
-          const base = card.querySelector('.card-base') as HTMLElement | null;
           const visit = card.querySelector('.visit-btn-component') as HTMLElement | null;
 
           if (!el || !img) return;
@@ -698,59 +660,48 @@ function GalleryGrid({ items }: { items: any[] }) {
             const r = card.getBoundingClientRect();
             const px = (ev.clientX - r.left) / r.width;
             const py = (ev.clientY - r.top) / r.height;
-            const ry = (px - 0.5) * -16;
-            const rx = (py - 0.5) * 10;
-            const tx = (px - 0.5) * 8;
-            const ty = (py - 0.5) * -6;
-
+            const ry = (px - 0.5) * -12;
+            const rx = (py - 0.5) * 8;
+            
             if (rafId) cancelAnimationFrame(rafId);
             rafId = requestAnimationFrame(() => {
-              lastRX += (rx - lastRX) * 0.18;
-              lastRY += (ry - lastRY) * 0.18;
-              gsap.set(el, { transform: `perspective(1100px) rotateX(${lastRX}deg) rotateY(${lastRY}deg) translate3d(${tx}px, ${ty}px, 0px)`, transformStyle: 'preserve-3d' });
-              gsap.to(img, { z: 20, scale: 1.04, duration: 0.45, ease: 'power3.out' });
-              if (shine) gsap.to(shine, { x: (px - 0.5) * 120, y: (py - 0.5) * -60, duration: 0.6, ease: 'power3.out' });
-              gsap.to(card, { boxShadow: '0 40px 90px rgba(11,42,95,0.14)', duration: 0.45, ease: 'power3.out' });
+              lastRX += (rx - lastRX) * 0.15;
+              lastRY += (ry - lastRY) * 0.15;
+              gsap.set(el, { transform: `perspective(1000px) rotateX(${lastRX}deg) rotateY(${lastRY}deg)`, transformStyle: 'preserve-3d' });
+              if (shine) gsap.to(shine, { x: (px - 0.5) * 80, y: (py - 0.5) * -80, duration: 0.2 });
             });
           };
 
           const onEnter = () => {
-            if (rafId) cancelAnimationFrame(rafId);
-            gsap.to(card, { scale: 1.03, duration: 0.45, ease: 'power3.out' });
-            gsap.to(img, { scale: 1.06, duration: 0.6, ease: 'power3.out' });
-            if (base) gsap.to(base, { y: 10, duration: 0.5, ease: 'power3.out' });
-            if (visit) {
-              visit.classList.add('show-shimmer');
-              gsap.to(visit, { autoAlpha: 1, scale: 1, duration: 0.42, ease: 'back.out(2)' });
-            }
+             if (rafId) cancelAnimationFrame(rafId);
+             gsap.to(card, { scale: 1.02, duration: 0.4, ease: 'power3.out' });
+             gsap.to(img, { scale: 1.05, duration: 0.4, ease: 'power3.out' });
+             if (visit) {
+               visit.classList.add('show-shimmer');
+               gsap.to(visit, { autoAlpha: 1, scale: 1, duration: 0.3 });
+             }
           };
 
           const onLeave = () => {
             if (rafId) cancelAnimationFrame(rafId);
             lastRX = lastRY = 0;
-            gsap.to(el, { transform: 'perspective(1100px) rotateX(0deg) rotateY(0deg) translate3d(0px,0px,0px)', duration: 0.8, ease: 'power3.out' });
-            gsap.to(img, { z: 0, scale: 1, duration: 0.8, ease: 'power3.out' });
-            if (shine) gsap.to(shine, { x: 0, y: 0, duration: 0.9, ease: 'power3.out' });
-            gsap.to(card, { scale: 1, boxShadow: '0 14px 40px rgba(11,42,95,0.06)', duration: 0.7, ease: 'power3.out' });
-            if (base) gsap.to(base, { y: 0, duration: 0.6, ease: 'power3.out' });
+            gsap.to(el, { transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)', duration: 0.6, ease: 'power3.out' });
+            gsap.to(card, { scale: 1, duration: 0.6, ease: 'power3.out' });
+            gsap.to(img, { scale: 1, duration: 0.6, ease: 'power3.out' });
             if (visit) {
-              visit.classList.remove('show-shimmer');
-              gsap.to(visit, { autoAlpha: 0, scale: 0.78, duration: 0.38, ease: 'power2.inOut' });
-            }
+               visit.classList.remove('show-shimmer');
+               gsap.to(visit, { autoAlpha: 0, scale: 0.78, duration: 0.3 });
+             }
           };
 
           card.addEventListener('pointermove', onMove as any, { passive: true } as any);
           card.addEventListener('pointerenter', onEnter);
           card.addEventListener('pointerleave', onLeave);
-          card.addEventListener('focus', onEnter);
-          card.addEventListener('blur', onLeave);
-
+          
           (card as any).__remReveal = () => {
             card.removeEventListener('pointermove', onMove as any);
             card.removeEventListener('pointerenter', onEnter);
             card.removeEventListener('pointerleave', onLeave);
-            card.removeEventListener('focus', onEnter);
-            card.removeEventListener('blur', onLeave);
             if (rafId) cancelAnimationFrame(rafId);
           };
         });
@@ -763,10 +714,8 @@ function GalleryGrid({ items }: { items: any[] }) {
           cardsNow.forEach((c: any) => c.__remReveal && c.__remReveal());
         };
       }, rootRef);
-
       return () => ctx.revert();
     });
-
     return () => cancelAnimationFrame(raf);
   }, [items]);
 
@@ -777,63 +726,53 @@ function GalleryGrid({ items }: { items: any[] }) {
         <p className="text-slate-600 mt-2">Selected projects across web & infra.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12">
         {items.map((it) => (
           <article
             key={it.id}
             className="card-3d relative will-change-transform"
             tabIndex={0}
             aria-labelledby={`gallery-${it.id}-title`}
-            data-image={String(it.image)}
           >
-            <div className="card-inner relative rounded-3xl overflow-visible" style={{ perspective: 1100 }}>
-              <div className="card-base absolute left-1/2 -translate-x-1/2 bottom-0 w-[86%] h-6 bg-gradient-to-t from-black/6 to-transparent rounded-2xl pointer-events-none transform-gpu" />
-              <div className="relative z-10 rounded-2xl bg-white" style={{ transformStyle: 'preserve-3d' }}>
+            <div className="card-inner relative rounded-3xl overflow-visible" style={{ perspective: 1000 }}>
+              <div className="relative z-10 rounded-2xl bg-white shadow-sm border border-slate-100" style={{ transformStyle: 'preserve-3d' }}>
                 <div className="relative rounded-2xl overflow-hidden" style={{ transform: 'translateZ(0px)' }}>
                   <div className="relative w-full h-[260px] md:h-64 lg:h-56">
-                    {(() => {
-                      const src = typeof it.image === 'string' && it.image ? it.image : '/placeholders/g1.png';
-                      return <ResilientImage src={src} alt={it.title} />;
-                    })()}
+                    <ResilientImage src={typeof it.image === 'string' && it.image ? it.image : '/placeholders/g1.png'} alt={it.title} />
                   </div>
-
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  
+                  <div className="hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none">
                     <div className="pointer-events-auto">
                       <VisitButton href={it.href ?? '#'} label={`Visit ${it.title}`} />
                     </div>
                   </div>
 
                   <div
-                    className="card-shine pointer-events-none absolute -left-24 -top-24 w-56 h-56 rounded-full opacity-14 mix-blend-screen filter blur-3xl"
+                    className="card-shine pointer-events-none absolute -left-24 -top-24 w-56 h-56 rounded-full opacity-0 lg:opacity-14 mix-blend-screen filter blur-3xl"
                     style={{
                       background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.12) 40%, rgba(255,255,255,0) 60%)',
-                      transform: 'translate3d(0px,0px,80px)',
                       zIndex: 20,
                     }}
                   />
                 </div>
 
-                <div className="card-floating absolute left-6 right-6 -bottom-10 bg-white/90 backdrop-blur-sm border border-white/60 rounded-xl p-4 shadow-md z-30">
+                <div className="card-floating absolute left-4 right-4 -bottom-10 bg-white/95 backdrop-blur-md border border-white/60 rounded-xl p-4 shadow-lg z-30">
                   <div className="flex items-center">
                     <div>
-                      <h4 id={`gallery-${it.id}-title`} className="text-sm font-medium text-slate-800">
+                      <h4 id={`gallery-${it.id}-title`} className="text-sm font-bold text-slate-800 line-clamp-1">
                         {it.title}
                       </h4>
                       <p className="text-xs text-slate-500 mt-1">Case study • UI/UX</p>
                     </div>
-                    <div className="ml-auto flex items-center gap-3">
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#0b2b57]/8 text-[#0b2b57]">Featured</span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" className="text-slate-400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 12h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M12 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    <div className="ml-auto">
+                         <a href={it.href ?? '#'} className="lg:hidden flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-[#0b2b57]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+                         </a>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-[-22px] w-[78%] h-4 rounded-2xl bg-gradient-to-t from-black/8 to-transparent blur-lg opacity-60 pointer-events-none" />
-
+              
               <a className="absolute inset-0 z-40 rounded-3xl focus:outline-none" href={it.href ?? '#'} aria-label={`Open ${it.title}`} />
             </div>
           </article>

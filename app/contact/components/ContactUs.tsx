@@ -137,27 +137,27 @@ export default function ContactPage() {
 
         {/* RIGHT – INFO */}
         <div className="reveal flex flex-col gap-10" style={{ opacity: 0, visibility: 'hidden' }}>
-          <div className="glass-card">
-            <h3 className="section-title">What happens next</h3>
-            <div className="timeline">
-              <div className="step">
-                <span>01</span>
-                <p>We review your request and goals</p>
+          <div className="bg-white/70 backdrop-blur-[18px] rounded-[28px] p-[28px] shadow-[0_30px_90px_rgba(0,0,0,0.06)]">
+            <h3 className="text-lg font-bold text-[#0b2a5f]">What happens next</h3>
+            <div className="mt-5 flex flex-col gap-[18px]">
+              <div className="flex gap-4 items-start">
+                <span className="font-bold text-[#1f6fe6]">01</span>
+                <p className="text-slate-600 text-sm">We review your request and goals</p>
               </div>
-              <div className="step">
-                <span>02</span>
-                <p>A short discovery call</p>
+              <div className="flex gap-4 items-start">
+                <span className="font-bold text-[#1f6fe6]">02</span>
+                <p className="text-slate-600 text-sm">A short discovery call</p>
               </div>
-              <div className="step">
-                <span>03</span>
-                <p>Clear scope, timeline & pricing</p>
+              <div className="flex gap-4 items-start">
+                <span className="font-bold text-[#1f6fe6]">03</span>
+                <p className="text-slate-600 text-sm">Clear scope, timeline & pricing</p>
               </div>
             </div>
           </div>
 
-          <div className="glass-card">
-            <h3 className="section-title">Why work with us</h3>
-            <ul className="trust-list">
+          <div className="bg-white/70 backdrop-blur-[18px] rounded-[28px] p-[28px] shadow-[0_30px_90px_rgba(0,0,0,0.06)]">
+            <h3 className="text-lg font-bold text-[#0b2a5f]">Why work with us</h3>
+            <ul className="mt-4 flex flex-col gap-2.5 text-sm text-slate-600">
               <li>✔ Product-focused engineering</li>
               <li>✔ Clear communication</li>
               <li>✔ Scalable, future-ready solutions</li>
@@ -165,83 +165,13 @@ export default function ContactPage() {
             </ul>
           </div>
 
-          <div className="soft-contact">
-            <p>Prefer a direct conversation?</p>
-            <div className="contact-row">📧 hello@y.com</div>
-            <div className="contact-row">📞 +91 </div>
+          <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1f6fe614] to-[#0b2a5f14]">
+            <p className="font-semibold text-[#0b2a5f] mb-3">Prefer a direct conversation?</p>
+            <div className="text-sm text-slate-700">📧 intasolutionpvtltd@gmail.com</div>
+            <div className="text-sm text-slate-700">📞 +91 9447595381</div>
           </div>
         </div>
       </section>
-
-      {/* ---------------- STYLES ---------------- */}
-      <style jsx>{`
-        .glass-card {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(18px);
-          border-radius: 28px;
-          padding: 28px;
-          box-shadow: 0 30px 90px rgba(0, 0, 0, 0.06);
-        }
-
-        .section-title {
-          font-size: 18px;
-          font-weight: 700;
-          color: #0b2a5f;
-        }
-
-        .timeline {
-          margin-top: 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 18px;
-        }
-
-        .step {
-          display: flex;
-          gap: 16px;
-          align-items: flex-start;
-        }
-
-        .step span {
-          font-weight: 700;
-          color: #1f6fe6;
-        }
-
-        .step p {
-          color: #475569;
-          font-size: 14px;
-        }
-
-        .trust-list {
-          margin-top: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          font-size: 14px;
-          color: #475569;
-        }
-
-        .soft-contact {
-          padding: 24px;
-          border-radius: 24px;
-          background: linear-gradient(
-            180deg,
-            rgba(31, 111, 230, 0.08),
-            rgba(11, 42, 95, 0.08)
-          );
-        }
-
-        .soft-contact p {
-          font-weight: 600;
-          color: #0b2a5f;
-          margin-bottom: 12px;
-        }
-
-        .contact-row {
-          font-size: 14px;
-          color: #334155;
-        }
-      `}</style>
     </main>
   );
 }
