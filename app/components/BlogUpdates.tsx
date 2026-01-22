@@ -65,15 +65,15 @@ export default function BlogUpdates() {
         // Assuming backend returns { id, title, date, tag, image, ... }
         if (Array.isArray(data) && data.length > 0) {
           const mapped = data.map((item: any) => {
-            let img = item.image || '/images/blog-placeholder.jpg';
-            // If it's a relative path from django, prepend backend url
-            if (img.startsWith('/media/')) {
-              if (img.startsWith('http')) {
-                // img is already absolute
-              } else {
-                 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-                 img = `${apiBase}${img}`;
-              }
+            // Robust URL handling
+            let img = item.image;
+            if (!img) img = '/images/blog-placeholder.jpg';
+            else if (img.startsWith('/')) img = `${apiBase}${img}`;
+            else if (img.includes('localhost') || img.includes('127.0.0.1')) {
+               try {
+                 const url = new URL(img);
+                 img = `${apiBase}${url.pathname}${url.search}`;
+               } catch {}
             }
             return {
               id: item.id.toString(),

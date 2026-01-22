@@ -50,7 +50,18 @@ export default function TestimonialSlider() {
             name: item.name,
             role: item.role || '',
             quote: item.quote,
-            avatar: item.avatar ? (item.avatar.startsWith('http') ? item.avatar : `${apiBase}${item.avatar}`) : undefined,
+            avatar: (() => {
+              const a = item.avatar;
+              if (!a) return undefined;
+              if (a.startsWith('/')) return `${apiBase}${a}`;
+              if (a.includes('localhost') || a.includes('127.0.0.1')) {
+                 try {
+                   const url = new URL(a);
+                   return `${apiBase}${url.pathname}${url.search}`;
+                 } catch { return a; }
+              }
+              return a;
+            })(),
             company: item.company || '',
           }));
           setData(mapped);

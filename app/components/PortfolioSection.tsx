@@ -94,9 +94,21 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
           .sort((a, b) => a.order - b.order)
           .map(p => ({
             ...p,
-            hero: p.hero
-              ? p.hero.startsWith('http') ? p.hero : `${apiBase}${p.hero}`
-              : '/placeholders/g1.png',
+            hero: (() => {
+              const h = p.hero;
+              if (!h) return '/placeholders/g1.png';
+              // If relative, prepend API base
+              if (h.startsWith('/')) return `${apiBase}${h}`;
+              // If absolute but points to localhost, rewrite it
+              if (h.includes('localhost') || h.includes('127.0.0.1')) {
+                 try {
+                   const url = new URL(h);
+                   return `${apiBase}${url.pathname}${url.search}`;
+                 } catch { return h; }
+              }
+              // Otherwise (e.g. S3 or correct domain) keep it
+              return h;
+            })(),
           }));
         setProjects(cleaned);
       } catch (err) {
