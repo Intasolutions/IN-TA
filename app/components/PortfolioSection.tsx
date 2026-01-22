@@ -83,11 +83,9 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const backend = `${protocol}//${hostname}:8000`;
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-        const res = await fetch(`${backend}/api/portfolio/projects/`);
+        const res = await fetch(`${apiBase}/api/portfolio/projects/`);
         if (!res.ok) throw new Error('Failed to fetch projects');
 
         const data: Project[] = await res.json();
@@ -97,7 +95,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
           .map(p => ({
             ...p,
             hero: p.hero
-              ? p.hero.startsWith('http') ? p.hero : `${backend}${p.hero}`
+              ? p.hero.startsWith('http') ? p.hero : `${apiBase}${p.hero}`
               : '/placeholders/g1.png',
           }));
         setProjects(cleaned);
