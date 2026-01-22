@@ -35,6 +35,15 @@ urlpatterns = [
 ]
 
 # Serve media files during development
+from django.urls import re_path
+from django.views.static import serve
+
+# Serve media files (works in both DEBUG=True and False if configured this way)
+# Note: In high-traffic production, serving media via Nginx/Apache/S3 is recommended.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
+# For static files during development
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
