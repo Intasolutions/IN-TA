@@ -38,11 +38,9 @@ export default function TestimonialSlider() {
       try {
         // Construct backend URL dynamically based on current hostname
         // This assumes backend is always on port 8000 of the same host
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const backendUrl = `${protocol}//${hostname}:8000`;
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-        const res = await fetch(`${backendUrl}/api/home/testimonials/`);
+        const res = await fetch(`${apiBase}/api/home/testimonials/`);
         if (!res.ok) throw new Error('Failed to fetch');
         const json = await res.json();
         if (Array.isArray(json) && json.length > 0) {
@@ -52,7 +50,7 @@ export default function TestimonialSlider() {
             name: item.name,
             role: item.role || '',
             quote: item.quote,
-            avatar: item.avatar ? (item.avatar.startsWith('http') ? item.avatar : `${backendUrl}${item.avatar}`) : undefined,
+            avatar: item.avatar ? (item.avatar.startsWith('http') ? item.avatar : `${apiBase}${item.avatar}`) : undefined,
             company: item.company || '',
           }));
           setData(mapped);
