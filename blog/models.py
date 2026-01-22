@@ -19,6 +19,11 @@ class Blog(models.Model):
 
 class Subscriber(models.Model):
     INTEREST_CHOICES = [
+        ('Enterprise Web Solutions', 'Enterprise Web Solutions'),
+        ('Mobile App Development', 'Mobile App Development'),
+        ('UI/UX Design Strategy', 'UI/UX Design Strategy'),
+        ('System Architecture', 'System Architecture'),
+        # Legacy support if needed, but for now we align with frontend
         ('Web Development', 'Web Development'),
         ('UI/UX Design', 'UI/UX Design'),
         ('App Development', 'App Development'),

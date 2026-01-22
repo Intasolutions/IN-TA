@@ -22,10 +22,31 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
     setLoading(true);
     setError(null);
 
-    // Simulate API call - User can replace this with actual logic
     try {
-      // Mock network request
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+      
+      // Prepend topic to message since backend has no topic field
+      const fullMessage = `[Topic: ${topic}]\n\n${message}`;
+
+      const res = await fetch(`${apiBase}/api/contact/messages/`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          country,
+          message: fullMessage,
+          source: 'Website Contact Page',
+          is_request: true
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`Submission failed: ${res.statusText}`);
+      }
 
       // Success
       if (onSuccess) onSuccess();
@@ -38,7 +59,8 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       setCountry('');
       setTopic('Custom Software');
     } catch (err) {
-      setError('Something went wrong. Please try again.');
+      console.error(err);
+      setError('Something went wrong. Please try again later.');
     } finally {
       setLoading(false);
     }
