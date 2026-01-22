@@ -192,7 +192,7 @@ export default function PortfolioPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
     setLoading(true);
     const aborter = new AbortController();
 

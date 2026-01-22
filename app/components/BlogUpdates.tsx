@@ -56,7 +56,8 @@ export default function BlogUpdates() {
   useEffect(() => {
     async function fetchBlogs() {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/blog/posts/');
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+        const res = await fetch(`${apiBase}/api/blog/posts/`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
 
@@ -67,7 +68,12 @@ export default function BlogUpdates() {
             let img = item.image || '/images/blog-placeholder.jpg';
             // If it's a relative path from django, prepend backend url
             if (img.startsWith('/media/')) {
-              img = `http://127.0.0.1:8000${img}`;
+              if (img.startsWith('http')) {
+                // img is already absolute
+              } else {
+                 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+                 img = `${apiBase}${img}`;
+              }
             }
             return {
               id: item.id.toString(),
@@ -325,7 +331,8 @@ export default function BlogUpdates() {
 
     setFormStatus('submitting');
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/blog/subscribe/', {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+      const res = await fetch(`${apiBase}/api/blog/subscribe/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -83,7 +83,7 @@ export default function ServicesPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
         const aborter = new AbortController();
         setLoading(true);
 
