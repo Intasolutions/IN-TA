@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
-    // Allow images served by local Django dev server (useful for development)
     remotePatterns: [
       {
         protocol: "http",
@@ -12,12 +10,30 @@ const nextConfig: NextConfig = {
         pathname: "/media/**",
       },
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8000",
+        protocol: "https",
+        hostname: "in-tasolutions.com",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.in-tasolutions.com",
         pathname: "/media/**",
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        // When you fetch('/api/...') locally, it goes to your EC2 backend
+        source: '/api/:path*',
+        destination: 'https://in-tasolutions.com/api/:path*',
+      },
+      {
+        // When you load images from /media/... locally, it grabs them from EC2
+        source: '/media/:path*',
+        destination: 'https://in-tasolutions.com/media/:path*',
+      },
+    ];
   },
 };
 
