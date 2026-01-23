@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { COUNTRIES } from '../data/countries';
 
 interface ContactFormProps {
@@ -14,6 +14,24 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [csrfToken, setCsrfToken] = useState<string>('');
+
+  useEffect(() => {
+    // Fetch CSRF token on mount
+    const fetchCsrf = async () => {
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+        const res = await fetch(`${apiBase}/api/csrf/`);
+        if (res.ok) {
+          const data = await res.json();
+          setCsrfToken(data.csrfToken);
+        }
+      } catch (e) {
+        console.error('Failed to fetch CSRF token', e);
+      }
+    };
+    fetchCsrf();
+  }, []);
 
   const selectedDial = COUNTRIES.find((c) => c.name === country)?.dial;
 
@@ -31,7 +49,8 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       const res = await fetch(`${apiBase}/api/contact/messages/`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json' 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
           name,

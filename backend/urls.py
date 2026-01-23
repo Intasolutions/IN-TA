@@ -19,6 +19,7 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
+from .csrf_view import get_csrf_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +31,7 @@ urlpatterns = [
     path('api/home/', include('home.urls')),
     path('api/contact/', include('contact.urls')),
     path('api/blog/', include('blog.urls')),
+    path('api/csrf/', get_csrf_token, name='csrf_token'),
     # simple health check
     path('', lambda request: HttpResponse('OK')),
 ]

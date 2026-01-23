@@ -40,7 +40,26 @@ export default function BlogUpdates() {
   const [formName, setFormName] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formInterest, setFormInterest] = useState('Web Development');
+
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [csrfToken, setCsrfToken] = useState<string>('');
+
+  // Fetch CSRF token on mount
+  useEffect(() => {
+    const fetchCsrf = async () => {
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+        const res = await fetch(`${apiBase}/api/csrf/`);
+        if (res.ok) {
+          const data = await res.json();
+          setCsrfToken(data.csrfToken);
+        }
+      } catch (e) {
+        console.error('Failed to fetch CSRF token', e);
+      }
+    };
+    fetchCsrf();
+  }, []);
 
   // Animation refs
   const itemsRef = useRef<HTMLDivElement[]>([]);
@@ -334,7 +353,10 @@ export default function BlogUpdates() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
       const res = await fetch(`${apiBase}/api/blog/subscribe/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
         body: JSON.stringify({
           name: formName,
           phone: formPhone,
