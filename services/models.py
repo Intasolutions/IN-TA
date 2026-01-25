@@ -40,6 +40,8 @@ class Service(models.Model):
     ("video", "Video"),
     ("marketing", "Marketing"),
     ("seo", "SEO"),
+    ("software_development", "Software Development"),
+    ("ai_integration", "AI Integration"),
     ]
 
     icon_key = models.CharField(

@@ -61,6 +61,19 @@ const SEOIcon = () => (
         <path d="M2 12h20M12 2v20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
 );
+const SoftwareDevIcon = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M9 16l-4-4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M15 8l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 4l-4 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+const AIIcon = () => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+);
 
 const getIcon = (key?: string) => {
     switch (key) {
@@ -70,6 +83,8 @@ const getIcon = (key?: string) => {
         case 'video': return <VideoIcon />;
         case 'marketing': return <MarketingIcon />;
         case 'seo': return <SEOIcon />;
+        case 'software_development': return <SoftwareDevIcon />;
+        case 'ai_integration': return <AIIcon />;
         default: return null;
     }
 };
