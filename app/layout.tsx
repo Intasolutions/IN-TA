@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'IN-TA Solutions',
-  description: 'Crafting digital ecosystems with precision, depth, and cinematic fidelity.',
+  description: 'Crafting powerful digital ecosystems with precision and purpose.',
   icons: {
     icon: '/logo/logo.png',
   },

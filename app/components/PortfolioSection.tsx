@@ -355,7 +355,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
 
           <div className="overflow-hidden mt-8 md:mt-10 max-w-lg mx-auto">
             <p className="hero-anim-text text-lg md:text-xl text-blue-200/60 font-light leading-relaxed">
-              Crafting digital ecosystems with precision, depth, and cinematic fidelity.
+              Crafting powerful digital ecosystems with precision and purpose.
             </p>
           </div>
         </div>
