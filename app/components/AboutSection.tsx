@@ -2,6 +2,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -276,8 +277,8 @@ export default function About() {
             </p>
 
             <div className="pt-6 flex justify-center lg:justify-start">
-              <a
-                href="#contact"
+              <Link
+                href="/about"
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-6 py-3 font-semibold shadow-md hover:brightness-110 transition text-sm md:text-base"
               >
                 Our Story
@@ -292,7 +293,7 @@ export default function About() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -310,7 +311,7 @@ export default function About() {
                 </div>
                 <div>
                   <h5 className="font-bold text-slate-900">Strategic Design</h5>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed hyphens-auto break-words">
                     Modular frameworks ensuring visual consistency across your digital ecosystem.
                   </p>
                 </div>
@@ -327,7 +328,7 @@ export default function About() {
                 </div>
                 <div>
                   <h5 className="font-bold text-slate-900">Enterprise Arch.</h5>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed hyphens-auto break-words">
                     Engineered for high-load performance with automated CI/CD workflows.
                   </p>
                 </div>
@@ -344,7 +345,7 @@ export default function About() {
                 </div>
                 <div>
                   <h5 className="font-bold text-slate-900">Data Intelligence</h5>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed hyphens-auto break-words">
                     Integrated analytics providing actionable insights for strategic decisions.
                   </p>
                 </div>
@@ -390,7 +391,7 @@ export default function About() {
                   </div>
                   <div>
                     <div className="how-label font-semibold text-xl text-slate-900">Discover</div>
-                    <p className="how-micro text-slate-600 mt-1 text-sm md:text-base">
+                    <p className="how-micro text-slate-600 mt-1 text-sm md:text-base hyphens-auto break-words">
                       Research, stakeholder interviews and rapid discovery workshops.
                     </p>
                   </div>
@@ -403,7 +404,7 @@ export default function About() {
                   </div>
                   <div>
                     <div className="how-label font-semibold text-xl text-slate-900">Design</div>
-                    <p className="how-micro text-slate-600 mt-1 text-sm md:text-base">
+                    <p className="how-micro text-slate-600 mt-1 text-sm md:text-base hyphens-auto break-words">
                       Wireframes, prototypes and design systems for rapid validation.
                     </p>
                   </div>
@@ -416,7 +417,7 @@ export default function About() {
                   </div>
                   <div>
                     <div className="how-label font-semibold text-xl text-slate-900">Deliver</div>
-                    <p className="how-micro text-slate-600 mt-1 text-sm md:text-base">
+                    <p className="how-micro text-slate-600 mt-1 text-sm md:text-base hyphens-auto break-words">
                       Engineering, testing, and operational handoff with observability.
                     </p>
                   </div>

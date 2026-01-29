@@ -130,9 +130,9 @@ export default function Header() {
               </Link>
             ))}
             
-            <button className="ml-4 px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold uppercase tracking-widest text-white transition-all duration-300 backdrop-blur-sm">
+            <Link href="/contact" className="ml-4 px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold uppercase tracking-widest text-white transition-all duration-300 backdrop-blur-sm">
               Get Started
-            </button>
+            </Link>
           </nav>
 
           {/* BURGER MENU BUTTON */}

@@ -690,7 +690,7 @@ export default function AboutPage() {
                 <div key={step} className="flex flex-col items-center text-center reveal relative overflow-hidden group">
                   <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#0b2a5f] text-white flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform">{i + 1}</div>
                   <div className="mt-3 text-sm font-bold text-slate-900">{step}</div>
-                  <div className="text-xs text-slate-500 mt-1 max-w-[100px] leading-tight opacity-80">Phase {i + 1} details</div>
+                  
                 </div>
               ))}
             </div>

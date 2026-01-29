@@ -598,14 +598,20 @@ const SEOIcon = () => (
 );
 const SoftwareDevIcon = () => (
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M9 16l-4-4 4-4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M15 8l4 4-4 4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M14 4l-4 16" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" stroke="white" strokeWidth="1.6" />
+    <path d="M8 21h8" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 17v4" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M7 8l-2 2 2 2" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M17 8l2 2-2 2" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 const AIIcon = () => (
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-    <circle cx="12" cy="12" r="4" stroke="white" strokeWidth="1.6" />
+    <circle cx="12" cy="12" r="3" stroke="white" strokeWidth="1.6" />
+    <circle cx="5" cy="5" r="2" stroke="white" strokeWidth="1.6" />
+    <circle cx="19" cy="5" r="2" stroke="white" strokeWidth="1.6" />
+    <circle cx="5" cy="19" r="2" stroke="white" strokeWidth="1.6" />
+    <circle cx="19" cy="19" r="2" stroke="white" strokeWidth="1.6" />
+    <path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
   </svg>
 );

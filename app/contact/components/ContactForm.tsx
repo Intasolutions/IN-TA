@@ -147,11 +147,13 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
         >
-          <option>Custom Software</option>
-          <option>Web / App Development</option>
-          <option>Branding & Design</option>
+          <option>Web Development</option>
           <option>Digital Marketing</option>
-          <option>Other</option>
+          <option>Media Production</option>
+          <option>SEO, AEO, GEO</option>
+          <option>Mobile App</option>
+          <option>UI/UX Design</option>
+          <option>AI Integration</option>
         </select>
       </div>
 
