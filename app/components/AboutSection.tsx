@@ -139,33 +139,7 @@ export default function About() {
         }
       );
 
-      // 7. Microtext Animation
-      const microTexts = gsap.utils.toArray<HTMLElement>('.how-micro');
-      microTexts.forEach((el) => {
-        if ((el as HTMLElement).dataset.split === 'true') return;
-        const raw = el.textContent || '';
-        const chars = Array.from(raw).map((ch) => {
-            if (ch === ' ') return '<span class="how-char inline-block mr-[0.2ch]">&nbsp;</span>';
-            return `<span class="how-char inline-block">${ch}</span>`;
-        }).join('');
-        el.innerHTML = chars;
-        (el as HTMLElement).dataset.split = 'true';
-      });
-      
-      const allChars = gsap.utils.toArray<HTMLElement>('.how-micro .how-char');
-      gsap.fromTo(allChars, 
-        { autoAlpha: 0, y: 4 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          stagger: 0.01,
-          duration: 0.3,
-          scrollTrigger: {
-            trigger: '#how-we-work',
-            start: 'top 75%',
-          }
-        }
-      );
+
 
       // 8. Desktop Only: Aside Slide Animation
       // We check window width to ensure we only apply the custom Y translation 
