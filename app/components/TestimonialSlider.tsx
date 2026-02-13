@@ -69,10 +69,6 @@ export default function TestimonialSlider() {
   const [isPlaying, setIsPlaying] = useState(true);
   const prefersReduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const sparkleLayerRef = useRef<HTMLDivElement | null>(null);
-  const sparkleTweens = useRef<gsap.core.Tween[]>([]);
-  const sparkleEls = useRef<HTMLDivElement[]>([]);
-
   // Main Marquee & Floating Animation
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -115,8 +111,8 @@ export default function TestimonialSlider() {
       const cards = Array.from(track.querySelectorAll<HTMLElement>('.ts-card'));
       cards.forEach((card, i) => {
         const t = gsap.to(card, {
-          y: gsap.utils.random(-8, -3),
-          rotation: gsap.utils.random(-0.4, 0.4),
+          y: gsap.utils.random(-6, -2),
+          rotation: gsap.utils.random(-0.3, 0.3),
           duration: gsap.utils.random(2.2 * TEMPO, 3.8 * TEMPO),
           yoyo: true,
           repeat: -1,
@@ -168,11 +164,11 @@ export default function TestimonialSlider() {
     };
   }, [activeTestimonials.length, isPlaying, prefersReduce]);
 
-  // Render Star SVG
+  // Render Star SVG (Slightly smaller)
   const renderStars = () => (
     <div className="flex gap-1">
       {[...Array(5)].map((_, i) => (
-        <svg key={i} className="w-6 h-6 text-[#FFC107]" fill="currentColor" viewBox="0 0 20 20">
+        <svg key={i} className="w-4 h-4 text-[#FFC107]" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
@@ -181,58 +177,50 @@ export default function TestimonialSlider() {
 
   const CardContent = ({ t, isOriginal }: { t: Testimonial; isOriginal?: boolean }) => (
     <article 
-      className={`ts-card ${isOriginal ? 'ts-card-original' : ''} relative w-[340px] md:w-[480px] rounded-[2rem] bg-white p-8 md:p-10 flex flex-col mt-12 mb-16 shadow-2xl shrink-0`}
+      className={`ts-card ${isOriginal ? 'ts-card-original' : ''} relative w-[280px] md:w-[380px] rounded-[1.5rem] bg-white p-6 md:p-8 flex flex-col mt-8 mb-10 shadow-xl shrink-0`}
     >
-      {/* Top Left Quote Icon */}
-      <div className="absolute -top-4 left-4 md:left-8 text-[#5B75F0] text-[6rem] font-serif leading-none select-none drop-shadow-sm z-20">“</div>
+      {/* Top Left Quote Icon (Scaled down) */}
+      <div className="absolute -top-3 left-4 md:left-6 text-[#5B75F0] text-[4rem] font-serif leading-none select-none drop-shadow-sm z-20">“</div>
 
-      {/* Floating Profile Badge */}
-      <div className="absolute -top-7 right-4 md:right-10 bg-[#0B44C9] rounded-[2rem] flex items-center p-1.5 pr-6 shadow-xl z-20 transition-transform hover:scale-105">
-        <div className="w-12 h-12 rounded-full bg-[#051A4D] flex items-center justify-center shrink-0 border-2 border-transparent overflow-hidden">
+      {/* Floating Profile Badge (Scaled down) */}
+      <div className="absolute -top-5 right-3 md:right-6 bg-[#0B44C9] rounded-full flex items-center p-1 pr-5 shadow-lg z-20 transition-transform hover:scale-105">
+        <div className="w-10 h-10 rounded-full bg-[#051A4D] flex items-center justify-center shrink-0 border-2 border-transparent overflow-hidden">
           {t.avatar ? (
-            <Image src={t.avatar} alt={t.name} width={48} height={48} className="object-cover" />
+            <Image src={t.avatar} alt={t.name} width={40} height={40} className="object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-blue-600" />
           )}
         </div>
-        <div className="ml-3 flex flex-col justify-center">
-          <span className="text-white font-bold text-[15px] leading-tight tracking-wide">{t.company || t.name}</span>
-          <span className="text-blue-200 text-sm leading-tight mt-0.5">{t.company ? t.name : t.role}</span>
+        <div className="ml-2.5 flex flex-col justify-center">
+          <span className="text-white font-bold text-[13px] leading-tight tracking-wide">{t.company || t.name}</span>
+          <span className="text-blue-200 text-[11px] leading-tight mt-0.5">{t.company ? t.name : t.role}</span>
         </div>
       </div>
 
-      {/* Quote Body */}
-      <blockquote className="text-[15px] md:text-[17px] text-slate-600 leading-relaxed z-10 relative mt-6 font-medium">
+      {/* Quote Body (Slightly smaller text) */}
+      <blockquote className="text-[14px] md:text-[15px] text-slate-600 leading-relaxed z-10 relative mt-5 font-medium">
         {t.quote}
       </blockquote>
 
       {/* Bottom Section (Stars) */}
-      <div className="mt-8 pt-5 border-t border-slate-200 w-full max-w-[160px]">
+      <div className="mt-6 pt-4 border-t border-slate-100 w-full max-w-[120px]">
         {renderStars()}
       </div>
 
-      {/* Bottom Right Quote Icon */}
-      <div className="absolute -bottom-14 right-10 text-[#5B75F0] text-[6rem] font-serif leading-none select-none drop-shadow-sm z-20">”</div>
+      {/* Bottom Right Quote Icon (Scaled down) */}
+      <div className="absolute -bottom-9 right-6 text-[#5B75F0] text-[4rem] font-serif leading-none select-none drop-shadow-sm z-20">”</div>
     </article>
   );
 
   return (
-    <section ref={wrapRef} className="w-full relative py-20 bg-[#08183A] overflow-hidden" aria-label="Client testimonials">
-      
-      {/* Abstract Background Faint Circular Patterns */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
-        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] rounded-full border-[1px] border-blue-400/20" />
-        <div className="absolute top-[10%] left-[-20%] w-[600px] h-[600px] rounded-full border-[1px] border-blue-400/20" />
-        <div className="absolute bottom-[-30%] right-[20%] w-[1000px] h-[1000px] rounded-full border-[1px] border-blue-400/20" />
-      </div>
-
+    <section ref={wrapRef} className="w-full relative py-12 bg-transparent overflow-hidden" aria-label="Client testimonials">
       <div className="relative z-10 w-full flex flex-col items-center">
         
-        {/* Marquee Wrapper */}
-        <div className="relative mt-4 w-full">
+        {/* Marquee Wrapper with transparent fade masks */}
+        <div className="relative w-full">
           <div className="marquee-wrap mx-auto w-full">
             <div className="relative overflow-visible max-w-full">
-              <div ref={trackRef} className="flex gap-10 items-stretch will-change-transform px-10" style={{ touchAction: 'pan-y' }}>
+              <div ref={trackRef} className="flex gap-8 items-stretch will-change-transform px-8" style={{ touchAction: 'pan-y' }}>
                 
                 {/* Original set */}
                 {activeTestimonials.map((t) => (
@@ -249,16 +237,6 @@ export default function TestimonialSlider() {
           </div>
         </div>
 
-        {/* Footer Area (Website & Phone matching Screenshot) */}
-        <div className="w-full max-w-6xl mx-auto px-8 mt-4 flex justify-between items-center text-blue-300 text-sm md:text-base font-medium">
-           <div className="flex items-center gap-2">
-             <span>🌐</span> www.in-tasolutions.com
-           </div>
-           <div className="flex items-center gap-2">
-             +91 9447595381 <span>📞</span>
-           </div>
-        </div>
-
       </div>
 
       <style jsx>{`
@@ -266,34 +244,16 @@ export default function TestimonialSlider() {
           transition: transform 300ms cubic-bezier(.2,.9,.2,1), box-shadow 300ms ease; 
         }
         .ts-card:focus-within { 
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
-          transform: translateY(-8px) scale(1.02); 
+          box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15); 
+          transform: translateY(-6px) scale(1.02); 
           outline: none; 
         }
 
-        /* Marquee wrapper with dark mode shades */
+        /* Uses CSS masking for smooth transparent fading on edges instead of hardcoded colors */
         .marquee-wrap {
-          --shade-width: 15vw; 
-          position: relative;
+          -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+          mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
-
-        /* Left and right gradient masks adapted for the dark #08183A background */
-        .marquee-wrap::before,
-        .marquee-wrap::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          width: var(--shade-width);
-          pointer-events: none;
-          z-index: 30;
-          background-image: linear-gradient(90deg, #08183A 0%, transparent 100%);
-        }
-
-        .marquee-wrap::before { left: 0; transform: translateZ(0); }
-        .marquee-wrap::after { right: 0; transform: translateZ(0) rotateY(180deg); }
-
-        .marquee-wrap > .relative { position: relative; z-index: 0; }
 
         @media (prefers-reduced-motion: reduce) {
           .ts-card, .ts-card * { transition: none !important; animation: none !important; transform: none !important; }
