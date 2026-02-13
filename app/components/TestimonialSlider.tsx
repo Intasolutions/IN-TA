@@ -16,7 +16,8 @@ type Testimonial = {
   company?: string;
 };
 
-const TEMPO = 0.60;
+// Increased from 0.60 to 1.0 to slow down the animation duration
+const TEMPO = 1.0;
 
 export default function TestimonialSlider() {
   const [data, setData] = useState<Testimonial[]>([]);
@@ -164,7 +165,6 @@ export default function TestimonialSlider() {
     };
   }, [activeTestimonials.length, isPlaying, prefersReduce]);
 
-  // Render Star SVG (Slightly smaller)
   const renderStars = () => (
     <div className="flex gap-1">
       {[...Array(5)].map((_, i) => (
@@ -179,10 +179,8 @@ export default function TestimonialSlider() {
     <article 
       className={`ts-card ${isOriginal ? 'ts-card-original' : ''} relative w-[280px] md:w-[380px] rounded-[1.5rem] bg-white p-6 md:p-8 flex flex-col mt-8 mb-10 shadow-xl shrink-0`}
     >
-      {/* Top Left Quote Icon (Scaled down) */}
       <div className="absolute -top-3 left-4 md:left-6 text-[#5B75F0] text-[4rem] font-serif leading-none select-none drop-shadow-sm z-20">“</div>
 
-      {/* Floating Profile Badge (Scaled down) */}
       <div className="absolute -top-5 right-3 md:right-6 bg-[#0B44C9] rounded-full flex items-center p-1 pr-5 shadow-lg z-20 transition-transform hover:scale-105">
         <div className="w-10 h-10 rounded-full bg-[#051A4D] flex items-center justify-center shrink-0 border-2 border-transparent overflow-hidden">
           {t.avatar ? (
@@ -197,37 +195,32 @@ export default function TestimonialSlider() {
         </div>
       </div>
 
-      {/* Quote Body (Slightly smaller text) */}
       <blockquote className="text-[14px] md:text-[15px] text-slate-600 leading-relaxed z-10 relative mt-5 font-medium">
         {t.quote}
       </blockquote>
 
-      {/* Bottom Section (Stars) */}
       <div className="mt-6 pt-4 border-t border-slate-100 w-full max-w-[120px]">
         {renderStars()}
       </div>
 
-      {/* Bottom Right Quote Icon (Scaled down) */}
       <div className="absolute -bottom-9 right-6 text-[#5B75F0] text-[4rem] font-serif leading-none select-none drop-shadow-sm z-20">”</div>
     </article>
   );
 
   return (
-    <section ref={wrapRef} className="w-full relative py-12 bg-transparent overflow-hidden" aria-label="Client testimonials">
+    // Updated background to the soft off-white #F8F9FA
+    <section ref={wrapRef} className="w-full relative py-12 bg-[#F8F9FA] overflow-hidden" aria-label="Client testimonials">
       <div className="relative z-10 w-full flex flex-col items-center">
         
-        {/* Marquee Wrapper with transparent fade masks */}
         <div className="relative w-full">
           <div className="marquee-wrap mx-auto w-full">
             <div className="relative overflow-visible max-w-full">
               <div ref={trackRef} className="flex gap-8 items-stretch will-change-transform px-8" style={{ touchAction: 'pan-y' }}>
                 
-                {/* Original set */}
                 {activeTestimonials.map((t) => (
                   <CardContent key={`a-${t.id}`} t={t} isOriginal={true} />
                 ))}
 
-                {/* Cloned set for infinite loop */}
                 {activeTestimonials.map((t) => (
                   <CardContent key={`b-${t.id}`} t={t} />
                 ))}
@@ -249,7 +242,6 @@ export default function TestimonialSlider() {
           outline: none; 
         }
 
-        /* Uses CSS masking for smooth transparent fading on edges instead of hardcoded colors */
         .marquee-wrap {
           -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
           mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
