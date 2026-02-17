@@ -538,6 +538,7 @@ export default function AboutPage() {
   return (
     <main ref={wrapRef} className="relative bg-[#fbf9f5] min-h-screen pb-20 overflow-x-hidden">
       {/* Background blobs */}
+      {/* Background blobs */}
       <div aria-hidden className="absolute inset-0 -z-20 overflow-hidden">
         <div className="ab-bg-blob absolute left-[-12%] top-[-18%] w-[64%] h-[110%] pointer-events-none opacity-50 md:opacity-100">
           <div style={{ mixBlendMode: 'screen' }} className="w-full h-full rounded-full bg-gradient-to-br from-[#1f6fe6]/10 to-[#0b2a5f]/04 blur-[96px]" />
@@ -597,9 +598,10 @@ export default function AboutPage() {
           <div ref={heroCardRef} className="hero-card relative w-full max-w-md rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-2xl transform-gpu will-change-transform reveal" style={{ opacity: 0, visibility: 'hidden' }}>
             <div ref={heroBlobRef} className="hero-blob absolute -left-12 -top-10 w-44 h-36 rounded-full bg-gradient-to-br from-[#e6f0ff] to-transparent opacity-60 mix-blend-screen blur-2xl pointer-events-none" />
             <div className="relative h-48 md:h-56">
-              <Image src="/about/inta-lobby.png" alt="office" fill className="object-cover" sizes="(min-width:1024px) 35vw, 100vw" />
+              <Image src="/about/inta-lobby.jpeg" alt="office" fill className="object-cover" sizes="(min-width:1024px) 35vw, 100vw" />
             </div>
             <div className="p-5">
+              
               <div className="text-sm text-slate-500">Our studio</div>
               <h3 className="mt-2 text-lg font-semibold text-slate-900">Engineering excellence</h3>
               <p className="mt-2 text-sm text-slate-600">Design systems, high-perf frontends and resilient backend architecture.</p>
