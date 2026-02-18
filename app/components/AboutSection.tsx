@@ -224,7 +224,7 @@ export default function About() {
               className="relative transform -rotate-3 lg:-rotate-5 rounded-2xl overflow-hidden shadow-elev about-reveal z-10 w-full max-w-sm md:max-w-xs lg:max-w-md mx-auto"
             >
               <Image
-                src="/about/inta-lobby.png"
+                src="/about/inta-lobby.jpeg"
                 alt="INTA Office Lobby"
                 width={520}
                 height={1000}

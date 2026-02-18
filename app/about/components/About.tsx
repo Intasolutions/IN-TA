@@ -239,15 +239,15 @@ export default function AboutPage() {
     // Check for reduced motion AND touch devices
     // We disable complex mouse-tracking (tilt/magnetic) on touch devices for performance
     const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    
+
     let media: MediaQueryList | null = null;
     const onMediaChange = (e: MediaQueryListEvent) => setPrefersReduce(!!e.matches);
-    
+
     try {
       media = window.matchMedia('(prefers-reduced-motion: reduce)');
       // If user wants reduced motion OR it's a touch device, simplified mode is on
       setPrefersReduce(!!media.matches || isTouch);
-      
+
       if (media.addEventListener) media.addEventListener('change', onMediaChange);
       else if ((media as any).addListener) (media as any).addListener(onMediaChange);
     } catch {
@@ -294,7 +294,7 @@ export default function AboutPage() {
         }
       }
       ScrollTrigger.refresh(true);
-      
+
       const heroEls = gsap.utils.toArray<HTMLElement>('.ab-hero .reveal');
       heroEls.forEach((el) => {
         const rect = el.getBoundingClientRect();
@@ -314,15 +314,15 @@ export default function AboutPage() {
           start: 'top 92%',
           onEnter: () => {
             if (prefersReduce) { label.textContent = String(s.value) + (s.label === 'Projects' || s.label === 'Years' ? '+' : ''); return; }
-            gsap.fromTo(obj, { v: 0 }, { 
-              v: s.value, 
-              duration: 1.2, 
-              ease: 'power2.out', 
-              onUpdate: () => { 
+            gsap.fromTo(obj, { v: 0 }, {
+              v: s.value,
+              duration: 1.2,
+              ease: 'power2.out',
+              onUpdate: () => {
                 let val = String(Math.floor(obj.v));
-                if(s.label === 'Projects' || s.label === 'Years') val += '+';
-                label.textContent = val; 
-              } 
+                if (s.label === 'Projects' || s.label === 'Years') val += '+';
+                label.textContent = val;
+              }
             });
           },
         });
@@ -601,7 +601,7 @@ export default function AboutPage() {
               <Image src="/about/inta-lobby.jpeg" alt="office" fill className="object-cover" sizes="(min-width:1024px) 35vw, 100vw" />
             </div>
             <div className="p-5">
-              
+
               <div className="text-sm text-slate-500">Our studio</div>
               <h3 className="mt-2 text-lg font-semibold text-slate-900">Engineering excellence</h3>
               <p className="mt-2 text-sm text-slate-600">Design systems, high-perf frontends and resilient backend architecture.</p>
@@ -692,7 +692,7 @@ export default function AboutPage() {
                 <div key={step} className="flex flex-col items-center text-center reveal relative overflow-hidden group">
                   <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#0b2a5f] text-white flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform">{i + 1}</div>
                   <div className="mt-3 text-sm font-bold text-slate-900">{step}</div>
-                  
+
                 </div>
               ))}
             </div>
