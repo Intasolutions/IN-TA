@@ -37,7 +37,7 @@ export default function Footer() {
 
             <div className="mt-8 flex items-center gap-3">
               <a
-                href="mailto:intasolutionspvtltd@gmail.com"
+                href="mailto:info@in-tasolutions.com"
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition-all focus:outline-none"
                 aria-label="Email us"
               >
@@ -45,7 +45,7 @@ export default function Footer() {
                   <path d="M3 7.5v9A2.5 2.5 0 0 0 5.5 19h13a2.5 2.5 0 0 0 2.5-2.5v-9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M21 7.5L12 13 3 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                intasolutionspvtltd@gmail.com
+                info@in-tasolutions.com
               </a>
             </div>
           </div>
