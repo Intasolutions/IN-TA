@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
+  /* async rewrites() {
     return [
       {
         // When you fetch('/api/...') locally, it goes to your EC2 backend
@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
         destination: 'https://in-tasolutions.com/media/:path*',
       },
     ];
-  },
+  }, */
 };
 
 export default nextConfig;

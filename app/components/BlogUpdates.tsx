@@ -2,6 +2,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -89,10 +90,10 @@ export default function BlogUpdates() {
             if (!img) img = '/images/blog-placeholder.jpg';
             else if (img.startsWith('/')) img = `${apiBase}${img}`;
             else if (img.includes('localhost') || img.includes('127.0.0.1')) {
-               try {
-                 const url = new URL(img);
-                 img = `${apiBase}${url.pathname}${url.search}`;
-               } catch {}
+              try {
+                const url = new URL(img);
+                img = `${apiBase}${url.pathname}${url.search}`;
+              } catch { }
             }
             return {
               id: item.id.toString(),
@@ -353,7 +354,7 @@ export default function BlogUpdates() {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
       const res = await fetch(`${apiBase}/api/blog/subscribe/`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken
         },
@@ -461,7 +462,16 @@ export default function BlogUpdates() {
                         </div>
 
                         <div className="flex items-center gap-4 mt-auto">
-
+                          <Link
+                            href={`/blog/${b.id}`}
+                            className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-xs font-bold text-white shadow-md hover:shadow-lg hover:from-[#102f6a] hover:to-[#2278f0] transition-all duration-300"
+                            tabIndex={i === active ? 0 : -1}
+                          >
+                            Read Article
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform">
+                              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </Link>
 
                           <div className="ml-auto flex items-center gap-3 text-sm text-slate-500">
                             <button onClick={() => { onPrev(); }} aria-label="Previous" className="p-2 rounded-md bg-white border shadow-sm hover:scale-[0.98] transition" title="Previous">‹</button>
