@@ -86,3 +86,9 @@ coverage.xml
 
 # Pytest
 .pytest_cache/
+
+# Local utility / seed scripts (not for source control)
+seed_db.py
+seed_testimonials.py
+clear_db.py
+build_log.txt
