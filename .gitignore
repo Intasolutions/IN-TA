@@ -39,3 +39,50 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ─── Python / Django ─────────────────────────────────────
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+
+# Django specific
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media files uploaded by users (keep folder, ignore contents)
+/media/*
+!/media/.gitkeep
+
+# Static files collected
+/staticfiles/
+/static_root/
+
+# Distribution / packaging
+dist/
+*.egg-info/
+.eggs/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# mypy / pyright
+.mypy_cache/
+.pyright/
+
+# Pytest
+.pytest_cache/
