@@ -42,13 +42,13 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-      
+
       // Prepend topic to message since backend has no topic field
       const fullMessage = `[Topic: ${topic}]\n\n${message}`;
 
       const res = await fetch(`${apiBase}/api/contact/messages/`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken,
         },
@@ -153,7 +153,9 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           <option>SEO, AEO, GEO</option>
           <option>Mobile App</option>
           <option>UI/UX Design</option>
-          <option>AI Integration</option>
+          <option>AI Integration & Model Training</option>
+          <option>Coustom Software Development</option>
+          <option>System Architecture</option>
         </select>
       </div>
 

@@ -167,7 +167,7 @@ export default function ContactPage() {
 
           <div className="p-6 rounded-3xl bg-gradient-to-b from-[#1f6fe614] to-[#0b2a5f14]">
             <p className="font-semibold text-[#0b2a5f] mb-3">Prefer a direct conversation?</p>
-            <div className="text-sm text-slate-700">📧 intasolutionpvtltd@gmail.com</div>
+            <div className="text-sm text-slate-700">📧 info@in-tasolutions.com</div>
             <div className="text-sm text-slate-700">📞 +91 9447595381</div>
           </div>
         </div>

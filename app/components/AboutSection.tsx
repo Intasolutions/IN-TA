@@ -107,7 +107,7 @@ export default function About() {
 
       // 5. Stats Pop
       const stats = gsap.utils.toArray<HTMLElement>('.stat');
-      gsap.fromTo(stats, 
+      gsap.fromTo(stats,
         { autoAlpha: 0, y: 15 },
         {
           autoAlpha: 1,
@@ -180,10 +180,10 @@ export default function About() {
       className="relative bg-[#f9f8f6] text-slate-900 py-16 lg:py-24 overflow-hidden rounded-t-[2.5rem] -mt-10 lg:-mt-20"
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20">
-        
+
         {/* Intro Grid */}
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center py-12 lg:py-20 about-reveal">
-          
+
           {/* Bottom-right Accent Curve (Hidden on mobile to save space/clutter) */}
           <svg
             className="hidden lg:block absolute right-0 bottom-0 w-[70%] h-[45%] pointer-events-none transform translate-x-10 translate-y-10"
@@ -205,7 +205,7 @@ export default function About() {
 
           {/* Left: Number + Image */}
           <div className="lg:col-span-6 flex flex-col md:flex-row lg:flex-row items-center justify-center gap-8 relative z-10">
-            
+
             <div className="text-center lg:text-left about-reveal z-10">
               <div className="text-xs md:text-sm font-bold tracking-[0.2em] text-slate-500 mb-1 uppercase">
                 Professional Milestone
@@ -255,7 +255,7 @@ export default function About() {
                 href="/about"
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-6 py-3 font-semibold shadow-md hover:brightness-110 transition text-sm md:text-base"
               >
-                Our Story
+                For More
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"

@@ -536,6 +536,10 @@ export default function BlogUpdates() {
                   <option>Mobile App Development</option>
                   <option>UI/UX Design Strategy</option>
                   <option>System Architecture</option>
+                  <option>AI Integration & Model Training</option>
+                  <option>Coustom Software Development</option>
+                  <option>Digital Marketing</option>
+                  <option>SEO, AEO, GEO</option>
                 </select>
 
                 {formStatus === 'success' ? (
