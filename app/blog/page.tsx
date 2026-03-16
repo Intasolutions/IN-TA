@@ -42,8 +42,8 @@ export default async function BlogPage() {
 
     return (
         <div className="bg-[#fbfaf8] min-h-screen selection:bg-[#0b2a5f] selection:text-white">
-            <Header />
-            
+
+
             <main className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
@@ -60,13 +60,13 @@ export default async function BlogPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {blogs.length > 0 ? (
                             blogs.map((blog: any) => (
-                                <article 
-                                    key={blog.id} 
+                                <article
+                                    key={blog.id}
                                     className="group bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
                                 >
                                     <Link href={`/blog/${blog.id}`} className="block relative aspect-[16/10] overflow-hidden">
-                                        <Image 
-                                            src={fixImageUrl(blog.image)} 
+                                        <Image
+                                            src={fixImageUrl(blog.image)}
                                             alt={blog.image_alt || blog.title}
                                             fill
                                             className="object-cover group-hover:scale-110 transition-transform duration-700"
@@ -78,25 +78,25 @@ export default async function BlogPage() {
                                             </span>
                                         </div>
                                     </Link>
-                                    
+
                                     <div className="p-8 pb-10">
                                         <div className="flex items-center gap-3 mb-4 text-xs font-medium text-slate-400">
                                             <time>{new Date(blog.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</time>
                                             <span className="w-1 h-1 rounded-full bg-slate-200" />
                                             <span>5 min read</span>
                                         </div>
-                                        
+
                                         <h2 className="text-2xl font-bold text-[#0b2a5f] leading-snug mb-4 group-hover:text-blue-600 transition-colors">
                                             <Link href={`/blog/${blog.id}`}>
                                                 {blog.title}
                                             </Link>
                                         </h2>
-                                        
+
                                         <p className="text-slate-500 font-light line-clamp-3 mb-8 text-sm leading-relaxed">
                                             {blog.content?.replace(/<[^>]+>/g, '') || 'No description available for this post.'}
                                         </p>
-                                        
-                                        <Link 
+
+                                        <Link
                                             href={`/blog/${blog.id}`}
                                             className="inline-flex items-center gap-2 text-sm font-bold text-[#0b2a5f] group/link"
                                         >
@@ -117,7 +117,7 @@ export default async function BlogPage() {
                 </div>
             </main>
 
-            <Footer />
+
         </div>
     );
 }

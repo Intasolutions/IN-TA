@@ -98,3 +98,6 @@ seed_db.py
 seed_testimonials.py
 clear_db.py
 build_log.txt
+lint_errors.txt
+lint_output.txt
+staged_files.txt
