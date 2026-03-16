@@ -104,13 +104,13 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
 
             // 2. Scroll-Triggered Sections
             // We use fromTo for the opacity to ensure transparency is cleared if triggered quickly
-            
+
             const bentoItems = gsap.utils.toArray('.bento-item');
             if (bentoItems.length > 0) {
-                gsap.fromTo(bentoItems, 
+                gsap.fromTo(bentoItems,
                     { y: 50, opacity: 0 },
-                    { 
-                        y: 0, 
+                    {
+                        y: 0,
                         opacity: 1,
                         stagger: 0.1,
                         duration: 0.8,
@@ -190,7 +190,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                                 </h1>
                             </div>
                             <div className="mt-12 overflow-hidden">
-                                <p className="reveal-text text-xl md:text-2xl text-slate-600 font-light max-w-2xl leading-relaxed">
+                                <p className="reveal-text text-lg md:text-md text-slate-600 font-light max-w-2xl leading-relaxed">
                                     {service.long_description || service.short_description}
                                 </p>
                             </div>
@@ -343,21 +343,21 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                         ) : (
                             <>
                                 <p>
-                                    Our commitment to excellence in {service.title} is driven by a passion for delivering measurable results. 
-                                    We understand that in today's digital-first economy, the quality of your technological infrastructure is 
-                                    a critical differentiator. Our team of specialized engineers in Kerala works tirelessly to ensure that 
+                                    Our commitment to excellence in {service.title} is driven by a passion for delivering measurable results.
+                                    We understand that in today's digital-first economy, the quality of your technological infrastructure is
+                                    a critical differentiator. Our team of specialized engineers in Kerala works tirelessly to ensure that
                                     every solution we deploy is optimized for reliability, performance, and long-term scalability.
                                 </p>
                                 <p>
-                                    From high-performance web ecosystems to complex AI-driven data pipelines, we provide the technical 
-                                    depth required to navigate contemporary business challenges. Our holistic approach ensures that 
-                                    we don't just build software; we build robust digital foundations that empower your organization 
+                                    From high-performance web ecosystems to complex AI-driven data pipelines, we provide the technical
+                                    depth required to navigate contemporary business challenges. Our holistic approach ensures that
+                                    we don't just build software; we build robust digital foundations that empower your organization
                                     to innovate and lead in your respective industry.
                                 </p>
                                 <p>
-                                    As a leading software development company in Kerala, INTA Solutions combines global expertise with 
-                                    local dedication. We pride ourselves on our transparent communication and our ability to translate 
-                                    complex technical requirements into successful business outcomes. Whether you're a burgeoning startup 
+                                    As a leading software development company in Kerala, INTA Solutions combines global expertise with
+                                    local dedication. We pride ourselves on our transparent communication and our ability to translate
+                                    complex technical requirements into successful business outcomes. Whether you're a burgeoning startup
                                     or a global enterprise, we have the specialized talent to elevate your digital presence.
                                 </p>
                             </>
@@ -376,14 +376,14 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                         </div>
                         <div className="grid md:grid-cols-3 gap-8">
                             {relatedServices.map((rs, i) => (
-                                <Link 
-                                    key={i} 
+                                <Link
+                                    key={i}
                                     href={`/services/${rs.slug}`}
                                     className="group bg-white p-10 rounded-[40px] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500"
                                 >
                                     <div className="mb-8 overflow-hidden rounded-2xl aspect-video">
-                                        <img 
-                                            src={rs.image || rs.icon_path || '/api/placeholder/400/225'} 
+                                        <img
+                                            src={rs.image || rs.icon_path || '/api/placeholder/400/225'}
                                             alt={`${rs.title} solutions Kerala`}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
