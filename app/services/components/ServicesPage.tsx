@@ -682,8 +682,12 @@ export default function ServicesPage() {
                             </div>
 
                             <div className="card-footer">
-                                <Link href="/contact" className="btn-primary primary-cta inline-flex items-center gap-3 rounded-full gap-2 text-sm px-3 py-2 rounded-full border border-slate-100 hover:bg-slate-50">
-                                    Enquire
+                                <Link 
+                                    href={`/services/${svc.slug}`} 
+                                    className="btn-primary primary-cta inline-flex items-center gap-3 rounded-full text-sm px-4 py-2 bg-[#0b2a5f] text-white hover:scale-105 transition-transform"
+                                    style={{ backgroundColor: svc.color || '#0b2a5f' }}
+                                >
+                                    Explore Service
                                 </Link>
                             </div>
                         </article>

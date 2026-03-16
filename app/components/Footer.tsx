@@ -60,6 +60,7 @@ export default function Footer() {
                   <li><a className="hover:text-white transition-colors" href="/services">Strategic Design & UX</a></li>
                   <li><a className="hover:text-white transition-colors" href="/services">Mobile Product Engineering</a></li>
                   <li><a className="hover:text-white transition-colors" href="/services">Digital Content Strategy</a></li>
+                  <li><a className="hover:text-white transition-colors" href="/blog">Our Blog</a></li>
                 </ul>
               </nav>
             </div>

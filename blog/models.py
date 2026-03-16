@@ -11,6 +11,12 @@ class Blog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # SEO Fields
+    meta_title = models.CharField(max_length=200, blank=True, null=True, help_text="Custom SEO title (optional). Overrides default blog title.")
+    meta_description = models.TextField(blank=True, null=True, help_text="Custom SEO description (optional). Recommended length: 150-160 characters.")
+    focus_keyword = models.CharField(max_length=100, blank=True, null=True, help_text="Primary keyword for internal tracking (optional).")
+    image_alt = models.CharField(max_length=200, blank=True, null=True, help_text="Custom alt text for the blog image (optional). Crucial for accessibility and SEO.")
+
     def __str__(self):
         return self.title
 

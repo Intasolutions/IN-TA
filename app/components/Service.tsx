@@ -4,6 +4,8 @@
 import React, { useEffect, useRef, ReactNode, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Link from 'next/link';
+import { useReveal } from '../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -222,6 +224,7 @@ export default function Services() {
 
   const [services, setServices] = useState<ServiceData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isRevealed } = useReveal();
 
   // store loops and handlers so we can pause/resume/kill reliably
   const cardLoops = useRef<Map<HTMLElement, gsap.core.Timeline>>(new Map());
@@ -249,7 +252,7 @@ export default function Services() {
 
   useEffect(() => {
     // Only run animation setup if we have data and not loading
-    if (loading || services.length === 0 || typeof window === 'undefined') return;
+    if (loading || services.length === 0 || typeof window === 'undefined' || !isRevealed) return;
 
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduce) {
@@ -430,7 +433,7 @@ export default function Services() {
       iconLoops.current.clear();
       clearTimeout(timer);
     };
-  }, [loading, services]);
+  }, [loading, services, isRevealed]);
 
   const getIcon = (key: string) => {
     switch (key) {
@@ -482,9 +485,10 @@ export default function Services() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 relative z-10">
             {services.map((s) => (
-              <article
+              <Link
                 key={s.id}
-                className="svc-card rounded-3xl overflow-hidden p-6 bg-[#fffdfb] border border-slate-100 shadow-xl transition-transform duration-300"
+                href={`/services/${s.slug}`}
+                className="svc-card block rounded-3xl overflow-hidden p-6 bg-[#fffdfb] border border-slate-100 shadow-xl transition-transform duration-300 hover:border-[#1f6fe6]/30 group"
               >
                 <div className="flex items-start gap-6">
                   <div
@@ -502,7 +506,7 @@ export default function Services() {
 
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}

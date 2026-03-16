@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReveal } from '../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,6 +23,7 @@ const TEMPO = 1.0;
 export default function TestimonialSlider() {
   const [data, setData] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isRevealed } = useReveal();
 
   useEffect(() => {
     async function fetchData() {
@@ -72,7 +74,7 @@ export default function TestimonialSlider() {
 
   // Main Marquee & Floating Animation
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isRevealed || loading) return;
     if (!wrapRef.current || !trackRef.current) return;
 
     try { tlRef.current?.kill(); } catch { }
@@ -163,7 +165,7 @@ export default function TestimonialSlider() {
       try { tlRef.current?.kill(); } catch { }
       floatTweens.current.forEach(t => t.kill());
     };
-  }, [activeTestimonials.length, isPlaying, prefersReduce]);
+  }, [activeTestimonials.length, isPlaying, prefersReduce, isRevealed, loading]);
 
   const renderStars = () => (
     <div className="flex gap-1">

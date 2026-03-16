@@ -225,7 +225,7 @@ export default function About() {
             >
               <Image
                 src="/about/inta-lobby.jpeg"
-                alt="INTA Office Lobby"
+                alt="INTA Solutions office lobby in Wayanad Kerala"
                 width={520}
                 height={1000}
                 className="object-cover w-full h-[350px] md:h-[450px] lg:h-auto rounded-2xl"

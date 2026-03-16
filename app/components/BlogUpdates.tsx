@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReveal } from '../context/RevealContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,6 +21,7 @@ type Blog = {
   tag?: string;
   image?: string;
   content?: string;
+  image_alt?: string;
 };
 
 // Fallback data in case API fails or is empty
@@ -36,6 +38,7 @@ export default function BlogUpdates() {
   const [active, setActive] = useState(0);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isRevealed } = useReveal();
 
   // Form states
   const [formName, setFormName] = useState('');
@@ -102,6 +105,7 @@ export default function BlogUpdates() {
               tag: item.tag || 'Update',
               image: img,
               content: item.content || '',
+              image_alt: item.image_alt || '',
             };
           });
           setBlogs(mapped);
@@ -125,7 +129,7 @@ export default function BlogUpdates() {
 
   // autoplay timeline + progress bar + floating micro motion for images
   useEffect(() => {
-    if (typeof window === 'undefined' || !wrapRef.current || blogs.length === 0) return;
+    if (typeof window === 'undefined' || !wrapRef.current || blogs.length === 0 || !isRevealed) return;
 
     // cleanup
     try { autoplayRef.current?.kill(); } catch { }
@@ -181,7 +185,7 @@ export default function BlogUpdates() {
       try { floatTweens.forEach(t => t.kill()); } catch { }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, prefersReduce, blogs]);
+  }, [active, prefersReduce, blogs, isRevealed]);
 
   // Non-overlapping advance
   const advance = (delta: number, opts?: { animateRim?: boolean; resetProgressAfter?: boolean }) => {
@@ -327,7 +331,7 @@ export default function BlogUpdates() {
       gsap.set(el, { autoAlpha: i === active ? 1 : 0, y: 0, scale: 1, pointerEvents: i === active ? 'auto' : 'none' });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blogs]);
+  }, [blogs, isRevealed]);
 
   // controls
   const onPrev = () => {
@@ -439,7 +443,7 @@ export default function BlogUpdates() {
                             ref={(el) => { if (el) innerParallaxRefs.current[i] = el; }}
                             className="absolute inset-0"
                           >
-                            <Image src={b.image} alt={b.title} fill className="object-cover" unoptimized />
+                            <Image src={b.image} alt={b.image_alt || `Blog post thumbnail: ${b.title}`} fill className="object-cover" unoptimized />
                             <div className="absolute inset-0 bg-gradient-to-t from-transparent to-[#0b2a5f]/36" />
                           </div>
                         ) : (

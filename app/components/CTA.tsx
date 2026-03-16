@@ -64,7 +64,7 @@ function ParticleCanvas({
 
     let w = 0;
     let h = 0;
-    let paused = false;
+    const paused = false;
 
     const resize = () => {
       const parent = canvas.parentElement;

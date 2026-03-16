@@ -120,7 +120,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
 
   // 2. ANIMATION LOGIC
   useEffect(() => {
-    if (!projects.length) return;
+    if (!projects.length || !isRevealed) return;
     if (typeof window === 'undefined') return;
     if (!wrapRef.current) return;
 
@@ -335,12 +335,12 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
         <div className="relative z-10 px-6 max-w-[1400px] w-full flex flex-col items-center">
           <div className="hero-logo-wrap mb-8 md:mb-12 inline-flex items-center justify-center overflow-hidden">
             <div className="glass-pill px-5 py-2 md:px-6 md:py-3 rounded-full flex items-center gap-3 border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl cursor-default">
-              <img src="/logo/logo-inta.png" alt="logo" className="w-6 h-6 md:w-8 md:h-8 object-contain drop-shadow-lg" />
+              <img src="/logo/logo-inta.png" alt="INTA Solutions - Software Development Company Kerala" className="w-6 h-6 md:w-8 md:h-8 object-contain drop-shadow-lg" />
               <span className="text-xs md:text-sm font-semibold tracking-widest text-blue-100 uppercase">Inta Solutions</span>
             </div>
           </div>
 
-          <h1 className="hero-title font-black leading-[0.9] tracking-tight text-white select-none text-center">
+          <h2 className="hero-title font-black leading-[0.9] tracking-tight text-white select-none text-center">
             <div className="overflow-hidden">
               <div className="hero-anim-text block bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/60 pb-2 md:pb-4">
                 Solutions
@@ -351,7 +351,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
                 We’ve Built
               </div>
             </div>
-          </h1>
+          </h2>
 
           <div className="overflow-hidden mt-8 md:mt-10 max-w-lg mx-auto">
             <p className="hero-anim-text text-lg md:text-xl text-blue-200/60 font-light leading-relaxed">
@@ -405,7 +405,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
                     <div className="flex-1 text-left">
                       <div className="flex items-center gap-3 mb-4 opacity-80">
                         <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center p-1.5">
-                          <img src="/logo/logo-inta.png" alt="logo" className="w-full h-full object-contain" />
+                          <img src="/logo/logo-inta.png" alt="INTA Solutions Kerala" className="w-full h-full object-contain" />
                         </div>
                         <span className="text-xs font-bold tracking-wider text-blue-200 uppercase">IN-TA Solutions</span>
                       </div>
