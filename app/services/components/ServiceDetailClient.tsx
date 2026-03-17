@@ -173,7 +173,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
         <main ref={containerRef} className="bg-[#fbf9f5] selection:bg-[#0b2a5f] selection:text-white">
 
             {/* 1. HERO SECTION: Editorial Minimalism */}
-            <section className="relative min-h-screen flex flex-col justify-center px-6 pt-20">
+            <section className="relative min-h-screen flex flex-col justify-center px-6 pt-30">
                 <div className="max-w-7xl mx-auto w-full">
                     <div className="grid lg:grid-cols-12 gap-12 items-center">
 
@@ -194,7 +194,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                                     {service.long_description || service.short_description}
                                 </p>
                             </div>
-                            <div className="mt-12 flex flex-wrap gap-6 reveal-text">
+                            <div className="mt-12 flex flex-wrap gap-6 reveal-text mb-12">
                                 <Link
                                     href="/contact"
                                     className="px-10 py-5 bg-[#0b2a5f] text-white rounded-full font-bold hover:scale-105 transition-transform shadow-2xl"
