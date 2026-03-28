@@ -48,9 +48,11 @@ export default function Hero() {
       Use 'text-3xl' (approx 30px) but keep font-bold 
       to ensure it still looks like a 'Heading' to crawlers.
     */}
-            <h1 className="text-[30px] md:text-[56px] font-black text-white leading-[1.1] tracking-tighter drop-shadow-lg">
+            <h1 className="text-[30px] md:text-[46px] font-black text-white leading-[1.1] tracking-tighter drop-shadow-lg">
               Engineering Digital<br />
-              <span className="text-[#1f6fe6] italic">Excellence in Wayanad</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 italic">
+                Excellence in Wayanad
+              </span>
             </h1>
 
             <p className="text-sm md:text-lg text-blue-100/70 font-medium uppercase mt-4 max-w-xl">
