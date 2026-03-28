@@ -382,14 +382,12 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             >
               <div className="absolute inset-0 panel-bg will-change-transform" aria-hidden>
                 {p.hero && (
-                  <div className="absolute inset-0 z-0">
+                  <div className="absolute inset-0 z-0 overflow-hidden">
                      <Image 
                        src={p.hero} 
                        alt="" 
                        fill 
-                       className="object-cover opacity-60"
-                       style={{ filter: 'blur(32px) brightness(0.55) saturate(1.1)', transform: 'scale(1.1)' }}
-                       unoptimized
+                       className="panel-bg-image object-cover opacity-60"
                      />
                   </div>
                 )}
@@ -401,8 +399,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
                         src={p.hero} 
                         alt={`${p.title} screenshot`} 
                         fill
-                        unoptimized
-                        style={{ borderRadius: 16, boxShadow: '0 24px 80px rgba(2,6,23,0.55)', transformOrigin: 'center center', zIndex: 6 }} 
+                        style={{ transformOrigin: 'center center', zIndex: 6 }} 
                       />
                     </div>
                   )}
@@ -412,16 +409,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
 
               {/* Card Container */}
               <div className="relative z-20 text-center w-full max-w-4xl px-4 md:px-6 pointer-events-none flex justify-center">
-                <div
-                  className="panel-card pointer-events-auto relative w-full max-w-2xl rounded-3xl px-6 py-8 md:px-10 md:py-10 transform-gpu"
-                  style={{
-                    background: 'rgba(8, 12, 24, 0.75)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: '0 40px 100px -10px rgba(0,0,0,0.6)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                  }}
-                >
+                <div className="panel-card pointer-events-auto relative w-full max-w-2xl rounded-3xl px-6 py-8 md:px-10 md:py-10 transform-gpu">
                   <div className="flex flex-col md:flex-row items-start gap-6">
                     <div className="hidden md:block w-1.5 h-20 rounded-full bg-gradient-to-b from-[#1f6fe6] to-[#0b2a5f] flex-shrink-0 mt-2" />
 
@@ -491,10 +479,33 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
         .glass-pill { transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s; }
         .glass-pill:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -5px rgba(31, 111, 230, 0.4); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
         .panel-bg, .panel-mid, .panel-fg { will-change: transform, opacity; transform: translate3d(0,0,0); }
+        
+        /* Premium Background Blurs */
+        .panel-bg-image { filter: blur(32px) brightness(0.55) saturate(1.1); transform: scale(1.1); }
+        .panel-centered-img { border-radius: 16px; box-shadow: 0 24px 80px rgba(2,6,23,0.55); overflow: hidden; }
+        .panel-card { 
+            background: rgba(8, 12, 24, 0.75); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            box-shadow: 0 40px 100px -10px rgba(0,0,0,0.6); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+        }
+
         @media (max-width: 768px) {
-            .panel-centered-img { height: 50vh !important; }
-            .panel-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(8, 12, 24, 0.95) !important; }
-            .panel-bg img { filter: blur(8px) brightness(0.4) saturate(1.1) !important; }
+            .panel-centered-img { height: 50vh !important; border-radius: 12px; }
+            /* HARD DISABLE BLURS ON MOBILE TO PREVENT CRASH */
+            .panel-card { 
+                backdrop-filter: none !important; 
+                -webkit-backdrop-filter: none !important; 
+                background: rgba(8, 12, 24, 0.96) !important; 
+                box-shadow: 0 20px 50px rgba(0,0,0,0.8) !important;
+            }
+            .panel-bg-image { 
+                filter: none !important; 
+                opacity: 0.15 !important; 
+                background: #020617 !important;
+            }
+            .panel-bg { background: #020617 !important; }
         }
       `}</style>
     </section>
