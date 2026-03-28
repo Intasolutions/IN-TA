@@ -14,22 +14,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Custom Software Development Company in Kerala | INTA Solutions',
-  description: 'INTA Solutions is a software development company in Wayanad, Kerala providing web development, AI integration, mobile apps, and enterprise software solutions.',
+  metadataBase: new URL('https://www.in-tasolutions.com'),
+  title: 'Top IT Company in Wayanad | Mobile App Development Team | INTA Solutions',
+  description: 'INTA Solutions is the #1 software development company in Wayanad, Kerala. We provide expert mobile app development, AI integration, and custom enterprise software solutions.',
   keywords: 'software development company kerala, IT company in Wayanad, web development company Kerala, mobile app development India, custom software development company, AI integration services, enterprise web solutions',
   authors: [{ name: 'INTA Solutions Pvt Ltd' }],
   robots: 'index, follow',
   icons: {
     icon: '/logo/logo.png',
   },
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'INTA Solutions | Engineering Digital Excellence',
     description: 'Custom software development, web development, mobile applications, AI integration and enterprise digital solutions.',
     type: 'website',
-    url: 'https://in-tasolutions.com',
+    url: 'https://www.in-tasolutions.com',
     images: [
       {
-        url: 'https://in-tasolutions.com/og-image.jpg',
+        url: 'https://www.in-tasolutions.com/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'INTA Solutions | Engineering Digital Excellence',
@@ -40,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'INTA Solutions | Software Development Company Kerala',
     description: 'Build scalable digital products with INTA Solutions — web development, mobile apps, AI integration and enterprise systems.',
-    images: ['https://in-tasolutions.com/og-image.jpg'],
+    images: ['https://www.in-tasolutions.com/og-image.jpg'],
   },
 };
 

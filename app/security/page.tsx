@@ -1,6 +1,15 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Footer1 from '../components/Footersecond';
 import Header1 from '../components/Header1';
+
+export const metadata: Metadata = {
+  title: 'Security Policy | Data Protection | INTA Solutions',
+  description: 'Learn about INTA Solutions commitment to data security, encryption, and compliance with global privacy standards.',
+  alternates: {
+    canonical: '/security',
+  },
+};
 
 export default function SecurityPage() {
   return (

@@ -1,7 +1,16 @@
+import { Metadata } from 'next';
 import React from 'react';
 
 import Footer1 from '../components/Footersecond';
 import Header1 from '../components/Header1';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | Legal | INTA Solutions',
+  description: 'Understand the terms and conditions for using INTA Solutions software development and digital strategy services.',
+  alternates: {
+    canonical: '/terms',
+  },
+};
 
 export default function TermsPage() {
     return (

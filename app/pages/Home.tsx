@@ -28,24 +28,36 @@ const Home = () => {
             "url": "https://in-tasolutions.com",
             "logo": "https://in-tasolutions.com/logo/logo.png",
             "image": "https://in-tasolutions.com/og-image.jpg",
-            "description": "Custom Software Development Company in Kerala. Specializing in Web Development, AI Integration, and Mobile Apps.",
+            "description": "The top-rated IT company in Wayanad, Kerala. Specialized Mobile App Development Team providing high-performance iOS/Android apps, AI integration, and enterprise software.",
             "address": {
               "@type": "PostalAddress",
+              "streetAddress": "INTA Solutions, Wayanad",
               "addressLocality": "Wayanad",
               "addressRegion": "Kerala",
-              "addressCountry": "India"
+              "postalCode": "673121",
+              "addressCountry": "IN"
             },
             "geo": {
               "@type": "GeoCoordinates",
               "latitude": "11.605",
               "longitude": "76.082"
             },
-            "service": [
-              "Web Development",
+            "openingHours": "Mo-Fr 09:00-18:00",
+            "priceRange": "$$",
+            "telephone": "+91-XXXXXXXXXX",
+            "knowsAbout": [
               "Mobile App Development",
-              "AI Integration",
-              "Custom Software Development",
-              "Digital Transformation"
+              "iOS and Android Apps",
+              "AI & Machine Learning Integration",
+              "Custom ERP Solutions",
+              "Web Development in Wayanad"
+            ],
+            "service": [
+              "Wayanad IT Solutions",
+              "Mobile App Development Team",
+              "Custom Software Engineering",
+              "AI Powered Platforms",
+              "Digital Transformation Consulting"
             ]
           })
         }}

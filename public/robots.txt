@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://in-tasolutions.com
+Host: https://www.in-tasolutions.com
 
 # Sitemaps
-Sitemap: https://in-tasolutions.com/sitemap.xml
+Sitemap: https://www.in-tasolutions.com/sitemap.xml

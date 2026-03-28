@@ -10,6 +10,9 @@ const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 export const metadata: Metadata = {
     title: 'Insights & Stories | INTA Solutions Blog',
     description: 'Expert perspectives on custom software development, AI integration, and digital transformation from the team at INTA Solutions.',
+    alternates: {
+        canonical: '/blog',
+    },
 };
 
 async function getBlogs() {
