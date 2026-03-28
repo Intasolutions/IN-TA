@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Image from 'next/image';
 import { useReveal } from '../context/RevealContext';
 
 if (typeof window !== 'undefined') {
@@ -380,9 +381,31 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
               aria-labelledby={`${p.id}-title`}
             >
               <div className="absolute inset-0 panel-bg will-change-transform" aria-hidden>
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${p.hero})`, backgroundSize: 'cover', backgroundPosition: 'center center', filter: 'blur(32px) brightness(0.55) saturate(1.1)', transform: 'scale(1.1)', zIndex: 0 }} />
+                {p.hero && (
+                  <div className="absolute inset-0 z-0">
+                     <Image 
+                       src={p.hero} 
+                       alt="" 
+                       fill 
+                       className="object-cover opacity-60"
+                       style={{ filter: 'blur(32px) brightness(0.55) saturate(1.1)', transform: 'scale(1.1)' }}
+                       unoptimized
+                     />
+                  </div>
+                )}
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 6, pointerEvents: 'none', padding: '3vh 4vw' }}>
-                  <img className="panel-centered-img" src={p.hero || ''} alt={`${p.title} screenshot`} style={{ width: 'auto', height: '80vh', maxWidth: '100%', objectFit: 'contain', display: 'block', borderRadius: 16, boxShadow: '0 24px 80px rgba(2,6,23,0.55)', transformOrigin: 'center center', zIndex: 6 }} />
+                  {p.hero && (
+                    <div className="relative w-full h-[80vh] max-w-full">
+                      <Image 
+                        className="panel-centered-img object-contain" 
+                        src={p.hero} 
+                        alt={`${p.title} screenshot`} 
+                        fill
+                        unoptimized
+                        style={{ borderRadius: 16, boxShadow: '0 24px 80px rgba(2,6,23,0.55)', transformOrigin: 'center center', zIndex: 6 }} 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.4) 100%)', zIndex: 8, pointerEvents: 'none' }} />
               </div>
@@ -470,6 +493,8 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
         .panel-bg, .panel-mid, .panel-fg { will-change: transform, opacity; transform: translate3d(0,0,0); }
         @media (max-width: 768px) {
             .panel-centered-img { height: 50vh !important; }
+            .panel-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(8, 12, 24, 0.95) !important; }
+            .panel-bg img { filter: blur(8px) brightness(0.4) saturate(1.1) !important; }
         }
       `}</style>
     </section>

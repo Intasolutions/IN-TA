@@ -27,22 +27,22 @@ export default function Hero() {
 
   return (
     <section aria-label="Hero video" className="relative">
-      <div className="relative h-[100vh] min-h-[520px] flex w-full overflow-hidden">
+      <div className="relative h-[100vh] min-h-[520px] flex w-full overflow-hidden bg-black">
         {/* Global Continuous Video Background */}
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
             src="/hero/web.mp4"
-            /* poster="/hero/poster.jpg"  <-- HIGHLY RECOMMENDED: Add a static image fallback 
-              for Low Power Mode on iPhone where video autoplay is strictly disabled.
-            */
+            poster="/hero-bg.png" // Updated to the premium generated poster
             autoPlay
             loop
             muted
-            playsInline // Critical for iOS: prevents video from going fullscreen automatically
+            playsInline
             preload="auto"
           />
+          {/* Overlay to ensure readability and fallback visibility */}
+          <div className="absolute inset-0 bg-black/40 z-10" />
         </div>
       </div>
     </section>
