@@ -18,27 +18,9 @@ export default function Hero() {
     }
   }, []);
 
-  // SEO: Structured Data for the IT Company
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ITBusiness",
-    "name": "Your Company Name",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Wayanad",
-      "addressRegion": "Kerala",
-      "addressCountry": "IN"
-    },
-    "description": "Top IT Company in Wayanad specializing in Mobile App Development and Custom Software Solutions."
-  };
 
   return (
     <section aria-label="Hero" className="relative">
-      {/* SEO: Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
 
       <div className="relative h-[100vh] min-h-[520px] flex w-full overflow-hidden bg-black">
         {/* Global Continuous Video Background */}
@@ -66,13 +48,13 @@ export default function Hero() {
       Use 'text-3xl' (approx 30px) but keep font-bold 
       to ensure it still looks like a 'Heading' to crawlers.
     */}
-            <h1 className="text-[30px] font-black text-white leading-tight tracking-tighter drop-shadow-lg">
-              Top IT Company<br />
-              <span className="text-[#1f6fe6] italic">in Wayanad</span>
+            <h1 className="text-[36px] md:text-[64px] font-black text-white leading-tight tracking-tighter drop-shadow-lg">
+              Engineering Digital<br />
+              <span className="text-[#1f6fe6] italic">Excellence in Wayanad</span>
             </h1>
 
-            <p className="text-sm md:text-lg text-blue-100/70 font-medium uppercase mt-2">
-              Mobile App Development & Custom Software
+            <p className="text-sm md:text-xl text-blue-100/70 font-medium uppercase mt-2 max-w-2xl">
+              Software Development & Mobile App Solutions for Kerala's Growing Digital Economy
             </p>
           </div>
         </div>

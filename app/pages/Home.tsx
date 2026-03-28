@@ -23,41 +23,84 @@ const Home = () => {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "ProfessionalService",
-            "name": "INTA Solutions",
-            "url": "https://in-tasolutions.com",
-            "logo": "https://in-tasolutions.com/logo/logo.png",
-            "image": "https://in-tasolutions.com/og-image.jpg",
-            "description": "The top-rated IT company in Wayanad, Kerala. Specialized Mobile App Development Team providing high-performance iOS/Android apps, AI integration, and enterprise software.",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "INTA Solutions, Wayanad",
-              "addressLocality": "Wayanad",
-              "addressRegion": "Kerala",
-              "postalCode": "673121",
-              "addressCountry": "IN"
-            },
-            "geo": {
-              "@type": "GeoCoordinates",
-              "latitude": "11.605",
-              "longitude": "76.082"
-            },
-            "openingHours": "Mo-Fr 09:00-18:00",
-            "priceRange": "$$",
-            "telephone": "+91-XXXXXXXXXX",
-            "knowsAbout": [
-              "Mobile App Development",
-              "iOS and Android Apps",
-              "AI & Machine Learning Integration",
-              "Custom ERP Solutions",
-              "Web Development in Wayanad"
-            ],
-            "service": [
-              "Wayanad IT Solutions",
-              "Mobile App Development Team",
-              "Custom Software Engineering",
-              "AI Powered Platforms",
-              "Digital Transformation Consulting"
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": "https://www.in-tasolutions.com/#organization",
+                "name": "INTA Solutions Pvt Ltd",
+                "url": "https://www.in-tasolutions.com",
+                "logo": "https://www.in-tasolutions.com/logo/logo.png",
+                "sameAs": [
+                  "https://www.linkedin.com/company/inta-solutions-pvt-ltd",
+                  "https://www.facebook.com/intasolutions"
+                ],
+                "contactPoint": {
+                  "@type": "ContactPoint",
+                  "telephone": "+91-XXXXXXXXXX",
+                  "contactType": "customer service",
+                  "areaServed": "IN",
+                  "availableLanguage": ["en", "ml"]
+                }
+              },
+              {
+                "@type": "SoftwareBusiness",
+                "@id": "https://www.in-tasolutions.com/#business",
+                "name": "INTA Solutions",
+                "description": "Leading Software Development Company in Wayanad, Kerala. Specialized in Mobile App Development, AI Integration, and Custom ERP solutions for the Malabar region.",
+                "url": "https://www.in-tasolutions.com",
+                "telephone": "+91-XXXXXXXXXX",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "Mananthavady, Wayanad District",
+                  "addressLocality": "Mananthavady",
+                  "addressRegion": "Kerala",
+                  "postalCode": "673121",
+                  "addressCountry": "IN"
+                },
+                "geo": {
+                  "@type": "GeoCoordinates",
+                  "latitude": "11.8033",
+                  "longitude": "76.0028"
+                },
+                "image": "https://www.in-tasolutions.com/og-image.jpg",
+                "priceRange": "$$",
+                "areaServed": [
+                  { "@type": "City", "name": "Mananthavady" },
+                  { "@type": "City", "name": "Kalpetta" },
+                  { "@type": "City", "name": "Sulthan Bathery" },
+                  { "@type": "State", "name": "Kerala" }
+                ],
+                "hasOfferCatalog": {
+                  "@type": "OfferCatalog",
+                  "name": "IT Services",
+                  "itemListElement": [
+                    {
+                      "@type": "Offer",
+                      "itemOffered": {
+                        "@type": "Service",
+                        "name": "Mobile App Development",
+                        "description": "Custom Android and iOS applications for Kerala startups and enterprises."
+                      }
+                    },
+                    {
+                      "@type": "Offer",
+                      "itemOffered": {
+                        "@type": "Service",
+                        "name": "Software Development Wayanad",
+                        "description": "Bespoke software solutions including ERP, CRM, and automation tools."
+                      }
+                    },
+                    {
+                      "@type": "Offer",
+                      "itemOffered": {
+                        "@type": "Service",
+                        "name": "AI Integration Kerala",
+                        "description": "Integrating LLMs and ML models into local business processes."
+                      }
+                    }
+                  ]
+                }
+              }
             ]
           })
         }}

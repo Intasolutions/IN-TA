@@ -468,7 +468,7 @@ export default function Services() {
 
       <div className="container mx-auto px-6 md:px-20 relative">
         <div className="svc-hero max-w-4xl mx-auto text-center mb-12 svc-reveal">
-          <p className="text-xl font-semibold tracking-wider text-slate-700 mb-2">OUR SERVICES</p>
+          <p className="text-xl font-semibold tracking-wider text-slate-700 mb-2">IT SERVICES IN WAYANAD</p>
         </div>
 
         {/* connector */}
@@ -488,6 +488,7 @@ export default function Services() {
               <Link
                 key={s.id}
                 href={`/services/${s.slug}`}
+                aria-label={`${s.title} - Software Development Service in Kerala`}
                 className="svc-card block rounded-3xl overflow-hidden p-6 bg-[#fffdfb] border border-slate-100 shadow-xl transition-transform duration-300 hover:border-[#1f6fe6]/30 group"
               >
                 <div className="flex items-start gap-6">
