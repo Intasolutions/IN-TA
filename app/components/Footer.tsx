@@ -28,25 +28,46 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <img src="/logo/logo-inta.png" alt="IN-TA Solutions" className="w-12 h-12 object-contain" />
               <div>
-                <div className="text-lg font-bold tracking-tight text-white">IN-TA Solutions</div>
+                <div className="text-lg font-bold tracking-tight text-white">IN-TA Solutions Pvt Ltd</div>
                 <div className="mt-2 text-sm text-slate-400 max-w-xs leading-relaxed">
                   Engineering high-performance digital ecosystems through strategic design, accessibility, and enterprise-grade scalability.
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 flex items-center gap-3">
-              <a
-                href="mailto:info@in-tasolutions.com"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition-all focus:outline-none"
-                aria-label="Email us"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path d="M3 7.5v9A2.5 2.5 0 0 0 5.5 19h13a2.5 2.5 0 0 0 2.5-2.5v-9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M21 7.5L12 13 3 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            <div className="mt-8 flex flex-col gap-4">
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="mailto:info@in-tasolutions.com"
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition-all focus:outline-none"
+                  aria-label="Email us"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path d="M3 7.5v9A2.5 2.5 0 0 0 5.5 19h13a2.5 2.5 0 0 0 2.5-2.5v-9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M21 7.5L12 13 3 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  info@in-tasolutions.com
+                </a>
+
+                <a
+                  href="tel:+919447595381"
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white/5 hover:bg-white/10 transition-all focus:outline-none"
+                  aria-label="Call us"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                  +91 94475 95381
+                </a>
+              </div>
+
+              <div className="flex items-start gap-2.5 text-sm text-slate-400 max-w-xs leading-relaxed ml-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 opacity-80" aria-hidden>
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
                 </svg>
-                info@in-tasolutions.com
-              </a>
+                <span>Thonichal, Mananthavady, Wayanad,<br/>Kerala 670645</span>
+              </div>
             </div>
           </div>
 

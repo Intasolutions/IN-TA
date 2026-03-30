@@ -26,9 +26,10 @@ export default function Footer1() {
             <p className="font-bold text-[#0b2a5f] leading-tight text-sm tracking-wide">
               IN-TA SOLUTIONS PVT LTD
             </p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Designing & building digital products.
-            </p>
+            <div className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+              <p>Thonichal, Mananthavady, Wayanad, Kerala 670645</p>
+              <a href="tel:+919447595381" className="text-[#0b2a5f] hover:underline font-medium transition-all">+91 94475 95381</a>
+            </div>
           </div>
         </div>
 

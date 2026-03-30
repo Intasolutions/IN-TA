@@ -36,33 +36,38 @@ const Home = () => {
                 ],
                 "contactPoint": {
                   "@type": "ContactPoint",
-                  "telephone": "+91-XXXXXXXXXX",
+                  "telephone": "+919447595381",
                   "contactType": "customer service",
                   "areaServed": "IN",
                   "availableLanguage": ["en", "ml"]
                 }
               },
               {
-                "@type": "SoftwareBusiness",
+                "@type": "ProfessionalService",
                 "@id": "https://www.in-tasolutions.com/#business",
-                "name": "INTA Solutions",
-                "description": "Leading Software Development Company in Wayanad, Kerala. Specialized in Mobile App Development, AI Integration, and Custom ERP solutions for the Malabar region.",
-                "url": "https://www.in-tasolutions.com",
-                "telephone": "+91-XXXXXXXXXX",
+                "name": "IN-TA Solutions Pvt Ltd",
+                "description": "Leading Software Development Company in Wayanad, Kerala. Specialized in SaaS Development, UI/UX Design, and Mobile App Development for the Malabar region.",
+                "url": "https://in-tasolutions.com",
+                "telephone": "+919447595381",
                 "address": {
                   "@type": "PostalAddress",
-                  "streetAddress": "Mananthavady, Wayanad District",
+                  "streetAddress": "Thonichal",
                   "addressLocality": "Mananthavady",
                   "addressRegion": "Kerala",
-                  "postalCode": "673121",
+                  "postalCode": "670645",
                   "addressCountry": "IN"
                 },
                 "geo": {
                   "@type": "GeoCoordinates",
-                  "latitude": "11.8033",
-                  "longitude": "76.0028"
+                  "latitude": "11.8021",
+                  "longitude": "76.0232"
                 },
-                "image": "https://www.in-tasolutions.com/og-image.jpg",
+                "aggregateRating": {
+                  "@type": "AggregateRating",
+                  "ratingValue": "5",
+                  "reviewCount": "25"
+                },
+                "image": "https://in-tasolutions.com/logo.png",
                 "priceRange": "$$",
                 "areaServed": [
                   { "@type": "City", "name": "Mananthavady" },
@@ -78,16 +83,24 @@ const Home = () => {
                       "@type": "Offer",
                       "itemOffered": {
                         "@type": "Service",
-                        "name": "Mobile App Development",
-                        "description": "Custom Android and iOS applications for Kerala startups and enterprises."
+                        "name": "SaaS Development",
+                        "description": "Custom SaaS product engineering, cloud-native architecture, and scalable digital solutions."
                       }
                     },
                     {
                       "@type": "Offer",
                       "itemOffered": {
                         "@type": "Service",
-                        "name": "Software Development Wayanad",
-                        "description": "Bespoke software solutions including ERP, CRM, and automation tools."
+                        "name": "UI/UX Design",
+                        "description": "User-centric design, strategic UX research, and high-fidelity interface prototyping."
+                      }
+                    },
+                    {
+                      "@type": "Offer",
+                      "itemOffered": {
+                        "@type": "Service",
+                        "name": "Mobile App Development",
+                        "description": "Custom Android and iOS applications for Kerala startups and enterprises."
                       }
                     },
                     {

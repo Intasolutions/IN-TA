@@ -1,9 +1,0 @@
-# *
-User-agent: *
-Allow: /
-
-# Host
-Host: https://www.in-tasolutions.com
-
-# Sitemaps
-Sitemap: https://www.in-tasolutions.com/sitemap.xml

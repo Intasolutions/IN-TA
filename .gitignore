@@ -101,6 +101,8 @@ build_log.txt
 lint_errors.txt
 lint_output.txt
 staged_files.txt
-
-
 LOCAL_SEO_GUIDE.md
+# next-sitemap generated files
+public/robots.txt
+public/sitemap.xml
+public/sitemap-*.xml
