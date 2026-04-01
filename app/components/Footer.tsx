@@ -124,6 +124,9 @@ export default function Footer() {
               <a href="https://www.instagram.com/intasolutions?igsh=MTdjYTNpc3ltNnd1eg==" target="_blank" rel="noreferrer" className="social-btn" aria-label="Instagram">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="0.6" /><path d="M16.5 7.5h.01" stroke="currentColor" strokeWidth="0.8" /><path d="M12 8.3a3.7 3.7 0 100 7.4 3.7 3.7 0 000-7.4z" stroke="currentColor" strokeWidth="0.6" /></svg>
               </a>
+              <a href="https://www.youtube.com/@IN-TASolutionsPvtLtd" target="_blank" rel="noreferrer" className="social-btn" aria-label="YouTube">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+              </a>
             </div>
           </div>
         </div>

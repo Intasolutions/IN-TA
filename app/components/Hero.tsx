@@ -42,15 +42,11 @@ export default function Hero() {
         </div>
 
         {/* SEO-Focused Content Overlay */}
-        <div className="relative z-20 w-full h-full flex items-end justify-start p-8 md:p-30 ">
+        <div className="relative z-20 w-full h-full flex items-end justify-start p-12 md:p-30 ">
           <div className="max-w-4xl">
-            {/* Keep it as H1. 
-      Use 'text-3xl' (approx 30px) but keep font-bold 
-      to ensure it still looks like a 'Heading' to crawlers.
-    */}
             <h1 className="text-[30px] md:text-[46px] font-black text-white leading-[1.1] tracking-tighter drop-shadow-lg">
               Engineering Digital<br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 italic">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 ">
                 Excellence in Wayanad
               </span>
             </h1>
