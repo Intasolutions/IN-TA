@@ -18,7 +18,6 @@ export default function Hero() {
     }
   }, []);
 
-
   return (
     <section aria-label="Hero" className="relative">
 
@@ -34,25 +33,28 @@ export default function Hero() {
             loop
             muted
             playsInline
-            preload="auto"
-            // @ts-ignore - fetchPriority is a newer attribute
-            fetchPriority="high"
+            preload="metadata"
           />
           <div className="absolute inset-0 bg-black/50 z-10" />
         </div>
 
-        {/* SEO-Focused Content Overlay */}
-        <div className="relative z-20 w-full h-full flex items-end justify-start p-12 md:p-30 ">
+        {/* Polished SEO-Focused Content Overlay */}
+        {/* Adjusted padding: lifted it away from the bottom curve */}
+        <div className="relative z-20 w-full h-full flex items-end justify-start p-8 pb-28 md:p-16 md:pb-20 lg:p-24 lg:pb-28">
           <div className="max-w-4xl">
-            <h1 className="text-[30px] md:text-[46px] font-black text-white leading-[1.1] tracking-tighter drop-shadow-lg">
-              Engineering Digital<br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500 ">
-                Excellence in Wayanad
+            {/* Softened the font weight and adjusted the gradient */}
+            <h1 className="text-[36px] md:text-[52px] font-bold text-white leading-[1.15] tracking-tight drop-shadow-md overflow-hidden pb-2">
+              <span className="block" data-reveal="mask-up">
+                Engineering Digital<br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-400">
+                  Excellence in Wayanad
+                </span>
               </span>
             </h1>
 
-            <p className="text-sm md:text-lg text-blue-100/70 font-medium uppercase mt-4 max-w-xl">
-              Software Development & Mobile App Solutions for Kerala's Growing Digital Economy
+            {/* Removed uppercase, made it lighter and more readable */}
+            <p className="text-base md:text-xl text-gray-200 font-light mt-5 max-w-2xl leading-relaxed" data-reveal="cascade">
+              Software development & mobile app solutions for Kerala's growing digital economy.
             </p>
           </div>
         </div>

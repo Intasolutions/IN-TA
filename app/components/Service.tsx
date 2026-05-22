@@ -265,12 +265,6 @@ export default function Services() {
     let ctx: any;
     const timer = setTimeout(() => {
       ctx = gsap.context(() => {
-        gsap.fromTo(
-          '.svc-hero',
-          { autoAlpha: 0, y: 22 },
-          { autoAlpha: 1, y: 0, duration: 0.56 * TEMPO, ease: 'power3.out', scrollTrigger: { trigger: '.svc-hero', start: 'top 92%' } }
-        );
-
         if (blobRef.current) {
           gsap.to(blobRef.current, {
             x: 10,
@@ -280,93 +274,6 @@ export default function Services() {
             repeat: -1,
             yoyo: true,
             ease: 'sine.inOut',
-          });
-        }
-
-        // Cards setup
-        const cards = gsap.utils.toArray<HTMLElement>('.svc-card') as HTMLElement[];
-        gsap.set(cards, { autoAlpha: 0, y: 36, transformStyle: 'preserve-3d', willChange: 'transform, opacity' });
-
-        if (cards.length > 0) {
-          ScrollTrigger.batch(cards, {
-            start: 'top 88%',
-            onEnter: (batch) => {
-              gsap.fromTo(
-                batch,
-                { autoAlpha: 0, y: 56, rotationX: 10, rotationZ: -2, scale: 0.992 },
-                {
-                  autoAlpha: 1,
-                  y: 0,
-                  rotationX: 0,
-                  rotationZ: 0,
-                  scale: 1,
-                  duration: 0.6 * TEMPO,
-                  ease: 'expo.out',
-                  stagger: { each: 0.06, from: 'start' },
-                  onComplete: () => {
-                    batch.forEach((c, idx) => {
-                      const card = c as HTMLElement;
-                      if (!cardLoops.current.has(card)) {
-                        const pulseScale = gsap.utils.random(1.02, 1.06);
-                        const settleScale = gsap.utils.random(1.003, 1.016);
-                        const upY = gsap.utils.random(-10, -4);
-                        const rotZ = gsap.utils.random(-3.2, 3.2);
-
-                        const tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { ease: 'sine.inOut' } });
-                        tl.to(card, { scale: pulseScale, y: upY, rotationZ: rotZ, duration: 1.0 * TEMPO }, 0);
-                        tl.to(card, { scale: settleScale, y: upY * 0.38, rotationZ: -rotZ * 0.35, duration: 3.0 * TEMPO }, `>-${0.06 * TEMPO}`);
-                        tl.to(card, { scale: 1.02, duration: 4.2 * TEMPO }, '>');
-                        tl.progress(Math.random());
-                        cardLoops.current.set(card, tl);
-
-                        const icon = card.querySelector<HTMLElement>('.svc-icon');
-                        if (icon && !iconLoops.current.has(icon)) {
-                          const iconTl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { ease: 'sine.inOut' } });
-                          iconTl.to(icon, { scale: 0.985, y: -upY * 0.22, rotationZ: -rotZ * 0.9, duration: 0.9 * TEMPO }, 0);
-                          iconTl.to(icon, { scale: 1.01, y: -upY * 0.08, rotationZ: rotZ * 0.45, duration: 1.8 * TEMPO }, `>-${0.04 * TEMPO}`);
-                          gsap.fromTo(icon, { autoAlpha: 0, scale: 0.78, rotation: 6 }, { autoAlpha: 1, scale: 1, rotation: 0, duration: 0.36 * TEMPO, ease: 'back.out(1.02)', delay: idx * 0.02 });
-
-                          iconTl.progress(Math.random());
-                          iconLoops.current.set(icon, iconTl);
-                        }
-
-                        const onEnter = () => {
-                          try {
-                            const cTl = cardLoops.current.get(card);
-                            if (cTl) cTl.timeScale(0.35);
-                            if (icon) {
-                              const iTl = iconLoops.current.get(icon as HTMLElement);
-                              if (iTl) iTl.timeScale(0.35);
-                            }
-                            gsap.to(card, { scale: 1.06, y: -8, duration: 0.18 * TEMPO, ease: 'power2.out' });
-                            if (icon) gsap.to(icon, { scale: 1.06, duration: 0.18 * TEMPO, ease: 'power2.out' });
-                          } catch { }
-                        };
-                        const onLeave = () => {
-                          try {
-                            const cTl = cardLoops.current.get(card);
-                            if (cTl) cTl.timeScale(1);
-                            if (icon) {
-                              const iTl = iconLoops.current.get(icon as HTMLElement);
-                              if (iTl) iTl.timeScale(1);
-                            }
-                            gsap.to(card, { scale: 1.0, y: 0, duration: 0.5 * TEMPO, ease: 'power3.out' });
-                            if (icon) gsap.to(icon, { scale: 1.0, duration: 0.5 * TEMPO, ease: 'power3.out' });
-                          } catch { }
-                        };
-
-                        card.addEventListener('pointerenter', onEnter, { passive: true });
-                        card.addEventListener('pointerleave', onLeave, { passive: true });
-                        handlers.current.set(card, { enter: onEnter, leave: onLeave });
-                      }
-                    });
-                  },
-                }
-              );
-            },
-            onEnterBack: (batch) => {
-              gsap.fromTo(batch, { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: 0.56 * TEMPO, stagger: 0.05, ease: 'power3.out' });
-            },
           });
         }
 
@@ -389,30 +296,6 @@ export default function Services() {
             });
           } catch { }
         }
-
-        // Animate the "View all services" button when it appears and add a subtle idle float
-        try {
-          const view = document.querySelector<HTMLElement>('.svc-viewall');
-          if (view) {
-            gsap.fromTo(
-              view,
-              { autoAlpha: 0, y: 16 },
-              {
-                autoAlpha: 1,
-                y: 0,
-                duration: 0.56 * TEMPO,
-                ease: 'power3.out',
-                scrollTrigger: { trigger: view, start: 'top 92%' },
-              }
-            );
-
-            // small idle float to make it feel alive (slow subtle)
-            const idle = gsap.timeline({ repeat: -1, yoyo: true });
-            idle.to(view, { y: -4, duration: 6.8, ease: 'sine.inOut' }, 0);
-            idle.to(view, { scale: 1.005, duration: 6.8, ease: 'sine.inOut' }, 0);
-            idle.progress(Math.random());
-          }
-        } catch { }
       }, wrapRef);
     }, 100);
 
@@ -467,8 +350,8 @@ export default function Services() {
       </div>
 
       <div className="container mx-auto px-6 md:px-20 relative">
-        <div className="svc-hero max-w-4xl mx-auto text-center mb-12 svc-reveal">
-          <p className="text-xl font-semibold tracking-wider text-slate-700 mb-2">IT SERVICES IN WAYANAD</p>
+        <div className="svc-hero max-w-4xl mx-auto text-center mb-12 overflow-hidden pb-2">
+          <p className="text-xl font-semibold tracking-wider text-slate-700 mb-2 block" data-reveal="mask-up">IT SERVICES IN WAYANAD</p>
         </div>
 
         {/* connector */}
@@ -489,7 +372,8 @@ export default function Services() {
                 key={s.id}
                 href={`/services/${s.slug}`}
                 aria-label={`${s.title} - Software Development Service in Kerala`}
-                className="svc-card block rounded-3xl overflow-hidden p-6 bg-[#fffdfb] border border-slate-100 shadow-xl transition-transform duration-300 hover:border-[#1f6fe6]/30 group"
+                className="svc-card block rounded-3xl overflow-hidden p-6 bg-[#fffdfb] border border-slate-100 shadow-xl transition-transform duration-300 hover:border-[#1f6fe6]/30 hover:-translate-y-2 group"
+                data-reveal="cascade"
               >
                 <div className="flex items-start gap-6">
                   <div
@@ -517,9 +401,10 @@ export default function Services() {
           <div className="mt-12 text-center z-10 relative">
             <a
               href="/services"
-              className="svc-viewall inline-flex items-center gap-3 rounded-full text-white px-6 py-3 text-lg font-semibold shadow-xl transition-transform relative overflow-hidden"
+              className="svc-viewall inline-flex items-center gap-3 rounded-full text-white px-6 py-3 text-lg font-semibold shadow-xl hover:brightness-110 transition-all hover:-translate-y-1 relative overflow-hidden"
               aria-label="View all services"
               style={{ background: 'linear-gradient(90deg, #0b2a5f 0%, #1f6fe6 100%)' }}
+              data-reveal="cascade"
             >
               <span className="relative z-10">View all services</span>
 

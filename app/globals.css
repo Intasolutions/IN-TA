@@ -80,34 +80,22 @@ body {
 
 
 /* header-glow.css (or append to your globals.css) */
-
 /* container must be position:relative (header wrapper already is) */
 .header-glow {
   position: absolute;
-  inset: -6px 0 -6px 0;           /* stretch behind header, tweak to taste */
+  inset: 0;
   left: 0;
   right: 0;
-  z-index: 10;                    /* behind header content but above bg */
+  z-index: 10;
   pointer-events: none;
-  border-radius: 0 0 8px 8px;
-  background: linear-gradient(90deg, rgba(11,42,95,0.35), rgba(31,111,230,0.45), rgba(11,42,95,0.35));
-  filter: blur(18px);
-  transform: translateY(0);
-  opacity: .25;
-  will-change: opacity, transform, filter;
-  animation: headerGlow 4s ease-in-out infinite;
+  background: linear-gradient(90deg, rgba(11,42,95,0.1), rgba(31,111,230,0.15), rgba(11,42,95,0.1));
+  filter: blur(12px);
+  opacity: .15;
 }
 
-/* subtle left-right float to make the gradient move */
-@keyframes headerGlow {
-  0%   { opacity: .16; transform: translateY(0) translateX(-6%); }
-  50%  { opacity: .36; transform: translateY(-2px) translateX(6%); }
-  100% { opacity: .16; transform: translateY(0) translateX(-6%); }
-}
-
-/* respect reduced motion users */
+/* removed heavy animation for enterprise look */
 @media (prefers-reduced-motion: reduce) {
-  .header-glow { animation: none; opacity: .28; }
+  .header-glow { opacity: .1; }
 }
 /* add to globals.css */
 @keyframes fadeUp {
@@ -173,8 +161,8 @@ body {
 
 /* subtle shimmer class — only affects filter (no background rectangle) */
 .vision-line.shimmer {
-  /* not required but nice: small glow via drop-shadow */
-  filter: drop-shadow(0 8px 20px rgba(31,111,230,0.06));
+  /* enterprise subtle shadow */
+  filter: drop-shadow(0 4px 10px rgba(31,111,230,0.03));
 }
 
 /* smaller sizes on narrower screens */
@@ -272,7 +260,7 @@ body {
 
 /* elevated shadow for image */
 .shadow-elev {
-  box-shadow: 0 20px 50px rgba(2,6,23,0.12);
+  box-shadow: 0 10px 30px rgba(11,42,95,0.06);
 }
 
 /* hide big svg on smaller screens for clean layout */

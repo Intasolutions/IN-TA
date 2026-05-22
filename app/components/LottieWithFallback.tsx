@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Lottie from 'lottie-react';
 
 type Props = {
@@ -22,23 +22,39 @@ export default function LottieWithFallback({
 }: Props) {
   const [data, setData] = useState<any | null>(null);
   const [errored, setErrored] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
-    // fetch the json at runtime to keep bundle small
-    fetch(jsonPath)
-      .then((r) => {
-        if (!r.ok) throw new Error('fetch failed');
-        return r.json();
-      })
-      .then((j) => {
-        if (!cancelled) setData(j);
-      })
-      .catch(() => {
-        if (!cancelled) setErrored(true);
-      });
+    let observer: IntersectionObserver;
+
+    if (containerRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            // fetch the json at runtime to keep bundle small
+            fetch(jsonPath)
+              .then((r) => {
+                if (!r.ok) throw new Error('fetch failed');
+                return r.json();
+              })
+              .then((j) => {
+                if (!cancelled) setData(j);
+              })
+              .catch(() => {
+                if (!cancelled) setErrored(true);
+              });
+            observer.disconnect();
+          }
+        },
+        { rootMargin: '200px' }
+      );
+      observer.observe(containerRef.current);
+    }
+
     return () => {
       cancelled = true;
+      if (observer) observer.disconnect();
     };
   }, [jsonPath]);
 
@@ -51,7 +67,7 @@ export default function LottieWithFallback({
   );
 
   return (
-    <div className={className} role="img" aria-label={ariaLabel}>
+    <div ref={containerRef} className={className} role="img" aria-label={ariaLabel}>
       {!errored && data ? (
         <Lottie animationData={data} loop={loop} autoplay={autoplay} />
       ) : (

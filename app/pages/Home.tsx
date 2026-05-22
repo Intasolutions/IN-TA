@@ -9,9 +9,10 @@ import TestimonialSlider from '../components/TestimonialSlider';
 import BlogUpdates from '../components/BlogUpdates';
 import PortfolioCinematicPanels from '../components/PortfolioSection';
 import CompanyIntro from '../components/CompanyIntro';
-
+import { useEnterpriseReveal } from '../hooks/useEnterpriseReveal';
 
 const Home = () => {
+  useEnterpriseReveal();
   return (
     <main>
       <section>

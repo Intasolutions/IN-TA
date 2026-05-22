@@ -41,11 +41,7 @@ export default function TechStack() {
     if (!isRevealed || !containerRef.current) return;
 
     const ctx = gsap.context(() => {
-      // 1. Reveal the section
-      gsap.fromTo('.marquee-content',
-        { autoAlpha: 0, y: 30 },
-        { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.1 }
-      );
+      // The reveal animation is now handled globally via data-reveal attributes.
 
       // 2. Infinite Marquee Animation
       // Row 1: Left
@@ -91,17 +87,17 @@ export default function TechStack() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-10 px-6 md:px-20 mb-16 text-center marquee-content">
-        <span className="text-sm font-bold tracking-wider text-[#0b2a5f] uppercase mb-3 block">Our Arsenal</span>
-        {/* CORRECTED HEADING COLOR */}
-        <h2 className="text-4xl md:text-5xl font-extrabold text-[#0b2a5f] mb-6">
-          Powered by modern <br /> <span className=" text-[#0b2a5f] bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">engineering standards</span>
-        </h2>
-
+      <div className="max-w-6xl mx-auto relative z-10 px-6 md:px-20 mb-16 text-center">
+        <span className="text-sm font-bold tracking-wider text-[#0b2a5f] uppercase mb-3 block" data-reveal="cascade">Our Arsenal</span>
+        <div className="overflow-hidden pb-2">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0b2a5f] mb-6 block" data-reveal="mask-up">
+            Powered by modern <br /> <span className=" text-[#0b2a5f] bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">engineering standards</span>
+          </h2>
+        </div>
       </div>
 
       {/* Marquee Rows */}
-      <div className="relative w-full overflow-hidden marquee-content space-y-8">
+      <div className="relative w-full overflow-hidden space-y-8" data-reveal="cascade">
         {/* Row 1 (Left) */}
         <div
           className="flex w-max space-x-6"

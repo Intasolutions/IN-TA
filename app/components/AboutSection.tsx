@@ -32,24 +32,7 @@ export default function About() {
     }
 
     const ctx = gsap.context(() => {
-      // 1. General Reveal Blocks
-      const reveals = gsap.utils.toArray<HTMLElement>('.about-reveal');
-      gsap.set(reveals, { autoAlpha: 0, y: 30 }); // Increased Y slightly for mobile drama
-      reveals.forEach((el) => {
-        gsap.to(el, {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 90%', // Trigger earlier on mobile
-            toggleActions: 'play none none reverse',
-          },
-        });
-      });
-
-      // 2. SVG Curves
+      // 1. SVG Curves
       [topCurveRef.current, bottomCurveRef.current].forEach((curve) => {
         if (curve && wrapRef.current) {
           const len = curve.getTotalLength();
@@ -57,91 +40,16 @@ export default function About() {
           curve.style.strokeDashoffset = `${len}`;
           gsap.to(curve, {
             strokeDashoffset: 0,
-            ease: 'none',
+            duration: 1.5,
+            ease: 'power2.out',
             scrollTrigger: {
               trigger: wrapRef.current!,
-              start: 'top center',
-              end: 'bottom top',
-              scrub: 0.7,
-              invalidateOnRefresh: true,
+              start: 'top 70%',
+              toggleActions: 'play none none reverse',
             },
           });
         }
-      });
-
-      // 3. Image Parallax
-      if (imageRef.current && wrapRef.current) {
-        gsap.fromTo(
-          imageRef.current,
-          { yPercent: -5, rotate: -4 }, // Reduced movement for safety
-          {
-            yPercent: 5,
-            rotate: 0,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: wrapRef.current!,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: 0.7,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-      }
-
-      // 4. Feature Cards Cascade
-      const cards = gsap.utils.toArray<HTMLElement>('.feature-card');
-      gsap.set(cards, { autoAlpha: 0, y: 20, scale: 0.98 });
-      ScrollTrigger.batch(cards, {
-        start: 'top 85%',
-        onEnter: batch => gsap.to(batch, {
-          autoAlpha: 1,
-          y: 0,
-          scale: 1,
-          stagger: 0.15,
-          duration: 0.8,
-          ease: 'power3.out'
-        }),
-        onLeaveBack: batch => gsap.to(batch, { autoAlpha: 0, y: 20, scale: 0.98 })
-      });
-
-      // 5. Stats Pop
-      const stats = gsap.utils.toArray<HTMLElement>('.stat');
-      gsap.fromTo(stats,
-        { autoAlpha: 0, y: 15 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'back.out(1.7)',
-          scrollTrigger: {
-            trigger: '.stats-row',
-            start: 'top 85%',
-          }
-        }
-      );
-
-      // 6. "How We Work" Steps
-      const steps = gsap.utils.toArray<HTMLElement>('.how-step');
-      gsap.fromTo(steps,
-        { autoAlpha: 0, x: -10 },
-        {
-          autoAlpha: 1,
-          x: 0,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '#how-we-work',
-            start: 'top 80%',
-          }
-        }
-      );
-
-
-
-      // 8. Desktop Only: Aside Slide Animation
+      });      // 8. Desktop Only: Aside Slide Animation
       // We check window width to ensure we only apply the custom Y translation 
       // when the layout is side-by-side (LG screens).
       if (window.innerWidth >= 1024 && wrapRef.current && asideRef.current) {
@@ -210,18 +118,20 @@ export default function About() {
               <div className="text-xs md:text-sm font-bold tracking-[0.2em] text-slate-500 mb-1 uppercase">
                 Professional Milestone
               </div>
-              <div className="text-7xl md:text-8xl lg:text-[7rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] leading-none">
-                2
-                <span className="text-[#1f6fe6] align-top text-4xl md:text-[3rem]">+</span>
+              <div className="text-7xl md:text-8xl lg:text-[7rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] leading-none overflow-hidden pb-4">
+                <div data-reveal="mask-up">
+                  2
+                  <span className="text-[#1f6fe6] align-top text-4xl md:text-[3rem]">+</span>
+                </div>
               </div>
-              <p className="text-slate-600 font-medium mt-2 text-sm md:text-base">
+              <p className="text-slate-600 font-medium mt-2 text-sm md:text-base" data-reveal="cascade">
                 Years of Engineering Excellence
               </p>
             </div>
 
             <div
               ref={imageRef}
-              className="relative transform -rotate-3 lg:-rotate-5 rounded-2xl overflow-hidden shadow-elev about-reveal z-10 w-full max-w-sm md:max-w-xs lg:max-w-md mx-auto"
+              className="relative transform -rotate-3 lg:-rotate-5 rounded-2xl overflow-hidden shadow-elev z-10 w-full max-w-sm md:max-w-xs lg:max-w-md mx-auto"
             >
               <Image
                 src="/about/inta-lobby.jpeg"
@@ -230,16 +140,17 @@ export default function About() {
                 height={1000}
                 className="object-cover w-full h-[350px] md:h-[450px] lg:h-auto rounded-2xl"
                 priority
+                data-reveal="zoom-out"
               />
             </div>
           </div>
 
           {/* Right: Text Content */}
           <div className="lg:col-span-6 space-y-5 z-10 text-center lg:text-left">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-              Engineering Digital Excellence
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight overflow-hidden pb-4">
+              <span className="block" data-reveal="mask-up">Engineering Digital Excellence</span>
             </h2>
-            <p className="text-base md:text-lg text-slate-700 leading-relaxed mt-4">
+            <p className="text-base md:text-lg text-slate-700 leading-relaxed mt-4" data-reveal="cascade">
               We are a specialized team of architects and developers dedicated to deploying
               scalable, high-performance digital products. By integrating cutting-edge design
               with robust engineering, we build intelligent systems that empower enterprises
@@ -250,7 +161,7 @@ export default function About() {
               solutions designed to evolve in lockstep with your business ambitions.
             </p>
 
-            <div className="pt-6 flex justify-center lg:justify-start">
+            <div className="pt-6 flex justify-center lg:justify-start" data-reveal="cascade">
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] text-white px-6 py-3 font-semibold shadow-md hover:brightness-110 transition text-sm md:text-base"
@@ -276,7 +187,7 @@ export default function About() {
         <div className="mt-8 lg:mt-16 features-grid">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
+            <article className="rounded-xl p-6 bg-white border border-slate-100 shadow-sm" data-reveal="cascade">
               <div className="flex items-start gap-4">
                 <div className="shrink-0 w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -293,7 +204,7 @@ export default function About() {
             </article>
 
             {/* Card 2 */}
-            <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
+            <article className="rounded-xl p-6 bg-white border border-slate-100 shadow-sm" data-reveal="cascade">
               <div className="flex items-start gap-4">
                 <div className="shrink-0 w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -310,7 +221,7 @@ export default function About() {
             </article>
 
             {/* Card 3 */}
-            <article className="feature-card rounded-xl p-6 bg-white border border-slate-100 shadow-sm">
+            <article className="rounded-xl p-6 bg-white border border-slate-100 shadow-sm" data-reveal="cascade">
               <div className="flex items-start gap-4">
                 <div className="shrink-0 w-12 h-12 rounded-md bg-gradient-to-tr from-[#0b2a5f] to-[#1f6fe6] flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -329,8 +240,8 @@ export default function About() {
         </div>
 
         {/* Stats Strip */}
-        <div className="mt-8 md:mt-12 stats-row bg-slate-50 rounded-2xl p-6 flex flex-row items-center justify-center gap-8 md:gap-24">
-          <div className="stat text-center">
+        <div className="mt-8 md:mt-12 bg-slate-50 rounded-2xl p-6 flex flex-row items-center justify-center gap-8 md:gap-24">
+          <div className="text-center" data-reveal="cascade">
             <div className="text-2xl md:text-3xl font-extrabold text-slate-900">20+</div>
             <div className="text-[10px] md:text-sm font-semibold text-slate-600 uppercase tracking-wide">
               Projects Delivered
@@ -339,7 +250,7 @@ export default function About() {
 
           <div className="w-px h-10 bg-slate-200"></div>
 
-          <div className="stat text-center">
+          <div className="text-center" data-reveal="cascade">
             <div className="text-2xl md:text-3xl font-extrabold text-slate-900">100%</div>
             <div className="text-[10px] md:text-sm font-semibold text-slate-600 uppercase tracking-wide">
               Client Satisfaction
