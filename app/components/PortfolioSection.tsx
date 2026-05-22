@@ -234,8 +234,11 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
                   </div>
 
                   <div className="fade-up-element flex flex-wrap gap-1.5 md:gap-2 mb-6 md:mb-10 flex-shrink-0">
-                    {p.tags.map((tag: any) => (
-                      <span key={tag.slug} className="px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[0.65rem] md:text-xs uppercase tracking-wide font-medium bg-white/5 border border-white/10 text-white/80">
+                    {p.tags.map((tag: any, index: number) => (
+                      <span 
+                        key={tag.slug} 
+                        className={`px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[0.65rem] md:text-xs uppercase tracking-wide font-medium bg-white/5 border border-white/10 text-white/80 ${index >= 3 ? 'hidden md:block' : ''}`}
+                      >
                         {tag.name}
                       </span>
                     ))}
