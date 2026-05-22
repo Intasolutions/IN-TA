@@ -224,9 +224,14 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
                   </h3>
 
                   {/* Removed SplitChars here for performance. Simple fade up instead. */}
-                  <p className="fade-up-element text-sm sm:text-base md:text-[1.125rem] text-white/70 font-light leading-relaxed mb-5 md:mb-8 max-w-xl">
-                    {p.summary?.length > 165 ? p.summary.substring(0, 165).replace(/\s+\S*$/, '') + '...' : p.summary}
-                  </p>
+                  <div className="fade-up-element text-sm sm:text-base md:text-[1.125rem] text-white/70 font-light leading-relaxed mb-5 md:mb-8 max-w-xl">
+                    <p className="hidden md:block">
+                      {p.summary?.length > 165 ? p.summary.substring(0, 165).replace(/\s+\S*$/, '') + '...' : p.summary}
+                    </p>
+                    <p className="block md:hidden">
+                      {p.summary?.length > 80 ? p.summary.substring(0, 80).replace(/\s+\S*$/, '') + '...' : p.summary}
+                    </p>
+                  </div>
 
                   <div className="fade-up-element flex flex-wrap gap-1.5 md:gap-2 mb-6 md:mb-10 flex-shrink-0">
                     {p.tags.map((tag: any) => (
