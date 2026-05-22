@@ -70,28 +70,7 @@ export default function FeaturesAndStats() {
         </div>
 
         {/* Bottom Section: Stats */}
-        <div className="stats-container pt-12 border-t border-slate-200/60">
-          <div className="flex flex-col md:flex-row justify-center items-center gap-16 md:gap-32">
 
-            <div className="text-center" data-reveal="cascade">
-              <div className="text-5xl md:text-6xl font-black text-slate-900 mb-2">20+</div>
-              <div className="text-sm font-bold tracking-widest text-slate-500 uppercase">
-                Projects Delivered
-              </div>
-            </div>
-
-            {/* Divider line for desktop */}
-            <div className="hidden md:block w-px h-16 bg-slate-300"></div>
-
-            <div className="text-center" data-reveal="cascade">
-              <div className="text-5xl md:text-6xl font-black text-slate-900 mb-2">100%</div>
-              <div className="text-sm font-bold tracking-widest text-slate-500 uppercase">
-                Client Satisfaction
-              </div>
-            </div>
-
-          </div>
-        </div>
 
       </div>
     </section>

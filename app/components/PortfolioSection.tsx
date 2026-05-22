@@ -86,6 +86,20 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
         { y: 0, autoAlpha: 1, duration: 1, stagger: 0.15, ease: 'power3.out', delay: 0.2 }
       );
 
+      // Fade out Hero when first card comes up to prevent ghosting
+      if (panelRefs.current[0]) {
+        gsap.to('.hero-section', {
+          opacity: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: panelRefs.current[0],
+            start: 'top 80%',
+            end: 'top 30%',
+            scrub: true,
+          }
+        });
+      }
+
       // B. Card Stack Effect & Text Reveals
       panelRefs.current.forEach((panel, i) => {
         if (!panel) return;
@@ -164,7 +178,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
         HERO SECTION
         Using CSS sticky instead of GSAP pinning for a buttery smooth scroll transition
       */}
-      <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center text-center overflow-hidden z-0">
+      <div className="hero-section sticky top-0 h-screen w-full flex flex-col items-center justify-center text-center overflow-hidden z-0">
         <div className="absolute inset-0 bg-radial-vignette pointer-events-none" />
         <div className="hero-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-[#1f6fe6] opacity-10 blur-[100px] rounded-full" />
 
@@ -198,41 +212,43 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             <div className="card-inner w-full max-w-7xl h-[85vh] bg-[#0a1020] rounded-3xl md:rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl flex flex-col md:flex-row transform-gpu will-change-transform">
 
               {/* Left Content Half */}
-              <div className="w-full md:w-1/2 h-1/2 md:h-full p-8 md:p-16 flex flex-col justify-center relative z-10">
-                <div className="fade-up-element flex items-center gap-3 mb-6">
-                  <div className="w-2 h-2 rounded-full bg-[#1f6fe6]" />
-                  <span className="text-sm font-bold tracking-widest text-blue-300 uppercase">Case Study</span>
-                </div>
+              <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 overflow-y-auto custom-scrollbar">
+                <div className="p-8 md:p-12 lg:p-16 min-h-full flex flex-col justify-center">
+                  <div className="fade-up-element flex items-center gap-3 mb-4 md:mb-6 flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-[#1f6fe6]" />
+                    <span className="text-sm font-bold tracking-widest text-blue-300 uppercase">Case Study</span>
+                  </div>
 
-                <h3 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6">
-                  <SplitWords text={p.title} />
-                </h3>
+                  <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 md:mb-6 flex-shrink-0">
+                    <SplitWords text={p.title} />
+                  </h3>
 
-                {/* Removed SplitChars here for performance. Simple fade up instead. */}
-                <p className="fade-up-element text-lg md:text-xl text-white/60 font-light leading-relaxed mb-8 max-w-xl">
-                  {p.summary}
-                </p>
+                  {/* Removed SplitChars here for performance. Simple fade up instead. */}
+                  <p className="fade-up-element text-base md:text-[1.125rem] text-white/70 font-light leading-relaxed mb-6 md:mb-8 max-w-xl">
+                    {p.summary}
+                  </p>
 
-                <div className="fade-up-element flex flex-wrap gap-2 mb-10">
-                  {p.tags.map((tag: any) => (
-                    <span key={tag.slug} className="px-4 py-1.5 rounded-full text-xs uppercase tracking-wide font-medium bg-white/5 border border-white/10 text-white/80">
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
+                  <div className="fade-up-element flex flex-wrap gap-2 mb-8 md:mb-10 flex-shrink-0">
+                    {p.tags.map((tag: any) => (
+                      <span key={tag.slug} className="px-3 py-1.5 rounded-full text-[0.7rem] md:text-xs uppercase tracking-wide font-medium bg-white/5 border border-white/10 text-white/80">
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="fade-up-element mt-auto md:mt-0">
-                  <a
-                    href={p.external_url || `/portfolio/${p.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-medium text-sm text-white bg-[#1f6fe6] hover:bg-blue-500 transition-colors group"
-                  >
-                    View Project
-                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </a>
+                  <div className="fade-up-element mt-auto md:mt-0 flex-shrink-0">
+                    <a
+                      href={p.external_url || `/portfolio/${p.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-medium text-sm text-white bg-[#1f6fe6] hover:bg-blue-500 transition-colors group"
+                    >
+                      View Project
+                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -261,6 +277,20 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
       <style jsx>{`
         .bg-radial-vignette { background: radial-gradient(circle at center, #020617 0%, #000000 100%); }
         .glass-pill { box-shadow: 0 10px 30px -5px rgba(31, 111, 230, 0.2); }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
       `}</style>
     </section>
   );
