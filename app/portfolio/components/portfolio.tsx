@@ -241,6 +241,25 @@ export default function PortfolioPage() {
         requestAnimationFrame(() => {
           try {
             ScrollTrigger.refresh();
+            
+            // Auto-scroll logic to handle hash navigation dynamically
+            setTimeout(() => {
+              const hash = window.location.hash;
+              if (hash && hash.startsWith('#project-')) {
+                const targetElement = document.querySelector(hash);
+                if (targetElement) {
+                  const offset = 80;
+                  const elementPosition = targetElement.getBoundingClientRect().top;
+                  const offsetPosition = elementPosition + window.scrollY - offset;
+                  
+                  window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                  });
+                }
+              }
+            }, 300);
+            
           } catch { }
         });
       })
@@ -518,7 +537,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
   return (
     <div ref={containerRef} className="space-y-16 lg:space-y-28">
       {projects.map((p, idx) => (
-        <article key={p.id} className="project-section grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
+        <article id={`project-${p.id}`} key={p.id} className="project-section grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
           <div className={`col-span-1 lg:col-span-7 ${idx % 2 === 1 ? 'lg:order-last' : ''}`}>
             <div className="relative will-change-transform">
               <div className="image-mask rounded-3xl overflow-hidden relative">
@@ -729,6 +748,7 @@ function GalleryGrid({ items }: { items: any[] }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12">
         {items.map((it) => (
           <article
+            id={`project-${it.id}`}
             key={it.id}
             className="card-3d relative will-change-transform"
             tabIndex={0}

@@ -118,8 +118,8 @@ export default function About() {
               <div className="text-xs md:text-sm font-bold tracking-[0.2em] text-slate-500 mb-1 uppercase">
                 Professional Milestone
               </div>
-              <div className="text-7xl md:text-8xl lg:text-[7rem] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] leading-none overflow-hidden pb-4">
-                <div data-reveal="mask-up">
+              <div className="text-7xl md:text-8xl lg:text-[7rem] font-extrabold leading-none overflow-hidden pb-4">
+                <div data-reveal="mask-up" className="text-transparent bg-clip-text bg-gradient-to-r from-[#0b2a5f] to-[#1f6fe6] inline-block">
                   2
                   <span className="text-[#1f6fe6] align-top text-4xl md:text-[3rem]">+</span>
                 </div>

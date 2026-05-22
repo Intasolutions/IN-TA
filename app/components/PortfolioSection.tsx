@@ -23,7 +23,7 @@ function SplitWords({ text }: { text: string }) {
       {text.split(' ').map((w, i) => (
         <span
           key={i}
-          className="split-word inline-block mr-2 md:mr-3 will-change-transform will-change-opacity"
+          className="split-word inline-block max-w-full break-all md:break-words mr-2 md:mr-3 will-change-transform will-change-opacity"
           style={{ opacity: 0 }}
         >
           {w}
@@ -212,20 +212,20 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             <div className="card-inner w-full max-w-7xl h-[85vh] bg-[#0a1020] rounded-3xl md:rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl flex flex-col md:flex-row transform-gpu will-change-transform">
 
               {/* Left Content Half */}
-              <div className="w-full md:w-1/2 h-[55%] sm:h-[60%] md:h-full relative z-10 overflow-y-auto custom-scrollbar">
+              <div className="w-full md:w-1/2 min-w-0 h-[55%] sm:h-[60%] md:h-full relative z-10 overflow-y-auto custom-scrollbar overflow-x-hidden">
                 <div className="p-6 sm:p-8 md:p-12 lg:p-16 min-h-full flex flex-col justify-center">
                   <div className="fade-up-element flex items-center gap-2 md:gap-3 mb-3 md:mb-6 flex-shrink-0">
                     <div className="w-2 h-2 rounded-full bg-[#1f6fe6]" />
                     <span className="text-xs md:text-sm font-bold tracking-widest text-blue-300 uppercase">Case Study</span>
                   </div>
 
-                  <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3 md:mb-6 flex-shrink-0">
+                  <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3 md:mb-6 flex-shrink-0 break-words">
                     <SplitWords text={p.title} />
                   </h3>
 
                   {/* Removed SplitChars here for performance. Simple fade up instead. */}
                   <p className="fade-up-element text-sm sm:text-base md:text-[1.125rem] text-white/70 font-light leading-relaxed mb-5 md:mb-8 max-w-xl">
-                    {p.summary}
+                    {p.summary?.length > 165 ? p.summary.substring(0, 165).replace(/\s+\S*$/, '') + '...' : p.summary}
                   </p>
 
                   <div className="fade-up-element flex flex-wrap gap-1.5 md:gap-2 mb-6 md:mb-10 flex-shrink-0">
@@ -238,7 +238,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
 
                   <div className="fade-up-element mt-auto md:mt-0 flex-shrink-0">
                     <a
-                      href={p.external_url || `/portfolio/${p.slug}`}
+                      href={p.external_url || `/portfolio#project-${p.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 md:gap-3 px-6 py-3 md:px-8 md:py-4 rounded-full font-medium text-xs md:text-sm text-white bg-[#1f6fe6] hover:bg-blue-500 transition-colors group"
@@ -253,7 +253,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
               </div>
 
               {/* Right Image Half */}
-              <div className="w-full md:w-1/2 h-[45%] sm:h-[40%] md:h-full relative overflow-hidden bg-black flex items-center justify-center p-4 sm:p-8">
+              <div className="w-full md:w-1/2 min-w-0 h-[45%] sm:h-[40%] md:h-full relative overflow-hidden bg-black flex items-center justify-center p-4 sm:p-8">
                 {/* Subtle gradient overlay to blend image into the card */}
                 <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a1020] via-transparent to-transparent z-10 opacity-80" />
 
