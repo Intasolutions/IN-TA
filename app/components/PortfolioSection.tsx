@@ -187,12 +187,12 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             <span className="text-sm font-semibold tracking-widest text-blue-200 uppercase">Inta Solutions</span>
           </div>
 
-          <h2 className="text-6xl md:text-8xl font-black leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60 mb-6">
+          <h2 className="text-5xl sm:text-6xl md:text-8xl font-black leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60 mb-4 md:mb-6">
             <span className="hero-anim-text block">Solutions</span>
             <span className="hero-anim-text block text-[#94b3ff]">We’ve Built</span>
           </h2>
 
-          <p className="hero-anim-text text-xl text-blue-200/60 font-light max-w-lg">
+          <p className="hero-anim-text text-lg md:text-xl text-blue-200/60 font-light max-w-lg px-4 md:px-0">
             Crafting powerful digital ecosystems with precision and purpose.
           </p>
         </div>
@@ -212,25 +212,25 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
             <div className="card-inner w-full max-w-7xl h-[85vh] bg-[#0a1020] rounded-3xl md:rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl flex flex-col md:flex-row transform-gpu will-change-transform">
 
               {/* Left Content Half */}
-              <div className="w-full md:w-1/2 h-1/2 md:h-full relative z-10 overflow-y-auto custom-scrollbar">
-                <div className="p-8 md:p-12 lg:p-16 min-h-full flex flex-col justify-center">
-                  <div className="fade-up-element flex items-center gap-3 mb-4 md:mb-6 flex-shrink-0">
+              <div className="w-full md:w-1/2 h-[55%] sm:h-[60%] md:h-full relative z-10 overflow-y-auto custom-scrollbar">
+                <div className="p-6 sm:p-8 md:p-12 lg:p-16 min-h-full flex flex-col justify-center">
+                  <div className="fade-up-element flex items-center gap-2 md:gap-3 mb-3 md:mb-6 flex-shrink-0">
                     <div className="w-2 h-2 rounded-full bg-[#1f6fe6]" />
-                    <span className="text-sm font-bold tracking-widest text-blue-300 uppercase">Case Study</span>
+                    <span className="text-xs md:text-sm font-bold tracking-widest text-blue-300 uppercase">Case Study</span>
                   </div>
 
-                  <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 md:mb-6 flex-shrink-0">
+                  <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-3 md:mb-6 flex-shrink-0">
                     <SplitWords text={p.title} />
                   </h3>
 
                   {/* Removed SplitChars here for performance. Simple fade up instead. */}
-                  <p className="fade-up-element text-base md:text-[1.125rem] text-white/70 font-light leading-relaxed mb-6 md:mb-8 max-w-xl">
+                  <p className="fade-up-element text-sm sm:text-base md:text-[1.125rem] text-white/70 font-light leading-relaxed mb-5 md:mb-8 max-w-xl">
                     {p.summary}
                   </p>
 
-                  <div className="fade-up-element flex flex-wrap gap-2 mb-8 md:mb-10 flex-shrink-0">
+                  <div className="fade-up-element flex flex-wrap gap-1.5 md:gap-2 mb-6 md:mb-10 flex-shrink-0">
                     {p.tags.map((tag: any) => (
-                      <span key={tag.slug} className="px-3 py-1.5 rounded-full text-[0.7rem] md:text-xs uppercase tracking-wide font-medium bg-white/5 border border-white/10 text-white/80">
+                      <span key={tag.slug} className="px-2.5 py-1 md:px-3 md:py-1.5 rounded-full text-[0.65rem] md:text-xs uppercase tracking-wide font-medium bg-white/5 border border-white/10 text-white/80">
                         {tag.name}
                       </span>
                     ))}
@@ -241,10 +241,10 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
                       href={p.external_url || `/portfolio/${p.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-medium text-sm text-white bg-[#1f6fe6] hover:bg-blue-500 transition-colors group"
+                      className="inline-flex items-center gap-2 md:gap-3 px-6 py-3 md:px-8 md:py-4 rounded-full font-medium text-xs md:text-sm text-white bg-[#1f6fe6] hover:bg-blue-500 transition-colors group"
                     >
                       View Project
-                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-3 h-3 md:w-4 md:h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </a>
@@ -253,7 +253,7 @@ export default function PortfolioCinematicPanels(): React.JSX.Element {
               </div>
 
               {/* Right Image Half */}
-              <div className="w-full md:w-1/2 h-1/2 md:h-full relative overflow-hidden bg-black flex items-center justify-center p-8">
+              <div className="w-full md:w-1/2 h-[45%] sm:h-[40%] md:h-full relative overflow-hidden bg-black flex items-center justify-center p-4 sm:p-8">
                 {/* Subtle gradient overlay to blend image into the card */}
                 <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#0a1020] via-transparent to-transparent z-10 opacity-80" />
 
