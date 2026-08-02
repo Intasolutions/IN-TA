@@ -25,7 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic services
   let serviceRoutes: any[] = [];
   try {
-    const res = await fetch(`${API_BASE}/api/services/`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${API_BASE}/api/services/`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
     if (res.ok) {
       const services = await res.json();
       serviceRoutes = services.map((s: any) => ({
@@ -42,7 +46,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic blogs
   let blogRoutes: any[] = [];
   try {
-    const res = await fetch(`${API_BASE}/api/blog/posts/`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${API_BASE}/api/blog/posts/`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
     if (res.ok) {
       const blogs = await res.json();
       blogRoutes = blogs.map((b: any) => ({

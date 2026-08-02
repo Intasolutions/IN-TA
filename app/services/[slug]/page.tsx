@@ -67,7 +67,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export async function generateStaticParams() {
     try {
-        const res = await fetch(`${apiBase}/api/services/`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(`${apiBase}/api/services/`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
         if (!res.ok) return [];
         const services = await res.json();
         return services.map((s: any) => ({
