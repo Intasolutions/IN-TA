@@ -17,9 +17,14 @@ export const metadata: Metadata = {
 
 async function getBlogs() {
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         const res = await fetch(`${apiBase}/api/blog/posts/`, {
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600 },
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
+        
         if (!res.ok) return [];
         return res.json();
     } catch (error) {
