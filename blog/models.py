@@ -1,4 +1,5 @@
 from django.db import models
+from ckeditor.fields import RichTextField
 
 class Blog(models.Model):
     title = models.CharField(max_length=200)
@@ -6,7 +7,7 @@ class Blog(models.Model):
     tag = models.CharField(max_length=50) # e.g. Design, Engineering
     image = models.ImageField(upload_to='blogs/', blank=True, null=True)
     link = models.URLField(blank=True, null=True)
-    content = models.TextField(blank=True, null=True)
+    content = RichTextField(blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
