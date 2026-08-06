@@ -8,3 +8,5 @@ dj-database-url
 whitenoise
 django-ckeditor
 Pillow
+cloudinary
+django-cloudinary-storage
