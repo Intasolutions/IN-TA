@@ -25,6 +25,10 @@ const nextConfig: NextConfig = {
         hostname: "www.in-tasolutions.com",
         pathname: "/media/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
   /* async rewrites() {
