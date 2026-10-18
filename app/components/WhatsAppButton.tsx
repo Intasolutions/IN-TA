@@ -1,7 +1,8 @@
 // app/components/WhatsAppButton.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
@@ -21,6 +22,20 @@ export default function WhatsAppButton() {
   const xTo = useRef<gsap.QuickToFunc | null>(null);
   const yTo = useRef<gsap.QuickToFunc | null>(null);
   const hoverTl = useRef<gsap.core.Timeline | null>(null);
+
+  // Tuck the button away while an element marked [data-floating-clear] (e.g. the hero CTAs)
+  // is on screen, so it never covers them. Keyed by path so it resets on navigation.
+  const pathname = usePathname();
+  const [tuckedOn, setTuckedOn] = useState<string | null>(null);
+  const tucked = tuckedOn === pathname;
+
+  useEffect(() => {
+    const target = document.querySelector('[data-floating-clear]');
+    if (!target) return;
+    const io = new IntersectionObserver(([entry]) => setTuckedOn(entry.isIntersecting ? pathname : null));
+    io.observe(target);
+    return () => io.disconnect();
+  }, [pathname]);
 
   useEffect(() => {
     // We use matchMedia inside GSAP context to handle desktop vs mobile animations cleanly
@@ -105,7 +120,9 @@ export default function WhatsAppButton() {
     <div
       ref={containerRef}
       // RESPONSIVE: bottom-4 right-4 for mobile, bottom-8 right-8 for desktop
-      className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] flex items-center justify-end pointer-events-none"
+      className={`fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] flex items-center justify-end pointer-events-none transition-all duration-500 ease-out
+        ${tucked ? 'opacity-0 translate-y-8 scale-75' : ''}`}
+      inert={tucked}
     >
       {/* Mouse interaction zone */}
       <div

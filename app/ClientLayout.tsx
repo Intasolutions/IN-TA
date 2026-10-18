@@ -14,25 +14,28 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const [routeKey, setRouteKey] = useState(pathname);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const prevPath = useRef(pathname);
-  const { setRevealComplete } = useReveal();
+  const { setRevealComplete, setIntroReady } = useReveal();
 
   useEffect(() => {
     if (prevPath.current !== pathname) {
       setShowMask(true);
       setRevealComplete(false);
+      setIntroReady(false);
       setRouteKey(pathname);
       prevPath.current = pathname;
     }
-  }, [pathname, setRevealComplete]);
+  }, [pathname, setRevealComplete, setIntroReady]);
 
   const handleLoaderDone = () => {
     setIsFirstLoad(false);
     setRevealComplete(true);
+    setIntroReady(true);
   };
 
   const handleMaskComplete = () => {
     setShowMask(false);
     setRevealComplete(true);
+    setIntroReady(true);
   };
 
   return (

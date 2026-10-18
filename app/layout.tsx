@@ -1,17 +1,30 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import ClientLayout from './ClientLayout';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jetbrains-mono',
   subsets: ['latin'],
 });
+
+// Material Symbols, limited to the icons the site uses (keeps the font tiny).
+// Add new icon names here — the list must stay in alphabetical order.
+const MATERIAL_ICONS = [
+  'arrow_outward', 'close', 'developer_board', 'location_on', 'menu',
+  'north_east', 'schedule',
+].sort().join(',');
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.in-tasolutions.com'),
@@ -59,9 +72,13 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="http://127.0.0.1:8000" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href={`https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=${MATERIAL_ICONS}&display=block`}
+        />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${jakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <ClientLayout>{children}</ClientLayout>
       </body>

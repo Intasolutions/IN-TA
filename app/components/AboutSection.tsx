@@ -85,7 +85,7 @@ export default function About() {
       ref={wrapRef}
       id="about"
       aria-label="About INTA"
-      className="relative bg-[#f9f8f6] text-slate-900 py-16 lg:py-24 overflow-hidden rounded-t-[2.5rem] -mt-10 lg:-mt-20"
+      className="relative bg-[#f9f8f6] text-slate-900 py-16 lg:py-24 overflow-hidden rounded-t-[2.5rem]"
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20">
 

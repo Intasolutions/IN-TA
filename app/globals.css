@@ -10,9 +10,24 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-serif: ui-serif, Georgia, serif;
   --animate-spin-slow: spin 12s linear infinite;
+}
+
+/* Fixed header height (info strip 44px + nav 80px); the strip hides on short landscape screens */
+:root { --header-h: 124px; }
+@media (max-height: 500px) and (orientation: landscape) {
+  :root { --header-h: 80px; }
+}
+
+/* ===== 2026 redesign tokens (Stitch) ===== */
+@theme {
+  --color-brand-blue: #0144b5;
+  --color-midnight: #01072b;
+  --color-canvas: #edf2ec;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -75,7 +90,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
 
 
@@ -722,4 +737,67 @@ aside .about-reveal:hover { transform: translateY(-6px); }
 }
 html {
   background-color: #000;
+}
+
+
+/* ===================================================================
+   2026 REDESIGN — kinetic utilities (from the Stitch home design)
+   =================================================================== */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  line-height: 1;
+  user-select: none;
+}
+
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.animate-marquee { animation: marquee 22s linear infinite; }
+.animate-marquee:hover { animation-play-state: paused; }
+
+@keyframes gradientShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.text-gradient-shimmer {
+  background: linear-gradient(90deg, #0144b5, #001f70, #2557c7, #01072b, #0144b5);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShimmer 4s ease-in-out infinite;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.5deg); }
+}
+.animate-float-subtle { animation: floatSlow 5s ease-in-out infinite; }
+
+@keyframes sonarPing {
+  from { transform: scale(0.6); opacity: 0.9; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+.sonar-wave {
+  position: absolute;
+  border-radius: 9999px;
+  border: 1.5px solid rgb(1 68 181 / 0.6);
+  animation: sonarPing 2.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.sonar-wave-2 { animation-delay: 1.4s; }
+
+.kinetic-cta-btn {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 10px 30px -5px rgb(1 68 181 / 0.35);
+}
+.kinetic-cta-btn:hover {
+  box-shadow: 0 16px 40px -2px rgb(1 68 181 / 0.55), 0 0 20px rgb(1 68 181 / 0.35);
+  transform: translateY(-2px);
+}
+
+/* Reduced motion: keep colour/opacity effects, calm the travelling ones */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-subtle { animation: none; }
+  .animate-marquee { animation-duration: 60s; }
 }

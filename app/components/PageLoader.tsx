@@ -11,7 +11,7 @@ export default function PageLoader({ onDone }: { onDone: () => void }) {
     const tl = gsap.timeline({
       defaults: { ease: 'power4.out' },
       onComplete: () => { requestAnimationFrame(onDone); },
-    });
+    }).timeScale(1.5); // ~2s instead of ~3s before the hero entrance starts
 
     tl.from('.logo', {
       opacity: 0,

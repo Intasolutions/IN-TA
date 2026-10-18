@@ -1,194 +1,208 @@
-// frontend/components/Header.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import gsap from 'gsap';
+import { usePathname } from 'next/navigation';
+import Icon from './Icon';
+
+const NAV_LINKS = [
+  { name: 'Work', href: '/portfolio' },
+  { name: 'Capabilities', href: '/services' },
+  { name: 'About', href: '/about' },
+  { name: 'Blog', href: '/blog' },
+  { name: 'Contact', href: '/contact' },
+];
+
+const PHONE_DISPLAY = '+91 94475 95381';
+const PHONE_HREF = 'tel:+919447595381';
+
+// Own component so the ticking clock re-renders only itself, not the whole header
+function IstClock() {
+  const [time, setTime] = useState('');
+  useEffect(() => {
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <span>IST {time}</span>;
+}
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  
   const lastScrollY = useRef(0);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const tl = useRef<gsap.core.Timeline | null>(null);
 
-  // --- 1. SCROLL BEHAVIOR ---
+  // Hide on scroll down, reveal on scroll up
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 20);
-
-      // Hide header on scroll down (if > 100px), show on scroll up
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      lastScrollY.current = currentScrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setIsVisible(y < lastScrollY.current || y < 140);
+      lastScrollY.current = y;
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // --- 2. MENU ANIMATION SETUP ---
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      tl.current = gsap.timeline({ paused: true });
-
-      // Slide Menu Down
-      tl.current.to(menuRef.current, {
-        yPercent: 100,
-        duration: 0.6,
-        ease: 'power4.inOut',
-        display: 'flex'
-      });
-
-      // Animate Links
-      tl.current.fromTo('.mobile-link', 
-        { y: 60, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power2.out' },
-        '-=0.2'
-      );
-    }, menuRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  // --- 3. TOGGLE HANDLER ---
-  useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = 'hidden';
-      tl.current?.play();
-    } else {
-      document.body.style.overflow = '';
-      tl.current?.reverse();
-    }
+    document.body.style.overflow = isMobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [isMobileOpen]);
 
-  const navLinks = [
-    { name: 'Work', href: '/portfolio' },
-    { name: 'Services', href: '/services' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ];
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <>
-      <header
-        className={`fixed top-0 left-0 w-full z-[60] transition-transform duration-500
-          ${isVisible ? 'translate-y-0' : '-translate-y-full'}
-        `}
-      >
-        {/* Glass Background Panel */}
-        <div 
-          className={`absolute inset-0 transition-opacity duration-300
-            ${isScrolled && !isMobileOpen ? 'opacity-100' : 'opacity-0'}
-            bg-[#020617]/80 backdrop-blur-md border-b border-white/5
-          `} 
-        />
-
-        <div className="relative max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
-          
-          {/* --- LOGO SECTION (FIXED) --- */}
-          <Link href="/" className="relative z-[70] group flex items-center gap-3 shrink-0">
-             
-             {/* FIX: Removed overflow-hidden and object-cover.
-                Using 'object-contain' ensures the full logo is always visible.
-                Added 'shrink-0' to prevent squashing.
-             */}
-       <div className="relative h-12 w-18 md:h-14 md:w-24 shrink-0 rounded-xl bg-gradient-to-br from-slate-950 via-[#0a0e24] to-blue-950 border border-blue-800/30 shadow-lg shadow-blue-900/20 ring-1 ring-inset ring-white/5 overflow-hidden flex items-center justify-center p-2">
-  <img 
-    src="/logo/logo-inta-light.png" 
-    alt="Inta Solutions" 
-    // Changed h-full w-full to slightly smaller so it floats inside the padding
-    className="w-full h-full object-contain drop-shadow-sm" 
-  />
-</div>
-             
-             {/* Text: Visible on mobile, styled nicely */}
-             <span className={`font-bold tracking-wider uppercase whitespace-nowrap transition-colors duration-300
-               text-xs md:text-sm 
-               ${isMobileOpen ? 'text-white' : 'text-white group-hover:text-blue-200'}
-             `}>
-               In-ta Solutions
-             </span>
-          </Link>
-
-          {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center gap-8 relative z-[70]">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.href}
-                className="text-sm font-medium text-blue-100/70 hover:text-white transition-all duration-300 relative group"
-              >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-blue-400 transition-all duration-300 group-hover:w-full" />
-              </Link>
-            ))}
-            
-            <Link href="/contact" className="ml-4 px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-semibold uppercase tracking-widest text-white transition-all duration-300 backdrop-blur-sm">
-              Get Started
-            </Link>
-          </nav>
-
-          {/* BURGER MENU BUTTON */}
-          <button 
-            onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="md:hidden relative z-[70] w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm transition-colors hover:bg-white/10"
-            aria-label="Toggle Menu"
-          >
-            <div className="flex flex-col gap-1.5 items-center justify-center w-5">
-                <span className={`h-0.5 bg-white rounded-full transition-all duration-300 ease-in-out ${isMobileOpen ? 'w-5 rotate-45 translate-y-2' : 'w-5'}`} />
-                <span className={`h-0.5 bg-white rounded-full transition-all duration-300 ease-in-out ${isMobileOpen ? 'w-0 opacity-0' : 'w-3.5'}`} />
-                <span className={`h-0.5 bg-white rounded-full transition-all duration-300 ease-in-out ${isMobileOpen ? 'w-5 -rotate-45 -translate-y-2' : 'w-5'}`} />
-            </div>
-          </button>
+    <div
+      className={`fixed top-0 left-0 right-0 z-[60] bg-canvas border-b border-brand-blue/15 shadow-sm transition-transform duration-500
+        ${isVisible || isMobileOpen ? 'translate-y-0' : '-translate-y-full'}`}
+    >
+      {/* TOP DATUM STRIP */}
+      <div className="[@media(max-height:500px)_and_(orientation:landscape)]:hidden max-w-[1520px] mx-auto px-4 sm:px-6 h-11 flex items-center justify-between gap-3 text-[10px] sm:text-[11px] font-mono tracking-wider sm:tracking-widest text-midnight/70">
+        <div className="flex items-center gap-4">
+          <span className="inline-flex items-center gap-1.5 text-brand-blue font-semibold">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue" />
+            </span>
+            <span className="hidden lg:inline">SYS.RUNNING [11.8021° N, 76.0232° E]</span>
+            <span className="lg:hidden">SYS.RUNNING</span>
+          </span>
+          <span className="hidden xl:inline text-brand-blue/30">/</span>
+          <span className="hidden xl:inline text-midnight font-medium">HQ: WAYANAD, KERALA</span>
         </div>
-      </header>
-
-      {/* MOBILE FULLSCREEN MENU */}
-      <div 
-        ref={menuRef}
-        className="fixed inset-0 z-[50] bg-[#020617] hidden flex-col items-center justify-center -translate-y-full"
-      >
-        {/* Background Ambient Glow */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px]" />
-        </div>
-        
-        {/* Links Container */}
-        <div className="flex flex-col items-center gap-6 text-center relative z-10 w-full px-6">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.name}
-              href={link.href}
-              onClick={() => setIsMobileOpen(false)}
-              className="mobile-link text-4xl font-bold text-white/90 hover:text-blue-400 transition-colors tracking-tight will-change-transform"
-            >
-              {link.name}
-            </Link>
-          ))}
-           
-           <div className="mobile-link mt-8 w-full max-w-[200px]">
-              <button className="w-full px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold tracking-wide shadow-xl shadow-blue-900/30 transition-all">
-                Let's Talk
-              </button>
-           </div>
-        </div>
-
-        {/* Footer Brand */}
-        <div className="absolute bottom-10 left-0 w-full text-center mobile-link opacity-50">
-             <span className="text-[10px] uppercase tracking-[0.3em] text-white/30">
-                Inta Solutions Pvt Ltd
-             </span>
+        <div className="flex items-center gap-4 sm:gap-6">
+          <span className="hidden sm:flex items-center gap-1 text-brand-blue font-semibold tabular-nums">
+            <Icon name="schedule" className="text-[13px]" />
+            <IstClock />
+          </span>
+          <a className="hover:text-brand-blue transition-colors text-midnight font-semibold whitespace-nowrap" href={PHONE_HREF}>
+            {PHONE_DISPLAY}
+          </a>
         </div>
       </div>
-    </>
+
+      {/* PRIMARY NAVIGATION */}
+      <header className="border-t border-brand-blue/10 bg-white">
+        <div className="max-w-[1520px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            onClick={() => setIsMobileOpen(false)}
+            className="group flex items-center gap-3 sm:gap-4 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-blue"
+            aria-label="IN-TA Solutions — home"
+          >
+            {/* Logo tile: dark navy glass with a soft blue glow, holding the official white INTA wordmark */}
+            <span
+              aria-hidden="true"
+              className="relative flex items-center justify-center h-11 sm:h-12 px-1.5 sm:px-2 rounded-xl overflow-hidden
+                bg-[linear-gradient(145deg,#01072b_0%,#06123f_55%,#0a1d5c_100%)]
+                border border-brand-blue/40 ring-1 ring-inset ring-white/5
+                shadow-[0_6px_20px_-6px_rgb(1_68_181/0.55)]
+                group-hover:shadow-[0_10px_28px_-6px_rgb(1_68_181/0.75)] group-hover:border-brand-blue/70
+                transition-[box-shadow,border-color] duration-500"
+            >
+              {/* The official logo file, shown as-is */}
+              <Image
+                src="/logo/logo-inta.png"
+                alt=""
+                width={774}
+                height={322}
+                priority
+                className="h-10 sm:h-11 w-auto"
+              />
+            </span>
+            <span
+              aria-hidden="true"
+              className="lg:hidden xl:inline font-display font-bold text-[15px] sm:text-base tracking-[0.06em] text-midnight whitespace-nowrap"
+            >
+              IN-TA SOLUTIONS
+            </span>
+          </Link>
+
+          <nav className="hidden lg:flex items-center gap-1 bg-canvas p-1.5 rounded-full border border-brand-blue/20 shadow-inner">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                className={`px-3.5 xl:px-5 py-2 rounded-full font-mono text-[12px] uppercase tracking-wider font-semibold whitespace-nowrap transition-all
+                  ${isActive(link.href)
+                    ? 'text-white bg-brand-blue shadow-sm'
+                    : 'text-midnight hover:text-brand-blue hover:bg-white'}`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/contact"
+              className="kinetic-cta-btn hidden sm:inline-flex items-center gap-2 whitespace-nowrap px-4 xl:px-5 py-2.5 rounded-lg bg-brand-blue hover:bg-midnight text-white font-mono text-[12px] font-semibold tracking-wider uppercase"
+            >
+              <span>Initialize Project</span>
+              <Icon name="arrow_outward" className="text-[16px]" />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen((o) => !o)}
+              className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg border border-brand-blue/20 bg-canvas text-midnight hover:text-brand-blue transition-colors"
+              aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileOpen}
+              aria-controls="mobile-nav"
+            >
+              <Icon
+                name={isMobileOpen ? 'close' : 'menu'}
+                className={`text-[24px] transition-transform duration-500 ease-out ${isMobileOpen ? 'rotate-180' : 'rotate-0'}`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE MENU */}
+        <nav
+          id="mobile-nav"
+          className={`lg:hidden overflow-hidden border-t border-brand-blue/10 transition-[max-height] duration-500 ease-out
+            ${isMobileOpen ? 'max-h-[calc(100dvh_-_var(--header-h))] overflow-y-auto' : 'max-h-0 border-transparent'}`}
+        >
+          <div className="max-w-[1520px] mx-auto px-6 py-6 flex flex-col gap-1">
+            {NAV_LINKS.map((link, i) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsMobileOpen(false)}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                // Links cascade in one after another when the menu opens
+                style={{ transitionDelay: isMobileOpen ? `${120 + i * 60}ms` : '0ms' }}
+                className={`flex items-center justify-between py-3 border-b border-brand-blue/10 font-display text-2xl font-bold uppercase tracking-tight
+                  transition-[opacity,translate,color] duration-500 ease-out motion-reduce:transition-none
+                  ${isMobileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'}
+                  ${isActive(link.href) ? 'text-brand-blue' : 'text-midnight hover:text-brand-blue active:text-brand-blue'}`}
+              >
+                <span>{link.name}</span>
+                <span className="font-mono text-[11px] text-brand-blue/60">0{i + 1}</span>
+              </Link>
+            ))}
+            <Link
+              href="/contact"
+              onClick={() => setIsMobileOpen(false)}
+              style={{ transitionDelay: isMobileOpen ? `${120 + NAV_LINKS.length * 60}ms` : '0ms' }}
+              className={`kinetic-cta-btn sm:hidden mt-6 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-lg bg-brand-blue text-white font-mono text-[12px] font-semibold tracking-wider uppercase active:scale-[0.97]
+                ${isMobileOpen ? 'opacity-100' : 'opacity-0'}`}
+            >
+              <span>Initialize Project</span>
+              <Icon name="arrow_outward" className="text-[16px]" />
+            </Link>
+          </div>
+        </nav>
+      </header>
+    </div>
   );
 }

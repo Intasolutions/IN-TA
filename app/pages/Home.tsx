@@ -14,10 +14,8 @@ import { useEnterpriseReveal } from '../hooks/useEnterpriseReveal';
 const Home = () => {
   useEnterpriseReveal();
   return (
-    <main>
-      <section>
-        <HeroSlider />
-      </section>
+    <main className="bg-canvas text-midnight">
+      <HeroSlider />
 
       <script
         type="application/ld+json"
@@ -136,7 +134,7 @@ const Home = () => {
         <PortfolioCinematicPanels />
       </section>
 
-      <section>
+      <section id="matrix">
         <TechStack />
       </section>
 
