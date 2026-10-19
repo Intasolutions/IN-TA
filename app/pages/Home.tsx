@@ -2,13 +2,12 @@
 
 import React from 'react';
 import HeroSlider from '../components/Hero';
-import About from '../components/AboutSection';
+import Philosophy from '../components/Philosophy';
 import Services from '../components/Service';
 import TechStack from '../components/TechStack';
 import TestimonialSlider from '../components/TestimonialSlider';
 import BlogUpdates from '../components/BlogUpdates';
 import PortfolioCinematicPanels from '../components/PortfolioSection';
-import CompanyIntro from '../components/CompanyIntro';
 import { useEnterpriseReveal } from '../hooks/useEnterpriseReveal';
 
 const Home = () => {
@@ -120,12 +119,7 @@ const Home = () => {
 
 
 
-      <section>
-        <About />
-      </section>
-      <section>
-        <CompanyIntro />
-      </section>
+      <Philosophy />
       <section>
         <Services />
       </section>

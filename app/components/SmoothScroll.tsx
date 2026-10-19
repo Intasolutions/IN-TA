@@ -26,9 +26,23 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     gsap.ticker.add(update);
     gsap.ticker.lagSmoothing(0);
 
+    // Images / API content loading change the page height; keep every ScrollTrigger's positions in sync
+    let refreshTimer: ReturnType<typeof setTimeout>;
+    let lastHeight = document.body.scrollHeight;
+    const ro = new ResizeObserver(() => {
+      const height = document.body.scrollHeight;
+      if (height === lastHeight) return;
+      lastHeight = height;
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 200);
+    });
+    ro.observe(document.body);
+
     return () => {
       lenis.destroy();
       gsap.ticker.remove(update);
+      ro.disconnect();
+      clearTimeout(refreshTimer);
     }
   }, [])
 
