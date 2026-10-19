@@ -3,7 +3,7 @@
 import React from 'react';
 import HeroSlider from '../components/Hero';
 import Philosophy from '../components/Philosophy';
-import Services from '../components/Service';
+import Capabilities from '../components/Capabilities';
 import TechStack from '../components/TechStack';
 import TestimonialSlider from '../components/TestimonialSlider';
 import BlogUpdates from '../components/BlogUpdates';
@@ -120,9 +120,7 @@ const Home = () => {
 
 
       <Philosophy />
-      <section>
-        <Services />
-      </section>
+      <Capabilities />
 
       <section>
         <PortfolioCinematicPanels />

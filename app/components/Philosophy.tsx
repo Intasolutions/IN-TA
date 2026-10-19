@@ -180,7 +180,8 @@ export default function Philosophy() {
             <span className="block overflow-hidden"><span data-ph="line" className="block">We don&apos;t just</span></span>
             <span className="block overflow-hidden"><span data-ph="line" className="block">write code.</span></span>
             <span className="block overflow-hidden pb-[0.12em]">
-              <span data-ph="line" className="block font-serif italic font-light normal-case text-brand-blue">
+              {/* Static version of the hero's gradient (only the hero animates); padded so g/p descenders aren't clipped */}
+              <span data-ph="line" className="inline-block pr-1 pb-[0.14em] font-serif italic font-light normal-case bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent">
                 We engineer products that last.
               </span>
             </span>

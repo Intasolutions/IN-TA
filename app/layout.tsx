@@ -24,6 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 const MATERIAL_ICONS = [
   'arrow_outward', 'close', 'developer_board', 'location_on', 'menu',
   'north_east', 'schedule', 'travel_explore', 'design_services', 'terminal',
+  'neurology', 'code', 'domain', 'devices', 'speed',
 ].sort().join(',');
 
 export const metadata: Metadata = {
