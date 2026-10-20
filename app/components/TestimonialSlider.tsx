@@ -194,7 +194,16 @@ export default function TestimonialSlider() {
     wrap.addEventListener('focusin', onEnter);
     wrap.addEventListener('focusout', onLeave);
 
+    // Perf: the marquee + float tweens rewrite ~a hundred card styles every frame; pause them off screen
+    const visibility = new IntersectionObserver(([e]) => {
+      const run = e.isIntersecting && isPlayingRef.current;
+      if (run) { tlRef.current?.resume(); floatTweens.current.forEach(t => t.resume()); }
+      else { tlRef.current?.pause(); floatTweens.current.forEach(t => t.pause()); }
+    });
+    visibility.observe(wrap);
+
     return () => {
+      visibility.disconnect();
       clearTimeout(initTO);
       try { wrap.removeEventListener('pointerenter', onEnter); } catch { }
       try { wrap.removeEventListener('pointerleave', onLeave); } catch { }

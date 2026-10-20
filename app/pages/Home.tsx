@@ -4,7 +4,7 @@ import React from 'react';
 import HeroSlider from '../components/Hero';
 import Philosophy from '../components/Philosophy';
 import Capabilities from '../components/Capabilities';
-import TechStack from '../components/TechStack';
+import TechOrbit from '../components/stack/TechOrbit';
 import TestimonialSlider from '../components/TestimonialSlider';
 import BlogUpdates from '../components/BlogUpdates';
 import Work from '../components/Work';
@@ -124,9 +124,7 @@ const Home = () => {
 
       <Work />
 
-      <section id="matrix">
-        <TechStack />
-      </section>
+      <TechOrbit />
 
       <section>
         <TestimonialSlider />

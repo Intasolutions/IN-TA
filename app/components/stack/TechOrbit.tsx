@@ -1,0 +1,327 @@
+'use client';
+
+import { useRef } from 'react';
+import Image from 'next/image';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { STACK } from './data';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+const STATIC_GRADIENT = 'bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent';
+
+// r = ring radius as a fraction of the stage width; speed = radians per second (sign = direction)
+const RINGS = [
+  { label: 'Intelligence', ids: ['openai', 'pytorch', 'tensorflow'], r: 0.2, speed: 0.24 },
+  { label: 'Product', ids: ['react', 'next', 'ts', 'tailwind', 'figma'], r: 0.33, speed: -0.15 },
+  { label: 'Platform', ids: ['python', 'node', 'aws', 'docker'], r: 0.46, speed: 0.1 },
+];
+const BY_ID = Object.fromEntries(STACK.map((s) => [s.id, s]));
+const VB_H = 56; // initial viewBox height; kept in step with the stage's aspect ratio at runtime
+
+/** Tech Stack: the tools orbiting an INTA core in three tilted rings. */
+export default function TechOrbit() {
+  const ref = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      const root = ref.current!;
+      const stage = root.querySelector<HTMLElement>('[data-orb="stage"]')!;
+      const tiltEl = root.querySelector<HTMLElement>('[data-orb="tilt"]')!;
+      const svg = root.querySelector<SVGSVGElement>('[data-orb="svg"]')!;
+      const line = root.querySelector<SVGLineElement>('[data-orb="line"]')!;
+      const ellipses = gsap.utils.toArray<SVGEllipseElement>('[data-orb="ring"]');
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const fine = window.matchMedia('(pointer: fine)').matches;
+      const move = (v: number) => (calm ? 0 : v);
+      const offs: (() => void)[] = [];
+      const on = <K extends keyof HTMLElementEventMap>(el: HTMLElement, type: K, fn: (e: HTMLElementEventMap[K]) => void) => {
+        el.addEventListener(type, fn as EventListener);
+        offs.push(() => el.removeEventListener(type, fn as EventListener));
+      };
+
+      // ---- Geometry (kept in step with the responsive stage) ----
+      let W = 0;
+      let H = 0;
+      let vbH = VB_H;
+      let lastTilt = -1;
+      const narrow = () => W < 640; // phones: square stage, rounder rings
+      const measure = () => {
+        W = stage.clientWidth;
+        H = stage.clientHeight;
+        vbH = W ? (H / W) * 100 : VB_H;
+        svg.setAttribute('viewBox', `0 0 100 ${vbH}`);
+        ellipses.forEach((e) => e.setAttribute('cy', String(vbH / 2)));
+        line.setAttribute('y1', String(vbH / 2));
+        lastTilt = -1; // force the rings to redraw
+      };
+      measure();
+      const ro = new ResizeObserver(measure);
+      ro.observe(stage);
+      offs.push(() => ro.disconnect());
+
+      // ---- Orbit state ----
+      const items = gsap.utils.toArray<HTMLElement>('[data-orb="item"]').map((el) => {
+        const ring = Number(el.dataset.ring);
+        const index = Number(el.dataset.index);
+        return { el, ring, base: (index / RINGS[ring].ids.length) * Math.PI * 2 + ring * 0.7, z: -1, x: 0, y: 0 };
+      });
+      const angles = RINGS.map(() => 0);
+      const speeds = RINGS.map((r) => (calm ? 0 : r.speed));
+      let boost = 0;
+      let tilt = calm ? (narrow() ? 0.7 : 0.38) : narrow() ? 0.45 : 0.16;
+      let tiltTarget = tilt;
+      let pausedRing = -1;
+      let activeItem: (typeof items)[number] | null = null;
+      let onScreen = false;
+
+      // Per frame: write each logo's transform directly (cheapest path); rings and z-order only when they change
+      const tick = (_t: number, deltaMs: number) => {
+        if (!onScreen || !W) return;
+        const dt = Math.min(deltaMs, 50) / 1000;
+        tilt += (tiltTarget - tilt) * 0.08;
+        if (Math.abs(tilt - lastTilt) > 0.0005) {
+          lastTilt = tilt;
+          ellipses.forEach((e, ri) => e.setAttribute('ry', String(RINGS[ri].r * 100 * tilt)));
+        }
+        for (let ri = 0; ri < RINGS.length; ri++) {
+          const target = calm || pausedRing === ri ? 0 : RINGS[ri].speed * (1 + boost);
+          speeds[ri] += (target - speeds[ri]) * 0.08;
+          angles[ri] += speeds[ri] * dt;
+        }
+        boost *= 0.95;
+        for (const it of items) {
+          const a = it.base + angles[it.ring];
+          const sin = Math.sin(a);
+          const rx = RINGS[it.ring].r * W;
+          it.x = W / 2 + rx * Math.cos(a);
+          it.y = H / 2 + rx * tilt * sin;
+          const depth = (sin + 1) / 2; // 0 = back, 1 = front
+          it.el.style.transform = `translate3d(${it.x.toFixed(1)}px, ${it.y.toFixed(1)}px, 0) scale(${(0.78 + 0.22 * depth).toFixed(3)})`;
+          it.el.style.opacity = (0.6 + 0.4 * depth).toFixed(3);
+          const z = it === activeItem ? 60 : sin > 0 ? 30 : 10; // front logos pass over the core, back ones under it
+          if (z !== it.z) {
+            it.z = z;
+            it.el.style.zIndex = String(z);
+          }
+        }
+        if (activeItem) {
+          line.setAttribute('x2', String((activeItem.x / W) * 100));
+          line.setAttribute('y2', String((activeItem.y / H) * vbH));
+        }
+      };
+      gsap.ticker.add(tick);
+      offs.push(() => gsap.ticker.remove(tick));
+      // Only animate while on screen
+      const vis = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; });
+      vis.observe(stage);
+      offs.push(() => vis.disconnect());
+
+      // ---- Scroll: rings tilt open as the section arrives; fast scrolling spins them faster ----
+      if (!calm) {
+        const st1 = ScrollTrigger.create({
+          trigger: stage, start: 'top bottom', end: 'center center',
+          onUpdate: (self) => { tiltTarget = narrow() ? 0.45 + 0.35 * self.progress : 0.16 + 0.24 * self.progress; },
+        });
+        const st2 = ScrollTrigger.create({
+          trigger: root, start: 'top bottom', end: 'bottom top',
+          onUpdate: (self) => { boost = Math.max(boost, Math.min(3.5, Math.abs(self.getVelocity()) / 600)); },
+        });
+        offs.push(() => { st1.kill(); st2.kill(); });
+      }
+
+      // ---- Hover / keyboard focus / tap a logo: pause its ring, show its label, draw a line from the core ----
+      let closeTimer: ReturnType<typeof setTimeout>;
+      const open = (it: (typeof items)[number]) => {
+        clearTimeout(closeTimer);
+        // keep the label inside the stage: near an edge it lines up with the logo instead of centring
+        const label = it.el.querySelector<HTMLElement>('[data-orb="label"]')!;
+        label.dataset.side = it.x < W * 0.25 ? 'left' : it.x > W * 0.75 ? 'right' : 'center';
+        items.forEach((o) => o.el.classList.toggle('is-open', o === it));
+        activeItem = it;
+        pausedRing = it.ring;
+        gsap.to(line, { opacity: 1, duration: 0.3, overwrite: true });
+      };
+      const close = () => {
+        items.forEach((o) => o.el.classList.remove('is-open'));
+        activeItem = null;
+        pausedRing = -1;
+        gsap.to(line, { opacity: 0, duration: 0.3, overwrite: true });
+      };
+      items.forEach((it) => {
+        const btn = it.el.querySelector<HTMLElement>('button')!;
+        on(btn, 'pointerenter', (e) => { if (e.pointerType === 'mouse') open(it); });
+        on(btn, 'pointerleave', (e) => { if (e.pointerType === 'mouse') close(); });
+        // keyboard focus only: a tap focuses too, and its click would then close the label straight away
+        on(btn, 'focus', () => { if (btn.matches(':focus-visible')) open(it); });
+        on(btn, 'blur', close);
+        on(btn, 'click', (e) => {
+          if ((e as PointerEvent).pointerType === 'mouse') return;
+          if (activeItem === it) close();
+          else {
+            open(it);
+            closeTimer = setTimeout(close, 3500);
+          }
+        });
+      });
+
+      // ---- Desktop: the whole orbit tilts towards the cursor ----
+      if (fine && !calm) {
+        gsap.set(tiltEl, { transformPerspective: 1300 });
+        const rx = gsap.quickTo(tiltEl, 'rotationX', { duration: 0.8, ease: 'power3.out' });
+        const ry = gsap.quickTo(tiltEl, 'rotationY', { duration: 0.8, ease: 'power3.out' });
+        on(stage, 'pointermove', (e) => {
+          const r = stage.getBoundingClientRect();
+          rx(((e.clientY - r.top) / r.height - 0.5) * -10);
+          ry(((e.clientX - r.left) / r.width - 0.5) * 12);
+        });
+        on(stage, 'pointerleave', () => { rx(0); ry(0); });
+      }
+
+      // ---- Reveals ----
+      const header = gsap
+        .timeline({ paused: true, defaults: { ease: 'expo.out' } })
+        .from('[data-orb="kicker"]', { y: move(10), autoAlpha: 0, duration: 0.7 }, 0)
+        .from('[data-orb="word"]', { yPercent: move(110), autoAlpha: calm ? 0 : 1, duration: 1.1, stagger: 0.1 }, 0.1)
+        .from('[data-orb="lede"]', { y: move(18), autoAlpha: 0, duration: 0.9 }, 0.35)
+        .from('[data-orb="hint"]', { autoAlpha: 0, duration: 0.8 }, 0.6);
+      gsap.set('[data-orb="pop"]', { scale: calm ? 1 : 0, autoAlpha: calm ? 0 : 1 });
+      const build = gsap
+        .timeline({ paused: true })
+        .from(ellipses, { scale: move(0.4), autoAlpha: 0, transformOrigin: '50% 50%', duration: 1.2, ease: 'expo.out', stagger: 0.12 }, 0)
+        .from('[data-orb="core"]', { scale: calm ? 1 : 0, autoAlpha: 0, duration: 0.9, ease: 'back.out(1.8)' }, 0.1)
+        .to('[data-orb="pop"]', { scale: 1, autoAlpha: 1, duration: 0.7, ease: 'back.out(2)', stagger: 0.06 }, 0.4);
+
+      const io = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return;
+            io.unobserve(e.target);
+            if (e.target === stage) build.play();
+            else header.play();
+          }),
+        { threshold: 0.25 },
+      );
+      io.observe(stage);
+      io.observe(root.querySelector('[data-orb="header"]')!);
+      offs.push(() => io.disconnect());
+
+      // place everything once before the first frame
+      onScreen = true;
+      tick(0, 16);
+      return () => {
+        clearTimeout(closeTimer);
+        offs.forEach((off) => off());
+      };
+    },
+    { scope: ref },
+  );
+
+  return (
+    <section ref={ref} id="matrix" aria-labelledby="orbit-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-10 sm:pt-12 lg:pt-8 pb-16 sm:pb-20 lg:pb-20 overflow-x-clip">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-12 items-center">
+        {/* Text */}
+        <div data-orb="header" className="lg:col-span-5">
+          <span data-orb="kicker" className="inline-flex items-center gap-3 font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase font-bold mb-3">
+            <span className="w-2 h-2 bg-brand-blue rounded-full animate-pulse" />
+            Stack // The orbit
+          </span>
+          <h2 id="orbit-title" className="font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] text-midnight tracking-tight uppercase">
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className="inline-block">One team.</span></span>{' '}
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>Every layer.</span></span>
+          </h2>
+          <p data-orb="lede" className="mt-4 text-midnight/80 text-sm sm:text-base leading-relaxed max-w-xl">
+            Intelligence, product and platform, engineered in-house around a single core. The tools we design, build and
+            ship with every day.
+          </p>
+          <p data-orb="hint" className="mt-6 hidden lg:block font-mono text-[11px] uppercase tracking-wider text-midnight/50 font-semibold">
+            <span className="pointer-fine:inline hidden">Hover a logo to pause its orbit</span>
+            <span className="pointer-fine:hidden">Tap a logo to see what we use it for</span>
+          </p>
+        </div>
+
+        {/* Orbit stage */}
+        <div className="lg:col-span-7">
+          <div data-orb="stage" className="relative w-full max-w-[520px] sm:max-w-[760px] mx-auto aspect-square sm:aspect-[100/56] select-none">
+            <div data-orb="tilt" className="absolute inset-0 [transform-style:preserve-3d]">
+              {/* Soft glow behind the core */}
+              <div
+                aria-hidden="true"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[90%] rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(closest-side, rgb(1 68 181 / 0.12), transparent)' }}
+              />
+              {/* Rings + core-to-logo line */}
+              <svg data-orb="svg" aria-hidden="true" viewBox={`0 0 100 ${VB_H}`} className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
+                {RINGS.map((ring) => (
+                  <ellipse
+                    key={ring.label}
+                    data-orb="ring"
+                    cx="50"
+                    cy={VB_H / 2}
+                    rx={ring.r * 100}
+                    ry={ring.r * 100 * 0.3}
+                    fill="none"
+                    vectorEffect="non-scaling-stroke"
+                    strokeDasharray="4 6"
+                    className="stroke-brand-blue/25 [stroke-width:1.2]"
+                  />
+                ))}
+                <line data-orb="line" x1="50" y1={VB_H / 2} x2="50" y2={VB_H / 2} vectorEffect="non-scaling-stroke" className="stroke-brand-blue [stroke-width:1.5]" strokeDasharray="3 4" opacity="0" />
+              </svg>
+
+              {/* Core: the official logo file, as-is */}
+              <div data-orb="core" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                <div className="relative flex items-center justify-center">
+                  <span aria-hidden="true" className="sonar-wave inset-0 w-full h-full" />
+                  <span aria-hidden="true" className="sonar-wave sonar-wave-2 inset-0 w-full h-full" />
+                  <div className="relative px-2 rounded-2xl bg-[linear-gradient(145deg,#01072b_0%,#06123f_55%,#0a1d5c_100%)] border border-brand-blue/40 ring-1 ring-inset ring-white/5 shadow-[0_12px_40px_-8px_rgb(1_68_181/0.7)]">
+                    <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} className="h-10 sm:h-16 lg:h-20 w-auto" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Orbiting logos */}
+              {RINGS.map((ring, ri) =>
+                ring.ids.map((id, i) => {
+                  const item = BY_ID[id];
+                  return (
+                    <div key={id} data-orb="item" data-ring={ri} data-index={i} className="group/orb absolute left-0 top-0 will-change-transform">
+                      <div data-orb="pop" className="relative -translate-x-1/2 -translate-y-1/2">
+                        <button
+                          type="button"
+                          aria-label={`${item.name}: ${item.use}`}
+                          className="w-9 h-9 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white border border-brand-blue/20 shadow-md shadow-brand-blue/10 flex items-center justify-center p-1.5 sm:p-3
+                            transition-[border-color,box-shadow,scale] duration-300 hover:border-brand-blue hover:shadow-xl hover:shadow-brand-blue/25 hover:scale-110
+                            group-[.is-open]/orb:border-brand-blue group-[.is-open]/orb:scale-110 focus-visible:outline-2 focus-visible:outline-brand-blue"
+                        >
+                          <span className="relative w-full h-full">
+                            <Image src={item.logo} alt="" fill sizes="56px" className="object-contain" />
+                          </span>
+                        </button>
+                        {/* Label (lines up with the logo near the stage edges so it never gets cut off) */}
+                        <span
+                          data-orb="label"
+                          className="pointer-events-none absolute top-full mt-2 whitespace-nowrap rounded-lg bg-midnight text-white px-3 py-1.5 shadow-lg
+                            left-1/2 -translate-x-1/2 data-[side=left]:left-0 data-[side=left]:translate-x-0 data-[side=right]:left-auto data-[side=right]:right-0 data-[side=right]:translate-x-0
+                            opacity-0 translate-y-1 transition-[opacity,translate] duration-300 group-[.is-open]/orb:opacity-100 group-[.is-open]/orb:translate-y-0"
+                        >
+                          <span className="block font-display font-bold uppercase text-[12px] tracking-tight">{item.name}</span>
+                          <span className="block font-mono text-[10px] text-white/70">{item.use}</span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }),
+              )}
+            </div>
+          </div>
+          <p className="lg:hidden mt-4 text-center font-mono text-[11px] uppercase tracking-wider text-midnight/50 font-semibold">
+            <span className="pointer-fine:inline hidden">Hover a logo to pause its orbit</span>
+            <span className="pointer-fine:hidden">Tap a logo to see what we use it for</span>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -245,6 +245,19 @@ export default function BlogUpdates() {
     tl.to(nextEl, { scale: 1, duration: 0.36 * TEMPO, ease: 'power2.out' }, '>-0.06');
   };
 
+  // Perf: pause autoplay, the width-animated progress bar and image floats while off screen
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const visibility = new IntersectionObserver(([e]) => {
+      const tweens = gsap.getTweensOf([progressRef.current, ...Object.values(innerParallaxRefs.current)].filter(Boolean));
+      if (e.isIntersecting) { autoplayRef.current?.resume(); tweens.forEach(t => t.resume()); }
+      else { autoplayRef.current?.pause(); tweens.forEach(t => t.pause()); }
+    });
+    visibility.observe(wrap);
+    return () => visibility.disconnect();
+  }, [blogs]);
+
   // hover/focus pause & resume
   useEffect(() => {
     if (!wrapRef.current) return;

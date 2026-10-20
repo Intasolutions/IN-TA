@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -43,6 +43,19 @@ export default function Hero() {
   const spotlightRef = useRef<HTMLDivElement>(null);
   const { isIntroReady } = useReveal();
   const [scrambleKey, setScrambleKey] = useState(0);
+
+  // The gradient shimmer animates background-position, which repaints on the main thread every frame;
+  // pause it whenever the hero is off screen
+  useEffect(() => {
+    const hero = heroRef.current;
+    const shimmer = hero?.querySelector<HTMLElement>('[data-hero="gradient"]');
+    if (!hero || !shimmer) return;
+    const io = new IntersectionObserver(([e]) => {
+      shimmer.style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
+    });
+    io.observe(hero);
+    return () => io.disconnect();
+  }, []);
 
   // Entrance sequence — waits until the loader / route mask has cleared
   useGSAP(
