@@ -6,7 +6,8 @@ import MaskReveal from './components/MaskReveal';
 import SmoothScroll from './components/SmoothScroll';
 import PageLoader from './components/PageLoader';
 import { RevealProvider, useReveal } from './context/RevealContext';
-import WhatsAppButton from './components/WhatsAppButton';
+// WhatsApp button hidden site-wide for now; re-enable by restoring the import and <WhatsAppButton /> below
+// import WhatsAppButton from './components/WhatsAppButton';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -52,7 +53,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       )}
 
       <SmoothScroll>{children}</SmoothScroll>
-      <WhatsAppButton />
     </>
   );
 }

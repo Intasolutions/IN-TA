@@ -162,7 +162,7 @@ export default function Philosophy() {
   );
 
   return (
-    <section ref={ref} id="philosophy" aria-labelledby="philosophy-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
+    <section ref={ref} id="philosophy" aria-labelledby="philosophy-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-16 sm:pt-20 lg:pt-28 pb-12 sm:pb-16 lg:pb-20">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Thesis column (pinned on desktop) */}
         <div data-ph="intro" className="lg:col-span-5 lg:sticky lg:top-36 h-fit">
@@ -239,7 +239,7 @@ export default function Philosophy() {
               key={step.tag}
               data-ph="card"
               data-index={i}
-              className="group relative p-6 sm:p-8 lg:p-10 rounded-3xl bg-white border border-brand-blue/20 shadow-sm transition-[border-color,box-shadow,opacity,scale] duration-500 will-change-transform
+              className="group relative p-6 sm:p-8 lg:p-10 rounded-3xl bg-white border border-brand-blue/20 shadow-sm transition-[border-color,box-shadow,opacity,scale] duration-500
                 hover:border-brand-blue hover:shadow-xl hover:shadow-brand-blue/10
                 [&.is-active]:border-brand-blue/60 [&.is-active]:shadow-lg [&.is-active]:shadow-brand-blue/10
                 pointer-coarse:opacity-55 pointer-coarse:scale-[0.97] pointer-coarse:[&.is-active]:opacity-100 pointer-coarse:[&.is-active]:scale-100

@@ -1,12 +1,11 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
-import Scramble from './Scramble';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -108,7 +107,6 @@ function NeuralNet({ inline = false }: { inline?: boolean }) {
 
 export default function Capabilities() {
   const ref = useRef<HTMLElement>(null);
-  const [scrambleKey, setScrambleKey] = useState(0);
 
   useGSAP(
     () => {
@@ -129,23 +127,13 @@ export default function Capabilities() {
         observers.push(io);
       };
 
-      // ---- Divider + heading ----
+      // ---- Heading ----
       const header = gsap
         .timeline({ paused: true, defaults: { ease: 'expo.out' } })
         .from('[data-cap="word"]', { yPercent: move(110), autoAlpha: calm ? 0 : 1, duration: 1.1, stagger: 0.1 }, 0.1)
         .from('[data-cap="kicker"]', { y: move(10), autoAlpha: 0, duration: 0.7 }, 0)
         .from('[data-cap="lede"]', { y: move(18), autoAlpha: 0, duration: 0.9 }, 0.35);
-      onceVisible(root.querySelector('[data-cap="header"]')!, 0.2, () => {
-        setScrambleKey((k) => k + 1);
-        header.play();
-      });
-
-      // Divider line fills as the section scrolls in
-      gsap.fromTo(
-        '[data-cap="divider-fill"]',
-        { scaleX: 0 },
-        { scaleX: 1, ease: 'none', scrollTrigger: { trigger: root, start: 'top 90%', end: 'top 30%', scrub: calm ? true : 0.5 } },
-      );
+      onceVisible(root.querySelector('[data-cap="header"]')!, 0.2, () => header.play());
 
       // ---- Cards: scroll-driven in both directions ----
       // Each card's motion is tied to its scroll position: it tilts up out of the page and unmasks on the
@@ -288,18 +276,9 @@ export default function Capabilities() {
   );
 
   return (
-    <section ref={ref} id="services" aria-labelledby="capabilities-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pb-16 sm:pb-20 lg:pb-28">
-      {/* Section divider */}
-      <div className="flex items-center gap-4 sm:gap-6 py-4 font-mono text-[10px] sm:text-xs font-semibold text-brand-blue">
-        <Scramble text="+ [SEC: 02 // CAPABILITIES]" playKey={scrambleKey} duration={700} className="shrink-0" />
-        <span aria-hidden="true" className="relative h-px flex-1 bg-brand-blue/15 overflow-hidden">
-          <span data-cap="divider-fill" className="absolute inset-0 bg-brand-blue/70 origin-left" />
-        </span>
-        <Scramble text="SYS.CODE // CORE-MATRIX +" playKey={scrambleKey} duration={900} className="hidden sm:inline shrink-0" />
-      </div>
-
+    <section ref={ref} id="services" aria-labelledby="capabilities-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
       {/* Heading */}
-      <div data-cap="header" className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 mt-10 sm:mt-12 mb-10 sm:mb-14 lg:mb-16">
+      <div data-cap="header" className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 mb-10 sm:mb-14 lg:mb-16">
         <div>
           <span data-cap="kicker" className="font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase block mb-3 font-bold">
             Engineering disciplines
@@ -326,7 +305,7 @@ export default function Capabilities() {
               href="/services"
               data-cap="card"
               data-featured={card.featured || undefined}
-              className={`group relative flex flex-col h-full rounded-3xl bg-white border border-brand-blue/20 shadow-sm will-change-transform
+              className={`group relative flex flex-col h-full rounded-3xl bg-white border border-brand-blue/20 shadow-sm
                 transition-[border-color,box-shadow,opacity,scale] duration-500
                 hover:border-brand-blue/50 hover:shadow-2xl hover:shadow-brand-blue/10
                 [&.is-active]:border-brand-blue/50 [&.is-active]:shadow-xl [&.is-active]:shadow-brand-blue/10
@@ -341,7 +320,7 @@ export default function Capabilities() {
                 {/* Light sweep + glowing top edge, played by the scroll reveal */}
                 <span
                   data-cap="sheen"
-                  className="absolute inset-y-0 left-0 w-1/3 -skew-x-12 bg-linear-to-r from-transparent via-[rgb(1_68_181/0.07)] to-transparent will-change-transform"
+                  className="absolute inset-y-0 left-0 w-1/3 -skew-x-12 bg-linear-to-r from-transparent via-[rgb(1_68_181/0.07)] to-transparent"
                   style={{ transform: 'translateX(-120%)' }}
                 />
                 <span

@@ -6,6 +6,8 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger);
+// Mobile address bars resize the viewport while scrolling; don't recalculate every trigger for that
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {

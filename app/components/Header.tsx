@@ -41,15 +41,24 @@ export default function Header() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const lastScrollY = useRef(0);
 
-  // Hide on scroll down, reveal on scroll up
+  // Hide on scroll down, reveal on scroll up (checked at most once per frame)
   useEffect(() => {
-    const onScroll = () => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
       const y = window.scrollY;
+      if (Math.abs(y - lastScrollY.current) < 4) return; // ignore tiny jitters
       setIsVisible(y < lastScrollY.current || y < 140);
       lastScrollY.current = y;
     };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {

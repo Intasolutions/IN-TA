@@ -7,7 +7,7 @@ import Capabilities from '../components/Capabilities';
 import TechStack from '../components/TechStack';
 import TestimonialSlider from '../components/TestimonialSlider';
 import BlogUpdates from '../components/BlogUpdates';
-import PortfolioCinematicPanels from '../components/PortfolioSection';
+import Work from '../components/Work';
 import { useEnterpriseReveal } from '../hooks/useEnterpriseReveal';
 
 const Home = () => {
@@ -122,9 +122,7 @@ const Home = () => {
       <Philosophy />
       <Capabilities />
 
-      <section>
-        <PortfolioCinematicPanels />
-      </section>
+      <Work />
 
       <section id="matrix">
         <TechStack />
