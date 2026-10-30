@@ -133,11 +133,20 @@ export default function TechOrbit() {
 
       // ---- Hover / keyboard focus / tap a logo: pause its ring, show its label, draw a line from the core ----
       let closeTimer: ReturnType<typeof setTimeout>;
-      const open = (it: (typeof items)[number]) => {
+      let freezeTilt = () => {}; // set below on desktop
+      const open = (it: (typeof items)[number], instant = false) => {
         clearTimeout(closeTimer);
+        freezeTilt(); // the cursor tilt would otherwise slide the logo out from under the pointer
+        if (instant) speeds[it.ring] = 0; // taps: freeze the ring at once so the logo stays under the finger
         // keep the label inside the stage: near an edge it lines up with the logo instead of centring
         const label = it.el.querySelector<HTMLElement>('[data-orb="label"]')!;
         label.dataset.side = it.x < W * 0.25 ? 'left' : it.x > W * 0.75 ? 'right' : 'center';
+        // ...then nudge it back inside the screen if it still overflows (long labels on narrow phones)
+        label.style.marginLeft = '0px';
+        const r = label.getBoundingClientRect();
+        const edge = 8;
+        const shift = r.left < edge ? edge - r.left : r.right > innerWidth - edge ? innerWidth - edge - r.right : 0;
+        label.style.marginLeft = `${Math.round(shift)}px`;
         items.forEach((o) => o.el.classList.toggle('is-open', o === it));
         activeItem = it;
         pausedRing = it.ring;
@@ -151,19 +160,58 @@ export default function TechOrbit() {
       };
       items.forEach((it) => {
         const btn = it.el.querySelector<HTMLElement>('button')!;
-        on(btn, 'pointerenter', (e) => { if (e.pointerType === 'mouse') open(it); });
+        // instant stop on hover too, so the logo doesn't drift out from under the cursor (which caused flicker)
+        on(btn, 'pointerenter', (e) => { if (e.pointerType === 'mouse') open(it, true); });
         on(btn, 'pointerleave', (e) => { if (e.pointerType === 'mouse') close(); });
         // keyboard focus only: a tap focuses too, and its click would then close the label straight away
         on(btn, 'focus', () => { if (btn.matches(':focus-visible')) open(it); });
         on(btn, 'blur', close);
+        // Keyboard (Enter / Space) arrives as a click with no pointer position (detail 0)
         on(btn, 'click', (e) => {
-          if ((e as PointerEvent).pointerType === 'mouse') return;
+          if (e.detail !== 0) return;
           if (activeItem === it) close();
-          else {
-            open(it);
-            closeTimer = setTimeout(close, 3500);
-          }
+          else open(it);
         });
+      });
+      // Touch / pen: a genuine tap (finger lifts quickly without moving, so not the start of a scroll)
+      // opens the logo NEAREST the finger, so overlapping or moving logos can't make it miss.
+      // Tapping elsewhere closes the open label. Works the same on iOS and Android.
+      const TAP_RADIUS = 44;
+      let down: { id: number; x: number; y: number; t: number } | null = null;
+      const onDown = (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') down = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
+      };
+      const onUp = (e: PointerEvent) => {
+        if (!down || e.pointerId !== down.id) return;
+        const tap = Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10 && performance.now() - down.t < 600;
+        const { x, y } = down;
+        down = null;
+        if (!tap) return;
+        const r = stage.getBoundingClientRect();
+        let nearest: (typeof items)[number] | null = null;
+        let best = TAP_RADIUS;
+        for (const it of items) {
+          const d = Math.hypot(x - (r.left + it.x), y - (r.top + it.y));
+          if (d < best) { best = d; nearest = it; }
+        }
+        if (!nearest) {
+          if (activeItem) close();
+          return;
+        }
+        if (activeItem === nearest) close();
+        else {
+          open(nearest, true);
+          closeTimer = setTimeout(close, 4000);
+        }
+      };
+      const onCancel = () => { down = null; }; // the browser cancels the touch when a scroll starts
+      document.addEventListener('pointerdown', onDown, { capture: true, passive: true });
+      document.addEventListener('pointerup', onUp, { capture: true, passive: true });
+      document.addEventListener('pointercancel', onCancel, { capture: true, passive: true });
+      offs.push(() => {
+        document.removeEventListener('pointerdown', onDown, { capture: true });
+        document.removeEventListener('pointerup', onUp, { capture: true });
+        document.removeEventListener('pointercancel', onCancel, { capture: true });
       });
 
       // ---- Desktop: the whole orbit tilts towards the cursor ----
@@ -171,7 +219,13 @@ export default function TechOrbit() {
         gsap.set(tiltEl, { transformPerspective: 1300 });
         const rx = gsap.quickTo(tiltEl, 'rotationX', { duration: 0.8, ease: 'power3.out' });
         const ry = gsap.quickTo(tiltEl, 'rotationY', { duration: 0.8, ease: 'power3.out' });
+        // hold the tilt where it is while a logo is hovered
+        freezeTilt = () => {
+          rx(Number(gsap.getProperty(tiltEl, 'rotationX')));
+          ry(Number(gsap.getProperty(tiltEl, 'rotationY')));
+        };
         on(stage, 'pointermove', (e) => {
+          if (activeItem) return;
           const r = stage.getBoundingClientRect();
           rx(((e.clientY - r.top) / r.height - 0.5) * -10);
           ry(((e.clientX - r.left) / r.width - 0.5) * 12);
@@ -271,7 +325,8 @@ export default function TechOrbit() {
               </svg>
 
               {/* Core: the official logo file, as-is */}
-              <div data-orb="core" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+              {/* pointer-events-none: the expanding sonar rings used to cover the inner logos and swallow taps */}
+              <div data-orb="core" className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                 <div className="relative flex items-center justify-center">
                   <span aria-hidden="true" className="sonar-wave inset-0 w-full h-full" />
                   <span aria-hidden="true" className="sonar-wave sonar-wave-2 inset-0 w-full h-full" />
@@ -291,7 +346,8 @@ export default function TechOrbit() {
                         <button
                           type="button"
                           aria-label={`${item.name}: ${item.use}`}
-                          className="w-9 h-9 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white border border-brand-blue/20 shadow-md shadow-brand-blue/10 flex items-center justify-center p-1.5 sm:p-3
+                          className="relative w-9 h-9 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white border border-brand-blue/20 shadow-md shadow-brand-blue/10 flex items-center justify-center p-1.5 sm:p-3
+                            touch-manipulation before:absolute before:-inset-2 before:content-[''] pointer-fine:before:hidden
                             transition-[border-color,box-shadow,scale] duration-300 hover:border-brand-blue hover:shadow-xl hover:shadow-brand-blue/25 hover:scale-110
                             group-[.is-open]/orb:border-brand-blue group-[.is-open]/orb:scale-110 focus-visible:outline-2 focus-visible:outline-brand-blue"
                         >
@@ -302,7 +358,7 @@ export default function TechOrbit() {
                         {/* Label (lines up with the logo near the stage edges so it never gets cut off) */}
                         <span
                           data-orb="label"
-                          className="pointer-events-none absolute top-full mt-2 whitespace-nowrap rounded-lg bg-midnight text-white px-3 py-1.5 shadow-lg
+                          className="pointer-events-none absolute top-full mt-2 w-max max-w-[min(15rem,calc(100vw-2rem))] sm:max-w-none sm:whitespace-nowrap rounded-lg bg-midnight text-white px-3 py-1.5 shadow-lg
                             left-1/2 -translate-x-1/2 data-[side=left]:left-0 data-[side=left]:translate-x-0 data-[side=right]:left-auto data-[side=right]:right-0 data-[side=right]:translate-x-0
                             opacity-0 translate-y-1 transition-[opacity,translate] duration-300 group-[.is-open]/orb:opacity-100 group-[.is-open]/orb:translate-y-0"
                         >
