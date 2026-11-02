@@ -368,7 +368,7 @@ export default function Hero() {
               </span>
               <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
                 <Link
-                  href="/#matrix"
+                  href="/about"
                   className="px-6 py-4 rounded-xl bg-white hover:bg-canvas border border-brand-blue/30 hover:border-brand-blue text-midnight hover:text-brand-blue font-mono text-[12px] sm:text-[13px] tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-sm font-semibold active:scale-[0.97]"
                 >
                   <Icon name="developer_board" className="text-brand-blue text-[18px]" />

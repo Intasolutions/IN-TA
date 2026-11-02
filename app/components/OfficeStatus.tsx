@@ -58,8 +58,11 @@ const subscribe = (onChange: () => void) => {
 const getSnapshot = () => officeStatus();
 const getServerSnapshot = () => null; // time-dependent → computed on the client only
 
+/** Live office status text, e.g. "OPEN NOW · UNTIL 5 PM IST" (null until mounted) */
+export const useOfficeStatus = () => useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
 export default function OfficeStatus() {
-  const status = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const status = useOfficeStatus();
   const isOpen = status?.startsWith('OPEN') ?? false;
 
   return (

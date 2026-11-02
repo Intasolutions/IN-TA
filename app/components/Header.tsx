@@ -18,7 +18,7 @@ const PHONE_DISPLAY = '+91 94475 95381';
 const PHONE_HREF = 'tel:+919447595381';
 
 // Own component so the ticking clock re-renders only itself, not the whole header
-function IstClock() {
+export function IstClock() {
   const [time, setTime] = useState('');
   useEffect(() => {
     const fmt = new Intl.DateTimeFormat('en-GB', {

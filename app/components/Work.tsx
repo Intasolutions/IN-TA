@@ -439,6 +439,9 @@ export default function Work() {
         };
       });
 
+      // The pin is created once the projects arrive, often after the sections below (and the footer) set up their
+      // scroll effects. Re-order everything by its place on the page so those are measured after the pin's extra length.
+      ScrollTrigger.sort();
       ScrollTrigger.refresh();
       return () => mm.revert();
     },

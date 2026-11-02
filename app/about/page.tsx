@@ -1,67 +1,45 @@
-'use client';
-
-import React, { useEffect } from 'react';
-import Lenis from '@studio-freight/lenis';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
 import Header from '../components/Header';
-import AboutPage from './components/About';
+import Footer from '../components/Footer';
+import SystemMap, { type MapService } from '../components/about/SystemMap';
+import { CLIENTS_PATH, toClients, type MapClient } from '../components/about/clients';
 
-import Header1 from '../components/Header1';
-import Footer1 from '../components/Footersecond';
-import SmoothScroll from '../components/SmoothScroll';
+const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-gsap.registerPlugin(ScrollTrigger);
+type ApiService = { title: string; slug: string; short_description?: string | null; order?: number; is_active?: boolean };
 
-const Page = () => {
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+async function getServices(): Promise<MapService[]> {
+  try {
+    const res = await fetch(`${apiBase}/api/services/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list: ApiService[] = Array.isArray(data) ? data : data.results ?? [];
+    return list
+      .filter((s) => s.is_active !== false)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map((s) => ({ title: s.title.trim(), slug: s.slug, description: s.short_description?.trim() ?? '' }));
+  } catch {
+    return []; // the map falls back to the service names it already knows
+  }
+}
 
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => 1 - Math.pow(1 - t, 3),
-      smooth: true,
-      smoothTouch: true,
-      touchMultiplier: 3.8,
-    } as any);
+async function getClients(): Promise<MapClient[]> {
+  try {
+    const res = await fetch(`${apiBase}${CLIENTS_PATH}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) });
+    return res.ok ? toClients(await res.json(), apiBase) : [];
+  } catch {
+    return []; // the page asks again from the browser
+  }
+}
 
-    // RAF loop for Lenis
-    let rafId = 0;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
-    // Keep GSAP ScrollTrigger in sync with Lenis
-    const onScroll = () => {
-      try {
-        ScrollTrigger.update();
-      } catch { }
-    };
-    try {
-      lenis.on('scroll', onScroll);
-    } catch { }
-
-    return () => {
-      try {
-        cancelAnimationFrame(rafId);
-      } catch { }
-      try { lenis.off('scroll', onScroll); } catch { }
-      try { lenis.destroy(); } catch { }
-    };
-  }, []);
-
+export default async function Page() {
+  const [services, clients] = await Promise.all([getServices(), getClients()]);
   return (
     <>
-    <SmoothScroll>
-      <Header1/>
-      <AboutPage />
-      <Footer1/>
-   </SmoothScroll>
+      <Header />
+      <main>
+        <SystemMap services={services} clients={clients} />
+      </main>
+      <Footer />
     </>
   );
-};
-
-export default Page;
+}

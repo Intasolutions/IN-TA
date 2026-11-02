@@ -9,13 +9,27 @@ gsap.registerPlugin(ScrollTrigger);
 // Mobile address bars resize the viewport while scrolling; don't recalculate every trigger for that
 ScrollTrigger.config({ ignoreMobileResize: true });
 
+let instance: Lenis | null = null;
+
+/** Smooth-scroll to a position on the page */
+export function scrollToY(y: number) {
+  if (instance) instance.scrollTo(y, { duration: 1.8 });
+  else window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
+/** Straight back to the top of the page, without travelling through every section on the way */
+export function scrollToTop() {
+  if (instance) instance.scrollTo(0, { immediate: true, force: true });
+  else window.scrollTo({ top: 0, behavior: 'auto' });
+  ScrollTrigger.update();
+}
+
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => 1 - Math.pow(1 - t, 3),
-      touchMultiplier: 3.8,
+      lerp: 0.09,
     })
+    instance = lenis;
 
     lenis.on('scroll', () => {
       ScrollTrigger.update();
@@ -42,6 +56,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     return () => {
       lenis.destroy();
+      instance = null;
       gsap.ticker.remove(update);
       ro.disconnect();
       clearTimeout(refreshTimer);

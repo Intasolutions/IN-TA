@@ -25,7 +25,7 @@ const MATERIAL_ICONS = [
   'arrow_outward', 'close', 'developer_board', 'location_on', 'menu',
   'north_east', 'schedule', 'travel_explore', 'design_services', 'terminal',
   'neurology', 'code', 'domain', 'devices', 'speed', 'lock',
-  'arrow_back', 'arrow_forward', 'south', 'mouse',
+  'arrow_back', 'arrow_forward', 'south', 'mouse', 'article', 'check', 'arrow_upward', 'call', 'mail',
 ].sort().join(',');
 
 export const metadata: Metadata = {

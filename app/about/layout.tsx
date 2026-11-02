@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'About Us | INTA Solutions',
-  description: 'Learn about INTA Solutions, our mission, vision, and the team driving digital transformation in Kerala.',
+  description: 'How INTA Solutions is wired: a software company in Wayanad, Kerala, mapped as one system, from the services we run to the technology behind them.',
   alternates: {
     canonical: '/about',
   },

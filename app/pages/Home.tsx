@@ -4,9 +4,8 @@ import React from 'react';
 import HeroSlider from '../components/Hero';
 import Philosophy from '../components/Philosophy';
 import Capabilities from '../components/Capabilities';
-import TechOrbit from '../components/stack/TechOrbit';
-import TestimonialSlider from '../components/TestimonialSlider';
-import BlogUpdates from '../components/BlogUpdates';
+import TestimonialDeck from '../components/testimonials/TestimonialDeck';
+import BlogSection from '../components/blog/BlogSection';
 import Work from '../components/Work';
 import { useEnterpriseReveal } from '../hooks/useEnterpriseReveal';
 
@@ -124,15 +123,9 @@ const Home = () => {
 
       <Work />
 
-      <TechOrbit />
+      <TestimonialDeck />
 
-      <section>
-        <TestimonialSlider />
-      </section>
-
-      <section>
-        <BlogUpdates />
-      </section>
+      <BlogSection />
     </main>
   );
 };

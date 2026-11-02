@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 40" role="img" aria-label="Sample logo 5">
+  <circle cx="14" cy="20" r="10" fill="#be123c"/><circle cx="26" cy="20" r="10" fill="#be123c" opacity=".55"/>
+  <text x="44" y="27" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#be123c">Client 5</text>
+</svg>
