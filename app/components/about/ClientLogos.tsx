@@ -15,7 +15,7 @@ const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const LOCAL_BACKEND = 'http://127.0.0.1:8000';
 
-const GRADIENT_ON_DARK = 'bg-linear-to-r from-[#5b8cff] via-[#7fa6ff] to-[#b9ceff] bg-clip-text text-transparent';
+const GRADIENT_ON_DARK = 'heading-accent';
 
 // (Must match ROUTE in SystemMap)
 const ROUTE = '(prefers-reduced-motion: no-preference) and (max-width: 1023.98px), (prefers-reduced-motion: no-preference) and (max-height: 639.98px)';
@@ -69,7 +69,7 @@ function ClientsHeading({ clients, id }: { clients: MapClient[]; id: string }) {
         <span className="h-2 w-2 shrink-0 rounded-full bg-current animate-pulse" />
         {CLIENTS.kicker}
       </span>
-      <h2 id={id} className="font-display font-extrabold uppercase tracking-tight leading-[1] text-white text-[length:clamp(1.75rem,3.4vw,3rem)]">
+      <h2 id={id} className="heading-section text-white">
         {CLIENTS.plain} <span className={GRADIENT_ON_DARK}>{CLIENTS.bright}</span>
       </h2>
       {clients[0].id < 0 && <p className="mt-2 mx-auto w-fit rounded bg-amber-300/90 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-midnight">Sample logos · local preview only</p>}

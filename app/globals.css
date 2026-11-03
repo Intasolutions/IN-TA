@@ -760,8 +760,42 @@ html {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+/* The site's headings: one font and one size at each level, on every page */
+.heading-page,
+.heading-section,
+.heading-sub {
+  font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+}
+.heading-page { font-size: clamp(2.4rem, 5.2vw, 5rem); line-height: 1; }
+.heading-section { font-size: clamp(2rem, 4.4vw, 3.5rem); line-height: 1.02; }
+.heading-sub { font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.15; }
+/* A sentence that leads a moment: the same font, in sentence case */
+.heading-lead {
+  font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: clamp(1.3rem, 2.5vw, 2.2rem);
+  line-height: 1.2;
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .heading-page { font-size: 1.9rem; }
+  .heading-section { font-size: 1.4rem; }
+}
+
+/* The last words of a heading: the one blue shared by every page, readable on white and on midnight alike */
+.heading-accent {
+  background-image: linear-gradient(90deg, #2563eb, #3b7bf7, #5b8cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
 .text-gradient-shimmer {
-  background: linear-gradient(90deg, #0144b5, #001f70, #2557c7, #01072b, #0144b5);
+  background: linear-gradient(90deg, #2563eb, #3b7bf7, #5b8cff, #3b7bf7, #2563eb);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;

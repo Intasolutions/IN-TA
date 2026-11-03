@@ -175,13 +175,13 @@ export default function Philosophy() {
 
           <h2
             id="philosophy-title"
-            className="font-display font-extrabold text-[length:clamp(2rem,4.2vw,3.4rem)] text-midnight tracking-tight leading-[1.04] uppercase"
+            className="heading-section text-midnight"
           >
             <span className="block overflow-hidden"><span data-ph="line" className="block">We don&apos;t just</span></span>
             <span className="block overflow-hidden"><span data-ph="line" className="block">write code.</span></span>
             <span className="block overflow-hidden pb-[0.12em]">
               {/* Static version of the hero's gradient (only the hero animates); padded so g/p descenders aren't clipped */}
-              <span data-ph="line" className="inline-block pr-1 pb-[0.14em] font-serif italic font-light normal-case bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent">
+              <span data-ph="line" className="inline-block pb-[0.06em] heading-accent">
                 We engineer products that last.
               </span>
             </span>
@@ -289,7 +289,7 @@ export default function Philosophy() {
                   />
                 </div>
               </div>
-              <h3 className="relative font-display text-xl sm:text-2xl font-bold text-midnight mt-5 sm:mt-6 mb-2 tracking-tight uppercase">
+              <h3 className="heading-sub relative text-midnight mt-5 sm:mt-6 mb-2">
                 {step.title}
               </h3>
               <p className="relative text-midnight/80 text-sm sm:text-[15px] leading-relaxed max-w-xl">{step.body}</p>

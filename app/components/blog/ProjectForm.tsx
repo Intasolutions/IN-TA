@@ -96,7 +96,7 @@ export default function ProjectForm() {
             <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
             Work with us
           </span>
-          <h3 data-pf="in" className="font-display font-extrabold uppercase tracking-tight leading-[1.02] text-white text-[length:clamp(1.5rem,2.6vw,2.1rem)]">
+          <h3 data-pf="in" className="heading-section text-white">
             Have a project in mind?
           </h3>
           <p data-pf="in" className="mt-2.5 text-sm leading-relaxed max-w-sm text-white/70">

@@ -14,7 +14,7 @@ const TONES = {
     kicker: 'text-brand-blue',
     dot: 'bg-brand-blue',
     title: 'text-midnight',
-    gradient: 'bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent',
+    gradient: 'heading-accent',
     copy: 'text-midnight/80',
     hint: 'text-midnight/50',
     ring: 'stroke-brand-blue/25',
@@ -26,7 +26,7 @@ const TONES = {
     kicker: 'text-[#9dbbff]',
     dot: 'bg-[#9dbbff]',
     title: 'text-white',
-    gradient: 'bg-linear-to-r from-[#5b8cff] via-[#7fa6ff] to-[#b9ceff] bg-clip-text text-transparent',
+    gradient: 'heading-accent',
     copy: 'text-white/75',
     hint: 'text-white/50',
     ring: 'stroke-[#7fa6ff]/40',
@@ -332,7 +332,7 @@ export default function TechOrbit({
             <span className={`w-2 h-2 rounded-full animate-pulse ${c.dot}`} />
             Stack // The orbit
           </span>
-          <h2 id={titleId} className={`font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] tracking-tight uppercase ${c.title}`}>
+          <h2 id={titleId} className={`heading-section ${c.title}`}>
             <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className="inline-block">One team.</span></span>{' '}
             <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className={`inline-block pb-[0.06em] ${c.gradient}`}>Every layer.</span></span>
           </h2>

@@ -99,7 +99,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           Start the conversation 👋
         </p>
 
-        <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+        <h2 className="heading-sub mt-2 text-slate-900">
           Tell us about your project
         </h2>
 

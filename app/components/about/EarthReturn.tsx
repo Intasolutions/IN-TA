@@ -10,7 +10,7 @@ import { CLOSING } from './story';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const GRADIENT_ON_DARK = 'bg-linear-to-r from-[#5b8cff] via-[#7fa6ff] to-[#b9ceff] bg-clip-text text-transparent';
+const GRADIENT_ON_DARK = 'heading-accent';
 const START_ZOOM = 0.6; // how close in the rise begins
 const SMALL_SCREENS = '(max-width: 1023.98px), (max-height: 639.98px), (prefers-reduced-motion: reduce)';
 
@@ -127,7 +127,7 @@ export default function EarthReturn() {
             <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
             {CLOSING.kicker}
           </span>
-          <h2 id="er-title" className="font-display font-extrabold uppercase tracking-tight leading-[1.02] text-white text-balance text-[length:clamp(1.75rem,6vw,3rem)] [@media(max-height:480px)]:text-[1.5rem]">
+          <h2 id="er-title" className="heading-section text-white text-balance">
             {CLOSING.plain} <span className={GRADIENT_ON_DARK}>{CLOSING.bright}</span>
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-white/75 leading-relaxed text-balance">{CLOSING.text}</p>

@@ -415,7 +415,7 @@ function Hero() {
       <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-12 mt-6 lg:mt-10">
         <div className="w-full lg:w-1/2 relative z-10">
           <p className="text-sm text-slate-500 uppercase mb-4">Our Work</p>
-          <h1 ref={titleRef} className="font-extrabold text-4xl md:text-5xl lg:text-[54px] leading-[1.1] lg:leading-[0.95] text-[#0b2b57] max-w-2xl">
+          <h1 ref={titleRef} className="heading-page max-w-2xl text-midnight">
             <span className="reveal-line block overflow-hidden">
               <span style={{ opacity: 0, visibility: 'hidden' }}>We craft websites & platforms</span>
             </span>
@@ -562,7 +562,7 @@ function FeaturedList({ projects }: { projects: any[] }) {
           <div className="col-span-1 lg:col-span-5">
             <div className="project-text max-w-xl mx-auto lg:mx-0" style={{ opacity: 0 }}>
               <p className="text-sm text-slate-500 uppercase">Featured project</p>
-              <h2 className="mt-2 lg:mt-4 text-2xl lg:text-3xl font-semibold text-[#0b2b57]">{p.title}</h2>
+              <h2 className="heading-sub mt-2 lg:mt-4 text-midnight">{p.title}</h2>
               <p className="mt-3 lg:mt-4 text-slate-600 text-sm lg:text-base">{p.summary}</p>
               <div className="mt-4 lg:mt-6 flex flex-wrap gap-2">
                 {p.tags.map((t: string) => (
@@ -741,7 +741,7 @@ function GalleryGrid({ items }: { items: any[] }) {
   return (
     <div ref={rootRef}>
       <div className="mb-8">
-        <h3 className="text-2xl font-semibold text-[#0b2b57]">More work</h3>
+        <h3 className="heading-section text-midnight">More work</h3>
         <p className="text-slate-600 mt-2">Selected projects across web & infra.</p>
       </div>
 

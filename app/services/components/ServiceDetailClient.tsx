@@ -184,7 +184,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                                 </span>
                             </div>
                             <div className="overflow-hidden">
-                                <h1 className="reveal-text text-[clamp(2.5rem,6vw,5.5rem)] font-black leading-[0.9] tracking-tighter text-[#0b2a5f]">
+                                <h1 className="heading-page reveal-text text-midnight">
                                     {service.title} Services <br />
                                     <span className="text-xl md:text-2xl font-bold tracking-normal opacity-50 block mt-4">| INTA Solutions</span>
                                 </h1>
@@ -233,7 +233,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-20">
                         <h2 className="text-sm font-bold tracking-[0.5em] text-slate-300 uppercase mb-4">Core Framework</h2>
-                        <h3 className="text-4xl md:text-6xl font-black text-[#0b2a5f] tracking-tight">Capabilities & Features</h3>
+                        <h3 className="heading-section text-midnight">Capabilities & Features</h3>
                     </div>
 
                     <div className="grid md:grid-cols-4 gap-6">
@@ -271,7 +271,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                 <div className="max-w-7xl mx-auto rounded-[60px] bg-[#0b2a5f] p-8 md:p-24 overflow-hidden relative shadow-2xl">
                     <div className="relative z-10 grid lg:grid-cols-2 gap-20 items-center">
                         <div>
-                            <h2 className="text-4xl md:text-7xl font-bold text-white mb-12 leading-[1.1] tracking-tighter">
+                            <h2 className="heading-section text-white mb-12">
                                 Strategic <br /><span style={{ color: themeColor }}>Benefits.</span>
                             </h2>
                             <div className="space-y-10">
@@ -332,7 +332,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
             <section className="py-32 px-6 bg-white overflow-hidden">
                 <div className="max-w-4xl mx-auto">
                     <h2 className="text-sm font-bold tracking-[0.5em] text-slate-300 uppercase mb-8">In-Depth Expertise</h2>
-                    <h3 className="text-3xl md:text-5xl font-black text-[#0b2a5f] mb-12 leading-tight">
+                    <h3 className="heading-section mb-12 text-midnight">
                         Advancing {service.title} for the <span className="text-blue-600">Modern Enterprise.</span>
                     </h3>
                     <div className="prose prose-lg max-w-none text-slate-600 space-y-8 font-light leading-relaxed">
@@ -372,7 +372,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
                     <div className="max-w-7xl mx-auto">
                         <div className="mb-16">
                             <h2 className="text-sm font-bold tracking-[0.5em] text-slate-300 uppercase mb-4">Internal Synergies</h2>
-                            <h3 className="text-3xl md:text-5xl font-black text-[#0b2a5f] tracking-tight">Related Solutions</h3>
+                            <h3 className="heading-section text-midnight">Related Solutions</h3>
                         </div>
                         <div className="grid md:grid-cols-3 gap-8">
                             {relatedServices.map((rs, i) => (
@@ -409,7 +409,7 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
             <section className="max-w-7xl mx-auto px-6 py-32">
                 <div className="relative rounded-[50px] overflow-hidden bg-slate-50 border border-slate-100 p-12 md:p-32 text-center group">
                     <div className="relative z-10">
-                        <h2 className="text-5xl md:text-8xl font-black text-[#0b2a5f] uppercase tracking-tighter mb-10">
+                        <h2 className="heading-section mb-10 text-midnight">
                             Let's Build <br /> The Future<span style={{ color: themeColor }}>_</span>
                         </h2>
                         <Link

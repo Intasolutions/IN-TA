@@ -313,7 +313,7 @@ export default function Hero() {
           <div className="relative [perspective:1200px]">
             <h1
               data-hero="tilt"
-              className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.04em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
+              className="heading-page text-midnight max-w-7xl [transform-style:preserve-3d]"
             >
               <span className="sr-only">Engineering Digital Reality</span>
               <span aria-hidden="true" className="block overflow-hidden pb-[0.06em]">
@@ -325,7 +325,7 @@ export default function Hero() {
                 {/* Gradient text only paints inside its box, so pad it to include the g/y descenders */}
                 <span
                   data-hero="gradient"
-                  className="font-serif italic font-light normal-case text-gradient-shimmer inline-block pr-2 pb-[0.16em] leading-[1.02]"
+                  className="text-gradient-shimmer inline-block pb-[0.06em]"
                 >
                   Digital Reality
                 </span>

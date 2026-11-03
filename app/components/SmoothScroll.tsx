@@ -17,6 +17,13 @@ export function scrollToY(y: number) {
   else window.scrollTo({ top: y, behavior: 'smooth' });
 }
 
+/** Straight to a position on the page, with no scrolling in between */
+export function jumpToY(y: number) {
+  if (instance) instance.scrollTo(y, { immediate: true, force: true });
+  else window.scrollTo({ top: y, behavior: 'auto' });
+  ScrollTrigger.update();
+}
+
 /** Straight back to the top of the page, without travelling through every section on the way */
 export function scrollToTop() {
   if (instance) instance.scrollTo(0, { immediate: true, force: true });

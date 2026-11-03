@@ -14,7 +14,7 @@ export function BlogHead({ id, action }: { id: string; action?: ReactNode }) {
           <span className="w-2 h-2 rounded-full bg-brand-blue animate-pulse" />
           Blog // Latest writing
         </span>
-        <h2 id={id} className="font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] text-midnight tracking-tight uppercase">
+        <h2 id={id} className="heading-section text-midnight">
           <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-bh="word" className="inline-block">Insights &amp;</span></span>{' '}
           <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-bh="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>stories</span></span>
         </h2>

@@ -227,7 +227,7 @@ export default function BlogDetailClient() {
 
                 <h1
                     ref={titleRef}
-                    className="text-3xl md:text-4xl lg:text-5xl font-black leading-[1.15] tracking-tight text-white opacity-0 mb-6"
+                    className="heading-page text-white opacity-0 mb-6"
                     style={{ textShadow: '0 2px 40px rgba(59,130,246,0.18)' }}
                 >
                     {blog.title}
@@ -296,7 +296,7 @@ export default function BlogDetailClient() {
                         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
                             <div>
                                 <p className="text-xs font-bold tracking-[0.2em] text-blue-400 uppercase mb-2">Continue Reading</p>
-                                <h2 className="text-2xl md:text-3xl font-black text-white">More Like This</h2>
+                                <h2 className="heading-section text-white">More Like This</h2>
                             </div>
                             <Link
                                 href="/"
@@ -339,7 +339,7 @@ export default function BlogDetailClient() {
                                     {/* Body */}
                                     <div className="p-5">
                                         <time className="text-xs text-slate-500 mb-2 block">{post.date}</time>
-                                        <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 mb-3 group-hover:text-blue-300 transition-colors">
+                                        <h3 className="heading-sub text-white line-clamp-2 mb-3 group-hover:text-blue-300 transition-colors">
                                             {post.title}
                                         </h3>
                                         {post.content && (

@@ -69,7 +69,7 @@ const STOPS = [
 const ZOOMED = '[data-sm="system"], [data-sm="panel-stack"], [data-sm="panel-clients"], [data-sm="intro"], [data-sm="story"], [data-sm="outro"]';
 const screenZoom = (w: number, h: number) => Math.min(1.9, Math.max(1, Math.min(w / 1480, h / 800))).toFixed(3);
 
-const GRADIENT_ON_DARK = 'bg-linear-to-r from-[#5b8cff] via-[#7fa6ff] to-[#b9ceff] bg-clip-text text-transparent';
+const GRADIENT_ON_DARK = 'heading-accent';
 
 // How the globe rests before you scroll (degrees): India in view, and turning the way the real earth turns
 const REST_LON = TARGET.lon + 24;
@@ -121,7 +121,7 @@ function Heading({ count }: { count: number }) {
         <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
         Services // What runs here
       </span>
-      <h2 className="font-display font-extrabold uppercase tracking-tight leading-[1] text-white text-[length:clamp(1.75rem,3.4vw,3rem)]">
+      <h2 className="heading-section text-white">
         One core. <span className={GRADIENT_ON_DARK}>{count} modules.</span>
       </h2>
     </div>
@@ -757,7 +757,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
                 <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
                 About // System map
               </span>
-              <h1 id="sm-title" className="font-display font-extrabold uppercase tracking-tight leading-[0.95] text-white text-[length:clamp(2.75rem,6.4vw,6rem)]">
+              <h1 id="sm-title" className="heading-page text-white">
                 <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className="block">How we&apos;re</span></span>
                 <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className={`block pb-[0.05em] ${GRADIENT_ON_DARK}`}>wired</span></span>
               </h1>
@@ -795,7 +795,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
                 <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
                 {CLOSING.kicker}
               </span>
-              <h2 className="font-display font-extrabold uppercase tracking-tight leading-[1] text-white text-[length:clamp(2.25rem,4.6vw,4.25rem)]">
+              <h2 className="heading-section text-white">
                 {CLOSING.plain} <span className={GRADIENT_ON_DARK}>{CLOSING.bright}</span>
               </h2>
               <p className="mt-4 max-w-md text-sm sm:text-base lg:text-lg text-white/75 leading-relaxed">{CLOSING.text}</p>

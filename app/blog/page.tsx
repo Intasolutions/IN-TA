@@ -56,7 +56,7 @@ export default async function BlogPage() {
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
                     <div className="mb-20 text-center lg:text-left">
-                        <h1 className="text-5xl md:text-7xl font-black text-[#0b2a5f] tracking-tighter mb-6">
+                        <h1 className="heading-page mb-6 text-midnight">
                             Insights<span className="text-blue-600">.</span> Stories<span className="text-blue-600">.</span> Updates
                         </h1>
                         <p className="text-xl text-slate-600 max-w-2xl font-light leading-relaxed">
@@ -94,7 +94,7 @@ export default async function BlogPage() {
                                             <span>5 min read</span>
                                         </div>
 
-                                        <h2 className="text-2xl font-bold text-[#0b2a5f] leading-snug mb-4 group-hover:text-blue-600 transition-colors">
+                                        <h2 className="heading-sub mb-4 group-hover:text-blue-600 transition-colors text-midnight">
                                             <Link href={`/blog/${blog.id}`}>
                                                 {blog.title}
                                             </Link>

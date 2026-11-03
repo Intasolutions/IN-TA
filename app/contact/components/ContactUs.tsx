@@ -88,7 +88,7 @@ export default function ContactPage() {
     >
       {/* ---------------- HERO ---------------- */}
       <section className="max-w-5xl mx-auto text-center mb-24">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-[#0b2a5f] leading-tight">
+        <h1 className="heading-page text-midnight">
           <span className="block overflow-hidden">
             <span className="hero-line block will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               Let’s talk about
@@ -125,7 +125,7 @@ export default function ContactPage() {
           ) : (
             <div className="text-center py-20">
               <div className="text-5xl mb-6">🚀</div>
-              <h3 className="text-2xl font-bold text-[#0b2a5f]">
+              <h3 className="heading-sub text-midnight">
                 Message received
               </h3>
               <p className="mt-3 text-slate-600">
@@ -138,7 +138,7 @@ export default function ContactPage() {
         {/* RIGHT – INFO */}
         <div className="reveal flex flex-col gap-10" style={{ opacity: 0, visibility: 'hidden' }}>
           <div className="bg-white/70 backdrop-blur-[18px] rounded-[28px] p-[28px] shadow-[0_30px_90px_rgba(0,0,0,0.06)]">
-            <h3 className="text-lg font-bold text-[#0b2a5f]">What happens next</h3>
+            <h3 className="heading-sub text-midnight">What happens next</h3>
             <div className="mt-5 flex flex-col gap-[18px]">
               <div className="flex gap-4 items-start">
                 <span className="font-bold text-[#1f6fe6]">01</span>
@@ -156,7 +156,7 @@ export default function ContactPage() {
           </div>
 
           <div className="bg-white/70 backdrop-blur-[18px] rounded-[28px] p-[28px] shadow-[0_30px_90px_rgba(0,0,0,0.06)]">
-            <h3 className="text-lg font-bold text-[#0b2a5f]">Why work with us</h3>
+            <h3 className="heading-sub text-midnight">Why work with us</h3>
             <ul className="mt-4 flex flex-col gap-2.5 text-sm text-slate-600">
               <li>✔ Product-focused engineering</li>
               <li>✔ Clear communication</li>
