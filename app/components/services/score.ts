@@ -16,7 +16,7 @@ const mix = (a: number, b: number, k: number) => a + (b - a) * k;
 const rad = (d: number) => (d * Math.PI) / 180;
 
 /** Which part of the screen the picture has to itself, because the words have the rest */
-type Frame = 'hero' | 'plan' | 'card' | 'free' | 'ask' | 'close';
+type Frame = 'hero' | 'plan' | 'card' | 'free' | 'ask' | 'close' | 'detail' | 'fill';
 type Room = { sx: number; sy: number; fw: number; fh: number };
 
 function roomFor(frame: Frame, aspect: number): Room {
@@ -32,6 +32,10 @@ function roomFor(frame: Frame, aspect: number): Room {
       return wide ? { sx: 0, sy: 0.22, fw: 0.9, fh: 0.62 } : { sx: 0, sy: 0.3, fw: 0.98, fh: 0.5 };
     case 'close':
       return { sx: 0, sy: 0.07, fw: 0.94, fh: wide ? 0.36 : 0.32 };
+    case 'detail':
+      return wide ? { sx: 0.46, sy: -0.1, fw: 0.5, fh: 0.76 } : { sx: 0, sy: 0.41, fw: 0.98, fh: 0.3 };
+    case 'fill':
+      return wide ? { sx: 0, sy: -0.04, fw: 0.7, fh: 0.84 } : { sx: 0, sy: 0.04, fw: 0.96, fh: 0.56 };
     default:
       return { sx: 0, sy: 0.14, fw: 0.94, fh: 0.66 };
   }
@@ -160,6 +164,19 @@ export function orderKeys(score: Score, block: Block): Key[] {
     { ...last, s: 0 },
     { s: 1, t: [0, -0.02, 0], w: 2.86, az: 0, el: 66, roll: 0, frame: 'free', travel: true },
     { s: 2, t: [x, 0.015, z], w: Math.min(shot.w, 0.98), az: shot.az, el: Math.min(shot.el, 58), roll: 0, frame: 'card', travel: true },
+  ];
+}
+
+/** One part's own page. Below zero is its arrival, played on a clock as the page opens. From zero it follows the scroll: in closer, until the part has the screen to itself */
+export function partKeys(block: Block, total: number): Key[] {
+  const [x, z] = centreOf(block);
+  const { az, el, w, roll = 0 } = block.shot;
+  const base = { t: [x, 0.015, z] as [number, number, number], roll };
+  return [
+    { ...base, s: -1, w: w * 2.1, az: az - 16, el: el - 9, frame: 'detail' },
+    { ...base, s: 0, w: w * 1.32, az: az - 6, el: el - 2, frame: 'detail', travel: true },
+    { ...base, s: total * 0.5, w: w * 1.14, az: az - 2, el, frame: 'detail' },
+    { ...base, s: total, w: w * 0.98, az: az + 3, el: el + 2, frame: 'fill', travel: true },
   ];
 }
 

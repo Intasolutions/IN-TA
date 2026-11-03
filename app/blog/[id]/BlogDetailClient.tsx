@@ -227,7 +227,7 @@ export default function BlogDetailClient() {
 
                 <h1
                     ref={titleRef}
-                    className="heading-page text-white opacity-0 mb-6"
+                    className="heading-section text-white opacity-0 mb-6"
                     style={{ textShadow: '0 2px 40px rgba(59,130,246,0.18)' }}
                 >
                     {blog.title}

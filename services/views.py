@@ -5,7 +5,11 @@ from .serializers import ServiceSerializer
 
 class ServiceViewSet(viewsets.ReadOnlyModelViewSet):
     """Read-only ViewSet for public Services listing and detail (lookup by slug)."""
-    queryset = Service.objects.filter(is_active=True).order_by("order", "title")
+    queryset = (
+        Service.objects.filter(is_active=True)
+        .prefetch_related("features", "technologies", "benefits", "gallery", "faqs", "projects__tags")
+        .order_by("order", "title")
+    )
     serializer_class = ServiceSerializer
     lookup_field = "slug"
 

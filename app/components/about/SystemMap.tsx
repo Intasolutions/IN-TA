@@ -69,7 +69,7 @@ const STOPS = [
 const ZOOMED = '[data-sm="system"], [data-sm="panel-stack"], [data-sm="panel-clients"], [data-sm="intro"], [data-sm="story"], [data-sm="outro"]';
 const screenZoom = (w: number, h: number) => Math.min(1.9, Math.max(1, Math.min(w / 1480, h / 800))).toFixed(3);
 
-const GRADIENT_ON_DARK = 'heading-accent';
+const GRADIENT_ON_DARK = 'heading-accent-dark';
 
 // How the globe rests before you scroll (degrees): India in view, and turning the way the real earth turns
 const REST_LON = TARGET.lon + 24;
@@ -759,7 +759,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
               </span>
               <h1 id="sm-title" className="heading-page text-white">
                 <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className="block">How we&apos;re</span></span>
-                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className={`block pb-[0.05em] ${GRADIENT_ON_DARK}`}>wired</span></span>
+                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className={`heading-serif ${GRADIENT_ON_DARK}`}>wired</span></span>
               </h1>
               <p data-sm="copy" className="mt-3 sm:mt-5 text-white/75 text-sm sm:text-base lg:text-lg leading-relaxed max-w-md">
                 IN-TA Solutions, drawn as what it really is: one system, running from Wayanad, Kerala.

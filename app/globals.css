@@ -756,22 +756,63 @@ html {
 .animate-marquee { animation: marquee 22s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 
+/* The live line that a service page's sockets hang off */
+.bus-flow {
+  background-color: rgb(1 68 181 / 0.2);
+  background-image: linear-gradient(90deg, transparent 0 62%, #3b7bf7 92%, transparent 100%);
+  background-size: 34rem 100%;
+  animation: busFlow 5s linear infinite;
+}
+@keyframes busFlow { to { background-position: 34rem 0; } }
+@media (prefers-reduced-motion: reduce) { .bus-flow { animation: none; } }
+
+/* A signal running along a lit pin on a service page */
+.pin-pulse {
+  animation: pinPulse 2.6s linear infinite;
+  animation-delay: calc(var(--r) * -0.37s);
+}
+.pin-pulse-back { animation-direction: reverse; }
+@keyframes pinPulse {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+@media (prefers-reduced-motion: reduce) { .pin-pulse { animation: none; opacity: 0; } }
+
 @keyframes gradientShimmer {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
-/* The site's headings: one font and one size at each level, on every page */
+/* The site's headings. The home page is the base: these values come from it, and every other page follows them */
 .heading-page,
 .heading-section,
 .heading-sub {
   font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif;
-  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: -0.025em;
 }
-.heading-page { font-size: clamp(2.4rem, 5.2vw, 5rem); line-height: 1; }
-.heading-section { font-size: clamp(2rem, 4.4vw, 3.5rem); line-height: 1.02; }
-.heading-sub { font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.15; }
+/* Page titles: the home hero's type. Its 7rem is for its two short lines, so longer titles take a step down in size */
+.heading-page {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  font-size: clamp(2.5rem, min(5.8vw, 11svh), 6rem);
+}
+/* Section headings: the same as the home page's sections */
+.heading-section {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+}
+/* Card titles: the same as the home page's cards */
+.heading-sub {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+@media (min-width: 40rem) {
+  .heading-sub { font-size: 1.5rem; line-height: 1.3333; }
+}
 /* A sentence that leads a moment: the same font, in sentence case */
 .heading-lead {
   font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif;
@@ -785,17 +826,36 @@ html {
   .heading-section { font-size: 1.4rem; }
 }
 
-/* The last words of a heading: the one blue shared by every page, readable on white and on midnight alike */
-.heading-accent {
-  background-image: linear-gradient(90deg, #2563eb, #3b7bf7, #5b8cff);
+/* The last words of a heading: the home page's blue, and its lighter version for dark backgrounds */
+.heading-accent,
+.heading-accent-dark {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
 }
+.heading-accent {
+  background-image: linear-gradient(to right, #0144b5, #2563eb, #3b7bf7);
+  background-image: linear-gradient(to right in oklab, #0144b5, #2563eb, #3b7bf7);
+}
+.heading-accent-dark {
+  background-image: linear-gradient(to right, #5b8cff, #7fa6ff, #b9ceff);
+  background-image: linear-gradient(to right in oklab, #5b8cff, #7fa6ff, #b9ceff);
+}
+/* The last words of a page title: the home hero's second line */
+.heading-serif {
+  display: inline-block;
+  font-family: ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  text-transform: none;
+  padding-right: 0.08em;
+  padding-bottom: 0.16em;
+  line-height: 1.02;
+}
 .text-gradient-shimmer {
-  background: linear-gradient(90deg, #2563eb, #3b7bf7, #5b8cff, #3b7bf7, #2563eb);
+  background: linear-gradient(90deg, #0144b5, #001f70, #2557c7, #01072b, #0144b5);
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;

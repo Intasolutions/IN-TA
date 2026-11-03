@@ -95,7 +95,7 @@ export default function ContactPage() {
             </span>
           </span>
           <span className="block overflow-hidden">
-            <span className="hero-line block will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
+            <span className="hero-line heading-accent heading-serif will-change-transform" style={{ opacity: 0, visibility: 'hidden' }}>
               what you’re building.
             </span>
           </span>

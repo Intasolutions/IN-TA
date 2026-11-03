@@ -15,7 +15,7 @@ const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 const LOCAL_BACKEND = 'http://127.0.0.1:8000';
 
-const GRADIENT_ON_DARK = 'heading-accent';
+const GRADIENT_ON_DARK = 'heading-accent-dark';
 
 // (Must match ROUTE in SystemMap)
 const ROUTE = '(prefers-reduced-motion: no-preference) and (max-width: 1023.98px), (prefers-reduced-motion: no-preference) and (max-height: 639.98px)';

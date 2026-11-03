@@ -20,11 +20,11 @@ const FIELD =
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 /** "Work with us" enquiry band → POST /api/blog/subscribe/ ({ name, phone, interest }). Reveal targets: [data-pf="box" | "in"]. */
-export default function ProjectForm() {
+export default function ProjectForm({ defaultInterest }: { defaultInterest?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [interest, setInterest] = useState(INTERESTS[0]);
+  const [interest, setInterest] = useState(defaultInterest && INTERESTS.includes(defaultInterest) ? defaultInterest : INTERESTS[0]);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [status, setStatus] = useState<Status>('idle');
   const [slow, setSlow] = useState(false); // our API host can take a while to wake up
@@ -96,7 +96,7 @@ export default function ProjectForm() {
             <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
             Work with us
           </span>
-          <h3 data-pf="in" className="heading-section text-white">
+          <h3 data-pf="in" className="font-display font-extrabold uppercase tracking-tight leading-[1.02] text-white text-[length:clamp(1.5rem,2.6vw,2.1rem)]">
             Have a project in mind?
           </h3>
           <p data-pf="in" className="mt-2.5 text-sm leading-relaxed max-w-sm text-white/70">

@@ -1,5 +1,13 @@
 from rest_framework import serializers
-from .models import Service, Feature, Technology, Benefit
+from portfolio.models import Project
+from .models import Service, ServiceFAQ, ServiceImage, Feature, Technology, Benefit
+
+
+def absolute_url(serializer, image):
+    if not image:
+        return None
+    request = serializer.context.get('request')
+    return request.build_absolute_uri(image.url) if request else image.url
 
 
 class FeatureSerializer(serializers.ModelSerializer):
@@ -9,9 +17,14 @@ class FeatureSerializer(serializers.ModelSerializer):
 
 
 class TechnologySerializer(serializers.ModelSerializer):
+    logo = serializers.SerializerMethodField()
+
     class Meta:
         model = Technology
-        fields = ("name", "slug")
+        fields = ("name", "slug", "logo")
+
+    def get_logo(self, obj):
+        return absolute_url(self, obj.logo)
 
 
 class BenefitSerializer(serializers.ModelSerializer):
@@ -20,10 +33,42 @@ class BenefitSerializer(serializers.ModelSerializer):
         fields = ("id", "title", "description")
 
 
+class ServiceImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceImage
+        fields = ("id", "image", "caption", "alt_text")
+
+    def get_image(self, obj):
+        return absolute_url(self, obj.image)
+
+
+class ServiceFAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceFAQ
+        fields = ("id", "question", "answer")
+
+
+class ServiceProjectSerializer(serializers.ModelSerializer):
+    hero = serializers.SerializerMethodField()
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+
+    class Meta:
+        model = Project
+        fields = ("id", "title", "slug", "role", "summary", "hero", "tags", "external_url")
+
+    def get_hero(self, obj):
+        return absolute_url(self, obj.hero)
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     features = FeatureSerializer(many=True, read_only=True)
     technologies = TechnologySerializer(many=True, read_only=True)
     benefits = BenefitSerializer(many=True, read_only=True)
+    gallery = ServiceImageSerializer(many=True, read_only=True)
+    faqs = ServiceFAQSerializer(many=True, read_only=True)
+    projects = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     class Meta:
@@ -37,6 +82,9 @@ class ServiceSerializer(serializers.ModelSerializer):
             "features",
             "technologies",
             "benefits",
+            "gallery",
+            "faqs",
+            "projects",
             "image",
             "color",
             "icon_key",
@@ -51,6 +99,10 @@ class ServiceSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("created_at", "updated_at")
+
+    def get_projects(self, obj):
+        live = [p for p in obj.projects.all() if p.is_active]
+        return ServiceProjectSerializer(live, many=True, context=self.context).data
 
     def get_image(self, obj):
         if obj.image:

@@ -285,10 +285,10 @@ export default function Capabilities() {
           </span>
           <h2
             id="capabilities-title"
-            className="heading-section text-midnight"
+            className="font-display font-extrabold text-[length:clamp(2.25rem,5.4vw,3.75rem)] leading-[1] text-midnight tracking-tight uppercase"
           >
             <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block">Specialized</span></span>{' '}
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block pb-[0.06em] heading-accent">Capabilities</span></span>
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block pb-[0.06em] bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent">Capabilities</span></span>
           </h2>
         </div>
         <p data-cap="lede" className="text-midnight/80 max-w-md text-sm sm:text-[15px] leading-relaxed">
@@ -376,7 +376,8 @@ export default function Capabilities() {
                 )}
                 <h3
                   data-cap="item"
-                  className={`heading-sub text-midnight transition-colors duration-300 group-hover:text-brand-blue ${card.featured ? 'text-2xl mb-4' : 'text-xl mb-3'}`}
+                  className={`font-display font-bold text-midnight uppercase tracking-tight transition-colors duration-300 group-hover:text-brand-blue
+                    ${card.featured ? 'text-2xl sm:text-3xl mb-4' : 'text-xl sm:text-2xl mb-3'}`}
                 >
                   {card.title}
                 </h3>

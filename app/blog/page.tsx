@@ -52,12 +52,12 @@ export default async function BlogPage() {
         <div className="bg-[#fbfaf8] min-h-screen selection:bg-[#0b2a5f] selection:text-white">
 
 
-            <main className="pt-32 pb-20 px-6">
+            <main className="pt-[calc(var(--header-h)+2.5rem)] pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
                     {/* Hero Section */}
                     <div className="mb-20 text-center lg:text-left">
                         <h1 className="heading-page mb-6 text-midnight">
-                            Insights<span className="text-blue-600">.</span> Stories<span className="text-blue-600">.</span> Updates
+                            Insights. Stories. <span className="heading-accent heading-serif">Updates</span>
                         </h1>
                         <p className="text-xl text-slate-600 max-w-2xl font-light leading-relaxed">
                             Practical case studies and deep-dive articles on software engineering, design, and digital transformation.

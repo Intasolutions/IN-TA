@@ -23,6 +23,7 @@ class Technology(models.Model):
     """Tech stack used for the service (e.g., 'Next.js', 'PostgreSQL')."""
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
+    logo = models.ImageField(upload_to="services/technologies/", blank=True, null=True, help_text="PNG with a transparent background, at least 256px wide")
 
     class Meta:
         verbose_name_plural = "Technologies"
@@ -62,6 +63,7 @@ class Service(models.Model):
     features = models.ManyToManyField(Feature, blank=True, related_name="services")
     technologies = models.ManyToManyField(Technology, blank=True, related_name="services")
     benefits = models.ManyToManyField(Benefit, blank=True, related_name="services")
+    projects = models.ManyToManyField("portfolio.Project", blank=True, related_name="services", help_text="Real work that used this service, shown on its page")
 
     # Visual Assets
     image = models.ImageField(upload_to='services/images/', blank=True, null=True, help_text="Main editorial image for service detail page")
@@ -113,3 +115,35 @@ class Service(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("services:detail", kwargs={"slug": self.slug})
+
+
+class ServiceImage(models.Model):
+    """A picture in the 'In real use' gallery on a service's page."""
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="gallery")
+    image = models.ImageField(upload_to="services/gallery/", help_text="At least 1600px wide, so that it stays sharp")
+    caption = models.CharField(max_length=200, blank=True)
+    alt_text = models.CharField(max_length=200, blank=True, help_text="Describes the image for screen readers and search")
+    order = models.IntegerField(default=0, help_text="Low numbers come first")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Gallery image"
+
+    def __str__(self) -> str:  # pragma: no cover - trivial
+        return self.caption or f"Image {self.pk}"
+
+
+class ServiceFAQ(models.Model):
+    """A common question on a service's page."""
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="faqs")
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    order = models.IntegerField(default=0, help_text="Low numbers come first")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "FAQ"
+        verbose_name_plural = "FAQs"
+
+    def __str__(self) -> str:  # pragma: no cover - trivial
+        return self.question

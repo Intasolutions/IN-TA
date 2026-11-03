@@ -17,7 +17,7 @@ export default function SecurityPage() {
     <main className="min-h-screen bg-slate-50 pt-32 pb-20 px-6">
       <Header1/>
       <div className="container mx-auto max-w-4xl">
-        <h1 className="heading-page text-slate-900 mb-8">Security Policy</h1>
+        <h1 className="heading-page text-midnight mb-8">Security <span className="heading-accent heading-serif">Policy</span></h1>
         
         <div className="space-y-8 text-slate-700 leading-relaxed">
           <section>

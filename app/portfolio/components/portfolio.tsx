@@ -415,12 +415,12 @@ function Hero() {
       <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-12 mt-6 lg:mt-10">
         <div className="w-full lg:w-1/2 relative z-10">
           <p className="text-sm text-slate-500 uppercase mb-4">Our Work</p>
-          <h1 ref={titleRef} className="heading-page max-w-2xl text-midnight">
+          <h1 ref={titleRef} className="heading-section max-w-2xl text-midnight">
             <span className="reveal-line block overflow-hidden">
               <span style={{ opacity: 0, visibility: 'hidden' }}>We craft websites & platforms</span>
             </span>
             <span className="reveal-line block overflow-hidden">
-              <span style={{ opacity: 0, visibility: 'hidden' }}>that scale - engineered to perform.</span>
+              <span className="heading-accent inline-block" style={{ opacity: 0, visibility: 'hidden' }}>that scale - engineered to perform.</span>
             </span>
           </h1>
           <p className="mt-6 text-slate-600 max-w-xl text-base lg:text-lg">

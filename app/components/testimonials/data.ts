@@ -63,7 +63,7 @@ export function useTestimonials() {
   return { items, failed };
 }
 
-export const STATIC_GRADIENT = 'heading-accent';
+export const STATIC_GRADIENT = 'bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent';
 
 /** Initials for clients without a photo */
 export const initials = (name: string) =>

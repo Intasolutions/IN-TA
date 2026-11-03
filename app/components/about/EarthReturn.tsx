@@ -10,7 +10,7 @@ import { CLOSING } from './story';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const GRADIENT_ON_DARK = 'heading-accent';
+const GRADIENT_ON_DARK = 'heading-accent-dark';
 const START_ZOOM = 0.6; // how close in the rise begins
 const SMALL_SCREENS = '(max-width: 1023.98px), (max-height: 639.98px), (prefers-reduced-motion: reduce)';
 

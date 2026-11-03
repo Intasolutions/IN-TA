@@ -27,7 +27,7 @@ const GALLERY_COUNT = 6;
 // Pinned horizontal scrolling only where there's room for it; elsewhere it's a native swipe carousel.
 // (Must match the [@media(min-width:1024px)_and_(min-height:640px)] classes in the markup.)
 const DESKTOP_QUERY = '(min-width: 1024px) and (min-height: 640px)';
-const STATIC_GRADIENT = 'heading-accent';
+const STATIC_GRADIENT = 'bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent';
 
 // Tags that describe the client's industry (used for the small label above each title)
 const INDUSTRY_TAGS = [
@@ -472,7 +472,7 @@ export default function Work() {
               <span className="w-2 h-2 rounded-full bg-brand-blue animate-pulse" />
               Selected work // Case studies
             </span>
-            <h2 id="work-title" className="heading-section text-midnight">
+            <h2 id="work-title" className="font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] text-midnight tracking-tight uppercase">
               <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-g="word" className="inline-block">Built, shipped</span></span>{' '}
               <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-g="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>&amp; live</span></span>
             </h2>

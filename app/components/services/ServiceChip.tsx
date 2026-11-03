@@ -993,7 +993,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       </p>
       <h1 id="chip-title" className="heading-page text-midnight">
         <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="block">{HERO.plain}</span></span>
-        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="heading-accent block pb-[0.05em]">{HERO.bright}</span></span>
+        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="heading-accent heading-serif">{HERO.bright}</span></span>
       </h1>
       <p data-hero="in" className={`mt-3 sm:mt-5 max-w-2xl text-[15px] sm:text-base lg:text-lg leading-relaxed [@media(max-height:480px)]:hidden ${BODY}`}>{HERO.text}</p>
       <nav data-hero="in" aria-label="Jump to a service" className="mt-3.5 sm:mt-6 [@media(max-height:620px)]:hidden">
