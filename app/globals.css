@@ -756,6 +756,309 @@ html {
 .animate-marquee { animation: marquee 22s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 
+/* The rack on the portfolio page. Everything is drawn in CSS, sized from the height of one unit (--uh) */
+.rack-room {
+  background-color: #01072b;
+  background-image:
+    radial-gradient(58% 62% at 72% 46%, rgb(37 99 235 / 0.2), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(157 187 255 / 0.028) 0 2px, transparent 2px 148px);
+}
+.rack-plate {
+  background: linear-gradient(180deg, #3a4b7c 0, #233267 6%, #1a2758 48%, #131e49 92%, #070d29 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.65);
+}
+.rack-screw {
+  width: calc(var(--uh, 40px) * 0.15);
+  height: calc(var(--uh, 40px) * 0.15);
+  border-radius: 9999px;
+  background:
+    linear-gradient(rgb(10 16 46 / 0.75), rgb(10 16 46 / 0.75)) center / 56% 13% no-repeat,
+    linear-gradient(rgb(10 16 46 / 0.75), rgb(10 16 46 / 0.75)) center / 13% 56% no-repeat,
+    radial-gradient(circle at 35% 30%, #a7b6dd, #47557f 55%, #1a2348);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(5 9 36 / 0.7);
+}
+.rack-grip {
+  width: calc(var(--uh, 40px) * 0.1);
+  height: 56%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #5a6a9c, #2a3768 45%, #101a44);
+  box-shadow: 0 0 0 1px rgb(3 7 32 / 0.7), 1px 1px 2px rgb(0 0 0 / 0.5);
+}
+.rack-led-name {
+  font-size: calc(var(--uh, 40px) * 0.105);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: rgb(157 187 255 / 0.6);
+}
+@media (max-width: 640px) { .rack-led-name { display: none; } }
+.rack-vent { background-image: repeating-linear-gradient(90deg, #040824 0 3px, transparent 3px 7px); opacity: 0.75; }
+.rack-ports {
+  background-image: linear-gradient(90deg, #030720 0 62%, transparent 62%);
+  background-size: calc(var(--uh, 40px) * 0.36) 100%;
+  opacity: 0.85;
+}
+.rack-post {
+  background-color: #0d1538;
+  background-image: radial-gradient(circle, #01041a 0 24%, transparent 27%);
+  background-size: 100% calc(var(--uh, 40px) / 3);
+  box-shadow: inset 1px 0 0 rgb(255 255 255 / 0.12), inset -1px 0 0 rgb(0 0 0 / 0.6);
+}
+.rack-back { background: linear-gradient(180deg, #030a2e, #01041a); }
+.rack-side { background: linear-gradient(90deg, #0e1740, #060c2c); box-shadow: inset 0 0 0 1px rgb(157 187 255 / 0.08); }
+/* The floor is drawn small and shown at twice the size: a quarter of the memory, and nothing there needs to be sharp */
+.rack-floor {
+  width: 120vmin;
+  height: 120vmin;
+  transform: translate(-50%, -50%) rotateX(90deg) scale(2);
+  will-change: transform;
+}
+.rack-floor-grid {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(157 187 255 / 0.1) 0 1px, transparent 1px 45px),
+    repeating-linear-gradient(90deg, rgb(157 187 255 / 0.1) 0 1px, transparent 1px 45px),
+    radial-gradient(closest-side, rgb(37 99 235 / 0.32), transparent);
+  -webkit-mask-image: radial-gradient(closest-side, #000 25%, transparent);
+  mask-image: radial-gradient(closest-side, #000 25%, transparent);
+}
+.rack-signal {
+  position: absolute;
+  bottom: 0;
+  width: 2px;
+  height: 11%;
+  border-radius: 9999px;
+  background: linear-gradient(0deg, transparent, rgb(127 166 255 / 0.75));
+  box-shadow: 0 0 6px rgb(91 140 255 / 0.9);
+}
+/* The light a screen throws into the room, drawn small and shown large for the same reason */
+.rack-ambient {
+  width: 60vmax;
+  height: 60vmax;
+  margin: -30vmax 0 0 -30vmax;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(59 123 247 / 0.36), transparent);
+  transform: scale(2);
+  will-change: transform, opacity;
+}
+.rack-scan { background: linear-gradient(180deg, transparent, rgb(127 166 255 / 0.12) 72%, rgb(190 210 255 / 0.42) 97%, transparent); }
+.rack-runner {
+  position: absolute;
+  top: 0;
+  width: calc(var(--rail, 18px) * 0.36);
+  height: calc(var(--uh, 40px) * 1.3);
+  border-radius: 9999px;
+  background: linear-gradient(180deg, transparent, #dbe7ff, transparent);
+  box-shadow: 0 0 14px 2px rgb(91 140 255 / 0.9);
+}
+/* A unit's lights wake in turn, down the rack */
+.rack-leds { opacity: 0.12; transition: opacity 0.6s ease-out; transition-delay: calc(var(--i, 0) * 90ms); }
+[data-lit='true'] .rack-leds { opacity: 1; }
+.rack-led {
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--uh, 40px) * 0.1);
+  height: calc(var(--uh, 40px) * 0.1);
+  min-width: 3px;
+  min-height: 3px;
+  border-radius: 9999px;
+  background: #8fb2ff;
+  box-shadow: 0 0 calc(var(--uh, 40px) * 0.16) 1px #5b8cff;
+}
+[data-off='true'] .rack-led { background: #2a3560; box-shadow: none; }
+/* The edge of a unit whose drawer is out */
+.rack-edge { position: absolute; inset: 0 0 auto; height: 1px; background: linear-gradient(90deg, transparent, rgb(127 166 255 / 0.55) 12%, rgb(190 210 255 / 0.8) 50%, rgb(127 166 255 / 0.55) 88%, transparent); box-shadow: 0 0 5px rgb(91 140 255 / 0.45); }
+.rack-cast { background: linear-gradient(180deg, rgb(1 4 26 / 0.7), rgb(1 4 26 / 0.24) 45%, transparent); }
+/* The laptop's base: the machined deck, the steel rails and side walls, the hinge, the speakers, the keyboard's well and the trackpad */
+.rack-tray {
+  background: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.012) 0 1px, transparent 1px 3px), linear-gradient(180deg, #121c4a, #1c2858 12%, #243268 86%, #2c3b73);
+  box-shadow: inset 0 0 0 1px rgb(190 210 255 / 0.1);
+}
+.rack-slide {
+  background-color: #111a42;
+  background-image:
+    linear-gradient(90deg, rgb(3 7 32 / 0.9), transparent 22%, rgb(120 138 190 / 0.5) 46%, rgb(120 138 190 / 0.5) 54%, transparent 78%, rgb(3 7 32 / 0.9)),
+    repeating-linear-gradient(180deg, transparent 0 14%, rgb(3 7 32 / 0.8) 14% 15.5%);
+}
+.rack-wall {
+  background-image: linear-gradient(90deg, transparent 38%, rgb(120 138 190 / 0.35) 38% 62%, transparent 62%), linear-gradient(90deg, #243268, #0d1538);
+}
+.rack-hinge { background: linear-gradient(180deg, #030720, #1b2654 70%, #33447a); box-shadow: 0 1px 0 rgb(190 210 255 / 0.12); }
+.rack-barrel {
+  border-radius: 2px 2px 4px 4px;
+  background: linear-gradient(180deg, #0b1233, #6d7eb0 38%, #a7b6dd 50%, #3a4a80 72%, #0b1233);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.7);
+}
+.rack-slots { background-image: repeating-linear-gradient(90deg, #030720 0 calc(var(--uh, 40px) * 0.1), transparent calc(var(--uh, 40px) * 0.1) calc(var(--uh, 40px) * 0.2)); opacity: 0.7; }
+.rack-speaker {
+  background-image: radial-gradient(circle, #030720 0 38%, transparent 44%);
+  background-size: calc(var(--uh, 40px) * 0.13) calc(var(--uh, 40px) * 0.13);
+  opacity: 0.9;
+}
+.rack-power {
+  width: calc(var(--uh, 40px) * 0.26);
+  height: calc(var(--uh, 40px) * 0.26);
+  border-radius: 9999px;
+  background: radial-gradient(circle at 40% 35%, #33447a, #111a42);
+  box-shadow: 0 0 0 1px #030720, inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
+.rack-power-light { border-radius: 9999px; box-shadow: 0 0 0 1px #9dbbff, 0 0 6px 1px #5b8cff; }
+.rack-well {
+  border-radius: 5px;
+  background: #050a24;
+  box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.85), 0 1px 0 rgb(190 210 255 / 0.14);
+}
+.rack-keyglow { background: #2a4aa0; box-shadow: 0 0 8px rgb(91 140 255 / 0.3); }
+.rack-trackpad {
+  border-radius: 5px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.09));
+  box-shadow: inset 0 0 0 1px rgb(3 7 32 / 0.7), 0 1px 0 rgb(190 210 255 / 0.2);
+}
+.rack-pad-button {
+  border-radius: 2px;
+  background: linear-gradient(180deg, #2c3b73, #1a2558);
+  box-shadow: inset 0 0 0 1px rgb(3 7 32 / 0.7), 0 1px 0 rgb(190 210 255 / 0.18);
+}
+.rack-status {
+  width: calc(var(--uh, 40px) * 0.07);
+  height: calc(var(--uh, 40px) * 0.07);
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: #9dbbff;
+  box-shadow: 0 0 4px 1px #5b8cff;
+}
+.rack-scoop { border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgb(3 7 32 / 0.8), rgb(3 7 32 / 0.25)); }
+.rack-press { width: 6.667%; height: 17.794%; }
+.rack-press::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  border-radius: 2px;
+  background: #dbe7ff;
+  box-shadow: 0 0 8px 1px #5b8cff;
+}
+/* What only exists while a laptop is opening or shutting, each on its own layer so that the screen isn't redrawn for it; at rest it's gone */
+.rack-fx { will-change: transform, opacity; }
+[data-rest='true'] .rack-fx { display: none; }
+/* What stays once it has lit up, and goes back into the laptop's own layer when it's still */
+.rack-lit { will-change: transform, opacity; }
+[data-rest='true'] .rack-lit { will-change: auto; }
+/* Everything else that moves has a layer of its own too: a change then costs the display a moment, not a redraw */
+.rack-moves, .rack-door, .rack-sheen, .rack-dim, .rack-runner, .rack-signal, .rack-scan, .rack-cast, .rack-empty-glow { will-change: transform, opacity; }
+[data-led] { will-change: opacity; }
+[data-out='true'] .rack-edge { will-change: opacity; }
+[data-words][data-moving='true'], [data-words][data-moving='true'] article > * { will-change: transform, opacity; }
+.rack-dim { background: #01072b; }
+.rack-typing { background: #1e2748; border-left: 1px solid #9dbbff; }
+.rack-scanline {
+  height: 3px;
+  margin-top: -1px;
+  background: linear-gradient(90deg, transparent, #9dbbff 15%, #fff 50%, #9dbbff 85%, transparent);
+  box-shadow: 0 0 22px 5px rgb(91 140 255 / 0.85);
+}
+.rack-glare { background: linear-gradient(115deg, transparent 30%, rgb(190 210 255 / 0.13) 44%, rgb(190 210 255 / 0.05) 56%, transparent 66%); }
+.rack-lid-edge { background: linear-gradient(90deg, #6d7eb0, #33447a 30%, #141d47); }
+/* The bezel's camera, microphone and the rubber stops the lid shuts on, and the shell's brushed metal and seam */
+.rack-lens {
+  width: calc(var(--bezel, 10px) * 0.62);
+  height: calc(var(--bezel, 10px) * 0.62);
+  border-radius: 9999px;
+  background: radial-gradient(circle at 38% 32%, #9dbbff 0 8%, #1b2a66 12%, #03061a 46%, #000 62%, #1a2348 66%, #0b1233);
+  box-shadow: 0 0 0 1px rgb(190 210 255 / 0.2);
+}
+.rack-cam-light {
+  width: calc(var(--bezel, 10px) * 0.22);
+  height: calc(var(--bezel, 10px) * 0.22);
+  border-radius: 9999px;
+  background: #9dbbff;
+  box-shadow: 0 0 5px 1px #5b8cff;
+}
+.rack-mic { width: calc(var(--bezel, 10px) * 0.2); height: calc(var(--bezel, 10px) * 0.2); border-radius: 9999px; background: #000; box-shadow: 0 0 0 1px rgb(190 210 255 / 0.12); }
+.rack-stop { width: 3%; height: calc(var(--bezel, 10px) * 0.5); border-radius: 9999px; background: #03061a; box-shadow: inset 0 0 0 1px rgb(190 210 255 / 0.1); }
+.rack-lid-seam { border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(3 7 32 / 0.5), 0 0 0 1px rgb(190 210 255 / 0.07); }
+/* The laptop: its lid, the shell of the lid with the light moving across it, and the hinge */
+.rack-bezel {
+  padding: calc(var(--bezel, 10px) * 1.6) var(--bezel, 10px) calc(var(--bezel, 10px) * 1.8);
+  background: #070d2c;
+  box-shadow: inset 0 0 0 1px rgb(190 210 255 / 0.2);
+}
+.rack-lid-back {
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.014) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3a4b7c, #233267 18%, #1a2758 62%, #131e49);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+}
+.rack-shine { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.3), transparent); }
+/* The glint across the glass door */
+.rack-door {
+  background: linear-gradient(112deg, rgb(157 187 255 / 0.16), rgb(157 187 255 / 0.04) 40%, rgb(157 187 255 / 0.1));
+  box-shadow: inset 0 0 0 1px rgb(190 210 255 / 0.4);
+}
+.rack-door-glint { background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.22), transparent); }
+.rack-empty {
+  background: #01041a;
+  box-shadow: inset 0 0 calc(var(--uh, 40px) * 0.5) rgb(59 123 247 / 0.45);
+  outline: 1px dashed rgb(157 187 255 / 0.65);
+  outline-offset: -3px;
+}
+.rack-empty-glow { box-shadow: inset 0 0 calc(var(--uh, 40px) * 0.9) rgb(91 140 255 / 0.85); }
+
+/* The way in: the light behind the rack, drawn small and shown large, its reflection, and the screens going round it */
+.rack-halo {
+  width: 80vmin;
+  height: 80vmin;
+  margin: -40vmin 0 0 -40vmin;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(112 160 255 / 0.62), rgb(37 99 235 / 0.26) 46%, transparent);
+  will-change: transform, opacity;
+}
+.rack-rays {
+  width: 70vmin;
+  height: 70vmin;
+  margin: -35vmin 0 0 -35vmin;
+  will-change: transform, opacity;
+}
+.rack-rays-paint {
+  background: conic-gradient(from 0deg, transparent 0 8deg, rgb(127 166 255 / 0.24) 11deg, transparent 15deg 41deg, rgb(127 166 255 / 0.14) 46deg, transparent 52deg 76deg, rgb(127 166 255 / 0.3) 79deg, transparent 84deg 118deg, rgb(127 166 255 / 0.16) 124deg, transparent 131deg 163deg, rgb(127 166 255 / 0.24) 167deg, transparent 172deg 207deg, rgb(127 166 255 / 0.12) 214deg, transparent 222deg 251deg, rgb(127 166 255 / 0.28) 255deg, transparent 260deg 296deg, rgb(127 166 255 / 0.15) 303deg, transparent 310deg 334deg, rgb(127 166 255 / 0.24) 338deg, transparent 343deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 16%, transparent 96%);
+  mask-image: radial-gradient(closest-side, #000 16%, transparent 96%);
+}
+.rack-burst {
+  background: linear-gradient(180deg, rgb(219 231 255 / 0.65), rgb(127 166 255 / 0.5) 50%, rgb(219 231 255 / 0.65));
+  will-change: opacity;
+}
+.rack-seam { width: 2px; background: #dbe7ff; box-shadow: 0 0 18px 3px rgb(127 166 255 / 0.95); }
+.rack-orbit {
+  border-radius: 9999px;
+  box-shadow: 0 0 0 1px rgb(157 187 255 / 0.28), 0 0 26px rgb(91 140 255 / 0.28), inset 0 0 26px rgb(91 140 255 / 0.14);
+  will-change: transform, opacity;
+}
+.rack-mirror {
+  height: calc(var(--uh, 40px) * 5);
+  background-image:
+    linear-gradient(90deg, transparent 88%, rgb(143 178 255 / 0.5) 89% 93%, transparent 94%),
+    repeating-linear-gradient(180deg, rgb(58 75 124 / 0.55) 0 calc(var(--uh, 40px) - 2px), rgb(1 7 43 / 0.95) calc(var(--uh, 40px) - 2px) var(--uh, 40px));
+  -webkit-mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.55), transparent);
+  mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.55), transparent);
+}
+.rack-card { will-change: transform, opacity; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.rack-card-face {
+  border-radius: calc(var(--cw, 500px) * 0.022);
+  background: #070d2c;
+  box-shadow: 0 0 0 1px rgb(190 210 255 / 0.3), 0 calc(var(--cw, 500px) * 0.05) calc(var(--cw, 500px) * 0.12) rgb(0 0 0 / 0.55), 0 0 calc(var(--cw, 500px) * 0.12) rgb(59 123 247 / 0.4);
+}
+.rack-card-bar {
+  height: calc(var(--cw, 500px) * 0.062);
+  gap: calc(var(--cw, 500px) * 0.016);
+  padding: 0 calc(var(--cw, 500px) * 0.024);
+  font-size: calc(var(--cw, 500px) * 0.027);
+  background: #0a1438;
+}
+.rack-card-dot { width: calc(var(--cw, 500px) * 0.016); height: calc(var(--cw, 500px) * 0.016); border-radius: 9999px; background: #8fb2ff; box-shadow: 0 0 6px 1px #5b8cff; }
+.rack-card-shade { background: #01072b; opacity: 0; will-change: opacity; }
+.rack-card-metal { opacity: 0; will-change: opacity; }
+.rack-card img { opacity: 0; transition: opacity 0.6s ease-out; }
+.rack-card img[data-ready] { opacity: 1; }
+[data-hero='true'] .rack-edge { will-change: opacity; }
+
 /* The inside of a part on a service page: midnight, with the faint grid of a mask layout */
 .inside-grid {
   background-color: #01072b;
@@ -804,6 +1107,16 @@ html {
 }
 @media (min-width: 40rem) {
   .heading-sub { font-size: 1.5rem; line-height: 1.3333; }
+}
+/* A project's name: the same as on the home page's work cards */
+.heading-project {
+  font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  overflow-wrap: anywhere;
 }
 /* A sentence that leads a moment: the same font, in sentence case */
 .heading-lead {

@@ -23,6 +23,7 @@ import {
 import { buildFixed, buildLids, buildNetwork, buildWebArcs, drawBoardArt, drawLidPrint, drawShadows, drawWord, LID_TOP } from './chipModel';
 import { BOARD, KIND, RECTS, WEB_TILES, type Point } from './floorplan';
 import { FOV, type Camera } from './score';
+import { releaseContext } from '../releaseContext';
 
 export type ChipFrame = {
   time: number;
@@ -838,7 +839,7 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
     destroy: () => {
       destroyed = true;
       canvas.removeEventListener('webglcontextlost', lost);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      releaseContext(gl, canvas);
     },
   };
 }

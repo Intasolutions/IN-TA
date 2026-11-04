@@ -10,6 +10,7 @@ import { useGSAP } from '@gsap/react';
 import Icon from '../../Icon';
 import { scrollToY } from '../../SmoothScroll';
 import { useReveal } from '../../../context/RevealContext';
+import { usePlayIntro } from '../../../context/usePlayIntro';
 import { createChip, type ChipEngine } from '../chipEngine';
 import { AI_SLUG, ALL_BLOCKS, BLOCKS, centreOf, KIND, type Block } from '../floorplan';
 import { cameraAt, fieldOfView, FOV, partKeys, ramp, smooth, smoother } from '../score';
@@ -84,11 +85,11 @@ export default function PartStage({ service, block, others, formId, insideId, fa
   const [still, setStill] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const { isIntroReady } = useReveal();
+  usePlayIntro(introRef);
   const readyRef = useRef(false);
 
   useEffect(() => {
     readyRef.current = isIntroReady;
-    if (isIntroReady) introRef.current?.restart();
   }, [isIntroReady]);
 
   const goTo = (id: string) => {

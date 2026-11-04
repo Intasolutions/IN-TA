@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { releaseContext } from './releaseContext';
 
 const VERT = `
 attribute vec2 a_pos;
@@ -236,7 +237,7 @@ export default function HeroCanvas({ className = '' }: { className?: string }) {
       io.disconnect();
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onDown);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      releaseContext(gl, canvas);
     };
   }, []);
 

@@ -13,7 +13,7 @@ import { scrollToY } from '../SmoothScroll';
 import { IstClock } from '../Header';
 import { useOfficeStatus } from '../OfficeStatus';
 import TechOrbit from '../stack/TechOrbit';
-import { useReveal } from '../../context/RevealContext';
+import { usePlayIntro } from '../../context/usePlayIntro';
 import { ClientBoard, ClientRoute, useClients } from './ClientLogos';
 import EarthReturn from './EarthReturn';
 import type { MapClient } from './clients';
@@ -159,7 +159,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
   const activeRef = useRef(-1);
   const [active, setActive] = useState(-1);
   const introRef = useRef<gsap.core.Timeline | null>(null);
-  const { isIntroReady } = useReveal();
+  usePlayIntro(introRef);
   const stopChangedRef = useRef<(i: number) => void>(() => {});
   const [credits, setCredits] = useState(false);
   const scrollToStop = useRef<(p: number) => void>(() => {});
@@ -184,9 +184,6 @@ export default function SystemMap({ services, clients: initialClients }: { servi
     },
     { scope: ref },
   );
-  useEffect(() => {
-    if (isIntroReady) introRef.current?.restart();
-  }, [isIntroReady]);
   // (the real logos can arrive after the first paint: the traces to them are measured again)
   useEffect(() => {
     boardStale.current = true;
@@ -213,6 +210,12 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         if (globe?.isReady() && imagery.v === 0) gsap.to(imagery, { v: 1, duration: window.matchMedia(CALM).matches ? 0 : 1.2, ease: 'power2.out', onUpdate: () => redrawStill() });
         redrawStill();
       });
+      // If the graphics context is ever really lost, the drawn globe takes over on the page's own dark background
+      const onGlLost = () => {
+        glCanvas.style.display = 'none';
+      };
+      glCanvas.addEventListener('webglcontextlost', onGlLost);
+      if (!globe) glCanvas.style.display = 'none';
       const font = `10px ${getComputedStyle(hud).fontFamily}`;
 
       let land: number[][] = [];
@@ -678,6 +681,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
       return () => {
         aborter.abort();
         mm.revert();
+        glCanvas.removeEventListener('webglcontextlost', onGlLost);
         globe?.destroy();
       };
     },

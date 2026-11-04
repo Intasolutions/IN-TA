@@ -4,6 +4,7 @@
 // Imagery: NASA Blue Marble / Black Marble (public domain) and Sentinel-2 cloudless 2016 by EOX (CC BY 4.0).
 
 import { smooth, TARGET } from './mapCanvas';
+import { releaseContext } from '../releaseContext';
 
 export type GlobeFrame = {
   cx: number;
@@ -447,7 +448,7 @@ export function createGlobe(canvas: HTMLCanvasElement, small: boolean, onChange:
     destroy() {
       destroyed = true;
       aborter.abort();
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      releaseContext(gl, canvas);
     },
   };
 }

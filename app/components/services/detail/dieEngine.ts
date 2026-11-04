@@ -1,6 +1,8 @@
 // The inside of a part: a silicon die drawn live. Everything is worked out per pixel from the zoom, so finer detail
 // keeps appearing as the camera comes in, and nothing ever goes soft.
 
+import { releaseContext } from '../../releaseContext';
+
 const MAX_BLOCKS = 8;
 
 export type DieRect = [number, number, number, number];
@@ -399,8 +401,7 @@ export function createDie(canvas: HTMLCanvasElement, initial: DieLayout, onFail:
       gl.deleteShader(vs);
       gl.deleteShader(fs);
       gl.deleteVertexArray(vao);
-      // browsers allow few contexts at a time, so this one is handed back straight away
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      releaseContext(gl, canvas);
     },
   };
 }

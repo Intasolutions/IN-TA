@@ -34,7 +34,7 @@ export function scrollToTop() {
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.09,
+      lerp: 0.075,
     })
     instance = lenis;
 

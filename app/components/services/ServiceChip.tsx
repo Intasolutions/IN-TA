@@ -10,7 +10,7 @@ import Icon from '../Icon';
 import ProjectForm from '../blog/ProjectForm';
 import { apiBase } from '../blog/data';
 import { jumpToY } from '../SmoothScroll';
-import { useReveal } from '../../context/RevealContext';
+import { usePlayIntro } from '../../context/usePlayIntro';
 import { createChip, type ChipEngine } from './chipEngine';
 import { AI_BLOCK, AI_SLUG, BLOCKS, centreOf, CLOSE, HERO, KIND, linkBetween, NOW, PLAN, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
@@ -369,7 +369,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
   const [attempt, setAttempt] = useState(0); // goes up if the graphics context is lost: the board restarts on a new canvas
   const [order, setOrder] = useState<ActiveOrder | null>(null);
   const orderRef = useRef<Block | null>(null);
-  const { isIntroReady } = useReveal();
+  usePlayIntro(introRef);
 
   const bySlug = useMemo(() => new Map(services.map((s) => [s.slug, s])), [services]);
   const ai: ChipService = bySlug.get(AI_SLUG) ?? { slug: AI_SLUG, title: NOW.fallbackTitle, description: '', features: [] };
@@ -430,9 +430,6 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
   };
 
   // ---- The opening words rise in once the page loader has cleared ----
-  useEffect(() => {
-    if (isIntroReady) introRef.current?.restart();
-  }, [isIntroReady]);
 
   useGSAP(
     () => {
