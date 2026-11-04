@@ -60,6 +60,11 @@ class Service(models.Model):
     slug = models.SlugField(max_length=220, unique=True)
     short_description = models.CharField(max_length=255)
     long_description = models.TextField(blank=True)
+    ideal_for = models.TextField(blank=True, help_text="Who this service suits, shown as 'Right for you if'. One per line, up to four short lines. Optional.")
+    page_text = models.JSONField(default=dict, blank=True, help_text="The wording of this service's page that differs from the standard. Edited in the 'Page wording' boxes.")
+    secondary_title = models.CharField(max_length=120, blank=True, help_text="Heading for the second description. Its last word takes the blue accent. Optional.")
+    secondary_description = models.TextField(blank=True, help_text="A second, more detailed description. Leave a blank line between paragraphs. Its section only appears when this is filled in.")
+    secondary_image = models.ImageField(upload_to="services/images/", blank=True, null=True, help_text="A picture beside the second description. Optional. At least 1600px wide")
     features = models.ManyToManyField(Feature, blank=True, related_name="services")
     technologies = models.ManyToManyField(Technology, blank=True, related_name="services")
     benefits = models.ManyToManyField(Benefit, blank=True, related_name="services")
@@ -131,6 +136,24 @@ class ServiceImage(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         return self.caption or f"Image {self.pk}"
+
+
+class ServiceCapability(models.Model):
+    """One thing we do within a service, shown as its own block in 'What we do' on the service's page."""
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="capabilities")
+    title = models.CharField(max_length=80, help_text="Short: two to four words. The last word takes the blue accent.")
+    description = models.TextField(help_text="What this is and what it does for the customer, in two or three sentences.")
+    points = models.TextField(blank=True, help_text="Optional key points. One per line, up to five short lines.")
+    image = models.ImageField(upload_to="services/capabilities/", blank=True, null=True, help_text="Optional. At least 1200px wide")
+    order = models.IntegerField(default=0, help_text="Low numbers come first")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Capability"
+        verbose_name_plural = "What we do (capabilities)"
+
+    def __str__(self) -> str:  # pragma: no cover - trivial
+        return self.title
 
 
 class ServiceFAQ(models.Model):

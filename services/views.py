@@ -7,7 +7,7 @@ class ServiceViewSet(viewsets.ReadOnlyModelViewSet):
     """Read-only ViewSet for public Services listing and detail (lookup by slug)."""
     queryset = (
         Service.objects.filter(is_active=True)
-        .prefetch_related("features", "technologies", "benefits", "gallery", "faqs", "projects__tags")
+        .prefetch_related("features", "technologies", "benefits", "capabilities", "gallery", "faqs", "projects__tags")
         .order_by("order", "title")
     )
     serializer_class = ServiceSerializer

@@ -20,7 +20,7 @@ const FIELD =
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 /** "Work with us" enquiry band → POST /api/blog/subscribe/ ({ name, phone, interest }). Reveal targets: [data-pf="box" | "in"]. */
-export default function ProjectForm({ defaultInterest }: { defaultInterest?: string }) {
+export default function ProjectForm({ defaultInterest, kicker = 'Work with us', title = 'Have a project in mind?', text = "Share your details and we'll reach out to talk through how we can build it." }: { defaultInterest?: string; kicker?: string; title?: string; text?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -94,13 +94,13 @@ export default function ProjectForm({ defaultInterest }: { defaultInterest?: str
         <div className="lg:col-span-4">
           <span data-pf="in" className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold mb-2.5 text-[#9dbbff]">
             <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-            Work with us
+            {kicker}
           </span>
           <h3 data-pf="in" className="font-display font-extrabold uppercase tracking-tight leading-[1.02] text-white text-[length:clamp(1.5rem,2.6vw,2.1rem)]">
-            Have a project in mind?
+            {title}
           </h3>
           <p data-pf="in" className="mt-2.5 text-sm leading-relaxed max-w-sm text-white/70">
-            Share your details and we&apos;ll reach out to talk through how we can build it.
+            {text}
           </p>
         </div>
 

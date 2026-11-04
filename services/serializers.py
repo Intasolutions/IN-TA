@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from portfolio.models import Project
-from .models import Service, ServiceFAQ, ServiceImage, Feature, Technology, Benefit
+from .models import Service, ServiceCapability, ServiceFAQ, ServiceImage, Feature, Technology, Benefit
 
 
 def absolute_url(serializer, image):
@@ -44,6 +44,26 @@ class ServiceImageSerializer(serializers.ModelSerializer):
         return absolute_url(self, obj.image)
 
 
+def lines_of(text):
+    """A text with one item per line, as a list."""
+    return [line.strip() for line in text.splitlines() if line.strip()]
+
+
+class ServiceCapabilitySerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    points = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceCapability
+        fields = ("id", "title", "description", "points", "image")
+
+    def get_image(self, obj):
+        return absolute_url(self, obj.image)
+
+    def get_points(self, obj):
+        return lines_of(obj.points)
+
+
 class ServiceFAQSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceFAQ
@@ -66,10 +86,13 @@ class ServiceSerializer(serializers.ModelSerializer):
     features = FeatureSerializer(many=True, read_only=True)
     technologies = TechnologySerializer(many=True, read_only=True)
     benefits = BenefitSerializer(many=True, read_only=True)
+    capabilities = ServiceCapabilitySerializer(many=True, read_only=True)
+    ideal_for = serializers.SerializerMethodField()
     gallery = ServiceImageSerializer(many=True, read_only=True)
     faqs = ServiceFAQSerializer(many=True, read_only=True)
     projects = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    secondary_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Service
@@ -79,6 +102,12 @@ class ServiceSerializer(serializers.ModelSerializer):
             "slug",
             "short_description",
             "long_description",
+            "ideal_for",
+            "page_text",
+            "capabilities",
+            "secondary_title",
+            "secondary_description",
+            "secondary_image",
             "features",
             "technologies",
             "benefits",
@@ -99,6 +128,12 @@ class ServiceSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("created_at", "updated_at")
+
+    def get_ideal_for(self, obj):
+        return lines_of(obj.ideal_for)
+
+    def get_secondary_image(self, obj):
+        return absolute_url(self, obj.secondary_image)
 
     def get_projects(self, obj):
         live = [p for p in obj.projects.all() if p.is_active]

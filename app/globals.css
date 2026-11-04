@@ -756,27 +756,19 @@ html {
 .animate-marquee { animation: marquee 22s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 
-/* The live line that a service page's sockets hang off */
-.bus-flow {
-  background-color: rgb(1 68 181 / 0.2);
-  background-image: linear-gradient(90deg, transparent 0 62%, #3b7bf7 92%, transparent 100%);
-  background-size: 34rem 100%;
-  animation: busFlow 5s linear infinite;
+/* The inside of a part on a service page: midnight, with the faint grid of a mask layout */
+.inside-grid {
+  background-color: #01072b;
+  background-image: linear-gradient(rgb(157 187 255 / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(157 187 255 / 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
 }
-@keyframes busFlow { to { background-position: 34rem 0; } }
-@media (prefers-reduced-motion: reduce) { .bus-flow { animation: none; } }
-
-/* A signal running along a lit pin on a service page */
-.pin-pulse {
-  animation: pinPulse 2.6s linear infinite;
-  animation-delay: calc(var(--r) * -0.37s);
+/* The copper joining a part to the ones around it */
+.trace-flow {
+  stroke-dasharray: 0.09 0.05;
+  animation: traceFlow 1.4s linear infinite;
 }
-.pin-pulse-back { animation-direction: reverse; }
-@keyframes pinPulse {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(300%); }
-}
-@media (prefers-reduced-motion: reduce) { .pin-pulse { animation: none; opacity: 0; } }
+@keyframes traceFlow { to { stroke-dashoffset: -0.14; } }
+@media (prefers-reduced-motion: reduce) { .trace-flow { animation: none; stroke-dasharray: none; } }
 
 @keyframes gradientShimmer {
   0%, 100% { background-position: 0% 50%; }

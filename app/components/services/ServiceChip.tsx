@@ -14,7 +14,7 @@ import { useReveal } from '../../context/RevealContext';
 import { createChip, type ChipEngine } from './chipEngine';
 import { AI_BLOCK, AI_SLUG, BLOCKS, centreOf, CLOSE, HERO, KIND, linkBetween, NOW, PLAN, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
-import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, ramp, smooth, smoother, type Camera, type Key } from './score';
+import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, ramp, smooth, smoother, type Camera, type Key, fieldOfView } from './score';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -351,12 +351,6 @@ function Credits({ id, className, popover }: { id: string; className: string; po
       </button>
     </div>
   );
-}
-
-function fieldOfView(worldWidth: number) {
-  // (the board is drawn as if it were 130 mm across)
-  const mm = worldWidth * 50;
-  return mm >= 10 ? `${Math.round(mm)} mm` : `${mm.toFixed(1)} mm`;
 }
 
 /** A still of the part, for visitors who ask for less motion or whose device can't draw the board */

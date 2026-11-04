@@ -16,8 +16,8 @@ const mix = (a: number, b: number, k: number) => a + (b - a) * k;
 const rad = (d: number) => (d * Math.PI) / 180;
 
 /** Which part of the screen the picture has to itself, because the words have the rest */
-type Frame = 'hero' | 'plan' | 'card' | 'free' | 'ask' | 'close' | 'detail' | 'fill';
-type Room = { sx: number; sy: number; fw: number; fh: number };
+type Frame = 'hero' | 'plan' | 'card' | 'free' | 'ask' | 'close' | 'opening' | 'fill' | 'centre';
+export type Room = { sx: number; sy: number; fw: number; fh: number };
 
 function roomFor(frame: Frame, aspect: number): Room {
   const wide = aspect > 1.15;
@@ -32,10 +32,12 @@ function roomFor(frame: Frame, aspect: number): Room {
       return wide ? { sx: 0, sy: 0.22, fw: 0.9, fh: 0.62 } : { sx: 0, sy: 0.3, fw: 0.98, fh: 0.5 };
     case 'close':
       return { sx: 0, sy: 0.07, fw: 0.94, fh: wide ? 0.36 : 0.32 };
-    case 'detail':
-      return wide ? { sx: 0.46, sy: -0.1, fw: 0.5, fh: 0.76 } : { sx: 0, sy: 0.41, fw: 0.98, fh: 0.3 };
+    case 'opening':
+      return wide ? { sx: 0.5, sy: -0.06, fw: 0.5, fh: 0.86 } : { sx: 0, sy: -0.62, fw: 1, fh: 0.34 };
     case 'fill':
-      return wide ? { sx: 0, sy: -0.04, fw: 0.7, fh: 0.84 } : { sx: 0, sy: 0.04, fw: 0.96, fh: 0.56 };
+      return wide ? { sx: 0, sy: -0.02, fw: 0.72, fh: 0.86 } : { sx: 0, sy: 0.02, fw: 0.96, fh: 0.6 };
+    case 'centre':
+      return { sx: 0, sy: 0, fw: 1, fh: 1 };
     default:
       return { sx: 0, sy: 0.14, fw: 0.94, fh: 0.66 };
   }
@@ -49,6 +51,8 @@ export type Key = {
   el: number;
   roll: number;
   frame: Frame;
+  /** the room measured on the page, for when it depends on how much the words have taken */
+  room?: Room;
   /** the move into this key is a flight rather than a slow drift */
   travel?: boolean;
   hop?: number;
@@ -167,17 +171,26 @@ export function orderKeys(score: Score, block: Block): Key[] {
   ];
 }
 
-/** One part's own page. Below zero is its arrival, played on a clock as the page opens. From zero it follows the scroll: in closer, until the part has the screen to itself */
-export function partKeys(block: Block, total: number): Key[] {
+/** One part's own page. Below zero is the arrival, played on a clock as the page opens. From zero it follows the scroll: over to the part, and down into it */
+export function partKeys(block: Block, total: number, opening?: Room): Key[] {
   const [x, z] = centreOf(block);
   const { az, el, w, roll = 0 } = block.shot;
-  const base = { t: [x, 0.015, z] as [number, number, number], roll };
+  const board: [number, number, number] = [0.02, -0.04, 0.02];
+  const part: [number, number, number] = [x, 0.015, z];
   return [
-    { ...base, s: -1, w: w * 2.1, az: az - 16, el: el - 9, frame: 'detail' },
-    { ...base, s: 0, w: w * 1.32, az: az - 6, el: el - 2, frame: 'detail', travel: true },
-    { ...base, s: total * 0.5, w: w * 1.14, az: az - 2, el, frame: 'detail' },
-    { ...base, s: total, w: w * 0.98, az: az + 3, el: el + 2, frame: 'fill', travel: true },
+    { s: -1, t: board, w: 3.7, az: -42, el: 30, roll: 0, frame: 'opening', room: opening },
+    { s: 0, t: board, w: 3.15, az: -30, el: 38, roll: 0, frame: 'opening', room: opening, travel: true },
+    { s: 0.22, t: board, w: 3.08, az: -28, el: 39, roll: 0, frame: 'opening', room: opening },
+    { s: 1.05, t: part, w: w * 1.1, az, el, roll, frame: 'fill', travel: true },
+    { s: 1.3, t: part, w: w * 1.0, az: az + 4, el: el + 2, roll, frame: 'fill' },
+    { s: total, t: part, w: w * 0.13, az: az + 30, el: Math.max(el, 62), roll: 0, frame: 'centre', travel: true },
   ];
+}
+
+/** How much of the board is in view, in millimetres (it is drawn as if it were 130 mm across) */
+export function fieldOfView(worldWidth: number) {
+  const mm = worldWidth * 50;
+  return mm >= 10 ? `${Math.round(mm)} mm` : `${mm.toFixed(1)} mm`;
 }
 
 export type Camera = {
@@ -214,8 +227,8 @@ export function cameraAt(keys: Key[], s: number, aspect: number, lean: [number, 
   const raw = clamp01((s - a.s) / (b.s - a.s));
   const k = b.travel ? smoother(raw) : raw;
 
-  const ra = roomFor(a.frame, aspect);
-  const rb = roomFor(b.frame, aspect);
+  const ra = a.room ?? roomFor(a.frame, aspect);
+  const rb = b.room ?? roomFor(b.frame, aspect);
   const sx = mix(ra.sx, rb.sx, k);
   const sy = mix(ra.sy, rb.sy, k);
   const fw = mix(ra.fw, rb.fw, k);
