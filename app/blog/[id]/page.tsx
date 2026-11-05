@@ -1,150 +1,100 @@
-import { Metadata, ResolvingMetadata } from 'next';
-import BlogDetailClient from './BlogDetailClient';
+import { cache } from 'react';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import ArticlePage, { type Article } from '../../components/blog/ArticlePage';
+import { articleHtml } from '../../components/blog/body.server';
+import { apiBase, plainText, relatedTo, serviceSlugOf, toPost, type ApiPost, type Post } from '../../components/blog/posts';
+
+const SITE = 'https://www.in-tasolutions.com';
+const RELATED = 3;
 
 type Props = {
-    params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 };
 
-type Blog = {
-    id: string;
-    title: string;
-    date: string;
-    tag?: string;
-    image?: string;
-    content?: string;
-    meta_title?: string;
-    meta_description?: string;
-    focus_keyword?: string;
-    image_alt?: string;
-};
+/**
+ * A post, or null if there's no such post. If the API can't answer (it can be asleep) this throws rather than saying
+ * the post doesn't exist: the error page keeps trying, and that failure is never kept as the page.
+ */
+const getPost = cache(async (id: string): Promise<ApiPost | null> => {
+  if (!/^\d+$/.test(id)) return null;
+  const res = await fetch(`${apiBase()}/api/blog/posts/${id}/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(12000) });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`The blog API answered ${res.status}`);
+  return res.json();
+});
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-
-function fixImageUrl(img: string | null | undefined): string {
-    if (!img) return `${apiBase}/images/blog-placeholder.jpg`;
-    if (img.startsWith('/')) return `${apiBase}${img}`;
-    if (img.includes('localhost') || img.includes('127.0.0.1')) {
-        try {
-            const url = new URL(img);
-            return `${apiBase}${url.pathname}${url.search}`;
-        } catch { }
-    }
-    return img;
+async function getPosts(): Promise<Post[]> {
+  try {
+    const res = await fetch(`${apiBase()}/api/blog/posts/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(12000) });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return ((Array.isArray(data) ? data : data.results ?? []) as ApiPost[]).map(toPost);
+  } catch {
+    return []; // the article still works, without its suggestions
+  }
 }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
-    const { id } = await params;
+async function getService(slug: string | null) {
+  if (!slug) return null;
+  try {
+    const res = await fetch(`${apiBase()}/api/services/${slug}/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const service = await res.json();
+    return { slug, title: String(service.title).trim() };
+  } catch {
+    return null;
+  }
+}
 
-    try {
-        const res = await fetch(`${apiBase}/api/blog/posts/${id}/`);
-        if (!res.ok) {
-            return {
-                title: 'Blog Post Not Found | In-Ta',
-            };
-        }
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  let api: ApiPost | null = null;
+  try {
+    api = await getPost(id);
+  } catch {
+    return { title: 'Blog | INTA Solutions' };
+  }
+  if (!api) return { title: 'Article not found | INTA Solutions' };
 
-        const post: Blog = await res.json();
-        const imageUrl = fixImageUrl(post.image);
-        
-        // Custom fields from API
-        const customTitle = post.meta_title;
-        const customDescription = post.meta_description;
-        
-        // Fallbacks
-        const plainTextContent = (post.content || '').replace(/<[^>]+>/g, '');
-        const fallbackDescription = plainTextContent.slice(0, 160) + (plainTextContent.length > 160 ? '...' : '');
-
-        const finalTitle = customTitle ? `${customTitle} | In-Ta` : `${post.title} | In-Ta`;
-        const finalDescription = customDescription || fallbackDescription || 'Read the latest insights and stories from In-Ta.';
-
-        return {
-            title: finalTitle,
-            description: finalDescription,
-            alternates: {
-                canonical: `/blog/${id}`,
-            },
-            openGraph: {
-                title: finalTitle,
-                description: finalDescription,
-                images: [
-                    {
-                        url: imageUrl,
-                        width: 1200,
-                        height: 630,
-                        alt: post.image_alt || `Cover image for ${post.title}`,
-                    },
-                ],
-                type: 'article',
-                publishedTime: post.date ? new Date(post.date).toISOString() : undefined,
-                tags: post.tag ? [post.tag] : undefined,
-            },
-            twitter: {
-                card: 'summary_large_image',
-                title: finalTitle,
-                description: finalDescription,
-                images: [imageUrl],
-            },
-        };
-    } catch (error) {
-        return {
-            title: 'Blog Post | In-Ta',
-        };
-    }
+  const post = toPost(api);
+  const title = `${api.meta_title?.trim() || post.title} | INTA Solutions`;
+  const description = api.meta_description?.trim() || plainText(api.content ?? '').slice(0, 160);
+  const images = post.image ? [{ url: post.image, alt: post.alt || post.title }] : undefined;
+  return {
+    title,
+    description,
+    alternates: { canonical: post.href },
+    openGraph: { title, description, images, type: 'article', publishedTime: post.iso, tags: post.tags, url: `${SITE}${post.href}` },
+    twitter: { card: images ? 'summary_large_image' : 'summary', title, description, images: images?.map((i) => i.url) },
+  };
 }
 
 export default async function Page({ params }: Props) {
-    const { id } = await params;
-    let post: Blog | null = null;
-    let jsonLd = null;
+  const { id } = await params;
+  const api = await getPost(id);
+  if (!api) notFound();
 
-    try {
-        const res = await fetch(`${apiBase}/api/blog/posts/${id}/`);
-        if (res.ok) {
-            post = await res.json();
-            
-            if (post) {
-                const imageUrl = fixImageUrl(post.image);
-                const description = (post.content || '').replace(/<[^>]+>/g, '').slice(0, 160);
-                
-                jsonLd = {
-                    '@context': 'https://schema.org',
-                    '@type': 'BlogPosting',
-                    headline: post.title,
-                    image: [imageUrl],
-                    datePublished: post.date ? new Date(post.date).toISOString() : undefined,
-                    author: {
-                        '@type': 'Organization',
-                        name: 'In-Ta',
-                        url: apiBase 
-                    },
-                    publisher: {
-                        '@type': 'Organization',
-                        name: 'In-Ta',
-                        logo: {
-                            '@type': 'ImageObject',
-                            url: `${apiBase}/logo.png` 
-                        }
-                    },
-                    description: description || 'In-Ta Blog Post'
-                };
-            }
-        }
-    } catch (e) {
-        console.error("Error fetching blog for JSON-LD", e);
-    }
+  const post = toPost(api);
+  const [posts, service] = await Promise.all([getPosts(), getService(serviceSlugOf(api.link))]);
+  const article: Article = { ...post, html: articleHtml(api.content ?? ''), url: `${SITE}${post.href}`, service };
 
-    return (
-        <>
-            {jsonLd && (
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-                />
-            )}
-            <BlogDetailClient />
-        </>
-    );
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    url: article.url,
+    datePublished: post.iso,
+    description: post.excerpt,
+    ...(post.image ? { image: [post.image] } : {}),
+    author: { '@type': 'Organization', name: 'INTA Solutions', url: SITE },
+    publisher: { '@type': 'Organization', name: 'INTA Solutions', logo: { '@type': 'ImageObject', url: `${SITE}/logo/logo-inta.png` } },
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
+      <ArticlePage article={article} related={relatedTo(post, posts, RELATED)} />
+    </>
+  );
 }

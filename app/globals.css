@@ -756,6 +756,130 @@ html {
 .animate-marquee { animation: marquee 22s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 
+/* An article's words on the blog: whatever the admin's editor produced, set to be read */
+.blog-prose {
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.8;
+  color: rgb(1 7 43 / 0.88);
+  overflow-wrap: break-word;
+}
+.blog-prose p { font-weight: 400; }
+/* Justified, with hyphenation so that a narrow column doesn't open wide gaps between words */
+.blog-prose :is(p, li, blockquote) {
+  text-align: justify;
+  text-justify: inter-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+.blog-prose > * + * { margin-top: 1.2em; }
+.blog-prose > p:first-child { font-size: 1.15em; line-height: 1.65; color: var(--color-midnight); }
+/* More words to a line on a phone, so that justified text doesn't open wide gaps */
+@media (max-width: 640px) {
+  .blog-prose { font-size: 1rem; line-height: 1.75; }
+  .blog-prose > p:first-child { font-size: 1.04em; line-height: 1.7; }
+}
+.blog-prose h2,
+.blog-prose h3,
+.blog-prose h4 {
+  font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-midnight);
+}
+.blog-prose h2 { font-size: 1.5em; }
+/* The short rule above a heading: drawn out by the scroll */
+.blog-prose > h2::before {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 3px;
+  margin-bottom: 0.55em;
+  border-radius: 9999px;
+  background: var(--color-brand-blue);
+  transform-origin: left;
+  transform: scaleX(var(--rule, 1));
+}
+.blog-prose h3 { font-size: 1.25em; }
+.blog-prose h4 { font-size: 1.1em; }
+.blog-prose > :is(h2, h3, h4) { margin-top: 1.9em; }
+.blog-prose > :is(h2, h3, h4) + * { margin-top: 0.6em; }
+.blog-prose strong, .blog-prose b { font-weight: 700; color: var(--color-midnight); }
+.blog-prose a { color: var(--color-brand-blue); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.blog-prose a:hover { color: var(--color-midnight); }
+.blog-prose ul, .blog-prose ol { padding-left: 1.3em; }
+.blog-prose ul { list-style: disc; }
+.blog-prose ol { list-style: decimal; }
+.blog-prose li + li { margin-top: 0.5em; }
+.blog-prose li::marker { color: var(--color-brand-blue); }
+.blog-prose blockquote { border-left: 3px solid var(--color-brand-blue); padding-left: 1.1em; font-size: 1.1em; color: var(--color-midnight); }
+.blog-prose img { max-width: 100%; height: auto; border-radius: 0.75rem; }
+.blog-prose figcaption { margin-top: 0.5em; font-size: 0.85em; color: rgb(1 7 43 / 0.65); }
+.blog-prose hr { border: 0; border-top: 1px solid rgb(1 68 181 / 0.15); }
+.blog-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 0.92em; }
+.blog-prose th, .blog-prose td { border: 1px solid rgb(1 68 181 / 0.15); padding: 0.5em 0.75em; text-align: left; }
+.blog-prose th { font-weight: 700; color: var(--color-midnight); }
+.blog-prose code { font-family: var(--font-mono, ui-monospace), monospace; font-size: 0.9em; }
+.blog-prose pre { overflow-x: auto; border-radius: 0.75rem; background: var(--color-midnight); padding: 1em 1.2em; color: #fff; font-size: 0.85em; line-height: 1.6; }
+
+/* The blog's hover touches. Only where a real hover exists, so a tap on a phone doesn't leave them stuck on */
+.blog-underline {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+a:focus-visible .blog-underline { background-size: 100% 2px; }
+.blog-sheen {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.28), transparent);
+  transform: translateX(-130%) skewX(-16deg);
+}
+.blog-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 24rem;
+  height: 24rem;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(59 123 247 / 0.14), transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+.blog-wipe {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: color 0.3s, border-color 0.3s, scale 0.2s;
+}
+.blog-wipe::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-brand-blue);
+  transform: translateY(101%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.blog-wipe:active { scale: 0.95; }
+@media (hover: hover) {
+  .group:hover .blog-underline { background-size: 100% 2px; }
+  .group:hover .blog-sheen { transform: translateX(320%) skewX(-16deg); transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1); }
+  .group:hover .blog-spot { opacity: 1; }
+  .blog-wipe:hover { color: #fff; border-color: var(--color-brand-blue); }
+  .blog-wipe:hover::before { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blog-sheen, .blog-spot { display: none; }
+  .blog-underline, .blog-wipe, .blog-wipe::before { transition: none; }
+}
+
 /* The rack on the portfolio page. Everything is drawn in CSS, sized from the height of one unit (--uh) */
 .rack-room {
   background-color: #01072b;
