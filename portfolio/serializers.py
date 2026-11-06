@@ -1,3 +1,5 @@
+import os
+
 from rest_framework import serializers
 from .models import Project, Tag, GalleryItem
 
@@ -31,9 +33,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         )
 
 
-import os
-
-
 class GalleryItemSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
@@ -51,10 +50,8 @@ class GalleryItemSerializer(serializers.ModelSerializer):
         except Exception:
             pass
 
-        # Fallback to a local frontend placeholder so the gallery always has an image.
-        # Pick a placeholder deterministically using the id so cards vary.
-        idx = (obj.id or 0) % 6
-        return f"/placeholders/g{idx + 1}.png"
+        # No picture rather than a stock one: the site shows the item without an image.
+        return None
 
     class Meta:
         model = GalleryItem

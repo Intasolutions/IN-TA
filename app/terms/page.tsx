@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import React from 'react';
 
 import Footer1 from '../components/Footersecond';
 import Header1 from '../components/Header1';

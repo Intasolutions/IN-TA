@@ -210,7 +210,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
           <span aria-hidden="true" className="rack-mic absolute left-1/2 top-[calc(var(--bezel)*0.7)] -ml-[calc(var(--bezel)*1.25)]" />
           <span aria-hidden="true" className="rack-stop absolute left-[7%] top-[calc(var(--bezel)*0.5)]" />
           <span aria-hidden="true" className="rack-stop absolute right-[7%] top-[calc(var(--bezel)*0.5)]" />
-          {near && <Image src="/logo/logo-inta-light.png" alt="" width={120} height={48} aria-hidden="true" className="pointer-events-none absolute bottom-[calc(var(--bezel)*0.35)] left-1/2 h-[calc(var(--bezel)*1.1)] w-auto -translate-x-1/2 opacity-60 max-sm:hidden" />}
+          {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={48} aria-hidden="true" className="pointer-events-none absolute bottom-[calc(var(--bezel)*0.35)] left-1/2 h-[calc(var(--bezel)*1.1)] w-auto -translate-x-1/2 opacity-60 max-sm:hidden" />}
           <div className="overflow-hidden rounded-[3px] shadow-[0_0_0_1px_#000,0_0_0_2px_rgb(190_210_255/0.07)]">
           <div className="relative flex items-center gap-2 border-b border-white/10 bg-[#0a1438] px-2.5 sm:gap-2.5 sm:px-3" style={{ height: 'var(--chrome)' }}>
             <span aria-hidden="true" className="flex shrink-0 gap-1">
@@ -264,7 +264,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
             {/* The screen waking as the lid lifts: dark, then our logo and a progress bar, then the page comes in from the top behind a line of light */}
             <span data-cover aria-hidden="true" className="rack-fx pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-[3%] bg-[#02061c]">
               <span data-boot className="flex h-[13%] w-[24%] flex-col items-center justify-center gap-2 opacity-0">
-                {near && <Image src="/logo/logo-inta-light.png" alt="" width={120} height={48} className="h-full w-auto" />}
+                {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-full w-auto" />}
                 <span className="block h-0.5 w-full shrink-0 overflow-hidden rounded-full bg-white/15">
                   <span data-bootbar className="rack-lit block h-full w-full origin-left scale-x-0 rounded-full bg-[#9dbbff]" />
                 </span>
@@ -278,7 +278,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
         </div>
         <div aria-hidden="true" className="rack-lid-back absolute inset-0 flex items-center justify-center overflow-hidden rounded-t-[10px] [backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(6px)]">
           <span data-logo className="rack-lit flex h-[14%] items-center justify-center">
-            {near && <Image src="/logo/logo-inta-light.png" alt="" width={120} height={48} className="h-full w-auto rotate-180 opacity-80" />}
+            {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-full w-auto rotate-180 opacity-80" />}
           </span>
           {/* the seam round the edge of the lid, and the dip a thumb opens it by */}
           <span className="rack-lid-seam absolute inset-[1.6%]" />
@@ -1211,7 +1211,7 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
 
           {/* The maker's plate, and the patch panel */}
           <div aria-hidden="true" className="rack-plate absolute flex items-center justify-between px-[calc(var(--uh)*0.5)]" style={{ left: 'var(--rail)', width: 'var(--lw)', top: 0, height: 'calc(var(--uh) * 2)', transform: 'translateZ(-4px)' }}>
-            <Image src="/logo/logo-inta-light.png" alt="" width={120} height={48} className="h-[calc(var(--uh)*0.8)] w-auto" />
+            <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-[calc(var(--uh)*0.8)] w-auto" />
             <span className="rack-vent h-[46%] w-[46%] rounded-[2px]" />
           </div>
           <div aria-hidden="true" className="rack-plate absolute flex items-center gap-[calc(var(--uh)*0.3)] px-[calc(var(--uh)*0.3)]" style={{ left: 'var(--rail)', width: 'var(--lw)', top: 'calc(var(--uh) * 2)', height: 'var(--uh)', transform: 'translateZ(-4px)' }}>

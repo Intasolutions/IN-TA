@@ -31,7 +31,7 @@ export type DetailService = {
 };
 
 /** The standard wording of the page. Each can be changed per service in the admin: see services/page_text.py, which holds the same list. */
-export const STANDARD_WORDS = {
+const STANDARD_WORDS = {
   breadcrumb: 'Services',
   hero_kicker: '{part} // Our service',
   cta_primary: 'Start this project',

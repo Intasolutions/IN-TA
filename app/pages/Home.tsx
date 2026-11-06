@@ -1,16 +1,11 @@
-'use client';
-
-import React from 'react';
 import HeroSlider from '../components/Hero';
 import Philosophy from '../components/Philosophy';
 import Capabilities from '../components/Capabilities';
 import TestimonialDeck from '../components/testimonials/TestimonialDeck';
 import BlogSection from '../components/blog/BlogSection';
 import Work from '../components/Work';
-import { useEnterpriseReveal } from '../hooks/useEnterpriseReveal';
 
 const Home = () => {
-  useEnterpriseReveal();
   return (
     <main className="bg-canvas text-midnight">
       <HeroSlider />
@@ -26,7 +21,7 @@ const Home = () => {
                 "@id": "https://www.in-tasolutions.com/#organization",
                 "name": "INTA Solutions Pvt Ltd",
                 "url": "https://www.in-tasolutions.com",
-                "logo": "https://www.in-tasolutions.com/logo/logo.png",
+                "logo": "https://www.in-tasolutions.com/logo/logo.jpg",
                 "sameAs": [
                   "https://www.linkedin.com/company/inta-solutions-pvt-ltd",
                   "https://www.facebook.com/intasolutions"

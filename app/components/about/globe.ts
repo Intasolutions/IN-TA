@@ -194,6 +194,19 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string) {
   return s;
 }
 
+// Every globe shares one download of each image: the About page's second globe, one waking from sleep, and the
+// Contact page's after the About page's all reuse it. (A failed download is forgotten, so the next asks again.)
+const downloads = new Map<string, Promise<Blob | null>>();
+function download(file: string) {
+  let pending = downloads.get(file);
+  if (!pending) {
+    pending = fetch(`/about/earth/${file}.webp`).then((res) => (res.ok ? res.blob() : null));
+    downloads.set(file, pending);
+    pending.then((blob) => { if (!blob) downloads.delete(file); }, () => downloads.delete(file));
+  }
+  return pending;
+}
+
 /** Returns null where WebGL2 isn't available; the map then keeps its drawn line globe. */
 export function createGlobe(canvas: HTMLCanvasElement, small: boolean, onChange: () => void): Globe | null {
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
@@ -234,7 +247,6 @@ export function createGlobe(canvas: HTMLCanvasElement, small: boolean, onChange:
   });
   const loaded = slots.map(() => false);
 
-  const aborter = new AbortController();
   let destroyed = false;
   let dirty = true; // something changed that the last picture doesn't show
   let settle = 60; // frames to ignore before judging the device: the page is still starting up
@@ -261,9 +273,9 @@ export function createGlobe(canvas: HTMLCanvasElement, small: boolean, onChange:
   });
   const fetchImage = async (file: string, slot: number, repeat: boolean, stillWanted: () => boolean = () => true) => {
     try {
-      const res = await fetch(`/about/earth/${file}.webp`, { signal: aborter.signal });
-      if (!res.ok) return;
-      const bitmap = await createImageBitmap(await res.blob());
+      const blob = await download(file);
+      if (!blob || destroyed) return;
+      const bitmap = await createImageBitmap(blob);
       await quietMoment();
       if (stillWanted()) upload(slot, bitmap, repeat);
       bitmap.close();
@@ -447,7 +459,6 @@ export function createGlobe(canvas: HTMLCanvasElement, small: boolean, onChange:
     isReady: () => loaded[0] && !gl.isContextLost(),
     destroy() {
       destroyed = true;
-      aborter.abort();
       releaseContext(gl, canvas);
     },
   };

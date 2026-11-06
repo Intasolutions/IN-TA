@@ -28,6 +28,14 @@ const MATERIAL_ICONS = [
   'arrow_back', 'arrow_forward', 'south', 'mouse', 'article', 'check', 'arrow_upward', 'call', 'mail', 'add', 'east', 'west', 'open_in_full', 'search',
 ].sort().join(',');
 
+const API_ORIGIN = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_API_URL ?? '').origin;
+  } catch {
+    return null;
+  }
+})();
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.in-tasolutions.com'),
   title: 'Top IT Company in Wayanad | Mobile App Development Team | INTA Solutions',
@@ -35,9 +43,6 @@ export const metadata: Metadata = {
   keywords: 'software development company kerala, IT company in Wayanad, web development company Kerala, mobile app development India, custom software development company, AI integration services, enterprise web solutions',
   authors: [{ name: 'INTA Solutions Pvt Ltd' }],
   robots: 'index, follow',
-  icons: {
-    icon: '/logo/logo.png',
-  },
   alternates: {
     canonical: '/',
   },
@@ -71,7 +76,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="dns-prefetch" href="http://127.0.0.1:8000" />
+        {/* Pages ask the API for their content from the browser too: opening the connection early saves that first wait */}
+        {API_ORIGIN && <link rel="preconnect" href={API_ORIGIN} crossOrigin="anonymous" />}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

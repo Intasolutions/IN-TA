@@ -4,7 +4,8 @@ from .serializers import ProjectSerializer, GalleryItemSerializer
 
 
 class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Project.objects.filter(is_active=True).order_by("-featured", "order", "title")
+    # (tags in one query for all projects, instead of one per project)
+    queryset = Project.objects.filter(is_active=True).prefetch_related("tags").order_by("-featured", "order", "title")
     serializer_class = ProjectSerializer
     lookup_field = "slug"
 

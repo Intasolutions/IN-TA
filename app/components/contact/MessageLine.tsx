@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Icon from '../Icon';
 import { apiBase } from '../blog/data';
 import { COUNTRIES } from '../../contact/data/countries';
@@ -29,8 +29,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>('idle');
   const [slow, setSlow] = useState(false); // our API host can take a while to wake up
-  const sentName = useRef('');
-  const sentEmail = useRef('');
+  const [sent, setSent] = useState({ name: '', email: '' }); // who it went from, for the thank-you
 
   // Most visitors don't need to look for their own country
   useEffect(() => {
@@ -98,8 +97,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
         }
         throw new Error(String(res.status));
       }
-      sentName.current = payload.name.split(/\s+/)[0];
-      sentEmail.current = payload.email;
+      setSent({ name: payload.name.split(/\s+/)[0], email: payload.email });
       setStatus('sent');
       onSent();
       setName('');
@@ -122,8 +120,8 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
         </span>
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Delivered</p>
-          <h2 className="heading-section mt-2 text-white">Thanks, <span className="heading-accent-dark">{sentName.current}.</span></h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">Your message is with our team in Wayanad, and we&apos;ll reply during office hours. You should also get a confirmation at {sentEmail.current}.</p>
+          <h2 className="heading-section mt-2 text-white">Thanks, <span className="heading-accent-dark">{sent.name}.</span></h2>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">Your message is with our team in Wayanad, and we&apos;ll reply during office hours. You should also get a confirmation at {sent.email}.</p>
         </div>
         <button type="button" onClick={() => setStatus('idle')} className="blog-wipe rounded-lg border border-white/25 px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-white">
           Send another

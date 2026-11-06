@@ -127,6 +127,8 @@ export default function ContactPage() {
     const canvas = canvasRef.current!;
     const plug = plugRef.current!;
     const jack = jackRef.current!;
+    // (held here, not read from the ref later: leaving the page clears refs before this effect is cleaned up)
+    const panel = consoleRef.current!;
     const still = calm();
     const head = { x: 0, y: 0 };
     const mouths = new Map<PortId, { x: number; y: number }>();
@@ -148,7 +150,7 @@ export default function ContactPage() {
       const anchorY = j.top - box.top + j.height / 2;
       cable.resize(Math.round(box.width), Math.round(Math.min(box.height, anchorY + DRAW_BELOW_JACK)));
       cable.setAnchor(j.left - box.left + j.width / 2, anchorY);
-      cable.setFloor(consoleRef.current!.getBoundingClientRect().top - box.top - 3);
+      cable.setFloor(panel.getBoundingClientRect().top - box.top - 3);
       PORTS.forEach(({ id }) => {
         const slot = stage.querySelector<HTMLElement>(`[data-port="${id}"] .patch-slot`)!.getBoundingClientRect();
         mouths.set(id, { x: slot.left - box.left + slot.width / 2, y: slot.bottom - box.top + PLUG_OUT });
@@ -218,7 +220,7 @@ export default function ContactPage() {
         if (!firstRef.current && changed) {
           window.history.replaceState(null, '', `#${id}`);
           // the line that just opened is what they want to see
-          const top = consoleRef.current!.getBoundingClientRect().top;
+          const top = panel.getBoundingClientRect().top;
           if (top > window.innerHeight * 0.5) scrollToY(stage.getBoundingClientRect().top + window.scrollY - 16);
         }
       }
@@ -241,6 +243,7 @@ export default function ContactPage() {
     if (still) seat(activeRef.current, true);
 
     const sized = new ResizeObserver(() => {
+      if (!stage.isConnected) return; // the page is being left
       measure();
       if (seated && !carried && !flight?.isActive()) {
         const mouth = mouths.get(seated)!;
@@ -473,7 +476,7 @@ export default function ContactPage() {
           <div data-contact="panel" className="rack-plate relative z-[4] rounded-lg">
             <div className="flex items-center gap-3 border-b border-black/30 px-3 py-2.5 sm:gap-4 sm:px-4">
               <span aria-hidden="true" className="rack-screw shrink-0 [--uh:44px]" />
-              <Image src="/logo/logo-inta-light.png" alt="" width={120} height={48} className="h-5 w-auto shrink-0 sm:h-6" />
+              <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-5 w-auto shrink-0 sm:h-6" />
               <span aria-hidden="true" className="rack-vent hidden h-4 min-w-0 flex-1 rounded-[2px] sm:block" />
               <p className="ml-auto inline-flex min-w-0 items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-wider sm:ml-0 sm:text-[11px]">
                 <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${open ? 'bg-[#9dbbff] shadow-[0_0_8px_2px_#5b8cff]' : 'bg-white/25'}`} />

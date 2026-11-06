@@ -1,4 +1,4 @@
-// Technologies shown in the Tech Stack section (shared by both design options)
+// Technologies shown in the Tech Stack section
 
 export type StackGroup = 'ai' | 'backend' | 'frontend' | 'cloud' | 'design';
 
@@ -8,14 +8,6 @@ export type StackItem = {
   logo: string;
   group: StackGroup;
   use: string; // what we use it for
-};
-
-export const GROUP_LABELS: Record<StackGroup, string> = {
-  ai: 'AI & Data',
-  backend: 'Backend',
-  frontend: 'Frontend',
-  cloud: 'Cloud',
-  design: 'Design',
 };
 
 export const STACK: StackItem[] = [

@@ -4,48 +4,23 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [75, 90],
     remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-        port: "8000",
-        pathname: "/media/**",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8000",
-        pathname: "/media/**",
-      },
-      {
-        protocol: "https",
-        hostname: "in-tasolutions.com",
-        pathname: "/media/**",
-      },
-      {
-        protocol: "https",
-        hostname: "www.in-tasolutions.com",
-        pathname: "/media/**",
-      },
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
+      // a backend running on this computer, while developing
+      { protocol: "http", hostname: "127.0.0.1", port: "8000", pathname: "/media/**" },
+      { protocol: "http", hostname: "localhost", port: "8000", pathname: "/media/**" },
+      // everything uploaded in the admin lives on Cloudinary
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
-  /* async rewrites() {
+  async headers() {
     return [
       {
-        // When you fetch('/api/...') locally, it goes to your EC2 backend
-        source: '/api/:path*',
-        destination: 'https://in-tasolutions.com/api/:path*',
-      },
-      {
-        // When you load images from /media/... locally, it grabs them from EC2
-        source: '/media/:path*',
-        destination: 'https://in-tasolutions.com/media/:path*',
+        // The About page's satellite imagery, fetched by script: a returning visitor keeps it for a week instead of
+        // asking about every image again. Replacing one? Give it a new name too, or some visitors keep the old one a week.
+        source: "/about/earth/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
       },
     ];
-  }, */
+  },
 };
 
 export default nextConfig;

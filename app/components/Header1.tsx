@@ -1,7 +1,7 @@
 // frontend/components/Header1.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 
@@ -98,7 +98,7 @@ export default function Header1() {
           <Link href="/" className="relative z-[70] group flex items-center gap-3 shrink-0">
              <div className="relative h-12 w-20 md:h-16 md:w-20 shrink-0 rounded-xl bg-gradient-to-br from-slate-950 via-[#0a0e24] to-blue-950 border border-blue-800/30 shadow-lg shadow-blue-900/10 ring-1 ring-inset ring-white/5 overflow-hidden flex items-center justify-center p-2">
                 <img 
-                  src="/logo/logo-inta-light.png" 
+                  src="/logo/logo-inta.png" 
                   alt="Inta Solutions" 
                   className="w-full h-full object-contain drop-shadow-sm" 
                 />

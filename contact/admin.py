@@ -30,7 +30,7 @@ class ContactMessageAdmin(admin.ModelAdmin):
                 # confirmation to user
                 try:
                     send_mail(
-                        f"Thanks for contacting IN-TA Solutions",
+                        "Thanks for contacting IN-TA Solutions",
                         f"Hi {obj.name},\n\nWe've received (again) your message. We'll get back to you shortly.\n\n-- IN-TA Solutions",
                         settings.DEFAULT_FROM_EMAIL,
                         [obj.email],

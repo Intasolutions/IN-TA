@@ -1,5 +1,4 @@
 import { useEffect, useRef, type RefObject } from 'react';
-import type gsap from 'gsap';
 import { useReveal } from './RevealContext';
 
 /**

@@ -44,7 +44,7 @@ export default function PageLoader({ onDone }: { onDone: () => void }) {
       <div className="flex flex-col items-center gap-6">
         <div className="logo">
           <Image
-            src="/logo/logo-inta-light.png"
+            src="/logo/logo-inta.png"
             alt="INTA"
             width={140}
             height={32}
