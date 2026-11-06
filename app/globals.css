@@ -145,6 +145,21 @@ html {
 .blog-prose th, .blog-prose td { border: 1px solid rgb(1 68 181 / 0.15); padding: 0.5em 0.75em; text-align: left; }
 .blog-prose th { font-weight: 700; color: var(--color-midnight); }
 .blog-prose code { font-family: var(--font-mono, ui-monospace), monospace; font-size: 0.9em; }
+/* The 404 trace's cursor, after "no route" */
+.nf-caret { animation: nfBlink 1.1s steps(1) infinite; }
+@keyframes nfBlink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .nf-caret { animation: none; } }
+
+/* The legal pages' wording */
+.legal-prose { font-size: 1rem; line-height: 1.75; color: rgb(1 7 43 / 0.8); text-wrap: pretty; }
+@media (min-width: 640px) { .legal-prose { font-size: 1.0625rem; } }
+.legal-prose > * + * { margin-top: 1em; }
+.legal-prose strong { font-weight: 700; color: var(--color-midnight); }
+.legal-prose a { color: var(--color-brand-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.legal-prose a:hover { color: var(--color-midnight); }
+.legal-prose ul { display: grid; gap: 0.6em; }
+.legal-prose li { position: relative; padding-left: 1.5em; }
+.legal-prose li::before { content: ''; position: absolute; left: 0.2em; top: 0.72em; width: 0.5em; height: 2px; border-radius: 9999px; background: var(--color-brand-blue); }
 .blog-prose pre { overflow-x: auto; border-radius: 0.75rem; background: var(--color-midnight); padding: 1em 1.2em; color: #fff; font-size: 0.85em; line-height: 1.6; }
 
 /* The blog's hover touches. Only where a real hover exists, so a tap on a phone doesn't leave them stuck on */

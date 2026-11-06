@@ -28,7 +28,7 @@ const when = (value?: string) => {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const routes = ['', '/about', '/blog', '/contact', '/portfolio', '/services', '/security', '/terms'].map((route) => ({
+  const routes = ['', '/about', '/blog', '/contact', '/portfolio', '/services', '/security', '/terms', '/privacy'].map((route) => ({
     url: `${SITE}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,

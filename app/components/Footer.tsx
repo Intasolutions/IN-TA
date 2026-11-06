@@ -385,6 +385,9 @@ export default function Footer() {
               <Link href="/terms" className="group/roll inline-flex hover:text-white">
                 <Roll>Terms</Roll>
               </Link>
+              <Link href="/privacy" className="group/roll inline-flex hover:text-white">
+                <Roll>Privacy</Roll>
+              </Link>
               <Link href="/security" className="group/roll inline-flex hover:text-white">
                 <Roll>Security</Roll>
               </Link>

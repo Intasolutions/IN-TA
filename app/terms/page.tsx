@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
-
-import Footer1 from '../components/Footersecond';
-import Header1 from '../components/Header1';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import LegalPage, { type LegalSection } from '../components/legal/LegalPage';
 
 export const metadata: Metadata = {
   title: 'Terms of Service | Legal | INTA Solutions',
@@ -11,54 +11,64 @@ export const metadata: Metadata = {
   },
 };
 
+const SECTIONS: LegalSection[] = [
+  {
+    id: 'introduction',
+    title: 'Introduction',
+    body: (
+      <p>
+        Welcome to IN-TA Solutions. By accessing our website and services, you agree to be bound by these Terms of Service.
+        Please read them carefully.
+      </p>
+    ),
+  },
+  {
+    id: 'use-of-services',
+    title: 'Use of Services',
+    body: (
+      <p>
+        You agree to use our services only for lawful purposes and in accordance with these Terms. You are responsible for
+        maintaining the confidentiality of your account information.
+      </p>
+    ),
+  },
+  {
+    id: 'intellectual-property',
+    title: 'Intellectual Property',
+    body: (
+      <p>
+        All content, features, and functionality of our services, including but not limited to text, graphics, logos, and
+        software, are the exclusive property of IN-TA Solutions and are protected by copyright and other intellectual property
+        laws.
+      </p>
+    ),
+  },
+  {
+    id: 'limitation-of-liability',
+    title: 'Limitation of Liability',
+    body: (
+      <p>
+        IN-TA Solutions shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting
+        from your use of or inability to use the service.
+      </p>
+    ),
+  },
+];
+
 export default function TermsPage() {
-    return (
-       
-        <main className="min-h-screen bg-slate-50 pt-32 pb-20 px-6">    
-         <Header1/>        
-            <div className="container mx-auto max-w-4xl">
-                <h1 className="heading-page text-midnight mb-8">Terms of <span className="heading-accent heading-serif">Service</span></h1>
-
-                <div className="space-y-8 text-slate-700 leading-relaxed">
-                    <section>
-                        <h2 className="heading-sub text-slate-800 mb-4">1. Introduction</h2>
-                        <p>
-                            Welcome to IN-TA Solutions. By accessing our website and services, you agree to be bound by these
-                            Terms of Service. Please read them carefully.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="heading-sub text-slate-800 mb-4">2. Use of Services</h2>
-                        <p>
-                            You agree to use our services only for lawful purposes and in accordance with these Terms.
-                            You are responsible for maintaining the confidentiality of your account information.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="heading-sub text-slate-800 mb-4">3. Intellectual Property</h2>
-                        <p>
-                            All content, features, and functionality of our services, including but not limited to text,
-                            graphics, logos, and software, are the exclusive property of IN-TA Solutions and are protected
-                            by copyright and other intellectual property laws.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="heading-sub text-slate-800 mb-4">4. Limitation of Liability</h2>
-                        <p>
-                            IN-TA Solutions shall not be liable for any indirect, incidental, special, consequential, or
-                            punitive damages resulting from your use of or inability to use the service.
-                        </p>
-                    </section>
-
-                    <div className="mt-12 text-sm text-slate-500">
-                        Last updated: {new Date().toLocaleDateString()}
-                    </div>
-                </div>
-            </div>
-            <Footer1/>
-        </main>
-    );
+  return (
+    <>
+      <Header />
+      <LegalPage
+        href="/terms"
+        kicker="Terms"
+        title="Terms of"
+        accent="Service"
+        lead="The terms for using this website and the services of IN-TA Solutions Pvt Ltd."
+        updated={{ iso: '2026-01-16', label: '16 Jan 2026' }}
+        sections={SECTIONS}
+      />
+      <Footer />
+    </>
+  );
 }
