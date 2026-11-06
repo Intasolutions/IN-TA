@@ -13,9 +13,9 @@ import { scrollToTop } from './SmoothScroll';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const EMAIL = 'info@in-tasolutions.com';
-const PHONE = { href: 'tel:+919447595381', label: '+91 94475 95381' };
-const MAP = 'https://www.google.com/maps/search/?api=1&query=11.8021,76.0232';
+export const EMAIL = 'info@in-tasolutions.com';
+export const PHONE = { href: 'tel:+919447595381', label: '+91 94475 95381' };
+export const MAP = 'https://www.google.com/maps/search/?api=1&query=11.8021,76.0232';
 
 const EXPLORE = [
   { name: 'Home', href: '/' },
@@ -38,7 +38,7 @@ export const SERVICES = [
   { name: 'Media Production', slug: 'media-production' },
 ];
 
-const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
+export const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
   {
     name: 'LinkedIn',
     href: 'https://www.linkedin.com/company/in-ta-solutions/',

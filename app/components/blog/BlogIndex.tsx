@@ -134,7 +134,7 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
       introRef.current = gsap
         .timeline({ paused: true, defaults: { ease: 'expo.out' } })
         .from('[data-blog="kicker"]', { y: 10, autoAlpha: 0, duration: 0.7 }, 0)
-        .from('[data-blog="word"]', { yPercent: 110, duration: 1.1, stagger: 0.1 }, 0.1)
+        .from('[data-blog="word"]', { y: 44, autoAlpha: 0, duration: 1.2, stagger: 0.14 }, 0.1)
         .from('[data-blog="in"]', { y: 16, autoAlpha: 0, duration: 0.9, stagger: 0.08 }, 0.35)
         .from('[data-blog="lead"]', { y: 30, autoAlpha: 0, duration: 1 }, 0.45);
       if (playedRef.current) introRef.current.progress(1);
@@ -167,8 +167,8 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
               Blog {'//'} Latest writing
             </p>
             <h1 id="blog-title" className="heading-page mt-2.5 text-midnight sm:mt-3">
-              <span className="inline-block overflow-hidden pb-[0.1em] align-bottom"><span data-blog="word" className="inline-block">Insights &amp;</span></span>{' '}
-              <span className="inline-block overflow-hidden pb-[0.1em] pr-[0.08em] align-bottom"><span data-blog="word" className="heading-accent heading-serif inline-block">stories.</span></span>
+              <span data-blog="word" className="inline-block">Insights &amp;</span>{' '}
+              <span data-blog="word" className="heading-accent heading-serif">stories.</span>
             </h1>
           </div>
           <p data-blog="in" className="text-[15px] leading-relaxed text-midnight/80 [text-wrap:balance] sm:text-lg lg:pb-3 lg:text-right">
