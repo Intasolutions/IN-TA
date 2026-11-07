@@ -12,6 +12,8 @@ export type ApiPost = {
   meta_title?: string | null;
   meta_description?: string | null;
   image_alt?: string | null;
+  /** When the post was last saved in the admin (an older API doesn't send it) */
+  updated_at?: string | null;
 };
 
 export type Post = {

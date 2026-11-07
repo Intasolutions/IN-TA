@@ -6,60 +6,38 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
+import { useText } from '../site/SiteContext';
+import { accent, listOf } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type Card = {
   icon: string;
-  track: string;
-  title: string;
-  body: string;
-  tags: string[];
   layout: string; // grid placement per breakpoint
   featured?: boolean;
 };
 
-// Content follows the Stitch home design (to be replaced with API services later)
+// Each card's look; its words are set in the admin (Site settings > Page wording: Home, capabilities)
 const CARDS: Card[] = [
   {
     icon: 'neurology',
-    track: 'Track 01 // Cognitive',
-    title: 'AI Integration & Autonomous Agents',
-    body: 'Fine-tuned large language models, retrieval-augmented generation (RAG) networks with low-latency embeddings, agentic workflow loops, and autonomous computer vision models integrated directly into your private business ecosystem.',
-    tags: ['LangChain', 'PyTorch Neural', 'OpenAI Whisper/GPT', 'PgVector DB'],
     layout: 'md:col-span-2 lg:col-span-8',
     featured: true,
   },
   {
     icon: 'code',
-    track: 'Track 02 // Web Runtimes',
-    title: 'Next-Gen Web Architecture',
-    body: 'Edge-rendered Next.js platforms, atomic design component trees, strictly typed contracts with sub-second page transitions.',
-    tags: ['Next.js', 'TypeScript', 'Tailwind'],
     layout: 'lg:col-span-4',
   },
   {
     icon: 'domain',
-    track: 'Track 03 // Enterprise',
-    title: 'Enterprise Systems & ERP',
-    body: 'Industrial resource planners, hospital clinical records, automated inventory pipelines, and high-concurrency relational data warehouses.',
-    tags: ['PostgreSQL', 'Python Backend'],
     layout: 'lg:col-span-4',
   },
   {
     icon: 'devices',
-    track: 'Track 04 // Cross-Platform',
-    title: 'Mobile Ecosystems',
-    body: 'Native-speed 60fps applications across iOS & Android. Offline-first synchronization, secure keychain biometrics, and push streaming.',
-    tags: ['Flutter', 'React Native'],
     layout: 'lg:col-span-4',
   },
   {
     icon: 'speed',
-    track: 'Track 05 // Vitals',
-    title: 'Performance & Schema Growth',
-    body: '100/100 Google Lighthouse velocity metrics, algorithmic structured JSON-LD schemas, and CDN edge optimization ensuring maximum visibility.',
-    tags: ['100% Score', 'Edge Purge'],
     layout: 'lg:col-span-4',
   },
 ];
@@ -106,6 +84,15 @@ function NeuralNet({ inline = false }: { inline?: boolean }) {
 }
 
 export default function Capabilities() {
+  const t = useText();
+  const cards = CARDS.map((card, i) => ({
+    ...card,
+    track: t(`home_cap${i + 1}_track`),
+    title: t(`home_cap${i + 1}_title`),
+    body: t(`home_cap${i + 1}_text`),
+    tags: listOf(t(`home_cap${i + 1}_tags`)),
+  }));
+  const [titlePlain, titleBright] = accent(t('home_cap_title'));
   const ref = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -281,26 +268,25 @@ export default function Capabilities() {
       <div data-cap="header" className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 mb-10 sm:mb-14 lg:mb-16">
         <div>
           <span data-cap="kicker" className="font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase block mb-3 font-bold">
-            Engineering disciplines
+            {t('home_cap_kicker')}
           </span>
           <h2
             id="capabilities-title"
             className="font-display font-extrabold text-[length:clamp(2.25rem,5.4vw,3.75rem)] leading-[1] text-midnight tracking-tight uppercase"
           >
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block">Specialized</span></span>{' '}
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block pb-[0.06em] bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent">Capabilities</span></span>
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block">{titlePlain}</span></span>{' '}
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-cap="word" className="inline-block pb-[0.06em] bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent">{titleBright}</span></span>
           </h2>
         </div>
         <p data-cap="lede" className="text-midnight/80 max-w-md text-sm sm:text-[15px] leading-relaxed">
-          Tailored technical capabilities calibrated to solve complex computational and operational bottlenecks with zero
-          bloat.
+          {t('home_cap_text')}
         </p>
       </div>
 
       {/* Bento grid */}
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
-        {CARDS.map((card) => (
-          <li key={card.title} data-cap="slot" className={`${card.layout} will-change-transform`}>
+        {cards.map((card, ci) => (
+          <li key={ci} data-cap="slot" className={`${card.layout} will-change-transform`}>
             <Link
               href="/services"
               data-cap="card"

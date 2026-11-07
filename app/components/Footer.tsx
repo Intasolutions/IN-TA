@@ -10,12 +10,10 @@ import Icon from './Icon';
 import { IstClock } from './Header';
 import { useOfficeStatus } from './OfficeStatus';
 import { scrollToTop } from './SmoothScroll';
+import { useSite, useText } from '../site/SiteContext';
+import { accent, addressLines, hoursShort, mapUrl, phoneHref, type Site } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-export const EMAIL = 'info@in-tasolutions.com';
-export const PHONE = { href: 'tel:+919447595381', label: '+91 94475 95381' };
-export const MAP = 'https://www.google.com/maps/search/?api=1&query=11.8021,76.0232';
 
 const EXPLORE = [
   { name: 'Home', href: '/' },
@@ -26,27 +24,16 @@ const EXPLORE = [
   { name: 'Contact', href: '/contact' },
 ];
 
-// Mirrors /api/services/ (title + slug, in their display order) so the footer needs no request of its own
-export const SERVICES = [
-  { name: 'AI Integration & Model Training', slug: 'ai-integration-model-training' },
-  { name: 'Web Development', slug: 'web-development' },
-  { name: 'Software Development', slug: 'software-development' },
-  { name: 'Mobile App', slug: 'mobile-app' },
-  { name: 'Digital Marketing', slug: 'Marketing' },
-  { name: 'UI/UX Design', slug: 'ui-ux-design' },
-  { name: 'SEO, AEO & GEO Services', slug: 'seo-aeo-geo-services' },
-  { name: 'Media Production', slug: 'media-production' },
-];
-
-export const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
+// The icons; the links themselves are set in the admin (Site settings), and an empty one hides its icon
+const SOCIAL_ICONS: { key: keyof Site['socials']; name: string; icon: ReactNode }[] = [
   {
+    key: 'linkedin',
     name: 'LinkedIn',
-    href: 'https://www.linkedin.com/company/in-ta-solutions/',
     icon: <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.5h4V21H3V9.5Zm6.5 0h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.1c0-1.22-.02-2.79-1.7-2.79-1.7 0-1.96 1.33-1.96 2.7V21h-4V9.5Z" />,
   },
   {
+    key: 'instagram',
     name: 'Instagram',
-    href: 'https://www.instagram.com/intasolutions',
     icon: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -56,18 +43,18 @@ export const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
     ),
   },
   {
+    key: 'facebook',
     name: 'Facebook',
-    href: 'https://www.facebook.com/share/17taAqPXPP/',
     icon: <path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.87.25-1.46 1.5-1.46h1.6V4.46A21 21 0 0 0 14.27 4.3c-2.3 0-3.88 1.4-3.88 3.98v2.22H7.8v3h2.6V21h3.1Z" />,
   },
   {
+    key: 'x',
     name: 'X',
-    href: 'https://x.com/intasolution',
     icon: <path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.19L2 3h6.33l4.36 5.77L17.75 3Zm-1.08 16.2h1.7L7.4 4.73H5.58l11.09 14.47Z" />,
   },
   {
+    key: 'youtube',
     name: 'YouTube',
-    href: 'https://www.youtube.com/@IN-TASolutionsPvtLtd',
     icon: (
       <path
         fillRule="evenodd"
@@ -77,8 +64,11 @@ export const SOCIALS: { name: string; href: string; icon: ReactNode }[] = [
   },
 ];
 
-// The sign-off line, revealed letter by letter
-const CTA = ["Let's build", "what's next"];
+/** The social links that are set, with their icons */
+export function useSocials() {
+  const { socials } = useSite();
+  return SOCIAL_ICONS.filter((s) => socials[s.key]).map((s) => ({ name: s.name, href: socials[s.key], icon: s.icon }));
+}
 
 const HEAD = 'mb-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-white/45';
 
@@ -96,6 +86,12 @@ function Roll({ children }: { children: string }) {
 }
 
 export default function Footer() {
+  const site = useSite();
+  const t = useText();
+  const socials = useSocials();
+  const [street, region] = addressLines(site);
+  // The sign-off line, revealed letter by letter
+  const cta = accent(t('footer_cta')).filter(Boolean);
   const ref = useRef<HTMLElement>(null);
   const status = useOfficeStatus();
   const isOpen = status?.startsWith('OPEN') ?? false;
@@ -227,14 +223,14 @@ export default function Footer() {
           <div>
             <span data-ft="lead" className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-3 sm:mb-4">
               <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-              Got an idea? // Let&apos;s talk
+              {t('footer_kicker')}
             </span>
-            <Link href="/contact" data-ft="cta" aria-label="Let's build what's next: contact us" className="group/cta flex items-end gap-3 sm:gap-5 w-fit rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#7fa6ff]">
+            <Link href="/contact" data-ft="cta" aria-label={`${cta.join(' ')}: contact us`} className="group/cta flex items-end gap-3 sm:gap-5 w-fit rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[#7fa6ff]">
               <span aria-hidden="true" className="block font-display font-extrabold uppercase tracking-tight leading-[0.95] text-[length:clamp(2rem,4.8vw,4.6rem)]">
-                {CTA.map((line, l) => (
+                {cta.map((line, l) => (
                   <span key={line} className={`block ${l ? 'text-[#7fa6ff]' : 'text-white'}`}>
-                    {line.split(' ').map((word) => (
-                      <span key={word} className="inline-block overflow-hidden align-bottom pb-[0.05em] mr-[0.22em] last:mr-0">
+                    {line.split(' ').map((word, w) => (
+                      <span key={w} className="inline-block overflow-hidden align-bottom pb-[0.05em] mr-[0.22em] last:mr-0">
                         {[...word].map((ch, c) => (
                           <span
                             key={c}
@@ -264,13 +260,13 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-1.5 sm:gap-2 lg:items-end lg:pb-2">
-            <a data-ft="lead" href={`mailto:${EMAIL}`} className="group/roll inline-flex items-center gap-2.5 font-display font-bold text-base sm:text-xl">
+            <a data-ft="lead" href={`mailto:${site.email}`} className="group/roll inline-flex items-center gap-2.5 font-display font-bold text-base sm:text-xl">
               <Icon name="mail" className="text-[18px] sm:text-[20px] text-[#7fa6ff]" />
-              <Roll>{EMAIL}</Roll>
+              <Roll>{site.email}</Roll>
             </a>
-            <a data-ft="lead" href={PHONE.href} className="group/roll inline-flex items-center gap-2.5 font-display font-bold text-base sm:text-xl">
+            <a data-ft="lead" href={phoneHref(site.phone)} className="group/roll inline-flex items-center gap-2.5 font-display font-bold text-base sm:text-xl">
               <Icon name="call" className="text-[18px] sm:text-[20px] text-[#7fa6ff]" />
-              <Roll>{PHONE.label}</Roll>
+              <Roll>{site.phone}</Roll>
             </a>
           </div>
         </div>
@@ -286,14 +282,14 @@ export default function Footer() {
                 <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} className="h-9 w-auto -ml-2.5" />
               </div>
               <p data-ft="item" className="mt-2 text-[13px] sm:text-sm text-white/65 leading-relaxed max-w-xs">
-                Software, apps and AI for growing businesses, built by our team in Wayanad, Kerala.
+                {t('footer_text')}
               </p>
               <div data-ft="item" className="mt-4 inline-flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 font-mono text-[10px] uppercase tracking-wider">
                 <span className="relative flex h-2 w-2 shrink-0">
                   {isOpen && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7fa6ff] opacity-75" />}
                   <span className={`relative inline-flex h-2 w-2 rounded-full ${isOpen ? 'bg-[#7fa6ff]' : 'bg-white/30'}`} />
                 </span>
-                <span className={isOpen ? 'text-[#9dbbff] font-bold' : 'text-white/60'}>{status ?? 'Mon–Sat · 9 AM–5 PM IST'}</span>
+                <span className={isOpen ? 'text-[#9dbbff] font-bold' : 'text-white/60'}>{status ?? hoursShort(site)}</span>
                 <span aria-hidden="true" className="text-white/25">·</span>
                 <span className="text-white/60 tabular-nums">
                   <IstClock />
@@ -317,10 +313,10 @@ export default function Footer() {
             <div className="lg:col-span-3">
               <h3 data-ft="item" className={HEAD}>Services</h3>
               <ul className="space-y-2">
-                {SERVICES.map((s) => (
+                {site.services.map((s) => (
                   <li key={s.slug} data-ft="item">
                     <Link href={`/services/${s.slug}`} className="group/roll inline-flex text-sm text-white/80">
-                      <Roll>{s.name}</Roll>
+                      <Roll>{s.title}</Roll>
                     </Link>
                   </li>
                 ))}
@@ -331,16 +327,16 @@ export default function Footer() {
               <h3 data-ft="item" className={HEAD}>Visit us</h3>
               <a
                 data-ft="item"
-                href={MAP}
+                href={mapUrl(site)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-start gap-2.5 text-sm text-white/80 leading-relaxed transition-colors duration-300 hover:text-[#9dbbff]"
               >
                 <Icon name="location_on" className="text-[18px] mt-0.5 text-[#7fa6ff]" />
                 <span>
-                  Thonichal, Mananthavady,
+                  {street}
                   <br />
-                  Wayanad, Kerala 670645
+                  {region}
                   <span className="ml-1.5 inline-flex align-middle opacity-0 -translate-x-1 transition-[opacity,translate] duration-300 group-hover:opacity-100 group-hover:translate-x-0">
                     <Icon name="arrow_outward" className="text-[14px]" />
                   </span>
@@ -348,12 +344,12 @@ export default function Footer() {
               </a>
               <p data-ft="item" className="mt-2.5 flex items-center gap-2.5 text-sm text-white/60">
                 <Icon name="schedule" className="text-[18px] text-[#7fa6ff]" />
-                Mon–Sat · 9 AM – 5 PM IST
+                {hoursShort(site, true)}
               </p>
 
               <h3 data-ft="item" className={`${HEAD} mt-6`}>Follow</h3>
               <ul className="flex flex-wrap gap-2">
-                {SOCIALS.map((s) => (
+                {socials.map((s) => (
                   <li key={s.name} data-ft="item">
                     <a
                       data-ft="mag"

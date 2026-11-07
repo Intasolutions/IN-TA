@@ -6,6 +6,8 @@ import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
 import Avatar from './Avatar';
 import { STATIC_GRADIENT, useTestimonials, type Testimonial } from './data';
+import { useText } from '../../site/SiteContext';
+import { accent } from '../../site/site';
 
 gsap.registerPlugin(useGSAP);
 
@@ -30,6 +32,8 @@ const pose = (depth: number) => ({
 
 /** Client testimonials as a stack of cards: drag / flick the top one away, or use the arrows and photos. */
 export default function TestimonialDeck() {
+  const t = useText();
+  const [titlePlain, titleBright] = accent(t('home_voices_title'));
   const ref = useRef<HTMLElement>(null);
   const { items, failed } = useTestimonials();
   // The stack is the testimonials rotated by `rot`: order[0] is the card on top
@@ -326,14 +330,14 @@ export default function TestimonialDeck() {
         <div data-td="par" className="lg:col-span-5">
           <span data-td="kicker" className="inline-flex items-center gap-3 font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase font-bold mb-3">
             <span className="w-2 h-2 rounded-full bg-brand-blue animate-pulse" />
-            Testimonials // Client voices
+            {t('home_voices_kicker')}
           </span>
           <h2 id="td-title" className="font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] text-midnight tracking-tight uppercase">
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-td="word" className="inline-block">In their</span></span>{' '}
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-td="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>own words</span></span>
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-td="word" className="inline-block">{titlePlain}</span></span>{' '}
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-td="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>{titleBright}</span></span>
           </h2>
           <p data-td="copy" className="mt-4 text-midnight/80 text-sm sm:text-base leading-relaxed max-w-md">
-            What the people we&apos;ve built for say about working with us.
+            {t('home_voices_text')}
           </p>
 
           {items && n > 1 && (
@@ -357,7 +361,7 @@ export default function TestimonialDeck() {
                 ))}
               </div>
               <div className="mt-5 max-w-sm">{controls}</div>
-              <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-midnight/50 font-semibold">Drag or flick the card</p>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-wider text-midnight/65 font-semibold">Drag or flick the card</p>
             </div>
           )}
         </div>
@@ -454,7 +458,7 @@ export default function TestimonialDeck() {
                     </button>
                   ))}
                 </div>
-                <span className="font-mono text-[11px] uppercase tracking-wider text-midnight/50 font-semibold">Swipe the card</span>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-midnight/65 font-semibold">Swipe the card</span>
               </div>
             </div>
           )}

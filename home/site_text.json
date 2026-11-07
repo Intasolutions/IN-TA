@@ -1,0 +1,181 @@
+{
+  "_about": "The website's own wording, by page. The admin shows one box per entry (Site settings > Page wording) and saves only what was changed; an empty box means the standard text here. The website reads this same file for its standard text. Adding an entry needs no migration, only a change on the website that uses it. In a heading, | marks where the blue words start. {street}, {locality}, {district} and {region} become the office address from Site settings. A new line in a box starts a new line on the page where the design has one.",
+  "groups": [
+    {
+      "name": "Home: opening",
+      "items": [
+        ["home_hero_kicker", "Small line at the top", "EST. 2023 // SPECIALIZED ENGINEERING UNIT"],
+        ["home_hero_focus", "Focus areas beside it (separate with commas)", "ENTERPRISE ERP, AI PIPELINES, HIGH-CONCURRENCY WEB"],
+        ["home_hero_badge", "Badge above the title", "CUSTOM SOFTWARE · AI · MOBILE APPS"],
+        ["home_hero_tagline", "Line beside the badge", "LET'S BUILD WHAT'S NEXT"],
+        ["home_hero_title", "Big title (| before the second, blue line)", "Engineering | Digital Reality"],
+        ["home_hero_text", "Paragraph under the title", "We forge hyper-scaled software architecture, resilient manufacturing execution backends, and fine-tuned AI ecosystems for enterprise leaders across Kerala and global markets."],
+        ["home_hero_cta_primary", "Main button", "Explore Selected Work"],
+        ["home_hero_cta_secondary", "Second button", "Inspect Matrix"],
+        ["home_marquee", "Moving strip of services (separate with commas)", "Custom Software, Web Platforms, Mobile Apps, AI Integration, ERP Systems, UI/UX Design, SaaS Products, Cloud & DevOps"]
+      ]
+    },
+    {
+      "name": "Home: how we work",
+      "items": [
+        ["home_philosophy_kicker", "Small line", "Philosophy // How we work"],
+        ["home_philosophy_title", "Heading (one line per line; | before the blue line)", "We don't just\nwrite code. | We engineer products that last."],
+        ["home_philosophy_text", "Paragraph", "Founded by engineers and product designers, IN-TA treats every project as a product, not a ticket. Clear strategy first, careful design next, then engineering built to grow with your business."],
+        ["home_deliver_badge", "Delivery card: badge", "WEEKLY DEMOS"],
+        ["home_deliver_cadence", "Delivery card: cadence", "Weekly sprints"],
+        ["home_deliver_ownership", "Delivery card: ownership", "Strategy → Launch"],
+        ["home_step1_tag", "Step 1: label", "Discover"],
+        ["home_step1_title", "Step 1: title", "Strategy before screens"],
+        ["home_step1_text", "Step 1: text", "Research, stakeholder interviews and rapid discovery workshops turn your goals into a clear, research-backed roadmap, so we build the right thing first."],
+        ["home_step1_output", "Step 1: what you get", "Roadmap · Scope · Estimate"],
+        ["home_step1_value", "Step 1: principle", "Clarity over complexity"],
+        ["home_step2_tag", "Step 2: label", "Design"],
+        ["home_step2_title", "Step 2: title", "Prototypes you can click"],
+        ["home_step2_text", "Step 2: text", "Wireframes, interactive prototypes and a shared design system let you validate the product with real users before a line of production code is written."],
+        ["home_step2_output", "Step 2: what you get", "Wireframes · Prototype · Design system"],
+        ["home_step2_value", "Step 2: principle", "User-centric"],
+        ["home_step3_tag", "Step 3: label", "Engineer"],
+        ["home_step3_title", "Step 3: title", "Built, tested, handed over"],
+        ["home_step3_text", "Step 3: text", "Full-stack engineering with automated testing, a clean operational handoff and monitoring in place, with the same team supporting you after launch."],
+        ["home_step3_output", "Step 3: what you get", "Web · Mobile · Cloud"],
+        ["home_step3_value", "Step 3: principle", "End-to-end ownership"]
+      ]
+    },
+    {
+      "name": "Home: capabilities",
+      "items": [
+        ["home_cap_kicker", "Small line", "Engineering disciplines"],
+        ["home_cap_title", "Heading", "Specialized | Capabilities"],
+        ["home_cap_text", "Paragraph", "Tailored technical capabilities calibrated to solve complex computational and operational bottlenecks with zero bloat."],
+        ["home_cap1_track", "Card 1 (large): small line", "Track 01 // Cognitive"],
+        ["home_cap1_title", "Card 1: title", "AI Integration & Autonomous Agents"],
+        ["home_cap1_text", "Card 1: text", "Fine-tuned large language models, retrieval-augmented generation (RAG) networks with low-latency embeddings, agentic workflow loops, and autonomous computer vision models integrated directly into your private business ecosystem."],
+        ["home_cap1_tags", "Card 1: tags (separate with commas)", "LangChain, PyTorch Neural, OpenAI Whisper/GPT, PgVector DB"],
+        ["home_cap2_track", "Card 2: small line", "Track 02 // Web Runtimes"],
+        ["home_cap2_title", "Card 2: title", "Next-Gen Web Architecture"],
+        ["home_cap2_text", "Card 2: text", "Edge-rendered Next.js platforms, atomic design component trees, strictly typed contracts with sub-second page transitions."],
+        ["home_cap2_tags", "Card 2: tags (separate with commas)", "Next.js, TypeScript, Tailwind"],
+        ["home_cap3_track", "Card 3: small line", "Track 03 // Enterprise"],
+        ["home_cap3_title", "Card 3: title", "Enterprise Systems & ERP"],
+        ["home_cap3_text", "Card 3: text", "Industrial resource planners, hospital clinical records, automated inventory pipelines, and high-concurrency relational data warehouses."],
+        ["home_cap3_tags", "Card 3: tags (separate with commas)", "PostgreSQL, Python Backend"],
+        ["home_cap4_track", "Card 4: small line", "Track 04 // Cross-Platform"],
+        ["home_cap4_title", "Card 4: title", "Mobile Ecosystems"],
+        ["home_cap4_text", "Card 4: text", "Native-speed 60fps applications across iOS & Android. Offline-first synchronization, secure keychain biometrics, and push streaming."],
+        ["home_cap4_tags", "Card 4: tags (separate with commas)", "Flutter, React Native"],
+        ["home_cap5_track", "Card 5: small line", "Track 05 // Vitals"],
+        ["home_cap5_title", "Card 5: title", "Performance & Schema Growth"],
+        ["home_cap5_text", "Card 5: text", "100/100 Google Lighthouse velocity metrics, algorithmic structured JSON-LD schemas, and CDN edge optimization ensuring maximum visibility."],
+        ["home_cap5_tags", "Card 5: tags (separate with commas)", "100% Score, Edge Purge"]
+      ]
+    },
+    {
+      "name": "Home: work, testimonials and blog",
+      "items": [
+        ["home_work_kicker", "Selected work: small line", "Selected work // Case studies"],
+        ["home_work_title", "Selected work: heading", "Built, shipped | & live"],
+        ["home_work_text", "Selected work: paragraph", "Hospital management, manufacturing execution, EdTech and e-commerce. A few of the products we've designed, engineered and launched for our clients."],
+        ["home_voices_kicker", "Testimonials: small line", "Testimonials // Client voices"],
+        ["home_voices_title", "Testimonials: heading", "In their | own words"],
+        ["home_voices_text", "Testimonials: paragraph", "What the people we've built for say about working with us."],
+        ["home_blog_kicker", "Blog: small line", "Blog // Latest writing"],
+        ["home_blog_title", "Blog: heading", "Insights & | stories"],
+        ["home_blog_text", "Blog: paragraph", "Practical writing on custom software, automation and AI, from the team that builds it."]
+      ]
+    },
+    {
+      "name": "About page",
+      "items": [
+        ["about_kicker", "Small line", "About // System map"],
+        ["about_title", "Title (| before the blue word)", "How we're | wired"],
+        ["about_text", "Paragraph", "IN-TA Solutions, drawn as what it really is: one system, running from {district}, {region}."],
+        ["about_services_kicker", "Services: small line", "Services // What runs here"],
+        ["about_services_title", "Services: heading ({n} becomes the number of services)", "One core. | {n} modules."],
+        ["about_origin_kicker", "Where it started: small line", "Where it started // Thonichal, Mananthavady"],
+        ["about_origin_year", "Where it started: year", "2023"],
+        ["about_origin_text", "Where it started: text", "IN-TA Solutions began right here, with a small team and a simple idea: businesses deserve software built around how they actually work."],
+        ["about_stack_kicker", "Stack: small line", "Stack // The orbit"],
+        ["about_stack_title", "Stack: heading", "One team. | Every layer."],
+        ["about_stack_text", "Stack: paragraph", "Intelligence, product and platform, engineered in-house around a single core. The tools we design, build and ship with every day."],
+        ["about_clients_kicker", "Clients: small line", "Clients // Connected to the core"],
+        ["about_clients_title", "Clients: heading", "Who we | build for."],
+        ["about_closing_kicker", "Closing: small line", "Our reach // Where it runs"],
+        ["about_closing_title", "Closing: heading", "Built in {district}. | Running wherever you are."],
+        ["about_closing_text", "Closing: text", "One point on the map. Software that reaches well beyond it."]
+      ]
+    },
+    {
+      "name": "Services page (the board)",
+      "items": [
+        ["services_kicker", "Small line", "Services // One board"],
+        ["services_title", "Title", "Everything we build. | On one board."],
+        ["services_text", "Paragraph", "Software, websites, apps, design, marketing, search, media and AI. Each one is a part on the same board: it does its own job, and the copper connects it to all the others."],
+        ["services_plan_kicker", "Board view: small line", "The board // Our services"],
+        ["services_plan_title", "Board view: heading ({n} becomes the number of parts)", "{n} parts are ours. | One socket is empty."],
+        ["services_ai_fact", "AI part: opening fact (its source link stays: Wikipedia, Transistor count)", "One AI processor now holds 208 billion switches. The most advanced part on the board is the one that learns."],
+        ["services_ai_beats", "AI part: the three lines that follow (one per line)", "One switch knows almost nothing.\nConnect billions of them, and it starts to learn.\nIt gets things wrong, measures how wrong, and adjusts. That is training."],
+        ["services_ai_note", "AI part: note under the last line", "A model is only as good as what it learns from. We train it on your business."],
+        ["services_ask", "AI part: order heading", "Give it an order."],
+        ["services_ask_note", "AI part: order note", "Say what you need. It finds the right part of the board and reads the details from our live service data."],
+        ["services_orders", "AI part: example orders (one per line)", "Build me a mobile app\nGet us found on Google\nAutomate our support\nMake a product video"],
+        ["services_close_kicker", "Ending: small line", "Next // Your project"],
+        ["services_close_title", "Ending: heading", "This socket is still empty. | What are we building?"]
+      ]
+    },
+    {
+      "name": "Portfolio page",
+      "items": [
+        ["portfolio_kicker", "Small line", "Our work"],
+        ["portfolio_title", "Title", "One rack. | All our work."],
+        ["portfolio_text", "Paragraph", "Every screen here is a real project we designed and built. Scroll, and they come home to the rack, then open one at a time."],
+        ["portfolio_empty_title", "Empty slot: heading", "This slot is | still empty."],
+        ["portfolio_empty_text", "Empty slot: text", "Tell us what you want to build, and it could be the next one in the rack."]
+      ]
+    },
+    {
+      "name": "Blog page",
+      "items": [
+        ["blog_kicker", "Small line", "Blog // Latest writing"],
+        ["blog_title", "Title", "Insights & | stories."],
+        ["blog_text", "Paragraph", "Practical writing on custom software, automation and AI, from the team that builds it."]
+      ]
+    },
+    {
+      "name": "Contact page",
+      "items": [
+        ["contact_kicker", "Small line", "Contact // Patch panel"],
+        ["contact_title", "Title", "Plug in. | We'll pick up."],
+        ["contact_text", "Paragraph", "Four lines into our team in {district}."],
+        ["contact_message_port", "Message port: line under its name", "Tell us what you need"],
+        ["contact_call_text", "Call: text ({days} and {time} come from the office hours)", "Call our office in {district}, {days}, {time} India time."],
+        ["contact_email_text", "Email: text", "Good for briefs, files and anything you'd like in writing. Tell us what you're building and where it's stuck."]
+      ]
+    },
+    {
+      "name": "Footer",
+      "items": [
+        ["footer_kicker", "Small line", "Got an idea? // Let's talk"],
+        ["footer_cta", "Big sign-off (| before the blue line)", "Let's build | what's next"],
+        ["footer_text", "Line under the logo", "Software, apps and AI for growing businesses, built by our team in {district}, {region}."]
+      ]
+    },
+    {
+      "name": "Search engines",
+      "items": [
+        ["seo_home_title", "Home: title", "Top IT Company in Wayanad | Mobile App Development Team | INTA Solutions"],
+        ["seo_home_description", "Home: description", "INTA Solutions is the #1 software development company in Wayanad, Kerala. We provide expert mobile app development, AI integration, and custom enterprise software solutions."],
+        ["seo_about_title", "About: title", "About Us | INTA Solutions"],
+        ["seo_about_description", "About: description", "How INTA Solutions is wired: a software company in Wayanad, Kerala, mapped as one system, from the services we run to the technology behind them."],
+        ["seo_services_title", "Services: title", "Our Services | Professional IT Solutions | INTA Solutions"],
+        ["seo_services_description", "Services: description", "Comprehensive software development services including web development, mobile app development, AI integration, and digital marketing. Transform your business with INTA Solutions."],
+        ["seo_portfolio_title", "Portfolio: title", "Our Portfolio | Showcase of Digital Innovation | INTA Solutions"],
+        ["seo_portfolio_description", "Portfolio: description", "Explore the diverse portfolio of INTA Solutions, featuring custom software, web and mobile apps, and enterprise platforms we have built."],
+        ["seo_blog_title", "Blog: title", "Insights & Stories | INTA Solutions Blog"],
+        ["seo_blog_description", "Blog: description", "Expert perspectives on custom software development, AI integration, and digital transformation from the team at INTA Solutions."],
+        ["seo_contact_title", "Contact: title", "Contact Us | Get in Touch for IT Consultations | INTA Solutions"],
+        ["seo_contact_description", "Contact: description", "Have a project in mind? Contact INTA Solutions in Wayanad, Kerala to discuss your software, web, or AI development needs. Call, email, visit or send us a message."],
+        ["seo_business_description", "Company description given to search engines", "Leading Software Development Company in Wayanad, Kerala. Specialized in SaaS Development, UI/UX Design, and Mobile App Development for the Malabar region."]
+      ]
+    }
+  ]
+}

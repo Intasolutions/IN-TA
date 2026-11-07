@@ -5,12 +5,13 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
 import { apiBase, calm } from './data';
+import { useSite } from '../../site/SiteContext';
+import { phoneHref } from '../../site/site';
 
 gsap.registerPlugin(useGSAP);
 
 // Must be values the backend accepts (Subscriber.INTEREST_CHOICES in blog/models.py)
 const INTERESTS = ['Web Development', 'Enterprise Web Solutions', 'Mobile App Development', 'UI/UX Design Strategy', 'System Architecture'];
-const PHONE = { href: 'tel:+919447595381', label: '+91 94475 95381' };
 
 const LABEL = 'block mb-2 font-mono text-[10px] uppercase tracking-wider font-bold text-white/60';
 const FIELD =
@@ -21,6 +22,7 @@ type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 /** "Work with us" enquiry band → POST /api/blog/subscribe/ ({ name, phone, interest }). Reveal targets: [data-pf="box" | "in"]. */
 export default function ProjectForm({ defaultInterest, kicker = 'Work with us', title = 'Have a project in mind?', text = "Share your details and we'll reach out to talk through how we can build it." }: { defaultInterest?: string; kicker?: string; title?: string; text?: string }) {
+  const site = useSite();
   const ref = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -96,9 +98,9 @@ export default function ProjectForm({ defaultInterest, kicker = 'Work with us', 
             <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
             {kicker}
           </span>
-          <h3 data-pf="in" className="font-display font-extrabold uppercase tracking-tight leading-[1.02] text-white text-[length:clamp(1.5rem,2.6vw,2.1rem)]">
+          <h2 data-pf="in" className="font-display font-extrabold uppercase tracking-tight leading-[1.02] text-white text-[length:clamp(1.5rem,2.6vw,2.1rem)]">
             {title}
-          </h3>
+          </h2>
           <p data-pf="in" className="mt-2.5 text-sm leading-relaxed max-w-sm text-white/70">
             {text}
           </p>
@@ -205,7 +207,7 @@ export default function ProjectForm({ defaultInterest, kicker = 'Work with us', 
                 {status === 'error' ? (
                   <span>
                     Something went wrong. Please try again, or call{' '}
-                    <a href={PHONE.href} className="underline underline-offset-2 whitespace-nowrap">{PHONE.label}</a>.
+                    <a href={phoneHref(site.phone)} className="underline underline-offset-2 whitespace-nowrap">{site.phone}</a>.
                   </span>
                 ) : slow ? (
                   'Still sending, hang tight…'

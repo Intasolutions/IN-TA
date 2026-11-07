@@ -4,7 +4,7 @@ from .models import Blog, Subscriber
 class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
-        fields = ['id', 'title', 'date', 'tag', 'image', 'link', 'content', 'meta_title', 'meta_description', 'focus_keyword', 'image_alt']
+        fields = ['id', 'title', 'date', 'tag', 'image', 'link', 'content', 'meta_title', 'meta_description', 'focus_keyword', 'image_alt', 'updated_at']
 
 class SubscriberSerializer(serializers.ModelSerializer):
     class Meta:

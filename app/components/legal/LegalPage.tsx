@@ -6,7 +6,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
-import { EMAIL } from '../Footer';
+import { useSite } from '../../site/SiteContext';
 import { scrollToY } from '../SmoothScroll';
 import { usePlayIntro } from '../../context/usePlayIntro';
 
@@ -14,9 +14,10 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export type LegalSection = { id: string; title: string; body: ReactNode };
 
-/** Our email address as a link (from here, since a server page can't read the Footer's constants) */
+/** Our email address (from Site settings) as a link, for the server-rendered pages' wording */
 export function Mail({ subject }: { subject: string }) {
-  return <a href={`mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`}>{EMAIL}</a>;
+  const { email } = useSite();
+  return <a href={`mailto:${email}?subject=${encodeURIComponent(subject)}`}>{email}</a>;
 }
 
 // The three documents, so each can point to the other two
@@ -54,6 +55,7 @@ export default function LegalPage({
   updated: { iso: string; label: string };
   sections: LegalSection[];
 }) {
+  const { email: EMAIL } = useSite();
   const rootRef = useRef<HTMLElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
   const playedRef = usePlayIntro(introRef);

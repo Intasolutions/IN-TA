@@ -1,16 +1,17 @@
 import { Metadata } from 'next';
+import { getSite } from '../site/server';
+import { textOf } from '../site/site';
+import { absolute, pageMetadata } from '../site/seo';
+import { organizationRef } from '../site/schema';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PortfolioPage from '../components/portfolio/PortfolioPage';
 import { toWork, type ApiProject, type ApiSite } from '../components/portfolio/data';
 
-export const metadata: Metadata = {
-  title: 'Our Portfolio | Showcase of Digital Innovation | INTA Solutions',
-  description: 'Explore the diverse portfolio of INTA Solutions, featuring custom software, web and mobile apps, and enterprise platforms we have built.',
-  alternates: {
-    canonical: '/portfolio',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSite();
+  return pageMetadata({ title: textOf(site, 'seo_portfolio_title'), description: textOf(site, 'seo_portfolio_description'), path: '/portfolio' });
+}
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -45,13 +46,13 @@ export default async function Page() {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Work by IN-TA Solutions',
-    url: 'https://www.in-tasolutions.com/portfolio',
+    url: absolute('/portfolio'),
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: [...work.projects.map((p) => ({ name: p.title, description: p.summary, url: p.url, image: p.hero })), ...work.sites.map((s) => ({ name: s.title, description: s.sub, url: s.url, image: s.image }))].map((item, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        item: { '@type': 'CreativeWork', name: item.name, ...(item.description ? { description: item.description } : {}), ...(item.url ? { url: item.url } : {}), ...(item.image ? { image: item.image } : {}), creator: { '@type': 'Organization', name: 'IN-TA Solutions' } },
+        item: { '@type': 'CreativeWork', name: item.name, ...(item.description ? { description: item.description } : {}), ...(item.url ? { url: item.url } : {}), ...(item.image ? { image: item.image } : {}), creator: organizationRef() },
       })),
     },
   };

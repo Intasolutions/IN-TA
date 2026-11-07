@@ -7,7 +7,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Scramble from '../Scramble';
 import { CLIENTS_PATH, toClients, type MapClient } from './clients';
-import { CLIENTS } from './story';
+import { useText } from '../../site/SiteContext';
+import { accent } from '../../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -63,14 +64,16 @@ export function useClients(initial: MapClient[]) {
 
 /** The stop's words, in the same voice as the services and the orbit */
 function ClientsHeading({ clients, id }: { clients: MapClient[]; id: string }) {
+  const t = useText();
+  const [plain, bright] = accent(t('about_clients_title'));
   return (
     <>
       <span className="mb-2 inline-flex items-center gap-2 sm:gap-3 font-mono text-[9px] min-[380px]:text-[10px] sm:text-[11px] tracking-[0.14em] min-[380px]:tracking-[0.2em] sm:tracking-[0.3em] uppercase font-bold text-[#9dbbff]">
         <span className="h-2 w-2 shrink-0 rounded-full bg-current animate-pulse" />
-        {CLIENTS.kicker}
+        {t('about_clients_kicker')}
       </span>
       <h2 id={id} className="heading-section text-white">
-        {CLIENTS.plain} <span className={GRADIENT_ON_DARK}>{CLIENTS.bright}</span>
+        {plain} <span className={GRADIENT_ON_DARK}>{bright}</span>
       </h2>
       {clients[0].id < 0 && <p className="mt-2 mx-auto w-fit rounded bg-amber-300/90 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-midnight">Sample logos · local preview only</p>}
     </>

@@ -12,6 +12,8 @@ import { refreshSoon } from '../services/detail/refresh';
 import { splitAccent } from '../services/detail/types';
 import { optimisable, toWork, type RackProject, type RackSite, type Work } from './data';
 import RackStage from './RackStage';
+import { useText } from '../../site/SiteContext';
+import { accent } from '../../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -87,12 +89,14 @@ function MoreSites({ sites }: { sites: RackSite[] }) {
 
 /** With animations off: the same work, one project after another */
 function StillList({ projects, onView }: { projects: RackProject[]; onView: (p: RackProject) => void }) {
+  const t = useText();
+  const [titlePlain, titleBright] = accent(t('portfolio_title'));
   return (
     <section aria-label="Our projects" className={`${CONTAINER} pb-6 pt-[calc(var(--header-h)+1.5rem)]`}>
-      <p className="inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px] sm:tracking-[0.3em]">Our work {'//'} The rack</p>
+      <p className="inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px] sm:tracking-[0.3em]">{t('portfolio_kicker')} {'//'} The rack</p>
       <h1 className="heading-page mt-3 text-white">
-        <span className="block">One rack.</span>
-        <span className="block"><span className="heading-accent-dark heading-serif">All our work.</span></span>
+        <span className="block">{titlePlain}</span>
+        <span className="block"><span className="heading-accent-dark heading-serif">{titleBright}</span></span>
       </h1>
       <ul className="mt-6 space-y-10 sm:space-y-14">
         {projects.map((p) => {

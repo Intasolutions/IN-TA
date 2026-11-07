@@ -12,7 +12,9 @@ import { apiBase } from '../blog/data';
 import { jumpToY } from '../SmoothScroll';
 import { usePlayIntro } from '../../context/usePlayIntro';
 import { createChip, type ChipEngine } from './chipEngine';
-import { AI_BLOCK, AI_SLUG, BLOCKS, centreOf, CLOSE, HERO, KIND, linkBetween, NOW, PLAN, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
+import { AI_BLOCK, AI_SLUG, BLOCKS, centreOf, HERO, KIND, linkBetween, NOW, PLAN, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
+import { useText } from '../../site/SiteContext';
+import { accent, linesOf, standardText } from '../../site/site';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
 import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, ramp, smooth, smoother, type Camera, type Key, fieldOfView } from './score';
 
@@ -112,6 +114,7 @@ const namesOf = (list: unknown): string[] => (Array.isArray(list) ? list.map((x)
 
 /** Give the board an order: the words a visitor would really use */
 function OrderConsole({ onOrder }: { onOrder: (text: string) => void }) {
+  const t = useText();
   const [value, setValue] = useState('');
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -123,7 +126,7 @@ function OrderConsole({ onOrder }: { onOrder: (text: string) => void }) {
   return (
     <div className="pointer-events-auto">
       <ul className="flex flex-wrap items-center justify-center gap-2">
-        {NOW.orders.map((order) => (
+        {linesOf(t('services_orders')).map((order) => (
           <li key={order}>
             <button
               type="button"
@@ -359,6 +362,12 @@ function Still({ name }: { name: string }) {
 }
 
 export default function ServiceChip({ services }: { services: ChipService[] }) {
+  const t = useText();
+  const [heroPlain, heroBright] = accent(t('services_title'));
+  const [closePlain, closeBright] = accent(t('services_close_title'));
+  // The animation has a scene for each of three lines: fewer typed in the admin are made up from the standard ones
+  const typedBeats = linesOf(t('services_ai_beats'));
+  const beats = [0, 1, 2].map((i) => typedBeats[i] ?? linesOf(standardText('services_ai_beats'))[i]);
   const rootRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<ChipEngine | null>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
@@ -389,7 +398,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
   const shown = score.services.map((b) => ({ beat: b, service: serviceOf(b.block)! }));
   // A service added in the admin that the board has no part for yet still gets a way in
   const extras = services.filter((s) => s.slug !== AI_SLUG && !BLOCKS.some((b) => b.service?.slug === s.slug));
-  const planHeading = PLAN.plain.replace('{n}', NUMBER_WORDS[shown.length + 1] ?? String(shown.length + 1));
+  const [planHeading, planBright] = accent(t('services_plan_title', { n: NUMBER_WORDS[shown.length + 1] ?? String(shown.length + 1) }));
   const planParts = [...shown.map(({ beat }) => beat.block), AI_BLOCK, YOUR_BLOCK];
   const jumpList = [{ id: AI_BLOCK.id, name: ai.title, featured: true }, ...shown.map(({ beat, service }) => ({ id: beat.block.id, name: service.title, featured: false }))];
 
@@ -980,13 +989,13 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
     <div className="max-w-[46rem] [@media(min-aspect-ratio:23/20)]:max-w-[min(46rem,50vw)]">
       <p data-hero="kicker" className={`${KICKER} mb-3 sm:mb-4`}>
         <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-current animate-pulse" />
-        {HERO.kicker}
+        {t('services_kicker')}
       </p>
       <h1 id="chip-title" className="heading-page text-midnight">
-        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="block">{HERO.plain}</span></span>
-        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="heading-accent heading-serif">{HERO.bright}</span></span>
+        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="block">{heroPlain}</span></span>
+        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="heading-accent heading-serif">{heroBright}</span></span>
       </h1>
-      <p data-hero="in" className={`mt-3 sm:mt-5 max-w-2xl text-[15px] sm:text-base lg:text-lg leading-relaxed [@media(max-height:480px)]:hidden ${BODY}`}>{HERO.text}</p>
+      <p data-hero="in" className={`mt-3 sm:mt-5 max-w-2xl text-[15px] sm:text-base lg:text-lg leading-relaxed [@media(max-height:480px)]:hidden ${BODY}`}>{t('services_text')}</p>
       <nav data-hero="in" aria-label="Jump to a service" className="mt-3.5 sm:mt-6 [@media(max-height:620px)]:hidden">
         <ul className="flex flex-wrap gap-1.5 sm:gap-2">
           {jumpList.map((item) => (
@@ -1036,10 +1045,10 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
           </section>
         ))}
         <section id={YOUR_BLOCK.id} className="relative px-4 pt-24 pb-10 text-center">
-          <p className={`${KICKER} mb-3`}>{CLOSE.kicker}</p>
+          <p className={`${KICKER} mb-3`}>{t('services_close_kicker')}</p>
           <h2 className="heading-section mx-auto max-w-5xl text-midnight">
-            <span className="block">{CLOSE.plain}</span>
-            <span className="heading-accent block">{CLOSE.bright}</span>
+            <span className="block">{closePlain}</span>
+            <span className="heading-accent block">{closeBright}</span>
           </h2>
         </section>
         <div className="relative px-3 sm:px-6 pb-10">
@@ -1072,11 +1081,11 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
                 <div className="max-w-[27rem]">
                   <p data-w className={`${KICKER} mb-3`}>
                     <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-current animate-pulse" />
-                    {PLAN.kicker}
+                    {t('services_plan_kicker')}
                   </p>
                   <h2 className="heading-section text-midnight">
                     <span className="block"><Words text={planHeading} /></span>
-                    <span data-b className="heading-accent block">{PLAN.bright}</span>
+                    <span data-b className="heading-accent block">{planBright}</span>
                   </h2>
                   <p data-b className={`mt-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider ${READOUT_KEY} [@media(max-height:480px)]:hidden`}>{PLAN.hint}</p>
                 </div>
@@ -1115,18 +1124,18 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
             <div id={AI_BLOCK.id} data-beat="ai-fact" aria-label={ai.title} className="invisible pointer-events-none absolute inset-0 text-center">
               <div className="absolute inset-x-0 bottom-[max(1.5rem,5svh)] px-4">
                 <div data-zoom data-card className={`${LINE_CARD} max-w-4xl`}>
-                  <p className="heading-lead text-midnight"><Words text={NOW.fact} /></p>
+                  <p className="heading-lead text-midnight"><Words text={t('services_ai_fact')} /></p>
                 </div>
               </div>
             </div>
-            {NOW.beats.map((text, i) => (
-              <div key={text} data-beat={`ai-b${i + 1}`} className="invisible pointer-events-none absolute inset-0 text-center">
+            {beats.map((text, i) => (
+              <div key={i} data-beat={`ai-b${i + 1}`} className="invisible pointer-events-none absolute inset-0 text-center">
                 <div className="absolute inset-x-0 bottom-[max(1.5rem,5svh)] px-4">
                   <div data-zoom data-card className={`${LINE_CARD} max-w-3xl`}>
                     <p className="heading-lead text-midnight"><Words text={text} /></p>
                     {i === 2 && (
                       <>
-                        <p className={`mx-auto mt-2 max-w-xl text-sm sm:text-base ${BODY} [@media(max-height:620px)]:hidden`}>{NOW.trainNote}</p>
+                        <p className={`mx-auto mt-2 max-w-xl text-sm sm:text-base ${BODY} [@media(max-height:620px)]:hidden`}>{t('services_ai_note')}</p>
                         <p className={`mt-2 font-mono text-[11px] sm:text-xs uppercase tracking-[0.2em] font-bold ${READOUT_KEY}`}>Error <span data-ai="error" className="tabular-nums text-brand-blue">0.00</span></p>
                       </>
                     )}
@@ -1147,8 +1156,8 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
               <div className={`absolute inset-0 transition-opacity duration-500 ${order ? 'invisible opacity-0' : ''}`}>
                 <div className="absolute inset-x-0 bottom-[max(0.75rem,2.5svh)] px-3 sm:px-4">
                   <div data-zoom data-card className={`${CARD} mx-auto max-w-2xl`}>
-                  <p className="heading-section text-midnight">{NOW.ask}</p>
-                  <p className={`mx-auto mt-2 mb-3 max-w-md text-sm sm:text-base ${BODY} [@media(max-height:620px)]:hidden`}>{NOW.askNote}</p>
+                  <p className="heading-section text-midnight">{t('services_ask')}</p>
+                  <p className={`mx-auto mt-2 mb-3 max-w-md text-sm sm:text-base ${BODY} [@media(max-height:620px)]:hidden`}>{t('services_ask_note')}</p>
                   <div className="[@media(max-height:620px)]:mt-2.5">
                     <OrderConsole onOrder={giveOrder} />
                   </div>
@@ -1171,11 +1180,11 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
                 <div data-zoom data-card className={`${LINE_CARD} max-w-5xl sm:!px-10 sm:!py-6`}>
                 <p data-w className={`${KICKER} mb-3`}>
                   <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-current animate-pulse" />
-                  {CLOSE.kicker}
+                  {t('services_close_kicker')}
                 </p>
                 <h2 className="heading-section mx-auto max-w-5xl text-midnight">
-                  <span className="block"><Words text={CLOSE.plain} /></span>
-                  <span data-b className="heading-accent block">{CLOSE.bright}</span>
+                  <span className="block"><Words text={closePlain} /></span>
+                  <span data-b className="heading-accent block">{closeBright}</span>
                 </h2>
                 </div>
               </div>

@@ -7,41 +7,29 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
 import Scramble from './Scramble';
+import { useText } from '../site/SiteContext';
+import { accent, linesOf } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 // "How We Work" + core values, taken from IN-TA's existing site copy
-const STEPS = [
-  {
-    tag: 'Discover',
-    icon: 'travel_explore',
-    title: 'Strategy before screens',
-    body: 'Research, stakeholder interviews and rapid discovery workshops turn your goals into a clear, research-backed roadmap, so we build the right thing first.',
-    output: 'Roadmap · Scope · Estimate',
-    value: 'Clarity over complexity',
-  },
-  {
-    tag: 'Design',
-    icon: 'design_services',
-    title: 'Prototypes you can click',
-    body: 'Wireframes, interactive prototypes and a shared design system let you validate the product with real users before a line of production code is written.',
-    output: 'Wireframes · Prototype · Design system',
-    value: 'User-centric',
-  },
-  {
-    tag: 'Engineer',
-    icon: 'terminal',
-    title: 'Built, tested, handed over',
-    body: 'Full-stack engineering with automated testing, a clean operational handoff and monitoring in place, with the same team supporting you after launch.',
-    output: 'Web · Mobile · Cloud',
-    value: 'End-to-end ownership',
-  },
-];
+// The three steps' icons; their words are set in the admin (Site settings > Page wording)
+const STEP_ICONS = ['travel_explore', 'design_services', 'terminal'];
 
 export default function Philosophy() {
+  const t = useText();
+  const STEPS = STEP_ICONS.map((icon, i) => ({
+    icon,
+    tag: t(`home_step${i + 1}_tag`),
+    title: t(`home_step${i + 1}_title`),
+    body: t(`home_step${i + 1}_text`),
+    output: t(`home_step${i + 1}_output`),
+    value: t(`home_step${i + 1}_value`),
+  }));
+  const [titleLines, titleBright] = accent(t('home_philosophy_title'));
   const ref = useRef<HTMLElement>(null);
   // Bumped each time a card becomes active, to replay its tag scramble
-  const [tagKeys, setTagKeys] = useState(() => STEPS.map(() => 0));
+  const [tagKeys, setTagKeys] = useState(() => STEP_ICONS.map(() => 0));
 
   useGSAP(
     () => {
@@ -169,7 +157,7 @@ export default function Philosophy() {
           <div className="flex items-center gap-3 mb-5">
             <span data-ph="kicker-line" className="w-6 h-0.5 bg-brand-blue origin-left" />
             <span data-ph="kicker" className="font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase font-bold">
-              Philosophy // How we work
+              {t('home_philosophy_kicker')}
             </span>
           </div>
 
@@ -177,19 +165,19 @@ export default function Philosophy() {
             id="philosophy-title"
             className="font-display font-extrabold text-[length:clamp(2rem,4.2vw,3.4rem)] text-midnight tracking-tight leading-[1.04] uppercase"
           >
-            <span className="block overflow-hidden"><span data-ph="line" className="block">We don&apos;t just</span></span>
-            <span className="block overflow-hidden"><span data-ph="line" className="block">write code.</span></span>
+            {linesOf(titleLines).map((line, i) => (
+              <span key={i} className="block overflow-hidden"><span data-ph="line" className="block">{line}</span></span>
+            ))}
             <span className="block overflow-hidden pb-[0.12em]">
               {/* Static version of the hero's gradient (only the hero animates); padded so g/p descenders aren't clipped */}
               <span data-ph="line" className="inline-block pr-1 pb-[0.14em] font-serif italic font-light normal-case bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent">
-                We engineer products that last.
+                {titleBright}
               </span>
             </span>
           </h2>
 
           <p data-ph="copy" className="text-midnight/80 text-base leading-relaxed mt-6 max-w-xl">
-            Founded by engineers and product designers, IN-TA treats every project as a product, not a ticket. Clear
-            strategy first, careful design next, then engineering built to grow with your business.
+            {t('home_philosophy_text')}
           </p>
           <Link
             data-ph="copy"
@@ -212,17 +200,17 @@ export default function Philosophy() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-blue" />
                 </span>
-                WEEKLY DEMOS
+                {t('home_deliver_badge')}
               </span>
             </div>
             <dl className="pt-4 grid grid-cols-2 gap-4 font-mono">
               <div>
                 <dt className="text-[10px] text-midnight/50 font-semibold uppercase">Cadence</dt>
-                <dd className="text-xs text-midnight font-bold mt-0.5">Weekly sprints</dd>
+                <dd className="text-xs text-midnight font-bold mt-0.5">{t('home_deliver_cadence')}</dd>
               </div>
               <div>
                 <dt className="text-[10px] text-midnight/50 font-semibold uppercase">Ownership</dt>
-                <dd className="text-xs text-brand-blue font-bold mt-0.5">Strategy → Launch</dd>
+                <dd className="text-xs text-brand-blue font-bold mt-0.5">{t('home_deliver_ownership')}</dd>
               </div>
             </dl>
           </div>
@@ -236,7 +224,7 @@ export default function Philosophy() {
 
           {STEPS.map((step, i) => (
             <li
-              key={step.tag}
+              key={i}
               data-ph="card"
               data-index={i}
               className="group relative p-6 sm:p-8 lg:p-10 rounded-3xl bg-white border border-brand-blue/20 shadow-sm transition-[border-color,box-shadow,opacity,scale] duration-500

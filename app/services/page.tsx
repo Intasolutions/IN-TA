@@ -1,15 +1,16 @@
 import { Metadata } from 'next';
+import { getSite } from '../site/server';
+import { textOf } from '../site/site';
+import { absolute, pageMetadata } from '../site/seo';
+import { organizationRef } from '../site/schema';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ServiceChip, { type ChipService } from '../components/services/ServiceChip';
 
-export const metadata: Metadata = {
-  title: 'Our Services | Professional IT Solutions | INTA Solutions',
-  description: 'Comprehensive software development services including web development, mobile app development, AI integration, and digital marketing. Transform your business with INTA Solutions.',
-  alternates: {
-    canonical: '/services',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSite();
+  return pageMetadata({ title: textOf(site, 'seo_services_title'), description: textOf(site, 'seo_services_description'), path: '/services' });
+}
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -55,8 +56,8 @@ export default async function Page() {
         '@type': 'Service',
         name: s.title,
         description: s.description,
-        url: `https://www.in-tasolutions.com/services/${s.slug}`,
-        provider: { '@type': 'Organization', name: 'IN-TA Solutions' },
+        url: absolute(`/services/${s.slug}`),
+        provider: organizationRef(),
       },
     })),
   };

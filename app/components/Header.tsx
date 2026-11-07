@@ -5,17 +5,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Icon from './Icon';
+import MainNav, { type NavLink } from './MainNav';
+import { useSite } from '../site/SiteContext';
+import { coords, phoneHref } from '../site/site';
 
-const NAV_LINKS = [
+// Home is only offered away from the home page
+const HOME_LINK: NavLink = { name: 'Home', href: '/' };
+const NAV_LINKS: NavLink[] = [
   { name: 'Work', href: '/portfolio' },
   { name: 'Capabilities', href: '/services' },
   { name: 'About', href: '/about' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },
 ];
-
-const PHONE_DISPLAY = '+91 94475 95381';
-const PHONE_HREF = 'tel:+919447595381';
 
 // Own component so the ticking clock re-renders only itself, not the whole header
 export function IstClock() {
@@ -36,6 +38,7 @@ export function IstClock() {
 }
 
 export default function Header() {
+  const site = useSite();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -66,7 +69,8 @@ export default function Header() {
     return () => { document.body.style.overflow = ''; };
   }, [isMobileOpen]);
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
+  const links = pathname === '/' ? NAV_LINKS : [HOME_LINK, ...NAV_LINKS];
 
   return (
     <div
@@ -81,19 +85,19 @@ export default function Header() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue" />
             </span>
-            <span className="hidden lg:inline">SYS.RUNNING [11.8021° N, 76.0232° E]</span>
+            <span className="hidden lg:inline">SYS.RUNNING [{coords(site)}]</span>
             <span className="lg:hidden">SYS.RUNNING</span>
           </span>
           <span className="hidden xl:inline text-brand-blue/30">/</span>
-          <span className="hidden xl:inline text-midnight font-medium">HQ: WAYANAD, KERALA</span>
+          <span className="hidden xl:inline text-midnight font-medium">HQ: {[site.address.district, site.address.region].filter(Boolean).join(', ').toUpperCase()}</span>
         </div>
         <div className="flex items-center gap-4 sm:gap-6">
           <span className="hidden sm:flex items-center gap-1 text-brand-blue font-semibold tabular-nums">
             <Icon name="schedule" className="text-[13px]" />
             <IstClock />
           </span>
-          <a className="hover:text-brand-blue transition-colors text-midnight font-semibold whitespace-nowrap" href={PHONE_HREF}>
-            {PHONE_DISPLAY}
+          <a className="hover:text-brand-blue transition-colors text-midnight font-semibold whitespace-nowrap" href={phoneHref(site.phone)}>
+            {site.phone}
           </a>
         </div>
       </div>
@@ -135,21 +139,7 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1 bg-canvas p-1.5 rounded-full border border-brand-blue/20 shadow-inner">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={isActive(link.href) ? 'page' : undefined}
-                className={`px-3.5 xl:px-5 py-2 rounded-full font-mono text-[12px] uppercase tracking-wider font-semibold whitespace-nowrap transition-all
-                  ${isActive(link.href)
-                    ? 'text-white bg-brand-blue shadow-sm'
-                    : 'text-midnight hover:text-brand-blue hover:bg-white'}`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+          <MainNav links={links} current={links.findIndex((l) => isActive(l.href))} />
 
           <div className="flex items-center gap-3">
             <Link
@@ -182,7 +172,7 @@ export default function Header() {
             ${isMobileOpen ? 'max-h-[calc(100dvh_-_var(--header-h))] overflow-y-auto' : 'max-h-0 border-transparent'}`}
         >
           <div className="max-w-[1520px] mx-auto px-6 py-6 flex flex-col gap-1">
-            {NAV_LINKS.map((link, i) => (
+            {links.map((link, i) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -202,7 +192,7 @@ export default function Header() {
             <Link
               href="/contact"
               onClick={() => setIsMobileOpen(false)}
-              style={{ transitionDelay: isMobileOpen ? `${120 + NAV_LINKS.length * 60}ms` : '0ms' }}
+              style={{ transitionDelay: isMobileOpen ? `${120 + links.length * 60}ms` : '0ms' }}
               className={`kinetic-cta-btn sm:hidden mt-6 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-lg bg-brand-blue text-white font-mono text-[12px] font-semibold tracking-wider uppercase active:scale-[0.97]
                 ${isMobileOpen ? 'opacity-100' : 'opacity-0'}`}
             >

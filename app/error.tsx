@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from './components/Header';
 import Icon from './components/Icon';
-import { EMAIL } from './components/Footer';
+import { useSite } from './site/SiteContext';
 
 /**
  * When a page fails on our side. Shows Next's reference for the failure (it matches the server's log), so a visitor
@@ -13,6 +13,7 @@ import { EMAIL } from './components/Footer';
  */
 export default function PageError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
+  const { email: EMAIL } = useSite();
   const again = () => {
     startTransition(() => {
       router.refresh();

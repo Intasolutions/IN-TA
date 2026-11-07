@@ -5,7 +5,9 @@ import ArticlePage, { type Article } from '../../components/blog/ArticlePage';
 import { articleHtml } from '../../components/blog/body.server';
 import { apiBase, plainText, relatedTo, serviceSlugOf, toPost, type ApiPost, type Post } from '../../components/blog/posts';
 
-const SITE = 'https://www.in-tasolutions.com';
+import { absolute, pageMetadata } from '../../site/seo';
+import { breadcrumbs, jsonLdHtml, organizationRef } from '../../site/schema';
+
 const RELATED = 3;
 
 type Props = {
@@ -60,14 +62,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = toPost(api);
   const title = `${api.meta_title?.trim() || post.title} | INTA Solutions`;
   const description = api.meta_description?.trim() || plainText(api.content ?? '').slice(0, 160);
-  const images = post.image ? [{ url: post.image, alt: post.alt || post.title }] : undefined;
-  return {
+  return pageMetadata({
     title,
     description,
-    alternates: { canonical: post.href },
-    openGraph: { title, description, images, type: 'article', publishedTime: post.iso, tags: post.tags, url: `${SITE}${post.href}` },
-    twitter: { card: images ? 'summary_large_image' : 'summary', title, description, images: images?.map((i) => i.url) },
-  };
+    path: post.href,
+    image: post.image ? { url: post.image, alt: post.alt || post.title } : null,
+    type: 'article',
+    publishedTime: post.iso,
+    modifiedTime: api.updated_at ?? undefined,
+    tags: post.tags,
+  });
 }
 
 export default async function Page({ params }: Props) {
@@ -77,23 +81,32 @@ export default async function Page({ params }: Props) {
 
   const post = toPost(api);
   const [posts, service] = await Promise.all([getPosts(), getService(serviceSlugOf(api.link))]);
-  const article: Article = { ...post, html: articleHtml(api.content ?? ''), url: `${SITE}${post.href}`, service };
+  const article: Article = { ...post, html: articleHtml(api.content ?? ''), url: absolute(post.href), service };
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    url: article.url,
-    datePublished: post.iso,
-    description: post.excerpt,
-    ...(post.image ? { image: [post.image] } : {}),
-    author: { '@type': 'Organization', name: 'INTA Solutions', url: SITE },
-    publisher: { '@type': 'Organization', name: 'INTA Solutions', logo: { '@type': 'ImageObject', url: `${SITE}/logo/logo-inta.png` } },
-  };
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      url: article.url,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': article.url },
+      datePublished: post.iso,
+      ...(api.updated_at ? { dateModified: api.updated_at } : {}),
+      description: post.excerpt,
+      ...(post.tag ? { articleSection: post.tag, keywords: post.tags.join(', ') } : {}),
+      wordCount: plainText(api.content ?? '').split(/\s+/).filter(Boolean).length,
+      ...(post.image ? { image: [post.image] } : {}),
+      inLanguage: 'en-IN',
+      author: organizationRef(),
+      publisher: organizationRef(),
+      ...(service ? { about: { '@type': 'Service', name: service.title, url: absolute(`/services/${service.slug}`) } } : {}),
+    },
+    breadcrumbs([{ name: 'Blog', path: '/blog' }, { name: post.title, path: post.href }]),
+  ];
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }} />
       <ArticlePage article={article} related={relatedTo(post, posts, RELATED)} />
     </>
   );

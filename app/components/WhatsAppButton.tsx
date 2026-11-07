@@ -5,10 +5,13 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { useSite } from '../site/SiteContext';
+import { phoneDigits } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function WhatsAppButton() {
+  const site = useSite();
   const containerRef = useRef<HTMLDivElement>(null);
   const btnWrapperRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLAnchorElement>(null);
@@ -136,7 +139,7 @@ export default function WhatsAppButton() {
         <div
           ref={tooltipRef}
           className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 items-center gap-3 bg-white/80 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] pl-5 pr-10 py-3 rounded-2xl opacity-0 scale-95 origin-right transition-colors hover:bg-white/90 cursor-pointer z-[-1]"
-          onClick={() => window.open('https://wa.me/919447595381', '_blank')}
+          onClick={() => window.open(`https://wa.me/${phoneDigits(site.phone)}`, '_blank')}
         >
           <div className="flex flex-col items-start min-w-[120px]">
             <p ref={textTitleRef} className="text-[15px] font-bold text-slate-800 leading-none mb-1">
@@ -167,7 +170,7 @@ export default function WhatsAppButton() {
 
           <a
             ref={btnRef}
-            href="https://wa.me/919447595381"
+            href={`https://wa.me/${phoneDigits(site.phone)}`}
             target="_blank"
             rel="noopener noreferrer"
             // RESPONSIVE: Slightly smaller on mobile if needed, but w-14 (56px) is a standard good touch target

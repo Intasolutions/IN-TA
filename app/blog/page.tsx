@@ -1,16 +1,16 @@
 import { Metadata } from 'next';
+import { getSite } from '../site/server';
+import { textOf } from '../site/site';
+import { absolute, pageMetadata } from '../site/seo';
+import { organizationRef } from '../site/schema';
 import BlogIndex from '../components/blog/BlogIndex';
 import { apiBase, toPost, type ApiPost, type Post } from '../components/blog/posts';
 
-const SITE = 'https://www.in-tasolutions.com';
 
-export const metadata: Metadata = {
-  title: 'Insights & Stories | INTA Solutions Blog',
-  description: 'Expert perspectives on custom software development, AI integration, and digital transformation from the team at INTA Solutions.',
-  alternates: {
-    canonical: '/blog',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSite();
+  return pageMetadata({ title: textOf(site, 'seo_blog_title'), description: textOf(site, 'seo_blog_description'), path: '/blog' });
+}
 
 async function getPosts(): Promise<Post[]> {
   try {
@@ -29,11 +29,12 @@ export default async function Page() {
     '@context': 'https://schema.org',
     '@type': 'Blog',
     name: 'INTA Solutions Blog',
-    url: `${SITE}/blog`,
+    url: absolute('/blog'),
+    publisher: organizationRef(),
     blogPost: posts.map((p) => ({
       '@type': 'BlogPosting',
       headline: p.title,
-      url: `${SITE}${p.href}`,
+      url: absolute(p.href),
       datePublished: p.iso,
       description: p.excerpt,
       ...(p.image ? { image: p.image } : {}),

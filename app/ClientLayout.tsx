@@ -6,6 +6,8 @@ import MaskReveal from './components/MaskReveal';
 import SmoothScroll from './components/SmoothScroll';
 import PageLoader from './components/PageLoader';
 import { RevealProvider, useReveal } from './context/RevealContext';
+import { SiteProvider } from './site/SiteContext';
+import type { Site } from './site/site';
 // WhatsApp button hidden site-wide for now; re-enable by restoring the import and <WhatsAppButton /> below
 // import WhatsAppButton from './components/WhatsAppButton';
 
@@ -55,13 +57,17 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function ClientLayout({
+  site,
   children,
 }: {
+  site: Site;
   children: React.ReactNode;
 }) {
   return (
-    <RevealProvider>
-      <LayoutContent>{children}</LayoutContent>
-    </RevealProvider>
+    <SiteProvider site={site}>
+      <RevealProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </RevealProvider>
+    </SiteProvider>
   );
 }

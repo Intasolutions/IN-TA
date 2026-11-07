@@ -8,7 +8,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
 import Scramble from '../Scramble';
-import { SERVICES } from '../Footer';
 import { scrollToY } from '../SmoothScroll';
 import { IstClock } from '../Header';
 import { useOfficeStatus } from '../OfficeStatus';
@@ -18,7 +17,8 @@ import { ClientBoard, ClientRoute, useClients } from './ClientLogos';
 import EarthReturn from './EarthReturn';
 import type { MapClient } from './clients';
 import { createGlobe } from './globe';
-import { CLOSING, ORIGIN } from './story';
+import { useSite, useText } from '../../site/SiteContext';
+import { accent, coords, countryName, hoursShort } from '../../site/site';
 import { clamp01, drawMap, makeTrace, smooth, TARGET, viewOf, type LandDetail, type Point, type Trace } from './mapCanvas';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -76,13 +76,16 @@ const REST_LON = TARGET.lon + 24;
 const REST_LAT = 10;
 const AUTO_SPIN = -3.5; // degrees per second
 
-const placeName = (fov: number) =>
-  fov > 6000 ? 'IN-TA Solutions' : fov > 1200 ? 'India' : fov > 240 ? 'Kerala' : fov > 60 ? 'Wayanad' : 'Thonichal, Mananthavady';
+// What the camera is over at this zoom: the company, then its country, state, district and street (from Site settings)
+type Places = { country: string; region: string; district: string; street: string };
+const placeName = (fov: number, p: Places) =>
+  fov > 6000 ? 'IN-TA Solutions' : fov > 1200 ? p.country : fov > 240 ? p.region : fov > 60 ? p.district : p.street;
 
 const formatKm = (fov: number) =>
   (fov >= 1000 ? Math.round(fov / 10) * 10 : fov >= 100 ? Math.round(fov) : Number(fov.toFixed(1))).toLocaleString('en-US');
 
 function StatusPill() {
+  const site = useSite();
   const status = useOfficeStatus();
   const isOpen = status?.startsWith('OPEN') ?? false;
   return (
@@ -91,7 +94,7 @@ function StatusPill() {
         {isOpen && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7fa6ff] opacity-75" />}
         <span className={`relative inline-flex h-2 w-2 rounded-full ${isOpen ? 'bg-[#7fa6ff]' : 'bg-white/30'}`} />
       </span>
-      <span className={isOpen ? 'text-[#9dbbff] font-bold' : 'text-white/60'}>{status ?? 'Mon–Sat · 9 AM–5 PM IST'}</span>
+      <span className={isOpen ? 'text-[#9dbbff] font-bold' : 'text-white/60'}>{status ?? hoursShort(site)}</span>
       <span aria-hidden="true" className="text-white/25">·</span>
       <span className="text-white/60 tabular-nums">
         <IstClock />
@@ -115,14 +118,16 @@ function Core({ className = '' }: { className?: string }) {
 }
 
 function Heading({ count }: { count: number }) {
+  const t = useText();
+  const [plain, bright] = accent(t('about_services_title', { n: count }));
   return (
     <div data-sm="head" className="text-center">
       <span className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-2">
         <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-        Services // What runs here
+        {t('about_services_kicker')}
       </span>
       <h2 className="heading-section text-white">
-        One core. <span className={GRADIENT_ON_DARK}>{count} modules.</span>
+        {plain} <span className={GRADIENT_ON_DARK}>{bright}</span>
       </h2>
     </div>
   );
@@ -153,7 +158,17 @@ function StopsNav({ hasClients, stopChangedRef, onGo }: { hasClients: boolean; s
 export default function SystemMap({ services, clients: initialClients }: { services: MapService[]; clients: MapClient[] }) {
   const clients = useClients(initialClients);
   const boardStale = useRef(false);
-  const modules: MapService[] = services.length ? services : SERVICES.map((s) => ({ title: s.name, slug: s.slug, description: '' }));
+  const site = useSite();
+  const t = useText();
+  const modules: MapService[] = services.length ? services : site.services.map((s) => ({ title: s.title, slug: s.slug, description: '' }));
+  // Read by the zoom's frame loop, which is set up once
+  const placesRef = useRef<Places>({ country: '', region: '', district: '', street: '' });
+  const { country, region, district, street, locality } = site.address;
+  useEffect(() => {
+    placesRef.current = { country: countryName(country), region, district, street: [street, locality].filter(Boolean).join(', ') };
+  }, [country, region, district, street, locality]);
+  const [closingPlain, closingBright] = accent(t('about_closing_title'));
+  const [titlePlain, titleBright] = accent(t('about_title'));
   const half = Math.ceil(modules.length / 2);
   const ref = useRef<HTMLDivElement>(null);
   const activeRef = useRef(-1);
@@ -480,7 +495,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
             lastFov = km;
             fovEl.textContent = km;
           }
-          const name = placeName(fov);
+          const name = placeName(fov, placesRef.current);
           if (name !== lastPlace) {
             lastPlace = name;
             placeText.textContent = name;
@@ -759,14 +774,14 @@ export default function SystemMap({ services, clients: initialClients }: { servi
             <div className="max-w-xl">
               <span data-sm="kicker" className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-3 sm:mb-4">
                 <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-                About // System map
+                {t('about_kicker')}
               </span>
               <h1 id="sm-title" className="heading-page text-white">
-                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className="block">How we&apos;re</span></span>
-                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className={`heading-serif ${GRADIENT_ON_DARK}`}>wired</span></span>
+                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className="block">{titlePlain}</span></span>
+                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className={`heading-serif ${GRADIENT_ON_DARK}`}>{titleBright}</span></span>
               </h1>
               <p data-sm="copy" className="mt-3 sm:mt-5 text-white/75 text-sm sm:text-base lg:text-lg leading-relaxed max-w-md">
-                IN-TA Solutions, drawn as what it really is: one system, running from Wayanad, Kerala.
+                {t('about_text')}
               </p>
               <p data-sm="copy" className="mt-4 sm:mt-6 inline-flex items-center gap-2 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-[#9dbbff] motion-reduce:hidden">
                 <Icon name="south" className="text-[15px] animate-bounce" /> <span className="max-[379px]:hidden">Spin the globe, or scroll to zoom in</span><span className="hidden max-[379px]:inline">Scroll to zoom in</span>
@@ -783,10 +798,10 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           >
             <span className="inline-flex items-center gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-[#9dbbff] [@media(max-height:480px)]:hidden">
               <span className="h-2 w-2 shrink-0 rounded-full bg-current animate-pulse" />
-              {ORIGIN.kicker}
+              {t('about_origin_kicker')}
             </span>
-            <p className={`mt-2 font-display font-extrabold leading-none text-[length:clamp(3rem,7vw,5.5rem)] [@media(max-height:480px)]:mt-0 [@media(max-height:480px)]:text-[2rem] ${GRADIENT_ON_DARK}`}>{ORIGIN.year}</p>
-            <p className="mt-2 sm:mt-3 text-sm sm:text-base text-white/85 leading-relaxed [@media(max-height:480px)]:mt-1 [@media(max-height:480px)]:text-[13px] [@media(max-height:480px)]:leading-snug">{ORIGIN.text}</p>
+            <p className={`mt-2 font-display font-extrabold leading-none text-[length:clamp(3rem,7vw,5.5rem)] [@media(max-height:480px)]:mt-0 [@media(max-height:480px)]:text-[2rem] ${GRADIENT_ON_DARK}`}>{t('about_origin_year')}</p>
+            <p className="mt-2 sm:mt-3 text-sm sm:text-base text-white/85 leading-relaxed [@media(max-height:480px)]:mt-1 [@media(max-height:480px)]:text-[13px] [@media(max-height:480px)]:leading-snug">{t('about_origin_text')}</p>
           </div>
 
           {/* ---- Back to Earth: the closing words, beside the whole planet again ---- */}
@@ -797,12 +812,12 @@ export default function SystemMap({ services, clients: initialClients }: { servi
             <div className="max-w-xl">
               <span className="mb-3 inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff]">
                 <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
-                {CLOSING.kicker}
+                {t('about_closing_kicker')}
               </span>
               <h2 className="heading-section text-white">
-                {CLOSING.plain} <span className={GRADIENT_ON_DARK}>{CLOSING.bright}</span>
+                {closingPlain} <span className={GRADIENT_ON_DARK}>{closingBright}</span>
               </h2>
-              <p className="mt-4 max-w-md text-sm sm:text-base lg:text-lg text-white/75 leading-relaxed">{CLOSING.text}</p>
+              <p className="mt-4 max-w-md text-sm sm:text-base lg:text-lg text-white/75 leading-relaxed">{t('about_closing_text')}</p>
             </div>
           </div>
 
@@ -810,7 +825,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           <dl data-sm="hud" className="pointer-events-none absolute left-4 sm:left-6 bottom-4 sm:bottom-6 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider motion-reduce:hidden [@media(max-height:480px)]:hidden [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]">
             <div className="flex gap-3">
               <dt className="w-[10.5em] whitespace-nowrap text-white/70">Target</dt>
-              <dd className="text-white">{TARGET.lat}° N, {TARGET.lon}° E</dd>
+              <dd className="text-white">{coords(site)}</dd>
             </div>
             <div className="flex gap-3 mt-1">
               <dt className="w-[10.5em] whitespace-nowrap text-white/70">Field of view</dt>

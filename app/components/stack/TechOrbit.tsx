@@ -5,7 +5,8 @@ import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { STACK } from './data';
+import { useSite, useText } from '../../site/SiteContext';
+import { accent, type StackGroup } from '../../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -37,12 +38,12 @@ const TONES = {
 };
 
 // r = ring radius as a fraction of the stage width; speed = radians per second (sign = direction)
-const RINGS = [
-  { label: 'Intelligence', ids: ['openai', 'pytorch', 'tensorflow'], r: 0.2, speed: 0.24 },
-  { label: 'Product', ids: ['react', 'next', 'ts', 'tailwind', 'figma'], r: 0.33, speed: -0.15 },
-  { label: 'Platform', ids: ['python', 'node', 'aws', 'docker'], r: 0.46, speed: 0.1 },
+// Which tools sit on which ring: each tool's "Orbit ring" in the admin (Technologies)
+const RINGS: { label: string; groups: StackGroup[]; r: number; speed: number }[] = [
+  { label: 'Intelligence', groups: ['ai'], r: 0.2, speed: 0.24 },
+  { label: 'Product', groups: ['frontend', 'design'], r: 0.33, speed: -0.15 },
+  { label: 'Platform', groups: ['backend', 'cloud'], r: 0.46, speed: 0.1 },
 ];
-const BY_ID = Object.fromEntries(STACK.map((s) => [s.id, s]));
 const VB_H = 56; // initial viewBox height; kept in step with the stage's aspect ratio at runtime
 
 /**
@@ -58,6 +59,10 @@ export default function TechOrbit({
   embedded?: boolean;
   titleId?: string;
 }) {
+  const { stack } = useSite();
+  const t = useText();
+  const rings = RINGS.map((ring) => stack.filter((tool) => ring.groups.includes(tool.group)));
+  const [titlePlain, titleBright] = accent(t('about_stack_title'));
   const ref = useRef<HTMLElement>(null);
   const c = TONES[tone];
 
@@ -102,7 +107,7 @@ export default function TechOrbit({
       const items = gsap.utils.toArray<HTMLElement>('[data-orb="item"]').map((el) => {
         const ring = Number(el.dataset.ring);
         const index = Number(el.dataset.index);
-        return { el, ring, base: (index / RINGS[ring].ids.length) * Math.PI * 2 + ring * 0.7, z: -1, x: 0, y: 0 };
+        return { el, ring, base: (index / Math.max(1, Number(el.dataset.count))) * Math.PI * 2 + ring * 0.7, z: -1, x: 0, y: 0 };
       });
       const angles = RINGS.map(() => 0);
       const speeds = RINGS.map((r) => (calm ? 0 : r.speed));
@@ -330,15 +335,14 @@ export default function TechOrbit({
         <div data-orb="header" className="lg:col-span-5">
           <span data-orb="kicker" className={`inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold mb-3 ${c.kicker}`}>
             <span className={`w-2 h-2 rounded-full animate-pulse ${c.dot}`} />
-            Stack // The orbit
+            {t('about_stack_kicker')}
           </span>
           <h2 id={titleId} className={`font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] tracking-tight uppercase ${c.title}`}>
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className="inline-block">One team.</span></span>{' '}
-            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className={`inline-block pb-[0.06em] ${c.gradient}`}>Every layer.</span></span>
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className="inline-block">{titlePlain}</span></span>{' '}
+            <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className={`inline-block pb-[0.06em] ${c.gradient}`}>{titleBright}</span></span>
           </h2>
           <p data-orb="lede" className={`mt-4 text-sm sm:text-base leading-relaxed max-w-xl ${c.copy}`}>
-            Intelligence, product and platform, engineered in-house around a single core. The tools we design, build and
-            ship with every day.
+            {t('about_stack_text')}
           </p>
           <p data-orb="hint" className={`mt-6 hidden lg:block font-mono text-[11px] uppercase tracking-wider font-semibold ${c.hint}`}>
             <span className="pointer-fine:inline hidden">Hover a logo to pause its orbit</span>
@@ -388,11 +392,10 @@ export default function TechOrbit({
               </div>
 
               {/* Orbiting logos */}
-              {RINGS.map((ring, ri) =>
-                ring.ids.map((id, i) => {
-                  const item = BY_ID[id];
+              {rings.map((ring, ri) =>
+                ring.map((item, i) => {
                   return (
-                    <div key={id} data-orb="item" data-ring={ri} data-index={i} className="group/orb absolute left-0 top-0 will-change-transform">
+                    <div key={item.slug || item.name} data-orb="item" data-ring={ri} data-index={i} data-count={ring.length} className="group/orb absolute left-0 top-0 will-change-transform">
                       <div data-orb="pop" className="relative -translate-x-1/2 -translate-y-1/2">
                         <button
                           type="button"

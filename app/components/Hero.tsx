@@ -12,33 +12,30 @@ import EdgePing from './EdgePing';
 import OfficeStatus from './OfficeStatus';
 import Marquee from './Marquee';
 import { useReveal } from '../context/RevealContext';
+import { useSite, useText } from '../site/SiteContext';
+import { accent, listOf } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const FOCUS_AREAS = ['ENTERPRISE ERP', 'AI PIPELINES', 'HIGH-CONCURRENCY WEB'];
+// The words and the figures are set in the admin (Site settings)
 
-// TODO(content): confirm these figures before going live.
-const METRICS = [
-  { label: 'EXPERIENCE INDEX', value: '02', unit: '+ Yrs', note: 'High-stakes engineering' },
-  { label: 'PRODUCTION UNITS', value: '20', unit: '+', note: 'Enterprise grade deployments' },
-  { label: 'UPTIME / SLA', value: '99.9', unit: '%', note: 'Production uptime' },
-  { label: 'DATA PIPELINES', value: '<100', unit: 'ms', note: 'Edge telemetry response' },
-];
-
-const HEADLINE_TOP = 'Engineering';
-
-// "<100" → { prefix: "<", target: 100, decimals: 0, pad: 3 }
+// "<100" → { prefix: "<", target: 100, decimals: 0, pad: 3 }. A figure that isn't a number (like 24/7) doesn't count up.
 function parseMetric(value: string) {
-  const [, prefix = '', num = '0'] = value.match(/^(\D*)([\d.]+)$/) ?? [];
+  const match = value.match(/^(\D*)(\d+(?:\.\d+)?)$/);
+  if (!match) return null;
+  const [, prefix = '', num = '0'] = match;
   const decimals = num.split('.')[1]?.length ?? 0;
   return { prefix, target: parseFloat(num), decimals, pad: decimals ? 0 : num.length };
 }
 
-function formatMetric(n: number, { prefix, decimals, pad }: ReturnType<typeof parseMetric>) {
+function formatMetric(n: number, { prefix, decimals, pad }: NonNullable<ReturnType<typeof parseMetric>>) {
   return prefix + n.toFixed(decimals).padStart(pad, '0');
 }
 
 export default function Hero() {
+  const { metrics } = useSite();
+  const t = useText();
+  const [titleTop, titleBottom] = accent(t('home_hero_title'));
   const heroRef = useRef<HTMLElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const { isIntroReady } = useReveal();
@@ -83,7 +80,8 @@ export default function Hero() {
 
       // Stats count up from zero
       gsap.utils.toArray<HTMLElement>('[data-count]').forEach((el, i) => {
-        const meta = parseMetric(el.dataset.count ?? '0');
+        const meta = parseMetric(el.dataset.count ?? '');
+        if (!meta) return;
         const counter = { v: 0 };
         el.textContent = formatMetric(0, meta);
         tl.to(counter, {
@@ -270,14 +268,14 @@ export default function Hero() {
             <div className="inline-flex items-center gap-3">
               <span className="w-2.5 h-2.5 bg-brand-blue rounded-sm rotate-45 animate-pulse" />
               <Scramble
-                text="EST. 2023 // SPECIALIZED ENGINEERING UNIT"
+                text={t('home_hero_kicker')}
                 playKey={scrambleKey}
                 duration={600}
                 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.1em] min-[400px]:tracking-[0.16em] sm:tracking-[0.25em] text-brand-blue font-bold"
               />
             </div>
             <div className="hidden sm:flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] tracking-widest text-midnight/70 font-semibold">
-              {FOCUS_AREAS.map((area) => (
+              {listOf(t('home_hero_focus')).map((area) => (
                 <span key={area} className="flex items-center gap-1.5">
                   <span className="text-brand-blue font-bold">+</span>
                   <Scramble text={area} playKey={scrambleKey} duration={750} />
@@ -293,7 +291,7 @@ export default function Hero() {
             <div className="inline-flex flex-wrap items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-md bg-white/95 border border-brand-blue/25 text-brand-blue font-mono text-[10px] sm:text-[11px] tracking-wide shadow-sm">
               <span className="hidden sm:inline text-midnight font-bold">IN-TA SOLUTIONS</span>
               <span className="hidden sm:inline text-brand-blue/40">•</span>
-              <span className="font-semibold">CUSTOM SOFTWARE · AI · MOBILE APPS</span>
+              <span className="font-semibold">{t('home_hero_badge')}</span>
             </div>
             <span className="inline-flex items-center gap-3">
               <span className="relative flex items-center justify-center w-6 h-6" aria-hidden="true">
@@ -302,7 +300,7 @@ export default function Hero() {
                 <span className="w-2.5 h-2.5 rounded-full bg-brand-blue relative z-10" />
               </span>
               <Scramble
-                text="LET'S BUILD WHAT'S NEXT"
+                text={t('home_hero_tagline')}
                 playKey={scrambleKey}
                 duration={800}
                 className="font-mono text-[10px] text-brand-blue font-semibold uppercase tracking-wider"
@@ -315,9 +313,9 @@ export default function Hero() {
               data-hero="tilt"
               className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.04em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
             >
-              <span className="sr-only">Engineering Digital Reality</span>
+              <span className="sr-only">{`${titleTop} ${titleBottom}`.trim()}</span>
               <span aria-hidden="true" className="block overflow-hidden pb-[0.06em]">
-                {HEADLINE_TOP.split('').map((ch, i) => (
+                {[...titleTop].map((ch, i) => (
                   <span key={i} className="hero-char inline-block">{ch}</span>
                 ))}
               </span>
@@ -327,7 +325,7 @@ export default function Hero() {
                   data-hero="gradient"
                   className="font-serif italic font-light normal-case text-gradient-shimmer inline-block pr-2 pb-[0.16em] leading-[1.02]"
                 >
-                  Digital Reality
+                  {titleBottom}
                 </span>
               </span>
             </h1>
@@ -353,8 +351,7 @@ export default function Hero() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mt-8 sm:mt-12 items-end">
             <p data-hero="fade" className="lg:col-span-6 max-w-2xl text-midnight/85 text-base sm:text-lg lg:text-xl leading-relaxed">
-              We forge hyper-scaled software architecture, resilient manufacturing execution backends, and fine-tuned AI
-              ecosystems for enterprise leaders across Kerala and global markets.
+              {t('home_hero_text')}
             </p>
             <div data-hero="fade" data-floating-clear className="lg:col-span-6 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-start lg:justify-end gap-3 sm:gap-4">
               <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
@@ -362,7 +359,7 @@ export default function Hero() {
                   href="/portfolio"
                   className="kinetic-cta-btn px-8 py-4 rounded-xl bg-brand-blue hover:bg-midnight text-white font-mono text-[12px] sm:text-[13px] tracking-wider uppercase font-semibold flex items-center justify-center gap-3 group active:scale-[0.97]"
                 >
-                  <span>Explore Selected Work</span>
+                  <span>{t('home_hero_cta_primary')}</span>
                   <Icon name="north_east" className="text-[18px] group-hover:rotate-45 transition-transform duration-300" />
                 </Link>
               </span>
@@ -372,7 +369,7 @@ export default function Hero() {
                   className="px-6 py-4 rounded-xl bg-white hover:bg-canvas border border-brand-blue/30 hover:border-brand-blue text-midnight hover:text-brand-blue font-mono text-[12px] sm:text-[13px] tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-sm font-semibold active:scale-[0.97]"
                 >
                   <Icon name="developer_board" className="text-brand-blue text-[18px]" />
-                  <span>Inspect Matrix</span>
+                  <span>{t('home_hero_cta_secondary')}</span>
                 </Link>
               </span>
             </div>
@@ -393,8 +390,8 @@ export default function Hero() {
         <div className="relative pt-8">
           <span data-hero="rule" className="absolute top-0 left-0 right-0 h-px bg-brand-blue/20 origin-left" />
           <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6 sm:gap-6">
-            {METRICS.map((m) => (
-              <div key={m.label} data-hero="metric" className="pl-3 sm:pl-4 border-l-2 border-brand-blue">
+            {metrics.map((m, i) => (
+              <div key={i} data-hero="metric" className="pl-3 sm:pl-4 border-l-2 border-brand-blue">
                 <dt className="font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-midnight/70 font-semibold">
                   <Scramble text={m.label} playKey={scrambleKey} duration={700} />
                 </dt>

@@ -1,15 +1,15 @@
 import { Metadata } from 'next';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { pageMetadata } from '../site/seo';
+import { LEGAL_UPDATED } from '../components/legal/updated';
 import LegalPage, { Mail, type LegalSection } from '../components/legal/LegalPage';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Privacy Policy | INTA Solutions',
   description: 'What the forms on the INTA Solutions website collect, why, where it is kept, and how to have it deleted.',
-  alternates: {
-    canonical: '/privacy',
-  },
-};
+  path: '/privacy',
+});
 
 // Each statement here describes what the site and its API actually do: keep it in step with the forms and the backend
 const SECTIONS: LegalSection[] = [
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
         title="Privacy"
         accent="Policy"
         lead="What our forms collect, why we ask for it, where it is kept, and how to have it removed."
-        updated={{ iso: '2026-11-06', label: '6 Nov 2026' }}
+        updated={LEGAL_UPDATED.privacy}
         sections={SECTIONS}
       />
       <Footer />

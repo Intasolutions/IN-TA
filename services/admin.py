@@ -44,10 +44,19 @@ class FeatureAdmin(admin.ModelAdmin):
 
 @admin.register(Technology)
 class TechnologyAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "logo_preview")
+    list_display = ("name", "slug", "logo_preview", "on_about_page", "about_group", "about_order")
+    list_editable = ("on_about_page", "about_order")
+    list_filter = ("on_about_page", "about_group")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ("logo_preview",)
+    fieldsets = (
+        (None, {"fields": ("name", "slug", "logo_preview", "logo")}),
+        ("About page orbit", {
+            "description": "The tools that circle the core on the About page. Without a logo uploaded, a tool the site already knows keeps its own logo; any other tool needs one.",
+            "fields": ("on_about_page", "about_group", "about_use", "about_order"),
+        }),
+    )
 
     @admin.display(description="Logo")
     def logo_preview(self, obj):

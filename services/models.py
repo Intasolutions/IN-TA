@@ -24,6 +24,16 @@ class Technology(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     logo = models.ImageField(upload_to="services/technologies/", blank=True, null=True, help_text="PNG with a transparent background, at least 256px wide")
+    on_about_page = models.BooleanField("Show on the About page", default=False, help_text="Puts this tool in the orbit on the About page.")
+    about_group = models.CharField("Orbit ring", max_length=12, blank=True, choices=[
+        ("ai", "Intelligence (AI)"),
+        ("frontend", "Product (front end)"),
+        ("design", "Product (design)"),
+        ("backend", "Platform (back end)"),
+        ("cloud", "Platform (cloud)"),
+    ], help_text="Which ring of the orbit it sits on.")
+    about_use = models.CharField("What we use it for", max_length=80, blank=True, help_text="Shown when the logo is hovered or tapped, e.g. 'Type-safe code across the whole stack'.")
+    about_order = models.IntegerField("Order in the orbit", default=0, help_text="Lower numbers come first in their ring.")
 
     class Meta:
         verbose_name_plural = "Technologies"

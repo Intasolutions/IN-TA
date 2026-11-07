@@ -6,7 +6,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { createGlobe, type Globe } from './globe';
 import { TARGET, viewOf, type Point } from './mapCanvas';
-import { CLOSING } from './story';
+import { useText } from '../../site/SiteContext';
+import { accent } from '../../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -16,6 +17,8 @@ const SMALL_SCREENS = '(max-width: 1023.98px), (max-height: 639.98px), (prefers-
 
 /** "Back to Earth" for phones, tablets and reduced motion, where the page flows instead of using one pinned scene. */
 export default function EarthReturn() {
+  const t = useText();
+  const [plain, bright] = accent(t('about_closing_title'));
   const ref = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -125,12 +128,12 @@ export default function EarthReturn() {
         <div data-er="text" className="relative px-4 pt-[9svh] text-center [@media(max-height:480px)]:w-[62%] [@media(max-height:480px)]:pt-4">
           <span className="mb-2 inline-flex items-center gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-[#9dbbff]">
             <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
-            {CLOSING.kicker}
+            {t('about_closing_kicker')}
           </span>
           <h2 id="er-title" className="heading-section text-white text-balance">
-            {CLOSING.plain} <span className={GRADIENT_ON_DARK}>{CLOSING.bright}</span>
+            {plain} <span className={GRADIENT_ON_DARK}>{bright}</span>
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-white/75 leading-relaxed text-balance">{CLOSING.text}</p>
+          <p className="mx-auto mt-3 max-w-md text-sm text-white/75 leading-relaxed text-balance">{t('about_closing_text')}</p>
         </div>
       </div>
     </section>

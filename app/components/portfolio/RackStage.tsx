@@ -12,6 +12,8 @@ import { usePlayIntro } from '../../context/usePlayIntro';
 import { refreshSoon } from '../services/detail/refresh';
 import { splitAccent } from '../services/detail/types';
 import { optimisable, sharedTags, type RackProject } from './data';
+import { useText } from '../../site/SiteContext';
+import { accent } from '../../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -210,7 +212,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
           <span aria-hidden="true" className="rack-mic absolute left-1/2 top-[calc(var(--bezel)*0.7)] -ml-[calc(var(--bezel)*1.25)]" />
           <span aria-hidden="true" className="rack-stop absolute left-[7%] top-[calc(var(--bezel)*0.5)]" />
           <span aria-hidden="true" className="rack-stop absolute right-[7%] top-[calc(var(--bezel)*0.5)]" />
-          {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={48} aria-hidden="true" className="pointer-events-none absolute bottom-[calc(var(--bezel)*0.35)] left-1/2 h-[calc(var(--bezel)*1.1)] w-auto -translate-x-1/2 opacity-60 max-sm:hidden" />}
+          {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={50} aria-hidden="true" className="pointer-events-none absolute bottom-[calc(var(--bezel)*0.35)] left-1/2 h-[calc(var(--bezel)*1.1)] w-auto -translate-x-1/2 opacity-60 max-sm:hidden" />}
           <div className="overflow-hidden rounded-[3px] shadow-[0_0_0_1px_#000,0_0_0_2px_rgb(190_210_255/0.07)]">
           <div className="relative flex items-center gap-2 border-b border-white/10 bg-[#0a1438] px-2.5 sm:gap-2.5 sm:px-3" style={{ height: 'var(--chrome)' }}>
             <span aria-hidden="true" className="flex shrink-0 gap-1">
@@ -264,7 +266,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
             {/* The screen waking as the lid lifts: dark, then our logo and a progress bar, then the page comes in from the top behind a line of light */}
             <span data-cover aria-hidden="true" className="rack-fx pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-[3%] bg-[#02061c]">
               <span data-boot className="flex h-[13%] w-[24%] flex-col items-center justify-center gap-2 opacity-0">
-                {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-full w-auto" />}
+                {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={50} className="h-full w-auto" />}
                 <span className="block h-0.5 w-full shrink-0 overflow-hidden rounded-full bg-white/15">
                   <span data-bootbar className="rack-lit block h-full w-full origin-left scale-x-0 rounded-full bg-[#9dbbff]" />
                 </span>
@@ -278,7 +280,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
         </div>
         <div aria-hidden="true" className="rack-lid-back absolute inset-0 flex items-center justify-center overflow-hidden rounded-t-[10px] [backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(6px)]">
           <span data-logo className="rack-lit flex h-[14%] items-center justify-center">
-            {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-full w-auto rotate-180 opacity-80" />}
+            {near && <Image src="/logo/logo-inta.png" alt="" width={120} height={50} className="h-full w-auto rotate-180 opacity-80" />}
           </span>
           {/* the seam round the edge of the lid, and the dip a thumb opens it by */}
           <span className="rack-lid-seam absolute inset-[1.6%]" />
@@ -401,6 +403,9 @@ type Props = { projects: RackProject[]; siteCount: number; formId: string; nextI
  * picture is as sharp as the file. The last slot is empty.
  */
 function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
+  const t = useText();
+  const [titlePlain, titleBright] = accent(t('portfolio_title'));
+  const [emptyPlain, emptyBright] = accent(t('portfolio_empty_title'));
   const rootRef = useRef<HTMLDivElement>(null);
   const currentRef = useRef<(n: number) => void>(() => {});
   const readyRef = useRef(false);
@@ -1211,7 +1216,7 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
 
           {/* The maker's plate, and the patch panel */}
           <div aria-hidden="true" className="rack-plate absolute flex items-center justify-between px-[calc(var(--uh)*0.5)]" style={{ left: 'var(--rail)', width: 'var(--lw)', top: 0, height: 'calc(var(--uh) * 2)', transform: 'translateZ(-4px)' }}>
-            <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-[calc(var(--uh)*0.8)] w-auto" />
+            <Image src="/logo/logo-inta.png" alt="" width={120} height={50} className="h-[calc(var(--uh)*0.8)] w-auto" />
             <span className="rack-vent h-[46%] w-[46%] rounded-[2px]" />
           </div>
           <div aria-hidden="true" className="rack-plate absolute flex items-center gap-[calc(var(--uh)*0.3)] px-[calc(var(--uh)*0.3)]" style={{ left: 'var(--rail)', width: 'var(--lw)', top: 'calc(var(--uh) * 2)', height: 'var(--uh)', transform: 'translateZ(-4px)' }}>
@@ -1278,14 +1283,14 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
             <div data-rack="opening-words" className="pointer-events-auto">
               <p data-rack="in" className="inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px] sm:tracking-[0.3em]">
                 <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-current" />
-                Our work{facts && <> {'//'} {facts}</>}
+                {t('portfolio_kicker')}{facts && <> {'//'} {facts}</>}
               </p>
               <h1 className="heading-page mt-2 text-white sm:mt-2.5">
-                <span data-rack="word" className="inline-block">One rack.</span>{' '}
-                <span data-rack="word" className="heading-accent-dark heading-serif inline-block">All our work.</span>
+                <span data-rack="word" className="inline-block">{titlePlain}</span>{' '}
+                <span data-rack="word" className="heading-accent-dark heading-serif inline-block">{titleBright}</span>
               </h1>
               <p data-rack="in" className="mx-auto mt-2 max-w-4xl text-[15px] leading-relaxed text-white/85 [text-wrap:balance] sm:text-lg [@media(max-height:620px)]:hidden">
-                Every screen here is a real project we designed and built. Scroll, and they come home to the rack, then open one at a time.
+                {t('portfolio_text')}
               </p>
               {tags.length > 0 && (
                 <div data-rack="in" role="group" aria-label="Show only" className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] sm:mt-4 sm:flex-wrap sm:justify-center sm:overflow-visible [&::-webkit-scrollbar]:hidden [@media(max-height:480px)]:hidden">
@@ -1310,8 +1315,8 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
         {/* ---- The empty slot ---- */}
         <div data-rack="closing" className="rack-moves invisible absolute z-10 flex items-end opacity-0 [@media(min-aspect-ratio:23/20)]:items-center" style={{ left: 'var(--words-x)', width: 'var(--words-w)', top: 16, bottom: 16 }}>
           <div className="w-full rounded-3xl border border-white/12 bg-[#040c38]/95 p-5 sm:p-6 [@media(min-aspect-ratio:23/20)]:border-0 [@media(min-aspect-ratio:23/20)]:bg-transparent [@media(min-aspect-ratio:23/20)]:p-0">
-            <h2 className="heading-section text-white">This slot is <span className="heading-accent-dark">still empty.</span></h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-white/85 sm:text-lg">Tell us what you want to build, and it could be the next one in the rack.</p>
+            <h2 className="heading-section text-white">{emptyPlain} <span className="heading-accent-dark">{emptyBright}</span></h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/85 sm:text-lg">{t('portfolio_empty_text')}</p>
             <button type="button" onClick={() => toSection(formId)} className="kinetic-cta-btn mt-4 inline-flex items-center gap-2.5 rounded-xl bg-brand-blue px-5 py-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors duration-300 hover:bg-white hover:text-midnight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] sm:text-xs">
               Start a project <Icon name="north_east" className="text-[15px]" />
             </button>

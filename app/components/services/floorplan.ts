@@ -168,36 +168,17 @@ export function linkBetween(from: BlockKind, to: BlockKind): Point[] | null {
   return back ? [...back.path].reverse() : null;
 }
 
+// The board's wording (titles, the AI part's lines, the ending) is set in the admin: Site settings > Page wording
 export const HERO = {
-  kicker: 'Services // One board',
-  plain: 'Everything we build.',
-  bright: 'On one board.',
-  text: 'Software, websites, apps, design, marketing, search, media and AI. Each one is a part on the same board: it does its own job, and the copper connects it to all the others.',
   hint: 'Scroll to go onto the board',
 };
 
 export const PLAN = {
-  kicker: 'The board // Our services',
-  /** {n} is the number of parts */
-  plain: '{n} parts are ours.',
-  bright: 'One socket is empty.',
   hint: 'Drag to turn the board. Pick any part to fly to it.',
 };
 
 export const NOW = {
   fallbackTitle: 'AI Integration & Model Training',
-  fact: 'One AI processor now holds 208 billion switches. The most advanced part on the board is the one that learns.',
   source: 'https://en.wikipedia.org/wiki/Transistor_count',
-  beats: ['One switch knows almost nothing.', 'Connect billions of them, and it starts to learn.', 'It gets things wrong, measures how wrong, and adjusts. That is training.'],
-  trainNote: 'A model is only as good as what it learns from. We train it on your business.',
-  ask: 'Give it an order.',
-  askNote: 'Say what you need. It finds the right part of the board and reads the details from our live service data.',
-  orders: ['Build me a mobile app', 'Get us found on Google', 'Automate our support', 'Make a product video'],
   words: ['AI', 'AUTOMATE', 'PREDICT', 'ANSWER', 'LEARN'],
-};
-
-export const CLOSE = {
-  kicker: 'Next // Your project',
-  plain: 'This socket is still empty.',
-  bright: 'What are we building?',
 };

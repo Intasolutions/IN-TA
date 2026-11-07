@@ -4,25 +4,18 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useText } from '../site/SiteContext';
+import { listOf } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const ITEMS = [
-  'Custom Software',
-  'Web Platforms',
-  'Mobile Apps',
-  'AI Integration',
-  'ERP Systems',
-  'UI/UX Design',
-  'SaaS Products',
-  'Cloud & DevOps',
-];
+// The services in the strip are set in the admin (Site settings > Page wording)
 
-function Row({ hidden = false }: { hidden?: boolean }) {
+function Row({ items, hidden = false }: { items: string[]; hidden?: boolean }) {
   return (
     <ul aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
-      {ITEMS.map((item, i) => (
-        <li key={item} className="flex items-center">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-center">
           <span className={`transition-colors duration-300 hover:text-brand-blue ${i % 2 === 0 ? 'text-midnight' : 'text-midnight/55'}`}>
             {item}
           </span>
@@ -38,6 +31,8 @@ function Row({ hidden = false }: { hidden?: boolean }) {
  * Drifts on its own, speeds up with scroll velocity, follows scroll direction, and eases down on hover.
  */
 export default function Marquee() {
+  const t = useText();
+  const items = listOf(t('home_marquee'));
   const wrapRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -112,8 +107,8 @@ export default function Marquee() {
         ref={trackRef}
         className="flex w-max whitespace-nowrap py-5 sm:py-6 font-display text-base sm:text-lg lg:text-2xl tracking-[0.18em] uppercase font-bold will-change-transform"
       >
-        <Row />
-        <Row hidden />
+        <Row items={items} />
+        <Row items={items} hidden />
       </div>
     </div>
   );

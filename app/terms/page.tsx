@@ -1,15 +1,15 @@
 import { Metadata } from 'next';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { pageMetadata } from '../site/seo';
+import { LEGAL_UPDATED } from '../components/legal/updated';
 import LegalPage, { type LegalSection } from '../components/legal/LegalPage';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Terms of Service | Legal | INTA Solutions',
   description: 'Understand the terms and conditions for using INTA Solutions software development and digital strategy services.',
-  alternates: {
-    canonical: '/terms',
-  },
-};
+  path: '/terms',
+});
 
 const SECTIONS: LegalSection[] = [
   {
@@ -65,7 +65,7 @@ export default function TermsPage() {
         title="Terms of"
         accent="Service"
         lead="The terms for using this website and the services of IN-TA Solutions Pvt Ltd."
-        updated={{ iso: '2026-01-16', label: '16 Jan 2026' }}
+        updated={LEGAL_UPDATED.terms}
         sections={SECTIONS}
       />
       <Footer />

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Icon from '../Icon';
 import { apiBase } from '../blog/data';
 import { COUNTRIES } from '../../contact/data/countries';
+import { useSite } from '../../site/SiteContext';
+import { phoneHref } from '../../site/site';
 
 const LABEL = 'mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-white/70';
 const FIELD = 'block h-12 w-full rounded-xl border bg-white/[0.06] px-4 text-base text-white outline-none transition-[border-color,background-color,box-shadow] duration-200 placeholder:text-white/35 focus:bg-white/[0.09] focus:ring-4 focus:ring-[#3b7bf7]/25 sm:text-[15px]';
@@ -20,6 +22,7 @@ type Props = {
 
 /** The message line: posts to the same endpoint the admin panel reads (POST /api/contact/messages/) */
 export default function MessageLine({ onKey, onSending, onSent }: Props) {
+  const site = useSite();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -121,7 +124,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Delivered</p>
           <h2 className="heading-section mt-2 text-white">Thanks, <span className="heading-accent-dark">{sent.name}.</span></h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">Your message is with our team in Wayanad, and we&apos;ll reply during office hours. You should also get a confirmation at {sent.email}.</p>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">Your message is with our team{site.address.district ? ` in ${site.address.district}` : ''}, and we&apos;ll reply during office hours. You should also get a confirmation at {sent.email}.</p>
         </div>
         <button type="button" onClick={() => setStatus('idle')} className="blog-wipe rounded-lg border border-white/25 px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-white">
           Send another
@@ -181,7 +184,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
       </div>
       <div data-line className="mt-4 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 sm:mt-5">
         <p className="font-mono text-[10px] uppercase tracking-wider text-white/60 sm:text-[11px]">
-          Packet <span data-bytes className="font-bold text-[#9dbbff]">{bytes}</span> bytes · to Wayanad, Kerala
+          Packet <span data-bytes className="font-bold text-[#9dbbff]">{bytes}</span> bytes · to {[site.address.district, site.address.region].filter(Boolean).join(', ')}
         </p>
         <button type="submit" disabled={busy} className="kinetic-cta-btn group inline-flex h-12 items-center justify-center gap-3 rounded-xl bg-brand-blue px-6 font-mono text-xs font-semibold uppercase tracking-wider text-white hover:bg-[#2563eb] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] disabled:cursor-wait disabled:opacity-70 max-sm:w-full">
           {busy ? (
@@ -201,7 +204,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
         {slow && busy && <p className="mt-3 text-[13px] text-white/70">Still sending. Our server can take a moment to wake up.</p>}
         {status === 'error' && (
           <p role="alert" className="mt-3 text-[14px] leading-relaxed text-[#ffb4b4]">
-            That didn&apos;t reach us. Your words are still here, so please try again, or call <a href="tel:+919447595381" className="underline underline-offset-2">+91 94475 95381</a>.
+            That didn&apos;t reach us. Your words are still here, so please try again, or call <a href={phoneHref(site.phone)} className="underline underline-offset-2">{site.phone}</a>.
           </p>
         )}
       </div>

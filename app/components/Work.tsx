@@ -7,6 +7,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
+import { useText } from '../site/SiteContext';
+import { accent } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -205,6 +207,8 @@ function SeeAllCard({ projects }: { projects: Project[] }) {
 }
 
 export default function Work() {
+  const t = useText();
+  const [titlePlain, titleBright] = accent(t('home_work_title'));
   const ref = useRef<HTMLElement>(null);
   // Set by the active (desktop / mobile) animation branch so the buttons know how to move
   const navRef = useRef<((dir: 1 | -1) => void) | null>(null);
@@ -470,15 +474,14 @@ export default function Work() {
           <div className="max-w-3xl">
             <span data-g="kicker" className="inline-flex items-center gap-3 font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase font-bold mb-3">
               <span className="w-2 h-2 rounded-full bg-brand-blue animate-pulse" />
-              Selected work // Case studies
+              {t('home_work_kicker')}
             </span>
             <h2 id="work-title" className="font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] text-midnight tracking-tight uppercase">
-              <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-g="word" className="inline-block">Built, shipped</span></span>{' '}
-              <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-g="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>&amp; live</span></span>
+              <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-g="word" className="inline-block">{titlePlain}</span></span>{' '}
+              <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-g="word" className={`inline-block pb-[0.06em] ${STATIC_GRADIENT}`}>{titleBright}</span></span>
             </h2>
             <p data-g="lede" className="mt-4 text-midnight/80 text-sm sm:text-base leading-relaxed max-w-2xl">
-              Hospital management, manufacturing execution, EdTech and e-commerce. A few of the products we&apos;ve designed,
-              engineered and launched for our clients.
+              {t('home_work_text')}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">

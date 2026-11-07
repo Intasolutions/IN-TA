@@ -6,8 +6,10 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
-import { EMAIL, MAP, PHONE, SOCIALS } from '../Footer';
-import { OFFICE_HOURS, useOfficeStatus } from '../OfficeStatus';
+import { useSocials } from '../Footer';
+import { useOfficeStatus } from '../OfficeStatus';
+import { useSite, useText } from '../../site/SiteContext';
+import { accent, addressLines, coords, daysLong, hoursShort, mapUrl, phoneHref, timeLong, TIME_ZONE } from '../../site/site';
 import { calm } from '../blog/data';
 import { scrollToY } from '../SmoothScroll';
 import { usePlayIntro } from '../../context/usePlayIntro';
@@ -20,14 +22,19 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type PortId = 'message' | 'call' | 'email' | 'visit';
 
-const ADDRESS = ['Thonichal, Mananthavady,', 'Wayanad, Kerala 670645'];
-const PORTS: { id: PortId; no: string; name: string; value: string }[] = [
-  { id: 'message', no: '01', name: 'Message', value: 'Tell us what you need' },
-  { id: 'call', no: '02', name: 'Call', value: PHONE.label },
-  { id: 'email', no: '03', name: 'Email', value: EMAIL },
-  { id: 'visit', no: '04', name: 'Visit', value: 'Mananthavady, Wayanad' },
+// The line under each port's name comes from Site settings (see `portValue` in the page)
+const PORTS: { id: PortId; no: string; name: string }[] = [
+  { id: 'message', no: '01', name: 'Message' },
+  { id: 'call', no: '02', name: 'Call' },
+  { id: 'email', no: '03', name: 'Email' },
+  { id: 'visit', no: '04', name: 'Visit' },
 ];
 const isPort = (v: string): v is PortId => PORTS.some((p) => p.id === v);
+
+/** A short buzz on phones, once the visitor has touched the page (before that, browsers block it and log a warning) */
+const buzz = (ms: number) => {
+  if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(ms);
+};
 
 // The plug: how far it stands out of the panel, once it's in
 const PLUG_OUT = 42;
@@ -58,10 +65,11 @@ function Copy({ text, label }: { text: string; label: string }) {
 
 /** Wayanad's time, and the visitor's if it's different. Only ever worked out in the browser */
 function Clocks() {
+  const site = useSite();
   const [times, setTimes] = useState<{ office: string; you: string; place: string } | null>(null);
   useEffect(() => {
     const clock = (timeZone?: string) => new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone });
-    const office = clock(OFFICE_HOURS.timeZone);
+    const office = clock(TIME_ZONE);
     const you = clock();
     const zone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? '';
     const place = zone.split('/').pop()?.replace(/_/g, ' ') ?? '';
@@ -76,7 +84,7 @@ function Clocks() {
   return (
     <dl className="grid grid-cols-2 gap-3">
       <div>
-        <dt className={RAIL_LABEL}>In Wayanad</dt>
+        <dt className={RAIL_LABEL}>In {site.address.district || 'our office'}</dt>
         <dd className="mt-1 font-display text-xl font-bold tabular-nums text-white">{times?.office ?? '--:--'}</dd>
       </div>
       {times && times.you !== times.office && (
@@ -90,6 +98,20 @@ function Clocks() {
 }
 
 export default function ContactPage() {
+  const site = useSite();
+  const t = useText();
+  const socials = useSocials();
+  const address = addressLines(site);
+  const phone = { href: phoneHref(site.phone), label: site.phone };
+  const email = site.email;
+  const [titlePlain, titleBright] = accent(t('contact_title'));
+  const portValue = (id: PortId) =>
+    ({
+      message: t('contact_message_port'),
+      call: site.phone,
+      email,
+      visit: [site.address.locality, site.address.district].filter(Boolean).join(', '),
+    })[id];
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -215,7 +237,7 @@ export default function ContactPage() {
           );
           cable.kick(-16);
           cable.pulse('down', true);
-          navigator.vibrate?.(12);
+          buzz(12);
         }
         if (!firstRef.current && changed) {
           window.history.replaceState(null, '', `#${id}`);
@@ -294,7 +316,7 @@ export default function ContactPage() {
       setDragging(true);
       setConnected(false);
       seated = null;
-      navigator.vibrate?.(6);
+      buzz(6);
     };
     const onMove = (e: PointerEvent) => {
       if (!carried) return;
@@ -451,15 +473,15 @@ export default function ContactPage() {
           <div>
           <p data-contact="kicker" className="inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px] sm:tracking-[0.3em]">
             <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-current" />
-            Contact {'//'} Patch panel
+            {t('contact_kicker')}
           </p>
           <h1 id="contact-title" className="heading-page mt-2.5 text-white sm:mt-3">
-            <span data-contact="word" className="inline-block">Plug in.</span>{' '}
-            <span data-contact="word" className="heading-accent-dark heading-serif">We&apos;ll pick up.</span>
+            <span data-contact="word" className="inline-block">{titlePlain}</span>{' '}
+            <span data-contact="word" className="heading-accent-dark heading-serif">{titleBright}</span>
           </h1>
           </div>
           <p data-contact="in" className="text-[15px] leading-relaxed text-white/85 [text-wrap:balance] sm:text-lg lg:pb-3 lg:text-right">
-            Four lines into our team in Wayanad. <span className="pointer-coarse:hidden">Drag the cable into whichever suits you, or just click one.</span><span className="hidden pointer-coarse:inline">Tap whichever suits you.</span>
+            {t('contact_text')} <span className="pointer-coarse:hidden">Drag the cable into whichever suits you, or just click one.</span><span className="hidden pointer-coarse:inline">Tap whichever suits you.</span>
           </p>
         </div>
 
@@ -476,11 +498,11 @@ export default function ContactPage() {
           <div data-contact="panel" className="rack-plate relative z-[4] rounded-lg">
             <div className="flex items-center gap-3 border-b border-black/30 px-3 py-2.5 sm:gap-4 sm:px-4">
               <span aria-hidden="true" className="rack-screw shrink-0 [--uh:44px]" />
-              <Image src="/logo/logo-inta.png" alt="" width={120} height={48} className="h-5 w-auto shrink-0 sm:h-6" />
+              <Image src="/logo/logo-inta.png" alt="" width={120} height={50} className="h-5 w-auto shrink-0 sm:h-6" />
               <span aria-hidden="true" className="rack-vent hidden h-4 min-w-0 flex-1 rounded-[2px] sm:block" />
               <p className="ml-auto inline-flex min-w-0 items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-wider sm:ml-0 sm:text-[11px]">
                 <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${open ? 'bg-[#9dbbff] shadow-[0_0_8px_2px_#5b8cff]' : 'bg-white/25'}`} />
-                <span className={`truncate ${open ? 'text-[#c6d8ff]' : 'text-white/70'}`}>{status ?? 'Mon–Sat · 9 AM–5 PM IST'}</span>
+                <span className={`truncate ${open ? 'text-[#c6d8ff]' : 'text-white/70'}`}>{status ?? hoursShort(site)}</span>
               </p>
               <span aria-hidden="true" className="rack-screw shrink-0 [--uh:44px]" />
             </div>
@@ -505,7 +527,7 @@ export default function ContactPage() {
                       <span aria-hidden="true" className="patch-led" />
                     </span>
                     <span className="patch-name mt-1.5 max-w-full truncate font-mono text-[10px] font-bold uppercase tracking-wider sm:mt-2 sm:font-display sm:text-[1.15rem] sm:normal-case sm:tracking-tight">{port.name}</span>
-                    <span className="patch-value mt-0.5 hidden max-w-full truncate font-mono text-[11px] sm:block">{port.value}</span>
+                    <span className="patch-value mt-0.5 hidden max-w-full truncate font-mono text-[11px] sm:block">{portValue(port.id)}</span>
                     <span aria-hidden="true" className="mt-2.5 flex w-full justify-center sm:mt-4">
                       <span className="patch-slot relative">
                         <span className="patch-ring absolute bottom-0 left-1/2 opacity-0" />
@@ -533,27 +555,27 @@ export default function ContactPage() {
 
                 <div data-line-panel="call" hidden={active !== 'call'}>
                   <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 02 // Call</p>
-                  <h2 data-line className="heading-section mt-2.5 text-white [overflow-wrap:anywhere]"><a href={PHONE.href} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{PHONE.label}</a></h2>
-                  <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">Call our office in Wayanad, Monday to Saturday, 9 AM to 5 PM India time.</p>
+                  <h2 data-line className="heading-section mt-2.5 text-white [overflow-wrap:anywhere]"><a href={phone.href} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{phone.label}</a></h2>
+                  <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_call_text', { days: daysLong(site), time: timeLong(site) })}</p>
                   <div data-line className="mt-5 flex flex-wrap gap-2.5">
-                    <a href={PHONE.href} className={`${ACTION} max-sm:w-full`}>
+                    <a href={phone.href} className={`${ACTION} max-sm:w-full`}>
                       Call now
                       <Icon name="call" className="text-[16px]" />
                     </a>
-                    <Copy text={PHONE.label} label="Copy number" />
+                    <Copy text={phone.label} label="Copy number" />
                   </div>
                 </div>
 
                 <div data-line-panel="email" hidden={active !== 'email'}>
                   <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 03 // Email</p>
-                  <h2 data-line className="mt-2.5 font-display text-[clamp(1.35rem,4.2vw,3rem)] font-extrabold leading-[1.05] tracking-tight text-white [overflow-wrap:anywhere]"><a href={`mailto:${EMAIL}`} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{EMAIL}</a></h2>
-                  <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">Good for briefs, files and anything you&apos;d like in writing. Tell us what you&apos;re building and where it&apos;s stuck.</p>
+                  <h2 data-line className="mt-2.5 font-display text-[clamp(1.35rem,4.2vw,3rem)] font-extrabold leading-[1.05] tracking-tight text-white [overflow-wrap:anywhere]"><a href={`mailto:${email}`} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{email}</a></h2>
+                  <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_email_text')}</p>
                   <div data-line className="mt-5 flex flex-wrap gap-2.5">
-                    <a href={`mailto:${EMAIL}`} className={`${ACTION} max-sm:w-full`}>
+                    <a href={`mailto:${email}`} className={`${ACTION} max-sm:w-full`}>
                       Write to us
                       <Icon name="mail" className="text-[16px]" />
                     </a>
-                    <Copy text={EMAIL} label="Copy address" />
+                    <Copy text={email} label="Copy address" />
                   </div>
                 </div>
 
@@ -562,11 +584,11 @@ export default function ContactPage() {
                   <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
                     <div>
                       <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 04 // Visit</p>
-                      <address data-line className="mt-2 font-display text-lg font-bold not-italic leading-snug tracking-tight text-white sm:text-2xl">{ADDRESS[0]}<br />{ADDRESS[1]}</address>
-                      <p data-line className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/60 sm:text-[11px]">11.8021° N, 76.0232° E</p>
+                      <address data-line className="mt-2 font-display text-lg font-bold not-italic leading-snug tracking-tight text-white sm:text-2xl">{address[0]}<br />{address[1]}</address>
+                      <p data-line className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/60 sm:text-[11px]">{coords(site)}</p>
                     </div>
                     <div data-line className="flex flex-wrap gap-2.5 max-sm:w-full">
-                      <a href={MAP} target="_blank" rel="noopener noreferrer" className={`${ACTION} max-sm:w-full`}>
+                      <a href={mapUrl(site)} target="_blank" rel="noopener noreferrer" className={`${ACTION} max-sm:w-full`}>
                         Open in Maps
                         <Icon name="north_east" className="text-[16px]" />
                       </a>
@@ -585,19 +607,19 @@ export default function ContactPage() {
                 <Clocks />
                 <div>
                   <p className={RAIL_LABEL}>Office hours</p>
-                  <p className="mt-1 text-[15px] text-white/90">Monday to Saturday<br />9 AM to 5 PM IST</p>
+                  <p className="mt-1 text-[15px] text-white/90">{daysLong(site)}<br />{timeLong(site)} IST</p>
                 </div>
                 <div className="sm:hidden">
                   <p className={RAIL_LABEL}>Direct</p>
                   <p className="mt-1 space-y-0.5 text-[15px]">
-                    <a href={PHONE.href} className="block text-white underline-offset-2 hover:underline">{PHONE.label}</a>
-                    <a href={`mailto:${EMAIL}`} className="block text-white underline-offset-2 hover:underline">{EMAIL}</a>
+                    <a href={phone.href} className="block text-white underline-offset-2 hover:underline">{phone.label}</a>
+                    <a href={`mailto:${email}`} className="block text-white underline-offset-2 hover:underline">{email}</a>
                   </p>
                 </div>
                 <div>
                   <p className={RAIL_LABEL}>Find us</p>
                   <ul className="mt-2 flex flex-wrap gap-1.5">
-                    {SOCIALS.map((s) => (
+                    {socials.map((s) => (
                       <li key={s.name}>
                         <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.name} className="blog-wipe flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff]">
                           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="h-[18px] w-[18px]">{s.icon}</svg>

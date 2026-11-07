@@ -14,6 +14,8 @@ import PostCard from './PostCard';
 import ProjectForm from './ProjectForm';
 import { calm } from './data';
 import { shimmer } from './parts';
+import { useText } from '../../site/SiteContext';
+import { accent } from '../../site/site';
 import { apiBase, hasTopic, sharedTopics, toPost, type ApiPost, type Post } from './posts';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -29,7 +31,7 @@ function FeaturedPost({ post }: { post: Post }) {
     <article data-blog="lead" className="group relative">
       <div data-tilt="1.5" className={`relative grid overflow-hidden transition-[border-color,box-shadow] duration-300 group-hover:border-brand-blue/40 group-hover:shadow-[0_30px_60px_-28px_rgb(1_7_43/0.45)] md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] ${CARD_FRAME}`}>
       <span className="relative block aspect-[3/2] overflow-hidden bg-midnight md:aspect-auto md:min-h-[clamp(20rem,30vw,28rem)]">
-        <BlogCover src={post.image} alt={post.alt || post.title} sizes="(min-width: 1520px) 830px, (min-width: 768px) 55vw, 100vw" priority zoom="group-hover:scale-[1.03]" />
+        <BlogCover src={post.image} alt={post.alt} sizes="(min-width: 1520px) 830px, (min-width: 768px) 55vw, 100vw" priority zoom="group-hover:scale-[1.03]" />
         <span aria-hidden="true" className="blog-sheen" />
       </span>
       <div className="flex flex-col justify-center p-5 sm:p-8 xl:p-12">
@@ -75,6 +77,8 @@ function Loading() {
 }
 
 export default function BlogIndex({ initial }: { initial: Post[] }) {
+  const t = useText();
+  const [titlePlain, titleBright] = accent(t('blog_title'));
   const rootRef = useRef<HTMLElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
   const playedRef = usePlayIntro(introRef);
@@ -164,15 +168,15 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
           <div>
             <p data-blog="kicker" className="inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue sm:text-[11px] sm:tracking-[0.3em]">
               <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-current" />
-              Blog {'//'} Latest writing
+              {t('blog_kicker')}
             </p>
             <h1 id="blog-title" className="heading-page mt-2.5 text-midnight sm:mt-3">
-              <span data-blog="word" className="inline-block">Insights &amp;</span>{' '}
-              <span data-blog="word" className="heading-accent heading-serif">stories.</span>
+              <span data-blog="word" className="inline-block">{titlePlain}</span>{' '}
+              <span data-blog="word" className="heading-accent heading-serif">{titleBright}</span>
             </h1>
           </div>
           <p data-blog="in" className="text-[15px] leading-relaxed text-midnight/80 [text-wrap:balance] sm:text-lg lg:pb-3 lg:text-right">
-            Practical writing on custom software, automation and AI, from the team that builds it.
+            {t('blog_text')}
           </p>
         </div>
 

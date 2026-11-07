@@ -1,15 +1,15 @@
 import { Metadata } from 'next';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { pageMetadata } from '../site/seo';
+import { LEGAL_UPDATED } from '../components/legal/updated';
 import LegalPage, { Mail, type LegalSection } from '../components/legal/LegalPage';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Security Policy | Data Protection | INTA Solutions',
   description: 'Learn about INTA Solutions commitment to data security, encryption, and compliance with global privacy standards.',
-  alternates: {
-    canonical: '/security',
-  },
-};
+  path: '/security',
+});
 
 const SECTIONS: LegalSection[] = [
   {
@@ -64,7 +64,7 @@ export default function SecurityPage() {
         title="Security"
         accent="Policy"
         lead="How IN-TA Solutions looks after your data, and how to tell us if you find a weakness in our systems."
-        updated={{ iso: '2026-11-06', label: '6 Nov 2026' }}
+        updated={LEGAL_UPDATED.security}
         sections={SECTIONS}
       />
       <Footer />

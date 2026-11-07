@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { createGlobe, type Globe } from '../about/globe';
 import { smooth, viewOf, TARGET } from '../about/mapCanvas';
 import Icon from '../Icon';
+import { useSite } from '../../site/SiteContext';
+import { coords } from '../../site/site';
 
 const SPIN_FROM = TARGET.lon + 70;
 const FINAL_ZOOM = 0.72;
@@ -12,6 +14,7 @@ const TURNED = 0.34; // on the camera's own scale, when it has finished turning 
 
 /** The earth from the About page, turning to face Wayanad and closing in on it each time this line is plugged in */
 export default function VisitGlobe({ active }: { active: boolean }) {
+  const site = useSite();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const markerRef = useRef<HTMLSpanElement>(null);
   const waitRef = useRef<HTMLParagraphElement>(null);
@@ -95,12 +98,12 @@ export default function VisitGlobe({ active }: { active: boolean }) {
       {failed ? (
         <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
           <Icon name="location_on" className="text-[32px] text-[#9dbbff]" />
-          <p className="font-mono text-[11px] uppercase tracking-wider text-white/70">11.8021° N, 76.0232° E</p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-white/70">{coords(site)}</p>
         </div>
       ) : (
         <>
           <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
-          <p ref={waitRef} aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] text-[#9dbbff] transition-opacity duration-500 sm:text-[11px]">Finding Wayanad</p>
+          <p ref={waitRef} aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] text-[#9dbbff] transition-opacity duration-500 sm:text-[11px]">Finding {site.address.district || 'us'}</p>
           {/* the office, once the earth has turned to face it */}
           <span ref={markerRef} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 opacity-0">
             <span className="patch-ping absolute -left-2 -top-2 h-4 w-4 rounded-full border-2 border-[#9dbbff]" />
