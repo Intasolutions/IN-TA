@@ -281,7 +281,8 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
     <section ref={rootRef} id={id} aria-label={plainTitle(title)} className="relative bg-midnight text-white">
       {!plain && (
         <div data-die="stage" className="pointer-events-none sticky top-0 z-0 -mb-[100svh] h-svh overflow-hidden">
-          <canvas data-die="canvas" aria-hidden="true" className="absolute inset-0 h-full w-full" />
+          {/* hidden until its first frame is drawn: an opaque WebGL canvas is black until then */}
+          <canvas data-die="canvas" aria-hidden="true" className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
         </div>
       )}
       {/* The names on the blocks and the way out sit above the words, so that a hand can reach them */}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import 'lenis/dist/lenis.css';
 import './globals.css';
 import ClientLayout from './ClientLayout';
 import { LOADER_SCRIPT } from './site/loader';

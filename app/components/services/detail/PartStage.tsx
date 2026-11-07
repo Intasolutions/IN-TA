@@ -12,7 +12,8 @@ import { scrollToY } from '../../SmoothScroll';
 import { useReveal } from '../../../context/RevealContext';
 import { usePlayIntro } from '../../../context/usePlayIntro';
 import { createChip, type ChipEngine } from '../chipEngine';
-import { AI_SLUG, ALL_BLOCKS, BLOCKS, centreOf, KIND, type Block } from '../floorplan';
+import { AI_SLUG, ALL_BLOCKS, BLOCKS, centreOf, KIND, NOW, type Block } from '../floorplan';
+import { useSite } from '../../../site/SiteContext';
 import { cameraAt, fieldOfView, FOV, partKeys, ramp, smooth, smoother } from '../score';
 import { refreshSoon } from './refresh';
 import { splitAccent, type DetailService, type Words } from './types';
@@ -79,6 +80,9 @@ type Props = {
 
 /** The opening of a service's page: its part lights up on the board and starts working, and scrolling flies down into it */
 export default function PartStage({ service, block, others, formId, insideId, facts, part, title, words: say }: Props) {
+  // the centre part carries the AI service's name, as the admin has it
+  const { services } = useSite();
+  const aiName = services.find((s) => s.slug === AI_SLUG)?.title ?? NOW.fallbackTitle;
   const rootRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
   const router = useRouter();
@@ -105,7 +109,7 @@ export default function PartStage({ service, block, others, formId, insideId, fa
         return;
       }
       const canvas = root.querySelector<HTMLCanvasElement>('[data-part="canvas"]')!;
-      const engine: ChipEngine | null = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true));
+      const engine: ChipEngine | null = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true), aiName);
       if (!engine) {
         setStill(true);
         return;
@@ -419,7 +423,8 @@ export default function PartStage({ service, block, others, formId, insideId, fa
   return (
     <div ref={rootRef} className="relative touch-pan-y bg-white" style={{ height: `${(TOTAL + 1) * 100}svh` }}>
       <div data-part="sticky" className="sticky top-0 h-svh overflow-hidden">
-        <canvas key={attempt} data-part="canvas" aria-hidden="true" className="absolute inset-0 h-full w-full" />
+        {/* hidden until the board's first frame is drawn: an opaque WebGL canvas is black until then */}
+        <canvas key={attempt} data-part="canvas" aria-hidden="true" className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
 
         {/* ---- The name on the part ---- */}
         <div data-part="callout" aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10">

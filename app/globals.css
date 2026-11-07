@@ -7,11 +7,8 @@
   --font-serif: ui-serif, Georgia, serif;
 }
 
-/* Fixed header height (info strip 44px + nav 80px); the strip hides on short landscape screens */
-:root { --header-h: 124px; }
-@media (max-height: 500px) and (orientation: landscape) {
-  :root { --header-h: 80px; }
-}
+/* Fixed header height: the navigation bar */
+:root { --header-h: 80px; }
 
 /* ===== 2026 redesign tokens (Stitch) ===== */
 @theme {
@@ -23,12 +20,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* the site is designed light: system dark mode mustn't darken its page or its form controls and scrollbars */
+  color-scheme: light;
 }
 
 /* The site has always set these Tailwind sizes and colours its own way: rounded-sm/md/lg are 8, 16 and 24px here, and
@@ -59,8 +52,9 @@ body {
 .logo img {
   filter: drop-shadow(0 0 18px rgba(100,140,255,0.45));
 }
+/* What shows past the page's edges when a trackpad or phone bounces the scroll: the header's white, not black */
 html {
-  background-color: #000;
+  background-color: #ffffff;
 }
 
 
@@ -145,23 +139,9 @@ html {
 .blog-prose th, .blog-prose td { border: 1px solid rgb(1 68 181 / 0.15); padding: 0.5em 0.75em; text-align: left; }
 .blog-prose th { font-weight: 700; color: var(--color-midnight); }
 .blog-prose code { font-family: var(--font-mono, ui-monospace), monospace; font-size: 0.9em; }
-/* The opening (PageLoader): the same timings it always had, but in CSS so it plays from the first paint instead of
-   waiting for the page's scripts. Logo in by 0.53s, line drawn 0.4–1.07s, logo lifted away by 1.33s; the slide up is
-   done by the component once the page is ready. A visitor who has seen it this visit never sees it at all. */
-/* hidden, not removed from layout: its logo keeps its size (Next.js warns about an image measured at 0 x 0) */
+/* The opening (PageLoader) plays once per visit: a visitor who has seen it never sees it flash on later pages.
+   Hidden, not removed from layout, so nothing inside it is measured at 0 x 0. */
 html[data-loader='seen'] .page-loader { visibility: hidden; }
-.page-loader-logo { animation: loaderLogo 1.33s both; }
-.page-loader-line { animation: loaderLine 0.67s cubic-bezier(0.165, 0.84, 0.44, 1) 0.4s both; }
-@keyframes loaderLogo {
-  0% { opacity: 0; transform: scale(0.9); animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); }
-  40% { opacity: 1; transform: scale(1); }
-  80% { opacity: 1; transform: translateY(0); animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); }
-  100% { opacity: 0; transform: translateY(-16px); }
-}
-@keyframes loaderLine {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
 
 /* The 404 trace's cursor, after "no route" */
 .nf-caret { animation: nfBlink 1.1s steps(1) infinite; }

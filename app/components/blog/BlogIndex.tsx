@@ -14,6 +14,7 @@ import PostCard from './PostCard';
 import ProjectForm from './ProjectForm';
 import { calm } from './data';
 import { shimmer } from './parts';
+import { underHeader } from '../underHeader';
 import { useText } from '../../site/SiteContext';
 import { accent } from '../../site/site';
 import { apiBase, hasTopic, sharedTopics, toPost, type ApiPost, type Post } from './posts';
@@ -143,7 +144,7 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
         .from('[data-blog="lead"]', { y: 30, autoAlpha: 0, duration: 1 }, 0.45);
       if (playedRef.current) introRef.current.progress(1);
       // the heading drifts up and away as the articles come up over it
-      gsap.fromTo('[data-blog="head"]', { y: 0, autoAlpha: 1 }, { y: -30, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-blog="head"]', start: 'top 12%', end: 'bottom top', scrub: true } });
+      gsap.fromTo('[data-blog="head"]', { y: 0, autoAlpha: 1 }, { y: -30, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-blog="head"]', start: underHeader(), end: 'bottom top', scrub: true } });
     },
     { scope: rootRef },
   );

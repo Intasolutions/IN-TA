@@ -757,7 +757,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         className="relative h-[440svh] [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[1040vh] motion-reduce:h-auto"
       >
         <div data-sm="stage" className="sticky top-0 h-svh overflow-hidden motion-reduce:relative motion-reduce:h-auto motion-reduce:min-h-svh">
-          <canvas data-sm="gl" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none" />
+          <canvas data-sm="gl" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
           <canvas data-sm="canvas" aria-hidden="true" className="absolute inset-0 w-full h-full touch-pan-y select-none" />
 
           {/* Name tag that sits on the coordinates and changes as the camera closes in */}

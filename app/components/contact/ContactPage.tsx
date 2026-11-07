@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
 import { useSocials } from '../Footer';
+import { underHeader } from '../underHeader';
 import { useOfficeStatus } from '../OfficeStatus';
 import { useSite, useText } from '../../site/SiteContext';
 import { accent, addressLines, coords, daysLong, hoursShort, mapUrl, phoneHref, timeLong, TIME_ZONE } from '../../site/site';
@@ -407,7 +408,7 @@ export default function ContactPage() {
         .from('.patch-led', { opacity: 0.08, duration: 0.5, stagger: 0.12, ease: 'steps(3)' }, 0.5)
         .call(() => plugIntoRef.current(activeRef.current, true), [], 0.75);
       // the heading drifts up and away as the panel takes over
-      gsap.fromTo('[data-contact="head"]', { y: 0, autoAlpha: 1 }, { y: -28, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-contact="head"]', start: 'top 14%', end: 'bottom top', scrub: true } });
+      gsap.fromTo('[data-contact="head"]', { y: 0, autoAlpha: 1 }, { y: -28, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-contact="head"]', start: underHeader(), end: 'bottom top', scrub: true } });
       const scrub = window.matchMedia('(pointer: fine)').matches ? true : 0.3;
       gsap.utils.toArray<HTMLElement>('[data-contact="rail"] > *').forEach((part) => {
         gsap.fromTo(part, { y: 24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: 'sine.out', scrollTrigger: { trigger: part, start: 'top 98%', end: 'top 80%', scrub } });

@@ -388,6 +388,8 @@ export function createDie(canvas: HTMLCanvasElement, initial: DieLayout, onFail:
     gl.uniform1f(uPower, f.power);
     gl.uniform1fv(uOn, f.on);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    // An opaque canvas is black until its first frame: the page keeps it hidden until this mark (data-[drawn])
+    if (!canvas.dataset.drawn) canvas.dataset.drawn = '1';
   };
 
   return {

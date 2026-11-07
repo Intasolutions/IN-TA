@@ -123,7 +123,7 @@ export default function EarthReturn() {
   return (
     <section ref={ref} aria-labelledby="er-title" className="relative h-[240svh] bg-midnight motion-reduce:h-auto">
       <div data-er="stage" className="sticky top-0 h-svh overflow-hidden motion-reduce:relative">
-        <canvas data-er="gl" aria-hidden="true" className="absolute inset-0 h-full w-full" />
+        <canvas data-er="gl" aria-hidden="true" className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[22svh] bg-linear-to-b from-midnight to-transparent" />
         <div data-er="text" className="relative px-4 pt-[9svh] text-center [@media(max-height:480px)]:w-[62%] [@media(max-height:480px)]:pt-4">
           <span className="mb-2 inline-flex items-center gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-[#9dbbff]">

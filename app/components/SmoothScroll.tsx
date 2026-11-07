@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import Lenis from '@studio-freight/lenis'
+import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -33,8 +33,11 @@ export function scrollToTop() {
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // lerp 0.1 is Lenis's own default: smooth, but the page stops soon after the wheel does instead of drifting on
+    // (0.075 kept it gliding for about a second, which felt laggy, most of all when stopping at the top)
     const lenis = new Lenis({
-      lerp: 0.075,
+      lerp: 0.1,
+      autoRaf: false, // driven by GSAP's ticker below, so ScrollTrigger and Lenis move in the same frame
     })
     instance = lenis;
 

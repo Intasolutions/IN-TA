@@ -436,6 +436,8 @@ export function createGlobe(canvas: HTMLCanvasElement, small: boolean, onChange:
       gl.uniform1f(uni.sea, 1 - boxes[3]);
       gl.uniform4fv(uni.box, boxes);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      // An opaque canvas is black until its first frame: the page keeps it hidden until this mark (data-[drawn])
+      if (!canvas.dataset.drawn) canvas.dataset.drawn = '1';
     },
     clear() {
       gl.clearColor(0.0039, 0.0275, 0.1686, 1);

@@ -382,6 +382,12 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
 
   const bySlug = useMemo(() => new Map(services.map((s) => [s.slug, s])), [services]);
   const ai: ChipService = bySlug.get(AI_SLUG) ?? { slug: AI_SLUG, title: NOW.fallbackTitle, description: '', features: [] };
+  // The centre part carries the AI service's name from the admin; the board learns a fresher one if the live data brings it
+  const aiTitleRef = useRef(ai.title);
+  useEffect(() => {
+    aiTitleRef.current = ai.title;
+    engineRef.current?.nameAi(ai.title);
+  }, [ai.title]);
   // (if the API can't be reached the page keeps the names it knows; a service switched off in the admin drops out)
   const serviceOf = (b: Block): ChipService | null => {
     if (!b.service) return null;
@@ -448,7 +454,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         return;
       }
       const canvas = root.querySelector<HTMLCanvasElement>('[data-chip="canvas"]')!;
-      const engine = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true));
+      const engine = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true), aiTitleRef.current);
       if (!engine) {
         setStill(true);
         return;
@@ -1063,7 +1069,8 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
 
   return (
     <div ref={rootRef} className="relative bg-white text-midnight">
-      <canvas key={attempt} data-chip="canvas" aria-hidden="true" className="fixed left-0 top-0 h-lvh w-full" />
+      {/* hidden until the board's first frame is drawn: an opaque WebGL canvas is black until then */}
+      <canvas key={attempt} data-chip="canvas" aria-hidden="true" className="fixed left-0 top-0 h-lvh w-full opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
 
       <div className="relative">
         <section data-chip="stage" aria-labelledby="chip-title" className="relative touch-pan-y" style={{ height: `${(score.total + 1) * 100}svh` }}>

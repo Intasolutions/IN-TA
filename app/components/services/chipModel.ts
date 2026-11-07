@@ -1,5 +1,5 @@
 // The solid parts of the scene: one circuit board, its modules and their lids, and everything printed on it.
-// All of it is generated here: nothing is downloaded but the logo.
+// All of it is generated here: nothing is downloaded.
 
 import { AI_BLOCK, ALL_BLOCKS, BLOCKS, BOARD, centreOf, LINKS, WEB_TILES, type Block, type Point } from './floorplan';
 
@@ -220,8 +220,24 @@ export function buildLids(): { data: Float32Array; ranges: LidRange[] } {
   return { data: new Float32Array(m.data), ranges };
 }
 
-/** What's printed on the lids: the name of each part, and on the centre one the official logo file */
-export function drawLidPrint(size: number, display: string, mono: string, logo: HTMLImageElement | null) {
+/** Splits a name into at most `max` lines that fit `room` at the largest size that allows it */
+function fitLines(g: CanvasRenderingContext2D, text: string, font: (px: number) => string, start: number, room: number, max: number) {
+  const words = text.split(/\s+/).filter(Boolean);
+  for (let fs = start; fs > 4; fs *= 0.92) {
+    g.font = font(fs);
+    const lines: string[] = [];
+    for (const word of words) {
+      const line = lines.length ? `${lines[lines.length - 1]} ${word}` : word;
+      if (lines.length && g.measureText(line).width <= room) lines[lines.length - 1] = line;
+      else lines.push(word);
+    }
+    if (lines.length <= max && lines.every((l) => g.measureText(l).width <= room)) return { fs, lines };
+  }
+  return { fs: 4, lines: [text] };
+}
+
+/** What's printed on the lids: the name of each part. The centre one carries the AI service's own name (from the admin). */
+export function drawLidPrint(size: number, display: string, mono: string, aiName: string) {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -244,10 +260,11 @@ export function drawLidPrint(size: number, display: string, mono: string, logo: 
     g.textAlign = 'center';
     g.textBaseline = 'middle';
     const isAi = block.kind === 'ai';
-    if (isAi && logo) {
-      const lw = w * 0.72;
-      const lh = (lw * logo.naturalHeight) / logo.naturalWidth;
-      g.drawImage(logo, (w - lw) / 2, h * 0.4 - lh / 2, lw, lh);
+    if (isAi) {
+      // the full name, on up to three lines, centred a little above the middle
+      const { fs, lines } = fitLines(g, aiName.toUpperCase(), (px) => `800 ${px}px ${display}`, h * 0.13, w * 0.84, 3);
+      const lead = fs * 1.08;
+      lines.forEach((line, n) => g.fillText(line, w / 2, h * 0.43 + (n - (lines.length - 1) / 2) * lead));
     } else {
       let fs = h * 0.17;
       const label = block.short.toUpperCase();
@@ -258,9 +275,8 @@ export function drawLidPrint(size: number, display: string, mono: string, logo: 
       g.font = `800 ${fs}px ${display}`;
       g.fillText(label, w / 2, h * 0.46);
     }
-    const sub = isAi ? 'AI // NEURAL ENGINE' : block.part.toUpperCase();
     g.font = `600 ${Math.min(w, h) * 0.05}px ${mono}`;
-    g.fillText(sub, w / 2, isAi ? h * 0.68 : h * 0.62);
+    g.fillText(block.part.toUpperCase(), w / 2, isAi ? h * 0.72 : h * 0.62);
     // the mark for pin one
     g.beginPath();
     g.moveTo(w * 0.045, h * 0.05);

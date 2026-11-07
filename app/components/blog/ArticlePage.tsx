@@ -16,6 +16,7 @@ import ProjectForm from './ProjectForm';
 import { calm } from './data';
 import { ViewAll } from './parts';
 import type { Post } from './posts';
+import { underHeader } from '../underHeader';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -76,7 +77,7 @@ export default function ArticlePage({ article, related }: { article: Article; re
       const body = rootRef.current!.querySelector<HTMLElement>('[data-article="body"]')!;
       gsap.fromTo('[data-article="progress"]', { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: body, start: 'top 45%', end: 'bottom 85%', scrub: 0.2 } });
       // The title drifts up and away, and the cover draws back, as the reading starts
-      gsap.fromTo('[data-article="head"]', { y: 0, autoAlpha: 1 }, { y: -30, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-article="head"]', start: 'top 12%', end: 'bottom top', scrub: true } });
+      gsap.fromTo('[data-article="head"]', { y: 0, autoAlpha: 1 }, { y: -30, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-article="head"]', start: underHeader(), end: 'bottom top', scrub: true } });
       gsap.utils.toArray<HTMLElement>('[data-article="frame"]').forEach((frame) => {
         gsap.fromTo(frame, { scale: 1 }, { scale: 0.95, ease: 'none', scrollTrigger: { trigger: frame, start: 'top 8%', end: 'bottom top', scrub: true } });
       });

@@ -102,7 +102,7 @@ export default function VisitGlobe({ active }: { active: boolean }) {
         </div>
       ) : (
         <>
-          <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
+          <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
           <p ref={waitRef} aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] text-[#9dbbff] transition-opacity duration-500 sm:text-[11px]">Finding {site.address.district || 'us'}</p>
           {/* the office, once the earth has turned to face it */}
           <span ref={markerRef} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 opacity-0">

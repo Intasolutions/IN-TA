@@ -72,6 +72,9 @@ function Story({ id, kicker, title, text, image, alt, flip = false, children }: 
                 sizes="(min-width: 1024px) 46vw, 100vw"
                 quality={90}
                 unoptimized={!optimisable(image)}
+                // with the page, not as it scrolls near: the box takes the picture's shape before anyone reaches it,
+                // so the page below never moves under the reader
+                loading="eager"
                 className="object-contain"
                 onLoad={(e) => {
                   const { naturalWidth: w, naturalHeight: h } = e.currentTarget;

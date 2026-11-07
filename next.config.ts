@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
         source: "/about/earth/:file*",
         headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
       },
+      {
+        // The opening's video and still: the same files for a week. Replacing them? Give them new names too.
+        source: "/intro/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
+      },
     ];
   },
 };

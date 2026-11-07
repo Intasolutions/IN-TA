@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Icon from './Icon';
 import MainNav, { type NavLink } from './MainNav';
-import { useSite } from '../site/SiteContext';
-import { coords, phoneHref } from '../site/site';
 
 // Home is only offered away from the home page
 const HOME_LINK: NavLink = { name: 'Home', href: '/' };
@@ -38,7 +36,6 @@ export function IstClock() {
 }
 
 export default function Header() {
-  const site = useSite();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -77,31 +74,6 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-[60] bg-canvas border-b border-brand-blue/15 shadow-sm transition-transform duration-500
         ${isVisible || isMobileOpen ? 'translate-y-0' : '-translate-y-full'}`}
     >
-      {/* TOP DATUM STRIP */}
-      <div className="[@media(max-height:500px)_and_(orientation:landscape)]:hidden max-w-[1520px] mx-auto px-4 sm:px-6 h-11 flex items-center justify-between gap-3 text-[10px] sm:text-[11px] font-mono tracking-wider sm:tracking-widest text-midnight/70">
-        <div className="flex items-center gap-4">
-          <span className="inline-flex items-center gap-1.5 text-brand-blue font-semibold">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue" />
-            </span>
-            <span className="hidden lg:inline">SYS.RUNNING [{coords(site)}]</span>
-            <span className="lg:hidden">SYS.RUNNING</span>
-          </span>
-          <span className="hidden xl:inline text-brand-blue/30">/</span>
-          <span className="hidden xl:inline text-midnight font-medium">HQ: {[site.address.district, site.address.region].filter(Boolean).join(', ').toUpperCase()}</span>
-        </div>
-        <div className="flex items-center gap-4 sm:gap-6">
-          <span className="hidden sm:flex items-center gap-1 text-brand-blue font-semibold tabular-nums">
-            <Icon name="schedule" className="text-[13px]" />
-            <IstClock />
-          </span>
-          <a className="hover:text-brand-blue transition-colors text-midnight font-semibold whitespace-nowrap" href={phoneHref(site.phone)}>
-            {site.phone}
-          </a>
-        </div>
-      </div>
-
       {/* PRIMARY NAVIGATION */}
       <header className="border-t border-brand-blue/10 bg-white">
         <div className="max-w-[1520px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
@@ -168,6 +140,7 @@ export default function Header() {
         {/* MOBILE MENU */}
         <nav
           id="mobile-nav"
+          data-lenis-prevent
           className={`lg:hidden overflow-hidden border-t border-brand-blue/10 transition-[max-height] duration-500 ease-out
             ${isMobileOpen ? 'max-h-[calc(100dvh_-_var(--header-h))] overflow-y-auto' : 'max-h-0 border-transparent'}`}
         >

@@ -60,6 +60,8 @@ export type ChipEngine = {
   frame: (f: ChipFrame) => void;
   resize: () => void;
   spell: (word: string) => void;
+  /** the AI service's name, printed on the centre part */
+  nameAi: (name: string) => void;
   /** where a point in the world is on screen, in CSS pixels */
   project: (x: number, y: number, z: number) => [number, number];
   /** where a point on the screen falls on the board, if it does */
@@ -73,7 +75,8 @@ const QUALITY = [
   { scale: 0.78, bloom: true, msaa: false, budget: 0.6 },
   { scale: 0.64, bloom: false, msaa: false, budget: 0.45 },
 ];
-const WATCH_FRAMES = 40;
+// How many frames it judges at a time: short, so a weaker laptop settles on the right quality within 2-3 s
+const WATCH_FRAMES = 30;
 const SLOW_FRAME_MS = 26;
 
 type Target = { fbo: WebGLFramebuffer; tex: WebGLTexture; w: number; h: number };
@@ -101,7 +104,7 @@ const COMPLETION_STATUS = 0x91b1; // COMPLETION_STATUS_KHR
 /** Where the light comes from, for the lids' shadows */
 const SUN: Vec3 = norm([-0.6, 0.5, -0.56]);
 
-export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail: () => void): ChipEngine | null {
+export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail: () => void, aiName = 'AI Integration & Model Training'): ChipEngine | null {
   const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, powerPreference: 'high-performance' });
   if (!gl) return null;
 
@@ -338,19 +341,19 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
   const artSize = Math.min(maxTexture, small ? 2048 : window.innerWidth > 2000 ? 4096 : 3072);
   const printSize = Math.min(maxTexture, small ? 1536 : 3072);
   let printed = false;
-  const uploadPrint = (logo: HTMLImageElement | null) => {
+  let lidName = aiName;
+  const uploadPrint = () => {
     if (destroyed) return;
     gl.bindTexture(gl.TEXTURE_2D, printTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, drawLidPrint(printSize, fontFamily(), monoFamily(), logo));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, drawLidPrint(printSize, fontFamily(), monoFamily(), lidName));
     sharpen();
   };
-  const logoImage = new window.Image();
-  let logoReady = false;
-  logoImage.onload = () => {
-    logoReady = true;
-    if (printed) uploadPrint(logoImage);
+  /** The AI service's name on the centre lid, printed again if it changed (the page can learn it after the board starts) */
+  const nameAi = (name: string) => {
+    if (!name || name === lidName) return;
+    lidName = name;
+    if (printed && !gl.isContextLost()) uploadPrint();
   };
-  logoImage.src = '/logo/logo-inta.png';
   const printAll = () => {
     if (destroyed || gl.isContextLost()) return;
     const { art, flow } = drawBoardArt(artSize, small ? 1024 : 2048, fontFamily(), monoFamily());
@@ -369,7 +372,7 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    uploadPrint(logoReady ? logoImage : null);
+    uploadPrint();
     printed = true;
   };
   document.fonts.ready.then(printAll, printAll);
@@ -400,7 +403,7 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
   let watched = 0;
   let slow = 0;
   let spent = 0;
-  let settle = 90;
+  let settle = 30; // frames to let the first shaders and textures settle before judging
   let locked = false;
   let paceBefore = 0;
   const changeQuality = (to: number) => {
@@ -826,6 +829,8 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
     gl.uniform1f(composite.u('uBloomAmt'), q.bloom ? 0.8 : 0);
     gl.uniform1f(composite.u('uFade'), fade);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    // An opaque canvas is black until its first frame: the page keeps it hidden until this mark (data-[drawn])
+    if (!canvas.dataset.drawn) canvas.dataset.drawn = '1';
   };
 
   resize();
@@ -834,6 +839,7 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
     frame,
     resize,
     spell,
+    nameAi,
     project,
     onBoard,
     destroy: () => {
