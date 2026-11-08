@@ -75,6 +75,7 @@
         ["home_work_kicker", "Selected work: small line", "Selected work // Case studies"],
         ["home_work_title", "Selected work: heading", "Built, shipped | & live"],
         ["home_work_text", "Selected work: paragraph", "Hospital management, manufacturing execution, EdTech and e-commerce. A few of the products we've designed, engineered and launched for our clients."],
+        ["home_work_industries", "Selected work: tags that name a client's industry, shown above each project (tag names, separate with commas)", "Healthcare Software, Manufacturing, EdTech, Education, E-commerce, Online Retail, Property Management, Community, Professional Education"],
         ["home_voices_kicker", "Testimonials: small line", "Testimonials // Client voices"],
         ["home_voices_title", "Testimonials: heading", "In their | own words"],
         ["home_voices_text", "Testimonials: paragraph", "What the people we've built for say about working with us."],
@@ -174,7 +175,8 @@
         ["seo_blog_description", "Blog: description", "Expert perspectives on custom software development, AI integration, and digital transformation from the team at INTA Solutions."],
         ["seo_contact_title", "Contact: title", "Contact Us | Get in Touch for IT Consultations | INTA Solutions"],
         ["seo_contact_description", "Contact: description", "Have a project in mind? Contact INTA Solutions in Wayanad, Kerala to discuss your software, web, or AI development needs. Call, email, visit or send us a message."],
-        ["seo_business_description", "Company description given to search engines", "Leading Software Development Company in Wayanad, Kerala. Specialized in SaaS Development, UI/UX Design, and Mobile App Development for the Malabar region."]
+        ["seo_business_description", "Company description given to search engines", "Leading Software Development Company in Wayanad, Kerala. Specialized in SaaS Development, UI/UX Design, and Mobile App Development for the Malabar region."],
+        ["seo_area_served", "Towns and regions the company serves (separate with commas)", "Mananthavady, Kalpetta, Sulthan Bathery, Kerala"]
       ]
     }
   ]

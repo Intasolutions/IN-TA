@@ -78,7 +78,9 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
             .fromTo(card, { y: 60, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.24 })
             .to(card, { y: 0, duration: 0.5 })
             .to(card, { y: -46, autoAlpha: 0, duration: 0.26 });
-          gsap.fromTo(card.querySelectorAll('[data-die="point"]'), { x: -14, autoAlpha: 0 }, { x: 0, autoAlpha: 1, stagger: 0.12, ease: 'sine.out', scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 64%', scrub } });
+          // its points, if the service lists any
+          const points = card.querySelectorAll('[data-die="point"]');
+          if (points.length) gsap.fromTo(points, { x: -14, autoAlpha: 0 }, { x: 0, autoAlpha: 1, stagger: 0.12, ease: 'sine.out', scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 64%', scrub } });
         });
       }
       if (reduced) {

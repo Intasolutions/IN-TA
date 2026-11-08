@@ -386,7 +386,7 @@ export default function TechOrbit({
                   <span aria-hidden="true" className="sonar-wave inset-0 w-full h-full" />
                   <span aria-hidden="true" className="sonar-wave sonar-wave-2 inset-0 w-full h-full" />
                   <div className="relative px-2 rounded-2xl bg-[linear-gradient(145deg,#01072b_0%,#06123f_55%,#0a1d5c_100%)] border border-brand-blue/40 ring-1 ring-inset ring-white/5 shadow-[0_12px_40px_-8px_rgb(1_68_181/0.7)]">
-                    <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} className="h-10 sm:h-16 lg:h-14 xl:h-20 w-auto" />
+                    <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} sizes="(min-width: 1280px) 193px, (min-width: 1024px) 135px, (min-width: 640px) 154px, 97px" className="h-10 sm:h-16 lg:h-14 xl:h-20 w-auto" />
                   </div>
                 </div>
               </div>
@@ -417,7 +417,7 @@ export default function TechOrbit({
                             opacity-0 translate-y-1 transition-[opacity,translate] duration-300 group-[.is-open]/orb:opacity-100 group-[.is-open]/orb:translate-y-0`}
                         >
                           <span className="block font-display font-bold uppercase text-[12px] tracking-tight">{item.name}</span>
-                          <span className="block font-mono text-[10px] text-white/70">{item.use}</span>
+                          <span className="block font-mono text-xs text-white/70">{item.use}</span>
                         </span>
                       </div>
                     </div>

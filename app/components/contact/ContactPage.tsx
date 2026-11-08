@@ -130,7 +130,7 @@ export default function ContactPage() {
   const [connected, setConnected] = useState(false);
   const status = useOfficeStatus();
   const open = status?.startsWith('OPEN') ?? false;
-  usePlayIntro(introRef);
+  const playedRef = usePlayIntro(introRef);
 
   const portEl = useCallback((id: PortId) => rootRef.current?.querySelector<HTMLElement>(`[data-port="${id}"]`) ?? null, []);
 
@@ -263,7 +263,9 @@ export default function ContactPage() {
     showHead();
     const hash = window.location.hash.slice(1);
     if (isPort(hash)) activeRef.current = hash;
-    if (still) seat(activeRef.current, true);
+    // with reduced motion it's simply in place; on a page that was already on screen as it arrived (its opening
+    // skipped, see usePlayIntro) it plugs itself in now, as the opening would have
+    if (still || playedRef.current) seat(activeRef.current, true);
 
     const sized = new ResizeObserver(() => {
       if (!stage.isConnected) return; // the page is being left
@@ -393,7 +395,7 @@ export default function ContactPage() {
       cable.destroy();
       cableRef.current = null;
     };
-  }, [blink, portEl]);
+  }, [blink, portEl, playedRef]);
 
   // ---- The opening, once: the words rise, the rack's lights come on, the plug swings up and clicks in ----
   useGSAP(
@@ -407,6 +409,7 @@ export default function ContactPage() {
         .from('[data-contact="panel"]', { autoAlpha: 0, duration: 0.9 }, 0.3)
         .from('.patch-led', { opacity: 0.08, duration: 0.5, stagger: 0.12, ease: 'steps(3)' }, 0.5)
         .call(() => plugIntoRef.current(activeRef.current, true), [], 0.75);
+      if (playedRef.current) introRef.current.progress(1);
       // the heading drifts up and away as the panel takes over
       gsap.fromTo('[data-contact="head"]', { y: 0, autoAlpha: 1 }, { y: -28, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-contact="head"]', start: underHeader(), end: 'bottom top', scrub: true } });
       const scrub = window.matchMedia('(pointer: fine)').matches ? true : 0.3;

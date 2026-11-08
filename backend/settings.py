@@ -31,8 +31,9 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Temporarily force DEBUG to True to see the real error on the admin screen
-DEBUG = True
+# Off on Render (which always sets RENDER), on for local development; DJANGO_DEBUG=True/False overrides either.
+# With it on, any error page shows the public the code and the site's URL patterns, so it must stay off live.
+DEBUG = os.getenv("DJANGO_DEBUG", "False" if os.getenv("RENDER") else "True") == "True"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -101,11 +102,18 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
+    # The public forms write to the database and email real people: one visitor can send at most this many
+    "DEFAULT_THROTTLE_RATES": {
+        "forms": "20/hour",
+    },
 }
 
 # Static and media files (uploads)
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# WhiteNoise serves the admin's and the editor's files straight from the apps, so they work whether or not the
+# deploy ran collectstatic (with DEBUG off it would otherwise only serve what collectstatic gathered)
+WHITENOISE_USE_FINDERS = True
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 

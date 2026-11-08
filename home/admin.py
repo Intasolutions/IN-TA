@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import WEEKDAYS, ClientLogo, HeroMetric, SiteSettings, Testimonial
-from .site_text import SITE_TEXT, TEXT_KEYS
+from .site_text import GROUP_NOTES, SITE_TEXT, TEXT_KEYS
 
 
 @admin.register(Testimonial)
@@ -77,17 +77,19 @@ class SiteSettingsForm(forms.ModelForm):
 
 
 def site_settings_form():
-    """The form with one box per wording in home/site_text.json, so that the admin can place them."""
+    """The form with one box per wording in home/site_text.json and home/legal_text.json, so that the admin can place them."""
     declared = {'Meta': type('Meta', (), {'model': SiteSettings, 'fields': '__all__'})}
     for _, items in SITE_TEXT:
         for key, label, standard in items:
-            wide = len(standard) > 60 or '\n' in standard
-            declared[f'text_{key}'] = forms.CharField(
-                required=False,
-                label=label,
-                help_text=format_html('Leave empty for: <em>{}</em>', standard.replace('\n', ' / ')),
-                widget=forms.Textarea(attrs={'rows': 3 if '\n' in standard else 2, 'cols': 80}) if wide else forms.TextInput(attrs={'size': 60}),
-            )
+            if len(standard) > 400:
+                # a whole document: a big box to write in, and the standard text to copy from, folded away
+                help_text = format_html('Leave empty for the standard text. <details><summary>Show it</summary><pre style="white-space:pre-wrap;max-width:60em">{}</pre></details>', standard)
+                widget = forms.Textarea(attrs={'rows': 24, 'cols': 100})
+            else:
+                help_text = format_html('Leave empty for: <em>{}</em>', standard.replace('\n', ' / '))
+                wide = len(standard) > 60 or '\n' in standard
+                widget = forms.Textarea(attrs={'rows': 3 if '\n' in standard else 2, 'cols': 80}) if wide else forms.TextInput(attrs={'size': 60})
+            declared[f'text_{key}'] = forms.CharField(required=False, label=label, help_text=help_text, widget=widget)
     return type(SiteSettingsForm)('SiteSettingsAdminForm', (SiteSettingsForm,), declared)
 
 
@@ -114,7 +116,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         }),
         *(
             (f'Page wording: {name}', {
-                'description': 'Leave a box empty to use the standard wording shown under it. In a heading, put | before the words that should be in blue. Where a box has more than one line, each line is a line on the page. {street}, {locality}, {district} and {region} become the office address above.',
+                'description': GROUP_NOTES.get(name, 'Leave a box empty to use the standard wording shown under it. In a heading, put | before the words that should be in blue. Where a box has more than one line, each line is a line on the page. {street}, {locality}, {district} and {region} become the office address above.'),
                 'classes': ('collapse',),
                 'fields': tuple(f'text_{key}' for key, _, _ in items),
             })

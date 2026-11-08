@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
 import { usePlayIntro } from '../context/usePlayIntro';
+import { SITE_URL } from '../site/seo';
 
 gsap.registerPlugin(useGSAP);
 
@@ -22,7 +23,8 @@ const ROUTES = [
   { href: '/security', name: 'Security' },
 ];
 const MAIN = ROUTES.slice(0, 5);
-const HOST = 'in-tasolutions.com';
+// the domain as people type it
+const HOST = new URL(SITE_URL).hostname.replace(/^www\./, '');
 
 const never = () => () => {};
 
@@ -45,7 +47,7 @@ export default function NotFoundTrace() {
   const path = known ? readable(asked || '/').replace(/\/+$/, '') || '/' : '';
   const rootRef = useRef<HTMLElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
-  usePlayIntro(introRef);
+  const playedRef = usePlayIntro(introRef);
 
   // The nearest page above the missing one: /services/nothing → /services
   const parts = path.split('/').filter(Boolean);
@@ -77,6 +79,7 @@ export default function NotFoundTrace() {
       });
       tl.from('[data-nf="route"]', { x: -10, autoAlpha: 0, duration: 0.6, stagger: 0.05 }, 1.6 + hops.length * 0.45 + 0.4);
       introRef.current = tl;
+      if (playedRef.current) tl.progress(1);
     },
     { scope: rootRef, dependencies: [path], revertOnUpdate: true },
   );

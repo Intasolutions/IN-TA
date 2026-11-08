@@ -14,18 +14,19 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export type LegalSection = { id: string; title: string; body: ReactNode };
 
-/** Our email address (from Site settings) as a link, for the server-rendered pages' wording */
-export function Mail({ subject }: { subject: string }) {
-  const { email } = useSite();
-  return <a href={`mailto:${email}?subject=${encodeURIComponent(subject)}`}>{email}</a>;
-}
-
-// The three documents, so each can point to the other two
-const DOCUMENTS = [
-  { href: '/terms', name: 'Terms of Service', about: 'Using this website and our services.' },
-  { href: '/privacy', name: 'Privacy Policy', about: 'What our forms collect and what happens to it.' },
-  { href: '/security', name: 'Security Policy', about: 'How we look after data, and how to report a problem.' },
-];
+/** A legal document as Site settings have it (see ./document.tsx) */
+export type LegalDocument = {
+  /** This document's own address */
+  href: string;
+  title: string;
+  accent: string;
+  lead: string;
+  /** When the wording last changed: an ISO date and how to show it */
+  updated: { iso: string; label: string };
+  sections: LegalSection[];
+  /** The other two documents, offered at the end */
+  others: { href: string; name: string; about: string }[];
+};
 
 const CONTAINER = 'mx-auto w-full max-w-[1520px] px-4 sm:px-6';
 const LABEL = 'font-mono text-[10px] font-bold uppercase tracking-[0.2em] sm:text-[11px]';
@@ -36,25 +37,7 @@ const calm = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
  * A legal document, read like a spec: numbered sections, a contents rail that follows the reader and fills as they go,
  * and the other two documents at the end. Shared by Terms, Privacy and Security.
  */
-export default function LegalPage({
-  href,
-  kicker,
-  title,
-  accent,
-  lead,
-  updated,
-  sections,
-}: {
-  /** This document's own address, so the others can be offered at the end */
-  href: string;
-  kicker: string;
-  title: string;
-  accent: string;
-  lead: string;
-  /** When the wording last changed: an ISO date and how to show it */
-  updated: { iso: string; label: string };
-  sections: LegalSection[];
-}) {
+export default function LegalPage({ kicker, title, accent, lead, updated, sections, others }: LegalDocument & { kicker: string }) {
   const { email: EMAIL } = useSite();
   const rootRef = useRef<HTMLElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
@@ -93,8 +76,9 @@ export default function LegalPage({
         .from('[data-lg="rule"]', { scaleX: 0, duration: 1.4 }, 0.3);
       if (playedRef.current) introRef.current.progress(1);
 
-      // ---- Each section rises in as it arrives, its rule drawing across ----
+      // ---- Each section rises in as it arrives, its rule drawing across (one already on screen as the page arrived stays) ----
       gsap.utils.toArray<HTMLElement>('[data-lg="section"]').forEach((el) => {
+        if (playedRef.current && el.getBoundingClientRect().top < window.innerHeight) return;
         gsap
           .timeline({ defaults: { ease: 'expo.out' }, scrollTrigger: { trigger: el, start: 'top 88%', once: true } })
           .from(el.querySelector('[data-lg="line"]'), { scaleX: 0, duration: 1.2 }, 0)
@@ -122,8 +106,6 @@ export default function LegalPage({
     setActive(id);
   };
 
-  const others = DOCUMENTS.filter((d) => d.href !== href);
-
   return (
     <main ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
       {/* ---- Title ---- */}
@@ -144,17 +126,17 @@ export default function LegalPage({
           </p>
           <dl data-lg="in" className="grid grid-cols-2 gap-x-6 gap-y-4 self-start font-mono text-[11px] uppercase tracking-wider sm:text-xs">
             <div>
-              <dt className="text-midnight/50">Last updated</dt>
+              <dt className="text-midnight/65">Last updated</dt>
               <dd className="mt-1 font-bold text-midnight">
                 <time dateTime={updated.iso}>{updated.label}</time>
               </dd>
             </div>
             <div>
-              <dt className="text-midnight/50">Sections</dt>
+              <dt className="text-midnight/65">Sections</dt>
               <dd className="mt-1 font-bold text-midnight">{String(sections.length).padStart(2, '0')}</dd>
             </div>
             <div className="col-span-2">
-              <dt className="text-midnight/50">Questions</dt>
+              <dt className="text-midnight/65">Questions</dt>
               <dd className="mt-1">
                 <a href={`mailto:${EMAIL}`} className="break-all font-bold normal-case tracking-normal text-brand-blue underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue">
                   {EMAIL}
@@ -168,7 +150,7 @@ export default function LegalPage({
       {/* ---- Contents and document ---- */}
       <div className={`${CONTAINER} grid gap-8 pb-16 sm:pb-24 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[17rem_minmax(0,1fr)]`}>
         <nav data-lg="in" aria-label="Contents" className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
-          <p className={`text-midnight/50 ${LABEL}`}>Contents</p>
+          <p className={`text-midnight/65 ${LABEL}`}>Contents</p>
           <ol className="relative mt-3 rounded-2xl border border-midnight/10 bg-white p-2 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pl-5">
             <span aria-hidden="true" className="absolute bottom-1 left-0 top-1 hidden w-px bg-midnight/15 lg:block" />
             <span data-lg="fill" aria-hidden="true" className="absolute bottom-1 left-0 top-1 hidden w-px origin-top bg-brand-blue lg:block" />
@@ -212,7 +194,7 @@ export default function LegalPage({
       {others.length > 0 && (
         <section data-lg="others" aria-labelledby="legal-others" className="border-t border-midnight/10 bg-white/50">
           <div className={`${CONTAINER} py-12 sm:py-16`}>
-            <h2 id="legal-others" className={`text-midnight/50 ${LABEL}`}>Also read</h2>
+            <h2 id="legal-others" className={`text-midnight/65 ${LABEL}`}>Also read</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:gap-6">
               {others.map((d) => (
                 <Link

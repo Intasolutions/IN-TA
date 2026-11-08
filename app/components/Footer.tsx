@@ -279,7 +279,7 @@ export default function Footer() {
             <div className="col-span-2 lg:col-span-4">
               <div data-ft="item">
                 {/* The official logo file, shown as-is */}
-                <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} className="h-9 w-auto -ml-2.5" />
+                <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} sizes="87px" className="h-9 w-auto -ml-2.5" />
               </div>
               <p data-ft="item" className="mt-2 text-[13px] sm:text-sm text-white/65 leading-relaxed max-w-xs">
                 {t('footer_text')}
@@ -375,16 +375,16 @@ export default function Footer() {
         {/* ---- Bottom bar ---- */}
         <div className="relative mt-8 lg:mt-10 pt-4">
           <span data-ft="rule" aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-white/15 origin-left" />
-          <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-white/50">
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 font-mono text-xs uppercase tracking-wider text-white/50">
             <p>© {year} IN-TA Solutions Pvt Ltd. All rights reserved.</p>
             <div className="flex items-center gap-5 sm:gap-6">
-              <Link href="/terms" className="group/roll inline-flex hover:text-white">
+              <Link href="/terms" className="group/roll inline-flex py-1 hover:text-white">
                 <Roll>Terms</Roll>
               </Link>
-              <Link href="/privacy" className="group/roll inline-flex hover:text-white">
+              <Link href="/privacy" className="group/roll inline-flex py-1 hover:text-white">
                 <Roll>Privacy</Roll>
               </Link>
-              <Link href="/security" className="group/roll inline-flex hover:text-white">
+              <Link href="/security" className="group/roll inline-flex py-1 hover:text-white">
                 <Roll>Security</Roll>
               </Link>
               <button

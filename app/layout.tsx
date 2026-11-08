@@ -1,10 +1,11 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import 'lenis/dist/lenis.css';
 import './globals.css';
 import ClientLayout from './ClientLayout';
 import { LOADER_SCRIPT } from './site/loader';
 import { getSite } from './site/server';
+import { withoutDocuments } from './components/legal/document';
 import { textOf } from './site/site';
 import { pageMetadata, SITE_NAME, SITE_URL } from './site/seo';
 
@@ -41,6 +42,9 @@ const API_ORIGIN = (() => {
   }
 })();
 
+// A phone browser's bar takes the header's white
+export const viewport: Viewport = { themeColor: '#ffffff' };
+
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite();
   return {
@@ -63,6 +67,8 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: LOADER_SCRIPT }} />
+        {/* without scripts the opening could never end: the page shows straight away */}
+        <noscript dangerouslySetInnerHTML={{ __html: '<style>.page-loader{display:none}</style>' }} />
         {/* Pages ask the API for their content from the browser too: opening the connection early saves that first wait */}
         {API_ORIGIN && <link rel="preconnect" href={API_ORIGIN} crossOrigin="anonymous" />}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -75,7 +81,7 @@ export default async function RootLayout({
       <body
         className={`${jakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <ClientLayout site={site}>{children}</ClientLayout>
+        <ClientLayout site={{ ...site, text: withoutDocuments(site.text) }}>{children}</ClientLayout>
       </body>
     </html>
   );

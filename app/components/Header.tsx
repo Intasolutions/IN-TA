@@ -75,8 +75,9 @@ export default function Header() {
         ${isVisible || isMobileOpen ? 'translate-y-0' : '-translate-y-full'}`}
     >
       {/* PRIMARY NAVIGATION */}
-      <header className="border-t border-brand-blue/10 bg-white">
-        <div className="max-w-[1520px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+      <header className="bg-white">
+        {/* 79px and the bar's 1px line: exactly --header-h, which the pages are spaced by */}
+        <div className="max-w-[1520px] mx-auto px-4 sm:px-6 h-[79px] flex items-center justify-between gap-4">
           <Link
             href="/"
             onClick={() => setIsMobileOpen(false)}
@@ -99,7 +100,7 @@ export default function Header() {
                 alt=""
                 width={774}
                 height={322}
-                priority
+                sizes="106px"
                 className="h-10 sm:h-11 w-auto"
               />
             </span>
@@ -141,8 +142,8 @@ export default function Header() {
         <nav
           id="mobile-nav"
           data-lenis-prevent
-          className={`lg:hidden overflow-hidden border-t border-brand-blue/10 transition-[max-height] duration-500 ease-out
-            ${isMobileOpen ? 'max-h-[calc(100dvh_-_var(--header-h))] overflow-y-auto' : 'max-h-0 border-transparent'}`}
+          className={`lg:hidden overflow-hidden transition-[max-height] duration-500 ease-out
+            ${isMobileOpen ? 'max-h-[calc(100dvh_-_var(--header-h))] overflow-y-auto border-t border-brand-blue/10' : 'max-h-0'}`}
         >
           <div className="max-w-[1520px] mx-auto px-6 py-6 flex flex-col gap-1">
             {links.map((link, i) => (

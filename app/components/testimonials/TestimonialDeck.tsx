@@ -265,7 +265,7 @@ export default function TestimonialDeck() {
       const setFan = () => deck.style.setProperty('--fan', fan.v.toFixed(3));
       gsap.set(tilt, { transformPerspective: 1200, transformOrigin: '50% 60%' });
 
-      gsap
+      const scroll = gsap
         .timeline({ scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true } })
         // fan out → neat stack → slight spread on the way out
         .fromTo(fan, { v: 1 }, { v: 0, ease: 'power2.out', duration: 0.45, onUpdate: setFan }, 0)
@@ -280,8 +280,10 @@ export default function TestimonialDeck() {
         .to(tilt, { rotationX: () => (small() ? -5 : -10), y: () => (small() ? -16 : -36), rotation: 2, ease: 'power1.in', duration: 0.35 }, 0.65)
         // text column drifts slower than the page; ghost text glides sideways; client photos ripple
         .fromTo('[data-td="par"]', { y: () => (small() ? 18 : 46) }, { y: () => (small() ? -18 : -46), ease: 'none', duration: 1 }, 0)
-        .fromTo('[data-td="ghost"]', { xPercent: 0 }, { xPercent: -28, ease: 'none', duration: 1 }, 0)
-        .fromTo('[data-td="ava"]', { y: (i: number) => Math.sin(i * 0.9) * 10 }, { y: (i: number) => -Math.sin(i * 0.9) * 10, ease: 'none', duration: 1 }, 0);
+        .fromTo('[data-td="ghost"]', { xPercent: 0 }, { xPercent: -28, ease: 'none', duration: 1 }, 0);
+      // (only the clients who sent a photo have one)
+      const photos = root.querySelectorAll('[data-td="ava"]');
+      if (photos.length) scroll.fromTo(photos, { y: (i: number) => Math.sin(i * 0.9) * 10 }, { y: (i: number) => -Math.sin(i * 0.9) * 10, ease: 'none', duration: 1 }, 0);
       setFan();
     },
     { scope: ref, dependencies: [n] },
@@ -313,6 +315,9 @@ export default function TestimonialDeck() {
       </span>
     </div>
   );
+
+  // No testimonials in the admin: the section steps aside rather than show an empty deck
+  if (items?.length === 0) return null;
 
   return (
     <section ref={ref} id="testimonials" aria-labelledby="td-title" className="relative max-w-[1520px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 lg:pt-12 pb-12 sm:pb-14 lg:pb-16 overflow-x-clip">

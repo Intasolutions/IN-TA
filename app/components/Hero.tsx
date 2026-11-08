@@ -12,6 +12,7 @@ import EdgePing from './EdgePing';
 import OfficeStatus from './OfficeStatus';
 import Marquee from './Marquee';
 import { useReveal } from '../context/RevealContext';
+import { useShownOnArrival } from '../context/usePlayIntro';
 import { useSite, useText } from '../site/SiteContext';
 import { accent, listOf } from '../site/site';
 
@@ -39,6 +40,8 @@ export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const { isIntroReady } = useReveal();
+  // already on screen when the scripts arrived (a reload, or a slow connection): it stays just as it is
+  const shownOnArrival = useShownOnArrival();
   const [scrambleKey, setScrambleKey] = useState(0);
 
   // The gradient shimmer animates background-position, which repaints on the main thread every frame;
@@ -57,6 +60,7 @@ export default function Hero() {
   // Entrance sequence — waits until the loader / route mask has cleared
   useGSAP(
     () => {
+      if (shownOnArrival) return;
       // Reduced motion → same sequence, but fades only (no travel/rotation)
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const move = (v: number) => (calm ? 0 : v);
@@ -94,7 +98,7 @@ export default function Hero() {
 
       if (isIntroReady) tl.play();
     },
-    { scope: heroRef, dependencies: [isIntroReady], revertOnUpdate: true },
+    { scope: heroRef, dependencies: [isIntroReady, shownOnArrival], revertOnUpdate: true },
   );
 
   // Cursor interactions + scroll-away parallax

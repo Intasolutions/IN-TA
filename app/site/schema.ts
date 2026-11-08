@@ -1,7 +1,7 @@
 // The company as search engines read it (schema.org), built from Site settings so it always matches the page.
 // Every page names the company the same way and points to the same @ids, so search engines see one business.
 import { SITE_URL, absolute } from './seo';
-import { textOf, type Site } from './site';
+import { listOf, textOf, type Site } from './site';
 
 export { SITE_URL };
 
@@ -71,13 +71,7 @@ function business(site: Site) {
     openingHoursSpecification: openingHours(site),
     sameAs: sameAs(site),
     parentOrganization: { '@id': ORG_ID },
-    priceRange: '$$',
-    areaServed: [
-      { '@type': 'City', name: 'Mananthavady' },
-      { '@type': 'City', name: 'Kalpetta' },
-      { '@type': 'City', name: 'Sulthan Bathery' },
-      { '@type': 'State', name: 'Kerala' },
-    ],
+    areaServed: listOf(textOf(site, 'seo_area_served')).map((name) => ({ '@type': 'Place', name })),
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'IT Services',

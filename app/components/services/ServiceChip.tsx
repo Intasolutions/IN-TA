@@ -378,7 +378,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
   const [attempt, setAttempt] = useState(0); // goes up if the graphics context is lost: the board restarts on a new canvas
   const [order, setOrder] = useState<ActiveOrder | null>(null);
   const orderRef = useRef<Block | null>(null);
-  usePlayIntro(introRef);
+  const playedRef = usePlayIntro(introRef);
 
   const bySlug = useMemo(() => new Map(services.map((s) => [s.slug, s])), [services]);
   const ai: ChipService = bySlug.get(AI_SLUG) ?? { slug: AI_SLUG, title: NOW.fallbackTitle, description: '', features: [] };
@@ -473,7 +473,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         .from('[data-hero="kicker"]', { y: 12, autoAlpha: 0, duration: 0.8 }, 0.05)
         .from('[data-hero="word"]', { yPercent: 110, duration: 1.2, stagger: 0.12 }, 0.1)
         .from('[data-hero="in"]', { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, 0.5);
-      if (attempt > 0) introRef.current.progress(1); // (restarting: the page is long past its opening)
+      if (attempt > 0 || playedRef.current) introRef.current.progress(1); // (restarting: the page is long past its opening)
 
       // One timeline for all the words on the page, in screens of scrolling
       const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: stageEl, start: 'top top', end: 'bottom bottom', scrub } });

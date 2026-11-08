@@ -125,10 +125,10 @@ const KeyShapes = memo(function KeyShapes() {
 
 function Plate({ project, index, off, onGo }: { project: RackProject; index: number; off: boolean; onGo: (i: number) => void }) {
   return (
-    <button type="button" data-plate data-off={off} onClick={() => onGo(index)} aria-label={`Open ${project.title}`} className="rack-plate group pointer-events-auto absolute inset-0 flex cursor-pointer items-center gap-[calc(var(--uh)*0.28)] px-[calc(var(--uh)*0.3)] text-left font-mono uppercase transition-[transform,opacity] duration-300 hover:[transform:translateZ(16px)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#9dbbff] data-[off=true]:opacity-35" style={{ '--i': index } as CSSProperties}>
+    <button type="button" data-plate data-off={off} onClick={() => onGo(index)} className="rack-plate group pointer-events-auto absolute inset-0 flex cursor-pointer items-center gap-[calc(var(--uh)*0.28)] px-[calc(var(--uh)*0.3)] text-left font-mono uppercase transition-[transform,opacity] duration-300 hover:[transform:translateZ(16px)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#9dbbff] data-[off=true]:opacity-35" style={{ '--i': index } as CSSProperties}>
       <span aria-hidden="true" className="rack-screw shrink-0" />
       <span aria-hidden="true" className="rack-grip shrink-0" />
-      <span className="min-w-0 flex-[0_1_46%] truncate text-[length:calc(var(--uh)*0.25)] font-bold tracking-wider text-white transition-colors duration-300 group-hover:text-[#9dbbff]">{project.title}</span>
+      <span className="min-w-0 flex-[0_1_46%] truncate text-[length:calc(var(--uh)*0.25)] font-bold tracking-wider text-white transition-colors duration-300 group-hover:text-[#9dbbff]"><span className="sr-only">Open </span>{project.title}</span>
       <span aria-hidden="true" className="rack-vent h-[42%] min-w-0 flex-1 rounded-[2px]" />
       <span className="shrink-0 rounded-[3px] border border-[#5b8cff]/60 px-[0.5em] text-[length:calc(var(--uh)*0.18)] font-bold tracking-wider text-[#9dbbff]">Live</span>
       <span aria-hidden="true" className="rack-leds flex shrink-0 items-center gap-[calc(var(--uh)*0.13)]">
@@ -1237,9 +1237,10 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
           <div data-rack="burst" aria-hidden="true" className="rack-burst absolute inset-y-0 hidden opacity-0" style={{ left: 'var(--rail)', width: 'var(--lw)', transform: 'translateZ(-1px)' }} />
 
           {/* The slot with nothing in it */}
-          <button type="button" onClick={() => toSection(formId)} aria-label="Start a project" className="rack-empty group pointer-events-auto absolute flex cursor-pointer items-center justify-center font-mono text-[length:calc(var(--uh)*0.24)] font-bold uppercase tracking-[0.25em] text-[#9dbbff] transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#9dbbff]" style={{ left: 'var(--rail)', width: 'var(--lw)', top: `calc(var(--uh) * ${ROWS_ABOVE + projects.length})`, height: 'var(--uh)', transform: 'translateZ(-5px)' }}>
+          <button type="button" onClick={() => toSection(formId)} className="rack-empty group pointer-events-auto absolute flex cursor-pointer items-center justify-center font-mono text-[length:calc(var(--uh)*0.24)] font-bold uppercase tracking-[0.25em] text-[#9dbbff] transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#9dbbff]" style={{ left: 'var(--rail)', width: 'var(--lw)', top: `calc(var(--uh) * ${ROWS_ABOVE + projects.length})`, height: 'var(--uh)', transform: 'translateZ(-5px)' }}>
             <span data-rack="slot-glow" aria-hidden="true" className="rack-empty-glow absolute inset-0 opacity-0" />
-            <span className="relative">Your project</span>
+            {/* named by what it shows, so saying "Your project" finds it */}
+            <span className="relative">Your project<span className="sr-only">: start one with us</span></span>
           </button>
 
           {/* A vent and the power strip */}

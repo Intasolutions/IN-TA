@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
 import { useText } from '../site/SiteContext';
-import { accent } from '../site/site';
+import { accent, listOf } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -31,11 +31,6 @@ const GALLERY_COUNT = 6;
 const DESKTOP_QUERY = '(min-width: 1024px) and (min-height: 640px)';
 const STATIC_GRADIENT = 'bg-linear-to-r from-brand-blue via-[#2563eb] to-[#3b7bf7] bg-clip-text text-transparent';
 
-// Tags that describe the client's industry (used for the small label above each title)
-const INDUSTRY_TAGS = [
-  'healthcare-software', 'manufacturing', 'edtech', 'education', 'e-commerce', 'online-retail',
-  'property-management', 'community', 'professional-education',
-];
 
 const hostname = (url: string) => {
   try {
@@ -73,9 +68,12 @@ const CARD_SIZE =
   'w-[80vw] sm:w-[58vw] md:w-[46vw] [@media(min-width:1024px)_and_(min-height:640px)]:w-[min(50vw,860px)] [@media(min-width:1024px)_and_(min-height:640px)]:h-full [@media(min-width:1024px)_and_(min-height:640px)]:min-h-0'
 
 function ProjectCard({ project }: { project: Project }) {
+  const t = useText();
   const host = hostname(project.external_url);
   const isLive = Boolean(host);
-  const industry = (project.tags.find((t) => INDUSTRY_TAGS.includes(t.slug)) ?? project.tags[0])?.name ?? '';
+  // the small label above the title: the tag that names the client's industry (the list is in Site settings), else the first
+  const industries = listOf(t('home_work_industries')).map((name) => name.toLowerCase());
+  const industry = (project.tags.find((tag) => industries.includes(tag.name.trim().toLowerCase())) ?? project.tags[0])?.name ?? '';
 
   return (
     <li data-g="card" className={`${CARD_SIZE} shrink-0 snap-center will-change-transform`}>
@@ -320,12 +318,13 @@ export default function Work() {
         if (!calm) {
           cards.forEach((card) => {
             const inner = card.querySelector('[data-g="inner"]');
-            // title rises out of its mask, tags pop in, arrow spins in as the card arrives
-            gsap
+            // title rises out of its mask, tags pop in (a project may have none), arrow spins in as the card arrives
+            const arrive = gsap
               .timeline({ scrollTrigger: { trigger: card, containerAnimation: slide, start: 'left 92%', end: 'left 50%', scrub: true } })
               .fromTo(card.querySelector('[data-g="title"]'), { yPercent: 105 }, { yPercent: 0, ease: 'power3.out' }, 0)
-              .fromTo(card.querySelectorAll('[data-g="tag"]'), { y: 12, autoAlpha: 0 }, { y: 0, autoAlpha: 1, stagger: 0.08, ease: 'power2.out' }, 0.25)
               .fromTo(card.querySelector('[data-g="arrow"]'), { scale: 0, rotate: -120 }, { scale: 1, rotate: 0, ease: 'back.out(2)' }, 0.35);
+            const tags = card.querySelectorAll('[data-g="tag"]');
+            if (tags.length) arrive.fromTo(tags, { y: 12, autoAlpha: 0 }, { y: 0, autoAlpha: 1, stagger: 0.08, ease: 'power2.out' }, 0.25);
             // Coverflow: tied to the card's position, not scroll speed, so it shows even when scrolling slowly.
             // Turned towards the centre on the right, flat through the middle, turned away on the left.
             const dim = card.querySelector('[data-g="dim"]');
@@ -416,7 +415,8 @@ export default function Work() {
         if (!calm) {
           cards.forEach((c) => {
             gsap.set(c.querySelector('[data-g="title"]'), { yPercent: 105 });
-            gsap.set(c.querySelectorAll('[data-g="tag"]'), { y: 10, autoAlpha: 0 });
+            const tags = c.querySelectorAll('[data-g="tag"]');
+            if (tags.length) gsap.set(tags, { y: 10, autoAlpha: 0 });
             gsap.set(c.querySelector('[data-g="arrow"]'), { scale: 0, rotate: -120 });
           });
         }
@@ -425,11 +425,12 @@ export default function Work() {
             entries.forEach((e) => {
               if (!e.isIntersecting || calm || revealed.has(e.target)) return;
               revealed.add(e.target);
-              gsap
+              const show = gsap
                 .timeline({ defaults: { ease: 'expo.out' } })
                 .fromTo(e.target.querySelector('[data-g="title"]'), { yPercent: 105 }, { yPercent: 0, duration: 0.9 }, 0.05)
-                .fromTo(e.target.querySelectorAll('[data-g="tag"]'), { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, stagger: 0.06 }, 0.25)
                 .fromTo(e.target.querySelector('[data-g="arrow"]'), { scale: 0, rotate: -120 }, { scale: 1, rotate: 0, duration: 0.7, ease: 'back.out(2)' }, 0.3);
+              const tags = e.target.querySelectorAll('[data-g="tag"]');
+              if (tags.length) show.fromTo(tags, { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, stagger: 0.06 }, 0.25);
             }),
           { root: viewport, threshold: 0.6 },
         );
@@ -451,6 +452,9 @@ export default function Work() {
     },
     { scope: ref, dependencies: [projects], revertOnUpdate: true },
   );
+
+  // No projects in the admin: the section steps aside rather than show an empty gallery
+  if (projects?.length === 0) return null;
 
   return (
     <section ref={ref} id="work" aria-labelledby="work-title" className="relative overflow-x-clip">

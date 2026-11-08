@@ -86,6 +86,8 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
   useCardHover(rootRef);
   const [posts, setPosts] = useState(initial);
   const [failed, setFailed] = useState(false);
+  // the API has answered (an empty answer means there are no articles yet, not that they're still coming)
+  const [answered, setAnswered] = useState(false);
   const [topic, setTopic] = useState('');
   const [search, setSearch] = useState('');
   const [limit, setLimit] = useState(PER_PAGE);
@@ -97,7 +99,10 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
     const stop = new AbortController();
     fetch(`${apiBase()}/api/blog/posts/`, { signal: stop.signal })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((data) => setPosts(((Array.isArray(data) ? data : data.results ?? []) as ApiPost[]).map(toPost)))
+      .then((data) => {
+        setPosts(((Array.isArray(data) ? data : data.results ?? []) as ApiPost[]).map(toPost));
+        setAnswered(true);
+      })
       .catch((err) => {
         if (err?.name !== 'AbortError') setFailed(true);
       });
@@ -140,8 +145,9 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
         .timeline({ paused: true, defaults: { ease: 'expo.out' } })
         .from('[data-blog="kicker"]', { y: 10, autoAlpha: 0, duration: 0.7 }, 0)
         .from('[data-blog="word"]', { y: 44, autoAlpha: 0, duration: 1.2, stagger: 0.14 }, 0.1)
-        .from('[data-blog="in"]', { y: 16, autoAlpha: 0, duration: 0.9, stagger: 0.08 }, 0.35)
-        .from('[data-blog="lead"]', { y: 30, autoAlpha: 0, duration: 1 }, 0.45);
+        .from('[data-blog="in"]', { y: 16, autoAlpha: 0, duration: 0.9, stagger: 0.08 }, 0.35);
+      // the featured article, when there are articles
+      if (rootRef.current?.querySelector('[data-blog="lead"]')) introRef.current.from('[data-blog="lead"]', { y: 30, autoAlpha: 0, duration: 1 }, 0.45);
       if (playedRef.current) introRef.current.progress(1);
       // the heading drifts up and away as the articles come up over it
       gsap.fromTo('[data-blog="head"]', { y: 0, autoAlpha: 1 }, { y: -30, autoAlpha: 0.2, ease: 'none', scrollTrigger: { trigger: '[data-blog="head"]', start: underHeader(), end: 'bottom top', scrub: true } });
@@ -212,6 +218,8 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
       <div className={`${CONTAINER} pb-10 sm:pb-14`}>
         {failed && empty ? (
           <p className={`p-8 text-center text-midnight/80 ${CARD_FRAME}`}>Our articles are taking a moment to load. Please refresh the page in a little while.</p>
+        ) : empty && answered ? (
+          <p className={`p-8 text-center text-midnight/80 ${CARD_FRAME}`}>No articles have been published yet. Please check back soon.</p>
         ) : empty ? (
           <Loading />
         ) : shown.length === 0 ? (

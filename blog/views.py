@@ -1,4 +1,5 @@
 from rest_framework import viewsets, mixins
+from rest_framework.throttling import ScopedRateThrottle
 from .models import Blog, Subscriber
 from .serializers import BlogSerializer, SubscriberSerializer
 
@@ -15,3 +16,6 @@ class SubscriberViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     queryset = Subscriber.objects.all()
     serializer_class = SubscriberSerializer
+    # the public enquiry form: one visitor can send at most "forms" (REST_FRAMEWORK) an hour
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'forms'

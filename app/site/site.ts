@@ -231,7 +231,8 @@ export function toSite(api: unknown, apiBase = ''): Site {
     : [];
   const text: Record<string, string> = {};
   if (a.text && typeof a.text === 'object') {
-    for (const [k, v] of Object.entries(a.text)) if (typeof v === 'string' && v.trim() && k in STANDARD) text[k] = v;
+    // legal_ entries are the Terms, Privacy and Security documents (home/legal_text.json), read only by those pages
+    for (const [k, v] of Object.entries(a.text)) if (typeof v === 'string' && v.trim() && (k in STANDARD || k.startsWith('legal_'))) text[k] = v;
   }
 
   return {

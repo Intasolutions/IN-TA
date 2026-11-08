@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { LEGAL_UPDATED } from './components/legal/updated';
+import { updatedOf } from './components/legal/document';
 import { getSite } from './site/server';
 import { absolute } from './site/seo';
 
@@ -61,9 +61,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/portfolio', latest(settings, projectsChanged)),
     entry('/blog', latest(settings, postsChanged)),
     entry('/contact', settings),
-    entry('/terms', dateOf(LEGAL_UPDATED.terms.iso)),
-    entry('/privacy', dateOf(LEGAL_UPDATED.privacy.iso)),
-    entry('/security', dateOf(LEGAL_UPDATED.security.iso)),
+    entry('/terms', updatedOf(site, 'terms').date),
+    entry('/privacy', updatedOf(site, 'privacy').date),
+    entry('/security', updatedOf(site, 'security').date),
     ...live.map((s) => entry(`/services/${s.slug}`, dateOf(s.updated_at))),
     ...posts.map((p) => entry(`/blog/${p.id}`, postDate(p))),
   ];

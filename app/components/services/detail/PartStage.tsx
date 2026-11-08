@@ -89,7 +89,7 @@ export default function PartStage({ service, block, others, formId, insideId, fa
   const [still, setStill] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const { isIntroReady } = useReveal();
-  usePlayIntro(introRef);
+  const playedRef = usePlayIntro(introRef);
   const readyRef = useRef(false);
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export default function PartStage({ service, block, others, formId, insideId, fa
         .timeline({ paused: true, defaults: { ease: 'expo.out' } })
         .from('[data-part="word"]', { y: 26, autoAlpha: 0, duration: 1, stagger: 0.1 }, 0.1)
         .from('[data-part="in"]', { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.08 }, 0.3);
-      if (attempt > 0) introRef.current.progress(1);
+      if (attempt > 0 || playedRef.current) introRef.current.progress(1);
 
       const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: root, start: 'top top', end: 'bottom bottom', scrub } });
       tl.to({}, { duration: TOTAL }, 0);

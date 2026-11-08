@@ -89,7 +89,7 @@ function StatusPill() {
   const status = useOfficeStatus();
   const isOpen = status?.startsWith('OPEN') ?? false;
   return (
-    <div data-sm="status" className="inline-flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border border-white/12 bg-[#050d3a]/85 px-3.5 py-2 font-mono text-[10px] uppercase tracking-wider">
+    <div data-sm="status" className="motion-safe:invisible motion-safe:opacity-0 inline-flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full border border-white/12 bg-[#050d3a]/85 px-3.5 py-2 font-mono text-[10px] uppercase tracking-wider">
       <span className="relative flex h-2 w-2 shrink-0">
         {isOpen && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7fa6ff] opacity-75" />}
         <span className={`relative inline-flex h-2 w-2 rounded-full ${isOpen ? 'bg-[#7fa6ff]' : 'bg-white/30'}`} />
@@ -108,11 +108,11 @@ function Core({ className = '' }: { className?: string }) {
   return (
     <div
       data-sm="chip"
-      className={`relative flex items-center justify-center rounded-2xl border border-[#7fa6ff]/50 ring-1 ring-inset ring-white/10
+      className={`motion-safe:invisible motion-safe:opacity-0 relative flex items-center justify-center rounded-2xl border border-[#7fa6ff]/50 ring-1 ring-inset ring-white/10
         bg-[linear-gradient(145deg,#01072b_0%,#06123f_55%,#0a1d5c_100%)] shadow-[0_0_60px_-8px_rgb(59_123_247/0.75)] ${className}`}
     >
       <span aria-hidden="true" className="absolute inset-2 rounded-xl border border-white/10" />
-      <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} className="relative w-[80%] h-auto" />
+      <Image src="/logo/logo-inta.png" alt="IN-TA Solutions" width={774} height={322} sizes="148px" className="relative w-[80%] h-auto" />
     </div>
   );
 }
@@ -121,7 +121,7 @@ function Heading({ count }: { count: number }) {
   const t = useText();
   const [plain, bright] = accent(t('about_services_title', { n: count }));
   return (
-    <div data-sm="head" className="text-center">
+    <div data-sm="head" className="motion-safe:invisible motion-safe:opacity-0 text-center">
       <span className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-2">
         <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
         {t('about_services_kicker')}
@@ -174,7 +174,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
   const activeRef = useRef(-1);
   const [active, setActive] = useState(-1);
   const introRef = useRef<gsap.core.Timeline | null>(null);
-  usePlayIntro(introRef);
+  const playedRef = usePlayIntro(introRef);
   const stopChangedRef = useRef<(i: number) => void>(() => {});
   const [credits, setCredits] = useState(false);
   const scrollToStop = useRef<(p: number) => void>(() => {});
@@ -196,6 +196,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         .from('[data-sm="copy"]', { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, 0.5)
         .from('[data-sm="canvas"], [data-sm="gl"]', { autoAlpha: 0, scale: 0.92, duration: 1.8 }, 0)
         .from('[data-sm="hud"]', { autoAlpha: 0, duration: 0.8 }, 0.8);
+      if (playedRef.current) introRef.current.progress(1);
     },
     { scope: ref },
   );
@@ -570,6 +571,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           .to('[data-sm="story"]', { y: -24, autoAlpha: 0, duration: u(0.04), ease: 'power2.in' }, landAt - u(0.08))
           .to([hud, '[data-sm="credit"]'], { autoAlpha: 0, duration: u(0.05) }, landAt + u(0.01))
           .fromTo(chip, { scale: 0.08, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: u(0.08), ease: 'back.out(1.5)' }, landAt - u(0.01))
+          // (the board's parts start hidden in the HTML, so the page doesn't show them over the globe before this takes over)
           .fromTo(`${box} [data-sm="status"]`, { y: 14, autoAlpha: 0 }, { ...rise, duration: u(0.05) }, landAt + u(0.06))
           .fromTo(`${box} [data-sm="head"]`, { y: 30, autoAlpha: 0 }, { ...rise, duration: u(0.07) }, landAt + u(0.05));
 
@@ -727,7 +729,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
     const on = active === i;
     return (
       <li key={m.slug} data-sm="slot">
-        <div data-sm="mod" className="pointer-events-auto">
+        <div data-sm="mod" className="motion-safe:invisible motion-safe:opacity-0 pointer-events-auto">
           <Link
             href={`/services/${m.slug}`}
             {...hover(i)}
@@ -761,7 +763,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           <canvas data-sm="canvas" aria-hidden="true" className="absolute inset-0 w-full h-full touch-pan-y select-none" />
 
           {/* Name tag that sits on the coordinates and changes as the camera closes in */}
-          <div data-sm="place" aria-hidden="true" className="pointer-events-none absolute left-0 top-0 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-white whitespace-nowrap [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]">
+          <div data-sm="place" aria-hidden="true" className="opacity-0 pointer-events-none absolute left-0 top-0 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-white whitespace-nowrap [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]">
             <span data-sm="placetext" className="inline-block">IN-TA Solutions</span>
           </div>
 
@@ -792,7 +794,8 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           {/* ---- Where it started: over the real terrain, while the camera holds on the coordinates ---- */}
           <div
             data-sm="story"
-            className="pointer-events-none absolute left-4 right-4 bottom-20 [@media(max-height:480px)]:bottom-3 rounded-2xl border border-white/12 bg-[#01072b]/80 p-4 sm:p-6 sm:left-6 sm:right-auto sm:max-w-md [@media(max-height:480px)]:max-w-[20rem] [@media(max-height:480px)]:p-3
+            // hidden until the scroll brings it in (with reduced motion it's a plain block under the map)
+            className="motion-safe:invisible motion-safe:opacity-0 pointer-events-none absolute left-4 right-4 bottom-20 [@media(max-height:480px)]:bottom-3 rounded-2xl border border-white/12 bg-[#01072b]/80 p-4 sm:p-6 sm:left-6 sm:right-auto sm:max-w-md [@media(max-height:480px)]:max-w-[20rem] [@media(max-height:480px)]:p-3
               motion-reduce:relative motion-reduce:inset-auto motion-reduce:mx-4 motion-reduce:mt-6
               [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:top-1/2 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:bottom-auto [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:-translate-y-1/2"
           >
@@ -807,7 +810,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           {/* ---- Back to Earth: the closing words, beside the whole planet again ---- */}
           <div
             data-sm="outro"
-            className="pointer-events-none absolute inset-x-0 inset-y-0 mx-auto hidden max-w-[1520px] items-center px-6 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:flex"
+            className="invisible opacity-0 pointer-events-none absolute inset-x-0 inset-y-0 mx-auto hidden max-w-[1520px] items-center px-6 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:flex"
           >
             <div className="max-w-xl">
               <span className="mb-3 inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff]">
@@ -866,7 +869,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
                   <div className="mt-4">
                     <StatusPill />
                   </div>
-                  <div data-sm="readout" className="mt-3 min-h-[6.25rem]">
+                  <div data-sm="readout" className="motion-safe:invisible motion-safe:opacity-0 mt-3 min-h-[6.25rem]">
                     {current ? (
                       <>
                         <p className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-[#9dbbff]">

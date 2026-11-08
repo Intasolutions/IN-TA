@@ -131,9 +131,9 @@ export default function Gallery({ images, projects, liveTag }: { images: DetailI
         })}
         {images.map((item, i) => (
           <li key={item.id} data-shot className="w-[min(84vw,36rem)] shrink-0 snap-start">
-            <button type="button" onClick={() => setOpen(i)} aria-label={`View full size${item.caption ? `: ${item.caption}` : ''}`} className={CARD}>
+            <button type="button" onClick={() => setOpen(i)} aria-label={`View full size${item.caption || item.alt ? `: ${item.caption || item.alt}` : ''}`} className={CARD}>
               <span className={FRAME}>
-                <Image src={item.image} alt={item.alt} fill draggable={false} sizes="(min-width: 800px) 36rem, 84vw" quality={90} unoptimized={!optimisable(item.image)} className={PICTURE} />
+                <Image src={item.image} alt="" fill draggable={false} sizes="(min-width: 800px) 36rem, 84vw" quality={90} unoptimized={!optimisable(item.image)} className={PICTURE} />
                 <span aria-hidden="true" className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-midnight opacity-0 shadow-md transition-opacity duration-300 group-hover:opacity-100">
                   <Icon name="open_in_full" className="text-[17px]" />
                 </span>

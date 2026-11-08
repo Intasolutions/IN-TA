@@ -1,5 +1,6 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.response import Response
 from django.core.mail import mail_admins, send_mail
 from django.conf import settings
@@ -12,6 +13,13 @@ class ContactViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.Ge
     """Public create (anyone) and admin-only list for messages."""
     queryset = ContactMessage.objects.all()
     serializer_class = ContactSerializer
+
+    def get_throttles(self):
+        # only sending is limited (see "forms" in REST_FRAMEWORK); the admin's list is not
+        if self.action == 'create':
+            self.throttle_scope = 'forms'
+            return [ScopedRateThrottle()]
+        return super().get_throttles()
 
     def get_permissions(self):
         if self.action == 'list':

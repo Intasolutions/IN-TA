@@ -1,11 +1,10 @@
 import type { MetadataRoute } from 'next';
-
-const SITE = 'https://www.in-tasolutions.com';
+import { SITE_URL } from './site/seo';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: '*', allow: '/' },
-    host: SITE,
-    sitemap: `${SITE}/sitemap.xml`,
+    host: SITE_URL,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

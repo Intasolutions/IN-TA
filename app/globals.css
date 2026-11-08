@@ -48,10 +48,6 @@ body {
   .container { padding-left: 1rem; padding-right: 1rem; }
 }
 
-/* The page loader's logo */
-.logo img {
-  filter: drop-shadow(0 0 18px rgba(100,140,255,0.45));
-}
 /* What shows past the page's edges when a trackpad or phone bounces the scroll: the header's white, not black */
 html {
   background-color: #ffffff;
@@ -139,9 +135,16 @@ html {
 .blog-prose th, .blog-prose td { border: 1px solid rgb(1 68 181 / 0.15); padding: 0.5em 0.75em; text-align: left; }
 .blog-prose th { font-weight: 700; color: var(--color-midnight); }
 .blog-prose code { font-family: var(--font-mono, ui-monospace), monospace; font-size: 0.9em; }
-/* The opening (PageLoader) plays once per visit: a visitor who has seen it never sees it flash on later pages.
-   Hidden, not removed from layout, so nothing inside it is measured at 0 x 0. */
-html[data-loader='seen'] .page-loader { visibility: hidden; }
+/* The opening (PageLoader). Its own script ends it by marking <html data-loader="left">: then it fades here, on the
+   compositor, so a phone still busy starting the page can't stall the fade. Should that script never run, it gives the
+   page back just after its four-second limit anyway. It plays once per visit: a visitor who has seen it never sees it flash on later
+   pages ("seen"). Hidden, not removed from layout, so nothing inside it is measured at 0 x 0. */
+.page-loader { transition: opacity 0.45s cubic-bezier(0.33, 1, 0.68, 1), visibility 0s linear 0.45s; animation: page-loader-giveup 0.45s ease-out 4.3s forwards; }
+html[data-loader='left'] .page-loader { opacity: 0; visibility: hidden; }
+html[data-loader='seen'] .page-loader { visibility: hidden; transition: none; animation: none; }
+.page-loader:not([data-still]) .page-loader-still { opacity: 0; }
+.page-loader[data-still] .page-loader-video { visibility: hidden; }
+@keyframes page-loader-giveup { to { opacity: 0; visibility: hidden; } }
 
 /* The 404 trace's cursor, after "no route" */
 .nf-caret { animation: nfBlink 1.1s steps(1) infinite; }
@@ -155,9 +158,13 @@ html[data-loader='seen'] .page-loader { visibility: hidden; }
 .legal-prose strong { font-weight: 700; color: var(--color-midnight); }
 .legal-prose a { color: var(--color-brand-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 .legal-prose a:hover { color: var(--color-midnight); }
-.legal-prose ul { display: grid; gap: 0.6em; }
+.legal-prose :is(ul, ol) { display: grid; gap: 0.6em; }
 .legal-prose li { position: relative; padding-left: 1.5em; }
-.legal-prose li::before { content: ''; position: absolute; left: 0.2em; top: 0.72em; width: 0.5em; height: 2px; border-radius: 9999px; background: var(--color-brand-blue); }
+.legal-prose ol { counter-reset: legal; }
+.legal-prose ol > li { counter-increment: legal; padding-left: 1.9em; }
+.legal-prose ol > li::before { content: counter(legal) '.'; position: absolute; left: 0; font-weight: 700; color: var(--color-brand-blue); font-variant-numeric: tabular-nums; }
+.legal-prose h3 { margin-top: 1.6em; font-weight: 700; font-size: 1.05em; line-height: 1.4; color: var(--color-midnight); }
+.legal-prose ul > li::before { content: ''; position: absolute; left: 0.2em; top: 0.72em; width: 0.5em; height: 2px; border-radius: 9999px; background: var(--color-brand-blue); }
 .blog-prose pre { overflow-x: auto; border-radius: 0.75rem; background: var(--color-midnight); padding: 1em 1.2em; color: #fff; font-size: 0.85em; line-height: 1.6; }
 
 /* The blog's hover touches. Only where a real hover exists, so a tap on a phone doesn't leave them stuck on */

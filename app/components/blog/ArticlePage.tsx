@@ -57,7 +57,7 @@ function Share({ title, url }: { title: string; url: string }) {
 export default function ArticlePage({ article, related }: { article: Article; related: Post[] }) {
   const rootRef = useRef<HTMLElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
-  usePlayIntro(introRef);
+  const playedRef = usePlayIntro(introRef);
   useCardHover(rootRef);
   const [plain, bright] = splitAccent(article.title);
   // no cover, or its file has gone missing: the words move up, rather than an empty panel taking the first screen
@@ -70,8 +70,11 @@ export default function ArticlePage({ article, related }: { article: Article; re
       if (calm()) return;
       introRef.current = gsap
         .timeline({ paused: true, defaults: { ease: 'expo.out' } })
-        .from('[data-article="in"]', { y: 22, autoAlpha: 0, duration: 1, stagger: 0.09 }, 0.05)
-        .from(gsap.utils.toArray('[data-article="cover"]'), { y: 36, autoAlpha: 0, duration: 1.2 }, 0.25);
+        .from('[data-article="in"]', { y: 22, autoAlpha: 0, duration: 1, stagger: 0.09 }, 0.05);
+      // the cover, when the post has one
+      const cover = rootRef.current?.querySelector('[data-article="cover"]');
+      if (cover) introRef.current.from(cover, { y: 36, autoAlpha: 0, duration: 1.2 }, 0.25);
+      if (playedRef.current) introRef.current.progress(1);
 
       const scrub = window.matchMedia('(pointer: fine)').matches ? true : 0.3;
       const body = rootRef.current!.querySelector<HTMLElement>('[data-article="body"]')!;

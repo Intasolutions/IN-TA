@@ -1,72 +1,22 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { getSite } from '../site/server';
 import { pageMetadata } from '../site/seo';
-import { LEGAL_UPDATED } from '../components/legal/updated';
-import LegalPage, { Mail, type LegalSection } from '../components/legal/LegalPage';
+import LegalPage from '../components/legal/LegalPage';
+import { legalDocument, seoOf } from '../components/legal/document';
 
-export const metadata: Metadata = pageMetadata({
-  title: 'Security Policy | Data Protection | INTA Solutions',
-  description: 'Learn about INTA Solutions commitment to data security, encryption, and compliance with global privacy standards.',
-  path: '/security',
-});
+// Written in the admin (Site settings > Page wording: Security Policy page); the standard text is in home/legal_text.json
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({ ...seoOf(await getSite(), 'security'), path: '/security' });
+}
 
-const SECTIONS: LegalSection[] = [
-  {
-    id: 'data-protection',
-    title: 'Data Protection',
-    body: (
-      <p>
-        At IN-TA Solutions, we prioritize the security of your data. We employ industry-standard encryption and security
-        protocols to ensure that your information remains confidential and protected against unauthorized access.
-      </p>
-    ),
-  },
-  {
-    id: 'secure-infrastructure',
-    title: 'Secure Infrastructure',
-    body: (
-      <p>
-        Our infrastructure is built on world-class cloud providers with robust security measures. We regularly perform
-        security audits and vulnerability assessments to maintain the highest standards of safety.
-      </p>
-    ),
-  },
-  {
-    id: 'compliance',
-    title: 'Compliance',
-    body: (
-      <p>
-        We adhere to global data protection regulations and standards. Our team is committed to ensuring compliance with GDPR,
-        CCPA, and other relevant privacy laws.
-      </p>
-    ),
-  },
-  {
-    id: 'report-a-vulnerability',
-    title: 'Report a Vulnerability',
-    body: (
-      <p>
-        If you believe you have found a security vulnerability in our systems, please report it to us immediately at{' '}
-        <Mail subject="Security report" />.
-      </p>
-    ),
-  },
-];
-
-export default function SecurityPage() {
+export default async function SecurityPage() {
+  const doc = legalDocument(await getSite(), 'security');
   return (
     <>
       <Header />
-      <LegalPage
-        href="/security"
-        kicker="Security"
-        title="Security"
-        accent="Policy"
-        lead="How IN-TA Solutions looks after your data, and how to tell us if you find a weakness in our systems."
-        updated={LEGAL_UPDATED.security}
-        sections={SECTIONS}
-      />
+      <LegalPage kicker="Security" {...doc} />
       <Footer />
     </>
   );

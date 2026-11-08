@@ -1,0 +1,44 @@
+{
+  "_about": "The Terms, Privacy and Security pages, one group each. They work like home/site_text.json (the admin shows one box per entry, an empty box means the standard text here, adding an entry needs no migration), but only those three pages read this file, so the documents aren't sent with every page.",
+  "groups": [
+    {
+      "name": "Terms of Service page",
+      "about": "The page at /terms. Leave a box empty to use the standard text shown under it. In the document, start each section with a line beginning ## and its title (### gives a smaller heading inside a section). Every other line is a paragraph; a line beginning - is a bullet point, and one beginning 1. is numbered. Put ** on both sides of words to make them bold, and write a link as [the words](https://address) or [the words](/privacy). An email or web address becomes a link by itself, and {email} becomes the email address from Contact above. Change the date whenever the wording changes: it is shown at the top of the page and tells search engines the page changed.",
+      "items": [
+        ["legal_terms_title", "Title (| before the blue words)", "Terms of | Service"],
+        ["legal_terms_lead", "Line under the title", "The terms for using this website and the services of IN-TA Solutions Pvt Ltd."],
+        ["legal_terms_updated", "Date the wording last changed (year-month-day, like 2026-01-16)", "2026-01-16"],
+        ["legal_terms_body", "The document", "## Introduction\nWelcome to IN-TA Solutions. By accessing our website and services, you agree to be bound by these Terms of Service. Please read them carefully.\n\n## Use of Services\nYou agree to use our services only for lawful purposes and in accordance with these Terms. You are responsible for maintaining the confidentiality of your account information.\n\n## Intellectual Property\nAll content, features, and functionality of our services, including but not limited to text, graphics, logos, and software, are the exclusive property of IN-TA Solutions and are protected by copyright and other intellectual property laws.\n\n## Limitation of Liability\nIN-TA Solutions shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service."],
+        ["legal_terms_card", "Line on its card at the end of the other two documents", "Using this website and our services."],
+        ["legal_terms_seo_title", "Search engines: title", "Terms of Service | Legal | INTA Solutions"],
+        ["legal_terms_seo_description", "Search engines: description", "Understand the terms and conditions for using INTA Solutions software development and digital strategy services."]
+      ]
+    },
+    {
+      "name": "Privacy Policy page",
+      "about": "The page at /privacy. It should describe what the site's forms really collect and where it goes: when a form or one of the services behind the site changes, change this too. The boxes work like those for the Terms of Service: ## starts a section, - a bullet point, ** makes words bold, [the words](address) is a link and {email} is the email address from Contact above. Change the date whenever the wording changes.",
+      "items": [
+        ["legal_privacy_title", "Title (| before the blue words)", "Privacy | Policy"],
+        ["legal_privacy_lead", "Line under the title", "What our forms collect, why we ask for it, where it is kept, and how to have it removed."],
+        ["legal_privacy_updated", "Date the wording last changed (year-month-day, like 2026-11-06)", "2026-11-06"],
+        ["legal_privacy_body", "The document", "## What we collect\nWe only collect what you type into one of our forms:\n- **The contact page and the order form on the Services page** ask for your name, email address, phone number, country and your message. With it we record the page you sent it from and your browser's user agent (the name and version of your browser and operating system).\n- **The “work with us” form on the blog** asks for your name, phone number and the kind of project you're interested in.\nThis website sets no cookies, and we use no analytics, advertising or tracking tools.\n\n## How we use it\nWe use your details to read your enquiry and get back to you about it. A message from the contact page or the Services page is saved in our database and emailed to our team, and a copy is emailed to you to confirm that it arrived.\nWe don't sell your details, share them for marketing, or add you to a mailing list.\n\n## Services we use\nThe site runs on a few outside services, which handle your details only to run it for us:\n- **Vercel** hosts this website, and **Render** runs the system that receives the forms.\n- **Neon** hosts the database where messages are saved.\n- **Cloudinary** stores and serves the images on the site.\n- **An email service** delivers the emails described above.\n- **Google Fonts** supplies the site's icons, so your browser asks Google's servers for them and Google sees your IP address.\nLinks to Google Maps, LinkedIn, Instagram, Facebook, X and YouTube take you to those sites, and their own privacy policies apply there.\n\n## Your choices\nTo see, correct or delete what you've sent us, email {email}.\n\n## Changes to this policy\nWhen this policy changes, we'll update this page and the date at the top."],
+        ["legal_privacy_card", "Line on its card at the end of the other two documents", "What our forms collect and what happens to it."],
+        ["legal_privacy_seo_title", "Search engines: title", "Privacy Policy | INTA Solutions"],
+        ["legal_privacy_seo_description", "Search engines: description", "What the forms on the INTA Solutions website collect, why, where it is kept, and how to have it deleted."]
+      ]
+    },
+    {
+      "name": "Security Policy page",
+      "about": "The page at /security. The boxes work like those for the Terms of Service: ## starts a section, - a bullet point, ** makes words bold, [the words](address) is a link and {email} is the email address from Contact above. Change the date whenever the wording changes.",
+      "items": [
+        ["legal_security_title", "Title (| before the blue words)", "Security | Policy"],
+        ["legal_security_lead", "Line under the title", "How IN-TA Solutions looks after your data, and how to tell us if you find a weakness in our systems."],
+        ["legal_security_updated", "Date the wording last changed (year-month-day, like 2026-11-06)", "2026-11-06"],
+        ["legal_security_body", "The document", "## Data Protection\nAt IN-TA Solutions, we prioritize the security of your data. We employ industry-standard encryption and security protocols to ensure that your information remains confidential and protected against unauthorized access.\n\n## Secure Infrastructure\nOur infrastructure is built on world-class cloud providers with robust security measures. We regularly perform security audits and vulnerability assessments to maintain the highest standards of safety.\n\n## Compliance\nWe adhere to global data protection regulations and standards. Our team is committed to ensuring compliance with GDPR, CCPA, and other relevant privacy laws.\n\n## Report a Vulnerability\nIf you believe you have found a security vulnerability in our systems, please report it to us immediately at {email}."],
+        ["legal_security_card", "Line on its card at the end of the other two documents", "How we look after data, and how to report a problem."],
+        ["legal_security_seo_title", "Search engines: title", "Security Policy | Data Protection | INTA Solutions"],
+        ["legal_security_seo_description", "Search engines: description", "Learn about INTA Solutions commitment to data security, encryption, and compliance with global privacy standards."]
+      ]
+    }
+  ]
+}

@@ -23,6 +23,8 @@ export default function BlogSection() {
   const ref = useRef<HTMLElement>(null);
   const { posts, failed } = usePosts();
   const list = posts?.slice(0, COUNT) ?? [];
+  // No posts in the admin: only the enquiry band stays
+  const none = posts?.length === 0;
 
   // ---- Heading + enquiry band reveal (independent of the posts, which can take a while on a cold API) ----
   useGSAP(
@@ -156,7 +158,7 @@ export default function BlogSection() {
   );
 
   return (
-    <section ref={ref} id="blog" aria-labelledby="blog-title" className="relative max-w-[1520px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 lg:pt-12 pb-12 sm:pb-14 lg:pb-16 overflow-x-clip">
+    <section ref={ref} id="blog" aria-labelledby={none ? undefined : 'blog-title'} className="relative max-w-[1520px] mx-auto px-4 sm:px-6 pt-8 sm:pt-10 lg:pt-12 pb-12 sm:pb-14 lg:pb-16 overflow-x-clip">
       {/* The floating cover (mouse + large screens only) */}
       {list.length > 0 && (
         <div
@@ -180,7 +182,7 @@ export default function BlogSection() {
       )}
 
       {/* Faint ghost text gliding behind the heading (laptop widths and up) */}
-      <div aria-hidden="true" className="hidden lg:block pointer-events-none select-none absolute left-0 top-4 whitespace-nowrap">
+      <div aria-hidden="true" className={`${none ? 'hidden' : 'hidden lg:block'} pointer-events-none select-none absolute left-0 top-4 whitespace-nowrap`}>
         <div
           data-bl="ghost"
           className="font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4rem,9vw,8rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
@@ -190,9 +192,9 @@ export default function BlogSection() {
       </div>
 
       <div className="relative">
-        <BlogHead id="blog-title" action={<span className="hidden lg:inline-flex"><ViewAll /></span>} />
+        {!none && <BlogHead id="blog-title" action={<span className="hidden lg:inline-flex"><ViewAll /></span>} />}
 
-        <div className="mt-6 lg:mt-8">
+        <div className={none ? 'hidden' : 'mt-6 lg:mt-8'}>
           <PostsFallback failed={failed}>
             <ul data-bl="list" className="relative border-b border-brand-blue/15">
               {(posts ? list : [0, 1, 2, 3]).map((p, i) =>
@@ -266,7 +268,7 @@ export default function BlogSection() {
           </PostsFallback>
         </div>
 
-        <div className="mt-10 lg:mt-12">
+        <div className={none ? undefined : 'mt-10 lg:mt-12'}>
           <ProjectForm />
         </div>
       </div>
