@@ -43,30 +43,11 @@
     },
     {
       "name": "Home: capabilities",
+      "about": "The heading over the five cards. Leave a box empty to use the standard wording shown under it; in the heading, put | before the words that should be in blue. The cards themselves are set on the services: Services > a service > Home page card.",
       "items": [
         ["home_cap_kicker", "Small line", "Engineering disciplines"],
         ["home_cap_title", "Heading", "Specialized | Capabilities"],
-        ["home_cap_text", "Paragraph", "Tailored technical capabilities calibrated to solve complex computational and operational bottlenecks with zero bloat."],
-        ["home_cap1_track", "Card 1 (large): small line", "Track 01 // Cognitive"],
-        ["home_cap1_title", "Card 1: title", "AI Integration & Autonomous Agents"],
-        ["home_cap1_text", "Card 1: text", "Fine-tuned large language models, retrieval-augmented generation (RAG) networks with low-latency embeddings, agentic workflow loops, and autonomous computer vision models integrated directly into your private business ecosystem."],
-        ["home_cap1_tags", "Card 1: tags (separate with commas)", "LangChain, PyTorch Neural, OpenAI Whisper/GPT, PgVector DB"],
-        ["home_cap2_track", "Card 2: small line", "Track 02 // Web Runtimes"],
-        ["home_cap2_title", "Card 2: title", "Next-Gen Web Architecture"],
-        ["home_cap2_text", "Card 2: text", "Edge-rendered Next.js platforms, atomic design component trees, strictly typed contracts with sub-second page transitions."],
-        ["home_cap2_tags", "Card 2: tags (separate with commas)", "Next.js, TypeScript, Tailwind"],
-        ["home_cap3_track", "Card 3: small line", "Track 03 // Enterprise"],
-        ["home_cap3_title", "Card 3: title", "Enterprise Systems & ERP"],
-        ["home_cap3_text", "Card 3: text", "Industrial resource planners, hospital clinical records, automated inventory pipelines, and high-concurrency relational data warehouses."],
-        ["home_cap3_tags", "Card 3: tags (separate with commas)", "PostgreSQL, Python Backend"],
-        ["home_cap4_track", "Card 4: small line", "Track 04 // Cross-Platform"],
-        ["home_cap4_title", "Card 4: title", "Mobile Ecosystems"],
-        ["home_cap4_text", "Card 4: text", "Native-speed 60fps applications across iOS & Android. Offline-first synchronization, secure keychain biometrics, and push streaming."],
-        ["home_cap4_tags", "Card 4: tags (separate with commas)", "Flutter, React Native"],
-        ["home_cap5_track", "Card 5: small line", "Track 05 // Vitals"],
-        ["home_cap5_title", "Card 5: title", "Performance & Schema Growth"],
-        ["home_cap5_text", "Card 5: text", "100/100 Google Lighthouse velocity metrics, algorithmic structured JSON-LD schemas, and CDN edge optimization ensuring maximum visibility."],
-        ["home_cap5_tags", "Card 5: tags (separate with commas)", "100% Score, Edge Purge"]
+        ["home_cap_text", "Paragraph", "Tailored technical capabilities calibrated to solve complex computational and operational bottlenecks with zero bloat."]
       ]
     },
     {

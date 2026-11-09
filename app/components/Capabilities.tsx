@@ -6,18 +6,19 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
-import { useText } from '../site/SiteContext';
-import { accent, listOf } from '../site/site';
+import { useSite, useText } from '../site/SiteContext';
+import { accent } from '../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type Card = {
-  icon: string;
+  icon: string; // unless the admin picks another
   layout: string; // grid placement per breakpoint
   featured?: boolean;
 };
 
-// Each card's look; its words are set in the admin (Site settings > Page wording: Home, capabilities)
+// Each card's place and look, card 1 to 5. Which service each one shows, and its words, are set in the admin
+// (Services > a service > Home page card); a card no service has is left out.
 const CARDS: Card[] = [
   {
     icon: 'neurology',
@@ -85,13 +86,13 @@ function NeuralNet({ inline = false }: { inline?: boolean }) {
 
 export default function Capabilities() {
   const t = useText();
-  const cards = CARDS.map((card, i) => ({
-    ...card,
-    track: t(`home_cap${i + 1}_track`),
-    title: t(`home_cap${i + 1}_title`),
-    body: t(`home_cap${i + 1}_text`),
-    tags: listOf(t(`home_cap${i + 1}_tags`)),
-  }));
+  const { services } = useSite();
+  const cards = CARDS.flatMap((card, i) => {
+    const service = services.find((s) => s.card?.n === i + 1);
+    if (!service?.card) return [];
+    const { icon, track, title, text, tags } = service.card;
+    return [{ ...card, n: i + 1, icon: icon || card.icon, track, title, body: text, tags, href: `/services/${service.slug}` }];
+  });
   const [titlePlain, titleBright] = accent(t('home_cap_title'));
   const ref = useRef<HTMLElement>(null);
 
@@ -285,10 +286,10 @@ export default function Capabilities() {
 
       {/* Bento grid */}
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
-        {cards.map((card, ci) => (
-          <li key={ci} data-cap="slot" className={`${card.layout} will-change-transform`}>
+        {cards.map((card) => (
+          <li key={card.n} data-cap="slot" className={`${card.layout} will-change-transform`}>
             <Link
-              href="/services"
+              href={card.href}
               data-cap="card"
               data-featured={card.featured || undefined}
               className={`group relative flex flex-col h-full rounded-3xl bg-white border border-brand-blue/20 shadow-sm

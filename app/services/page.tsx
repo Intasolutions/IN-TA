@@ -6,6 +6,7 @@ import { organizationRef } from '../site/schema';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ServiceChip, { type ChipService } from '../components/services/ServiceChip';
+import { partOf } from '../components/services/floorplan';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite();
@@ -21,6 +22,8 @@ type ApiService = {
   order?: number;
   is_active?: boolean;
   features?: ({ name?: string } | string)[];
+  board_part?: string;
+  board_label?: string;
 };
 
 async function getServices(): Promise<ChipService[]> {
@@ -37,9 +40,11 @@ async function getServices(): Promise<ChipService[]> {
         title: s.title.trim(),
         description: s.short_description?.trim() ?? '',
         features: (s.features ?? []).map((f) => (typeof f === 'string' ? f : f.name ?? '')).filter(Boolean),
+        part: partOf(s.board_part),
+        label: s.board_label?.trim() || null,
       }));
   } catch {
-    return []; // the page still works, with the service names it already knows
+    return []; // the page still works: the board keeps the services it always had
   }
 }
 

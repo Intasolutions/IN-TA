@@ -21,7 +21,7 @@ import {
   PLANE_VS,
 } from './chipShaders';
 import { buildFixed, buildLids, buildNetwork, buildWebArcs, drawBoardArt, drawLidPrint, drawShadows, drawWord, LID_TOP } from './chipModel';
-import { BOARD, KIND, RECTS, WEB_TILES, type Point } from './floorplan';
+import { BOARD, KIND, RECTS, WEB_TILES, type Names, type Point } from './floorplan';
 import { FOV, type Camera } from './score';
 import { releaseContext } from '../releaseContext';
 
@@ -104,7 +104,8 @@ const COMPLETION_STATUS = 0x91b1; // COMPLETION_STATUS_KHR
 /** Where the light comes from, for the lids' shadows */
 const SUN: Vec3 = norm([-0.6, 0.5, -0.56]);
 
-export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail: () => void, aiName = 'AI Integration & Model Training'): ChipEngine | null {
+/** `aiName` goes on the centre part's lid and `names` on the others: both as the admin has them */
+export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail: () => void, aiName: string, names: Names): ChipEngine | null {
   const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, powerPreference: 'high-performance' });
   if (!gl) return null;
 
@@ -345,7 +346,7 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
   const uploadPrint = () => {
     if (destroyed) return;
     gl.bindTexture(gl.TEXTURE_2D, printTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, drawLidPrint(printSize, fontFamily(), monoFamily(), lidName));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, drawLidPrint(printSize, fontFamily(), monoFamily(), lidName, names));
     sharpen();
   };
   /** The AI service's name on the centre lid, printed again if it changed (the page can learn it after the board starts) */
@@ -356,7 +357,7 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
   };
   const printAll = () => {
     if (destroyed || gl.isContextLost()) return;
-    const { art, flow } = drawBoardArt(artSize, small ? 1024 : 2048, fontFamily(), monoFamily());
+    const { art, flow } = drawBoardArt(artSize, small ? 1024 : 2048, fontFamily(), monoFamily(), names);
     gl.bindTexture(gl.TEXTURE_2D, artTex);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, art);
     sharpen();

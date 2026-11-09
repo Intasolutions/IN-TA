@@ -31,6 +31,18 @@ def _url(request, file):
     return request.build_absolute_uri(url) if request and url.startswith('/') else url
 
 
+def _card(service):
+    """A service's card on the home page, with its title and short description wherever the card's own are empty."""
+    return {
+        'n': service.home_card,
+        'track': service.home_card_track,
+        'title': service.home_card_title or service.title,
+        'text': service.home_card_text or service.short_description,
+        'tags': [t.strip() for t in service.home_card_tags.split(',') if t.strip()],
+        'icon': service.home_card_icon,
+    }
+
+
 class SiteSettingsSerializer(serializers.ModelSerializer):
     """Everything the website shows about the company, in one request: details, wording, the footer's services and the About orbit."""
 
@@ -64,7 +76,12 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
         return changed_text(obj.page_text)
 
     def get_services(self, obj):
-        return list(Service.objects.filter(is_active=True).order_by('order', 'title').values('title', 'slug'))
+        """The services in their order, each with its home page card if it has one (null if not)."""
+        fields = ('title', 'slug', 'short_description', 'home_card', 'home_card_track', 'home_card_title', 'home_card_text', 'home_card_tags', 'home_card_icon')
+        return [
+            {'title': s.title, 'slug': s.slug, 'card': _card(s) if s.home_card else None}
+            for s in Service.objects.filter(is_active=True).order_by('order', 'title').only(*fields)
+        ]
 
     def get_stack(self, obj):
         request = self.context.get('request')

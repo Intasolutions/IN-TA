@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from .models import Feature, Service, ServiceCapability, ServiceFAQ, ServiceImage, Technology, Benefit
-from .page_text import FORM_OPTIONS, PAGE_SECTIONS, PAGE_TEXT, TEXT_KEYS
+from .page_text import PAGE_SECTIONS, PAGE_TEXT, TEXT_KEYS
 
 # The narrowest image that still looks sharp where it is used
 MIN_WIDTH_MAIN = 2400
@@ -97,6 +97,12 @@ class ServiceFAQInline(admin.StackedInline):
     fields = ("question", "answer", "order")
 
 
+def interest_choices():
+    """The enquiry form's options: the services the website lists, as it lists them."""
+    titles = Service.objects.filter(is_active=True).order_by("order", "title").values_list("title", flat=True)
+    return [("", "This service")] + [(title, title) for title in titles]
+
+
 class PageTextForm(forms.ModelForm):
     """Shows the wording kept in Service.page_text as one box per wording, and the page's sections as tick boxes."""
 
@@ -109,6 +115,17 @@ class PageTextForm(forms.ModelForm):
         for key, _ in PAGE_SECTIONS:
             self.initial[f"show_{key}"] = key not in hidden
         self.initial["form_interest"] = saved.get("form_interest", "")
+
+    def clean(self):
+        data = super().clean()
+        # A hidden service would leave a gap in the board or the home page's cards: its spot goes to another service first
+        if not data.get("is_active") and (data.get("home_card") or data.get("board_part")):
+            held = Service(home_card=data.get("home_card"), board_part=data.get("board_part") or "").spots()
+            raise forms.ValidationError(
+                f"This service holds {held}. Give that to another service first (or clear it below), "
+                "so that the design never has a gap."
+            )
+        return data
 
     def save(self, commit=True):
         text = {}
@@ -142,7 +159,8 @@ def page_text_form():
     declared["form_interest"] = forms.ChoiceField(
         required=False,
         label="Option picked first on the form",
-        choices=[("", "The usual one for this service")] + [(option, option) for option in FORM_OPTIONS],
+        choices=interest_choices,
+        help_text="The form lists every service. On this service's page it starts on this one unless you pick another.",
     )
     return type(PageTextForm)("ServicePageForm", (PageTextForm,), declared)
 
@@ -150,7 +168,7 @@ def page_text_form():
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     form = page_text_form()
-    list_display = ("title", "slug", "is_active", "order")
+    list_display = ("title", "slug", "is_active", "order", "home_card", "board_part")
     list_filter = ("is_active",)
     search_fields = ("title", "short_description", "long_description")
     prepopulated_fields = {"slug": ("title",)}
@@ -170,6 +188,17 @@ class ServiceAdmin(admin.ModelAdmin):
                 "order",
                 "is_active",
             )
+        }),
+        ("Services page board", {
+            "description": "The Services page is one circuit board with eight drawn parts. Each part holds one service, "
+                           "which you choose here. A service without a part is listed above the board. "
+                           "(The still pictures shown to visitors who turn animations off keep the standard names.)",
+            "fields": ("board_part", "board_label"),
+        }),
+        ("Home page card", {
+            "description": "The home page's 'Specialized Capabilities' section has five cards in a fixed design. "
+                           "Each card holds one service, which you choose here, and links to its page.",
+            "fields": ("home_card", "home_card_track", "home_card_title", "home_card_text", "home_card_tags", "home_card_icon"),
         }),
         ("Second Description", {
             "description": "An optional second section on the service's page, below What's included.",
@@ -220,6 +249,27 @@ class ServiceAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    def changelist_view(self, request, extra_context=None):
+        """Says which parts of the fixed designs have no service, since the website then leaves a gap there."""
+        if request.method != "GET":
+            return super().changelist_view(request, extra_context)
+        live = Service.objects.filter(is_active=True)
+        cards = set(live.exclude(home_card=None).values_list("home_card", flat=True))
+        parts = set(live.exclude(board_part="").values_list("board_part", flat=True))
+        empty_cards = [str(n) for n, _ in Service.HOME_CARDS if n not in cards]
+        empty_parts = [label.split(":")[0] for key, label in Service.BOARD_PARTS if key not in parts]
+        if empty_cards:
+            messages.warning(request, f"No service has home page card {', '.join(empty_cards)}: the home page leaves that card out until one does.")
+        if empty_parts:
+            messages.warning(request, f"No service sits on the board's {', '.join(empty_parts)}: the Services page shows that part without a service.")
+        return super().changelist_view(request, extra_context)
+
+    def get_deleted_objects(self, objs, request):
+        """A service that holds a card or a part of the board can't be deleted until another service takes it."""
+        deleted, counts, perms_needed, protected = super().get_deleted_objects(objs, request)
+        held = [f"{obj.title}: it holds {obj.spots()}. Give that to another service first." for obj in objs if obj.spots()]
+        return deleted, counts, perms_needed, list(protected) + held
 
     @admin.display(description="Current image")
     def image_preview(self, obj):

@@ -110,6 +110,9 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
       let W = 1;
       let H = 1;
       let top = 0;
+      let bottom = 0;
+      // where each card of words sits on the page (before its scroll animation moves it), so a name it covers can hide
+      let cardBoxes: { el: HTMLElement; left: number; right: number; top: number; bottom: number }[] = [];
       let anchors: number[] = [];
       let cams: Cam[] = [];
       const titleWidths = titleWidths0;
@@ -129,6 +132,12 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
           return r.top + window.scrollY + r.height / 2;
         };
         top = root.getBoundingClientRect().top + window.scrollY;
+        bottom = top + root.offsetHeight;
+        cardBoxes = gsap.utils.toArray<HTMLElement>('[data-die="card"]', root).map((el) => {
+          const r = el.getBoundingClientRect();
+          const moved = Number(gsap.getProperty(el, 'y')) || 0;
+          return { el, left: r.left, right: r.right, top: r.top + window.scrollY - moved, bottom: r.bottom + window.scrollY - moved };
+        });
         const intro = root.querySelector<HTMLElement>('[data-die="intro"]')!;
         const outro = root.querySelector('[data-die="outro"]')!;
         const cards = gsap.utils.toArray<HTMLElement>('[data-die="slot"]', root);
@@ -230,7 +239,11 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
         power += (goal - power) * (1 - Math.exp(-dt * 1.5));
 
         // ---- The next section takes over at the end, and once the die has gone there's nothing to draw ----
-        const fade = 1 - ramp(pos, anchors[anchors.length - 1], anchors[anchors.length - 1] + H * 0.42);
+        // (on a tall screen the die fills most of it: it fades as the next section comes in, so that section's words
+        // never run over it. A wide screen has room beside it, and fades once the camera has pulled back.)
+        const fade = wide
+          ? 1 - ramp(pos, anchors[anchors.length - 1], anchors[anchors.length - 1] + H * 0.42)
+          : ramp(bottom - pos + H / 2, H * 0.5, H);
         if (Math.abs(fade - shownFade) > 0.004) {
           shownFade = fade;
           stage.style.opacity = fade.toFixed(3);
@@ -246,7 +259,16 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
           skip.style.pointerEvents = skipState === 'on' ? 'auto' : 'none';
         }
 
-        // ---- The names stay on their blocks ----
+        // ---- The names stay on their blocks, except where a card of words is over them ----
+        const scrollY = window.scrollY;
+        // (the names' layer is pinned to the screen while this part of the page is)
+        const overTop = scrollY < top ? top - scrollY : scrollY > bottom ? bottom - scrollY : 0;
+        const covered = (lx: number, ly: number, lw: number, lh: number) =>
+          cardBoxes.some((c) => {
+            if (Number(c.el.style.opacity || 1) < 0.35) return false;
+            const moved = Number(gsap.getProperty(c.el, 'y')) || 0;
+            return lx < c.right && lx + lw > c.left && ly < c.bottom + moved - scrollY && ly + lh > c.top + moved - scrollY;
+          });
         labels.forEach((el, i) => {
           const r = layout!.blocks[i];
           if (!r) return;
@@ -254,7 +276,8 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
           const sy = (r[1] - y) / perPixel + H / 2;
           const width = (r[2] - r[0]) / perPixel;
           const inFrame = sx < W && sy < H && sx + width > 0 && sy + (r[3] - r[1]) / perPixel > 0;
-          const mode = !inFrame || on[i] < 0.2 || power < 0.5 ? 'off' : width > titleWidths[i] ? 'full' : 'short';
+          let mode = !inFrame || on[i] < 0.2 || power < 0.5 ? 'off' : width > titleWidths[i] ? 'full' : 'short';
+          if (mode !== 'off' && covered(sx + 9, sy + 9 + overTop, mode === 'full' ? titleWidths[i] : 34, 24)) mode = 'off';
           if (mode !== 'off') el.style.transform = `translate3d(${(sx + 9).toFixed(1)}px,${(sy + 9).toFixed(1)}px,0)`;
           if (mode !== shown[i]) {
             shown[i] = mode;
@@ -385,7 +408,8 @@ export default function DieScene({ id, kicker, title, skipLabel, part, items, se
         })}
 
         {/* ---- Back out to the whole die, every block lit ---- */}
-        <div data-die="outro" className={plain ? 'h-8' : 'min-h-[56svh]'} />
+        {/* (longer on a tall screen, so the whole die is seen before the next section starts to come in) */}
+        <div data-die="outro" className={plain ? 'h-8' : 'min-h-[90svh] [@media(min-aspect-ratio:23/20)]:min-h-[56svh]'} />
       </div>
     </section>
   );

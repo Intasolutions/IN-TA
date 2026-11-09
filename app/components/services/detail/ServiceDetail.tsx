@@ -26,14 +26,6 @@ const SECTION = 'py-12 sm:py-20';
 // A service with no capabilities yet shows this many of its benefits on the die, and the rest in the list after it
 const MAX_FROM_BENEFITS = 6;
 
-// The enquiry form's options, for the services that have one
-const FORM_INTEREST: Record<string, string> = {
-  'web-development': 'Web Development',
-  'mobile-app': 'Mobile App Development',
-  'ui-ux-design': 'UI/UX Design Strategy',
-  'software-development': 'Enterprise Web Solutions',
-};
-
 function Head({ kicker, title }: { kicker: string; title: string }) {
   const [plain, bright] = splitAccent(title);
   return (
@@ -149,7 +141,7 @@ function PageRail({ items }: { items: { id: string; label: string }[] }) {
 
 export default function ServiceDetail({ service, related }: { service: DetailService; related: RelatedService[] }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const { block, others } = partsFor(service.slug, related);
+  const { block, others, board } = partsFor(service.slug, related);
   const part = service.text.part_name || block?.part || 'Our service';
   const say = wordsFor(service, part);
   const shown = (section: string) => !service.hide.includes(section);
@@ -217,7 +209,7 @@ export default function ServiceDetail({ service, related }: { service: DetailSer
   return (
     <main ref={rootRef} className="bg-midnight text-white">
       {block ? (
-        <PartStage key={service.slug} service={service} block={block} others={others} formId={lastId} insideId={firstId} facts={facts} part={part} title={service.text.hero_title || service.title} words={say} />
+        <PartStage key={service.slug} service={service} block={block} others={others} board={board} formId={lastId} insideId={firstId} facts={facts} part={part} title={service.text.hero_title || service.title} words={say} />
       ) : (
         <div className={`${CONTAINER} pt-[calc(var(--header-h)+2rem)] pb-6`}>
           <Title title={service.text.hero_title || service.title} dark />
@@ -289,7 +281,7 @@ export default function ServiceDetail({ service, related }: { service: DetailSer
           <section id="connected" aria-label={plainTitle(say('connected_title'))} className={SECTION}>
             <div className={CONTAINER}>
               <Head kicker={say('connected_kicker')} title={say('connected_title')} />
-              <div data-rv className="mt-6 sm:mt-9"><BoardMap block={block} related={related} formId={FORM_ID} linkLabel={say('board_link')} /></div>
+              <div data-rv className="mt-6 sm:mt-9"><BoardMap block={block} board={board} related={related} formId={FORM_ID} linkLabel={say('board_link')} /></div>
             </div>
           </section>
         )}
@@ -297,7 +289,7 @@ export default function ServiceDetail({ service, related }: { service: DetailSer
         {showForm && (
           <div id={FORM_ID} className="px-3 pb-10 pt-4 sm:px-6 sm:pb-16">
             <div data-rv className="mx-auto max-w-[1400px] rounded-3xl ring-1 ring-white/15">
-              <ProjectForm defaultInterest={service.text.form_interest || FORM_INTEREST[service.slug]} kicker={say('form_kicker')} title={say('form_title')} text={say('form_text')} />
+              <ProjectForm defaultInterest={service.text.form_interest || service.title} kicker={say('form_kicker')} title={say('form_title')} text={say('form_text')} />
             </div>
           </div>
         )}

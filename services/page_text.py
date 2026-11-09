@@ -90,7 +90,4 @@ PAGE_SECTIONS = (
     ("form", "Enquiry form"),
 )
 
-# What the enquiry form offers (INTERESTS in app/components/blog/ProjectForm.tsx), for choosing the one picked first
-FORM_OPTIONS = ("Web Development", "Enterprise Web Solutions", "Mobile App Development", "UI/UX Design Strategy", "System Architecture")
-
 TEXT_KEYS = tuple(key for _, items in PAGE_TEXT for key, _, _ in items)

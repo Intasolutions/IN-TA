@@ -101,6 +101,8 @@ class ServiceSerializer(serializers.ModelSerializer):
             "title",
             "slug",
             "short_description",
+            "board_part",
+            "board_label",
             "long_description",
             "ideal_for",
             "page_text",

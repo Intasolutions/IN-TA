@@ -4,6 +4,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import ServiceDetail from '../../components/services/detail/ServiceDetail';
 import { toDetail, type ApiService, type RelatedService } from '../../components/services/detail/types';
+import { partOf } from '../../components/services/floorplan';
 import { absolute, pageMetadata } from '../../site/seo';
 import { breadcrumbs, jsonLdHtml, organizationRef } from '../../site/schema';
 
@@ -53,7 +54,7 @@ async function getRelated(): Promise<RelatedService[]> {
         const list: (ApiService & { is_active?: boolean })[] = Array.isArray(data) ? data : data.results ?? [];
         return list
             .filter((s) => s.is_active !== false)
-            .map((s) => ({ slug: s.slug, title: s.title.trim(), short: s.short_description?.trim() ?? '' }));
+            .map((s) => ({ slug: s.slug, title: s.title.trim(), short: s.short_description?.trim() ?? '', part: partOf(s.board_part), label: s.board_label?.trim() || null }));
     } catch {
         return []; // the page still works, without its links to the other parts
     }

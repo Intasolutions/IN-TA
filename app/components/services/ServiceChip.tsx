@@ -12,7 +12,7 @@ import { apiBase } from '../blog/data';
 import { jumpToY } from '../SmoothScroll';
 import { usePlayIntro } from '../../context/usePlayIntro';
 import { createChip, type ChipEngine } from './chipEngine';
-import { AI_BLOCK, AI_SLUG, BLOCKS, centreOf, HERO, KIND, linkBetween, NOW, PLAN, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
+import { AI_BLOCK, BLOCKS, boardOf, centreOf, HERO, KIND, linkBetween, nameOf, NOW, PLAN, STANDARD_SERVICES, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
 import { useText } from '../../site/SiteContext';
 import { accent, linesOf, standardText } from '../../site/site';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
@@ -332,30 +332,6 @@ function StopsNav({ items, currentRef, onGo }: { items: NavItem[]; currentRef: R
   );
 }
 
-/** How the picture is made, and where the one outside figure comes from */
-function Credits({ id, className, popover }: { id: string; className: string; popover: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div data-chip={id === 'chip-credits' ? 'credits' : undefined} className={className}>
-      {open && (
-        <p id={id} className={`absolute bottom-full mb-2 w-[min(20rem,80vw)] rounded-xl border border-brand-blue/20 bg-white p-3 text-left text-[11px] leading-relaxed text-midnight/80 shadow-lg ${popover}`}>
-          Drawn live by your device, not a video. The board is an illustration, not a real product, and the training scene is an illustration too. Orders are matched to a service by keywords in your browser, not by an AI model, and nothing you type is sent until you press Send order. Figure from Wikipedia:{' '}
-          <a href={NOW.source} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-midnight">Transistor count</a>.
-        </p>
-      )}
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen((v) => !v)}
-        className="rounded-md bg-white/95 px-2 py-1 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider underline underline-offset-2 text-midnight/70 shadow-sm ring-1 ring-brand-blue/15 hover:text-midnight"
-      >
-        About this animation
-      </button>
-    </div>
-  );
-}
-
 /** A still of the part, for visitors who ask for less motion or whose device can't draw the board */
 function Still({ name }: { name: string }) {
   return <Image src={`${POSTERS}/${name}.jpg`} alt="" fill sizes="100vw" className="object-cover object-[72%_50%]" />;
@@ -380,30 +356,26 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
   const orderRef = useRef<Block | null>(null);
   const playedRef = usePlayIntro(introRef);
 
-  const bySlug = useMemo(() => new Map(services.map((s) => [s.slug, s])), [services]);
-  const ai: ChipService = bySlug.get(AI_SLUG) ?? { slug: AI_SLUG, title: NOW.fallbackTitle, description: '', features: [] };
+  // Which service is on each part, as the admin set it. (If the API can't be reached, the parts keep the services they
+  // always had; a part the admin left empty shows no service.)
+  const board = useMemo(() => boardOf(services.length ? services : STANDARD_SERVICES), [services]);
+  const { names } = board;
+  const ai: ChipService = board.at.get('ai') ?? STANDARD_SERVICES.find((s) => s.part === 'ai')!;
   // The centre part carries the AI service's name from the admin; the board learns a fresher one if the live data brings it
   const aiTitleRef = useRef(ai.title);
   useEffect(() => {
     aiTitleRef.current = ai.title;
     engineRef.current?.nameAi(ai.title);
   }, [ai.title]);
-  // (if the API can't be reached the page keeps the names it knows; a service switched off in the admin drops out)
-  const serviceOf = (b: Block): ChipService | null => {
-    if (!b.service) return null;
-    return bySlug.get(b.service.slug) ?? (services.length ? null : { slug: b.service.slug, title: b.service.fallbackTitle, description: '', features: [] });
-  };
   const score = useMemo(() => {
     const labels = new Map<string, string>();
-    BLOCKS.forEach((b) => {
-      const title = b.service && bySlug.get(b.service.slug)?.title;
-      labels.set(b.id, title || b.service?.fallbackTitle || b.short);
-    });
-    return buildScore(labels, bySlug.get(AI_SLUG)?.title ?? NOW.fallbackTitle, (b) => !services.length || (!!b.service && bySlug.has(b.service.slug)));
-  }, [bySlug, services.length]);
-  const shown = score.services.map((b) => ({ beat: b, service: serviceOf(b.block)! }));
-  // A service added in the admin that the board has no part for yet still gets a way in
-  const extras = services.filter((s) => s.slug !== AI_SLUG && !BLOCKS.some((b) => b.service?.slug === s.slug));
+    BLOCKS.forEach((b) => labels.set(b.id, board.at.get(b.kind)?.title ?? nameOf(b, board.names)));
+    return buildScore(labels, ai.title, (b) => board.at.has(b.kind));
+  }, [board, ai.title]);
+  const shown = score.services.map((b) => ({ beat: b, service: board.at.get(b.block.kind)! }));
+  // A service the admin hasn't put on a part is listed above the board, so it still has a way in
+  const placed = new Set(board.at.values());
+  const extras = services.filter((s) => !placed.has(s));
   const [planHeading, planBright] = accent(t('services_plan_title', { n: NUMBER_WORDS[shown.length + 1] ?? String(shown.length + 1) }));
   const planParts = [...shown.map(({ beat }) => beat.block), AI_BLOCK, YOUR_BLOCK];
   const jumpList = [{ id: AI_BLOCK.id, name: ai.title, featured: true }, ...shown.map(({ beat, service }) => ({ id: beat.block.id, name: service.title, featured: false }))];
@@ -430,7 +402,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
     const match = routeOrder(text, choices);
     const block = match?.block ?? YOUR_BLOCK;
     askedRef.current = true;
-    engineRef.current?.spell(match ? block.short.replace(/ \/ /g, ' ') : 'NEW');
+    engineRef.current?.spell(match ? nameOf(block, names).replace(/ \/ /g, ' ') : 'NEW');
     orderRef.current = block;
     setOrder({ text, block, service: match?.service ?? null });
   };
@@ -454,7 +426,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         return;
       }
       const canvas = root.querySelector<HTMLCanvasElement>('[data-chip="canvas"]')!;
-      const engine = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true), aiTitleRef.current);
+      const engine = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true), aiTitleRef.current, names);
       if (!engine) {
         setStill(true);
         return;
@@ -528,6 +500,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       // ---- The page, measured ----
       let top = 0;
       let run = 1;
+      let keys: Key[] = S.keys;
       const measure = () => {
         const zoom = screenZoom(window.innerWidth, window.innerHeight);
         root.querySelectorAll<HTMLElement>(ZOOMED).forEach((el) => {
@@ -535,6 +508,16 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         });
         top = stageEl.getBoundingClientRect().top + window.scrollY;
         run = Math.max(1, stageEl.offsetHeight - window.innerHeight);
+        // On a tall screen the opening board sits under the words. A phone's words fill most of the screen and the board
+        // keeps its usual place; a tablet's leave half of it, and there the board takes all the room they leave.
+        const copy = root.querySelector<HTMLElement>('[data-hero="copy"]');
+        const y0 = copy ? (copy.offsetTop + copy.offsetHeight * Number(zoom) + 14) / window.innerHeight : 1;
+        const roomy = window.innerWidth / window.innerHeight <= 1.15 && 0.985 - y0 > 0.3;
+        const room = { sx: 0, sy: 1 - y0 - 0.985, fw: 1, fh: 0.985 - y0 };
+        keys = roomy ? S.keys.map((k) => (k.frame === 'hero' ? { ...k, room } : k)) : S.keys;
+        // (the white behind the words then ends where they do, rather than fading the board's far edge)
+        const shade = root.querySelector<HTMLElement>('[data-hero="shade"]');
+        if (shade) shade.style.backgroundImage = roomy ? `linear-gradient(to bottom, #fff ${((y0 - 0.05) * 100).toFixed(1)}%, transparent ${((y0 + 0.02) * 100).toFixed(1)}%)` : '';
       };
       measure();
       ScrollTrigger.addEventListener('refresh', measure);
@@ -625,7 +608,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       const hudTarget = root.querySelector<HTMLElement>('[data-hud="target"]')!;
       const hudField = root.querySelector<HTMLElement>('[data-hud="field"]')!;
       const tipEl = root.querySelector<HTMLElement>('[data-chip="tip"]')!;
-      const chrome = gsap.utils.toArray<HTMLElement>('[data-chip="nav"], [data-chip="credits"], [data-chip="skip"]', root);
+      const chrome = gsap.utils.toArray<HTMLElement>('[data-chip="nav"], [data-chip="skip"]', root);
       const labelEls = gsap.utils.toArray<HTMLElement>('[data-label]', root);
       const labelCentres = labelEls.map((el) => centreOf(planParts.find((x) => x.id === el.dataset.label)!));
       let chromeShown = false;
@@ -759,7 +742,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         if (!pressed && Math.abs(raw - smoothed) > 0.004) orbitGoal *= Math.exp(-dt * 2.6);
         orbit += (orbitGoal - orbit) * (1 - Math.exp(-dt * 7));
         const inHero = 1 - smooth(s, 0, 0.5);
-        let cam = cameraAt(S.keys, s, aspect, lean, 2 + inHero * 5, orbit);
+        let cam = cameraAt(keys, s, aspect, lean, 2 + inHero * 5, orbit);
 
         // ---- Training: how far it has come, and how wrong it still is ----
         const learnMix = smooth(s, A.learn[0], A.learn[0] + 0.24) * (1 - smooth(s, A.form[0] - 0.05, A.form[0] + 0.2));
@@ -861,7 +844,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
           hover.rect = offered.rect;
           hover.kind = KIND[offered.kind];
         }
-        const tipText = offered ? offered.short : '';
+        const tipText = offered ? nameOf(offered, names) : '';
         if (tipText !== shownTip) {
           shownTip = tipText;
           tipEl.textContent = tipText;
@@ -923,12 +906,12 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         // ---- The readout: written only when it changes ----
         let target = 'Board';
         S.services.forEach((b) => {
-          if (s >= b.from + TARGET_AT * (b.arrive - b.from)) target = b.block.short;
+          if (s >= b.from + TARGET_AT * (b.arrive - b.from)) target = nameOf(b.block, names);
         });
-        if (s >= A.from + TARGET_AT * (A.arrive - A.from)) target = AI_BLOCK.short;
+        if (s >= A.from + TARGET_AT * (A.arrive - A.from)) target = nameOf(AI_BLOCK, names);
         if (s >= A.oneIn && s < A.wake[0] + 0.1) target = 'One switch';
         if (s >= S.close.from + TARGET_AT * (S.close.arrive - S.close.from)) target = YOUR_BLOCK.short;
-        if (orderPhase > 1.2 && orderBlock) target = orderBlock.short;
+        if (orderPhase > 1.2 && orderBlock) target = nameOf(orderBlock, names);
         if (target !== shownTarget) {
           shownTarget = target;
           hudTarget.textContent = target;
@@ -940,7 +923,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
           hudField.textContent = fieldText;
         }
 
-        // ---- Side menu and credits, once past the opening words ----
+        // ---- Side menu and skip button, once past the opening words ----
         const wantChrome = s > 0.32 && s < S.total - 0.32;
         if (wantChrome !== chromeShown) showChrome(wantChrome);
         // (on a short laptop screen the opening words need the corner the readout sits in)
@@ -1061,7 +1044,6 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
           <div className="mx-auto max-w-[1400px]">
             <ProjectForm />
           </div>
-          <Credits id="chip-credits-flow" className="relative mt-4 text-center" popover="left-1/2 -translate-x-1/2" />
         </div>
       </div>
     );
@@ -1107,7 +1089,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
                       style={{ transform: 'translate3d(-200px,-200px,0)' }}
                       className="sr-only pointer-events-auto left-0 top-0 whitespace-nowrap rounded-md border border-brand-blue/30 bg-white px-2 py-1 font-mono text-[11px] uppercase tracking-wider font-bold text-midnight focus:not-sr-only focus:absolute focus:outline-2 focus:outline-offset-2 focus:outline-brand-blue"
                     >
-                      Fly to {b.short}
+                      Fly to {nameOf(b, names)}
                     </button>
                   </li>
                 ))}
@@ -1203,7 +1185,6 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
           <div data-chip="form" className="mx-auto max-w-[1400px]">
             <ProjectForm />
           </div>
-          <Credits id="chip-credits-flow" className="relative mt-4 text-center lg:hidden" popover="left-1/2 -translate-x-1/2" />
         </div>
       </div>
 
@@ -1230,7 +1211,6 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         Skip <Icon name="south" className="text-[13px]" />
       </button>
       <StopsNav items={score.stops} currentRef={navChangedRef} onGo={go} />
-      <Credits id="chip-credits" className="invisible opacity-0 fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-20 hidden text-right transition-opacity duration-500 lg:block" popover="right-0" />
     </div>
   );
 }

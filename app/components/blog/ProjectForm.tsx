@@ -10,9 +10,6 @@ import { phoneHref } from '../../site/site';
 
 gsap.registerPlugin(useGSAP);
 
-// Must be values the backend accepts (Subscriber.INTEREST_CHOICES in blog/models.py)
-const INTERESTS = ['Web Development', 'Enterprise Web Solutions', 'Mobile App Development', 'UI/UX Design Strategy', 'System Architecture'];
-
 const LABEL = 'block mb-2 font-mono text-[10px] uppercase tracking-wider font-bold text-white/60';
 const FIELD =
   'block w-full h-12 rounded-xl border px-4 text-[15px] outline-none transition-[border-color,background-color,box-shadow] duration-200 focus:ring-4 focus:ring-brand-blue/15 disabled:opacity-60 ' +
@@ -26,7 +23,9 @@ export default function ProjectForm({ defaultInterest, kicker = 'Work with us', 
   const ref = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [interest, setInterest] = useState(defaultInterest && INTERESTS.includes(defaultInterest) ? defaultInterest : INTERESTS[0]);
+  // The options are the services, as the admin lists them (the backend accepts exactly those)
+  const options = site.services.map((s) => s.title);
+  const [interest, setInterest] = useState(defaultInterest && options.includes(defaultInterest) ? defaultInterest : (options[0] ?? ''));
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [status, setStatus] = useState<Status>('idle');
   const [slow, setSlow] = useState(false); // our API host can take a while to wake up
@@ -128,7 +127,7 @@ export default function ProjectForm({ defaultInterest, kicker = 'Work with us', 
               <fieldset disabled={busy} className="min-w-0">
                 <legend className={LABEL}>I&apos;m interested in</legend>
                 <div className="flex gap-2 overflow-x-auto -mx-5 px-5 py-1 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {INTERESTS.map((opt) => (
+                  {options.map((opt) => (
                     <label
                       key={opt}
                       className="shrink-0 whitespace-nowrap cursor-pointer select-none rounded-full border px-3 py-1.5 text-xs font-semibold transition-[background-color,color,border-color,scale] duration-200 active:scale-95

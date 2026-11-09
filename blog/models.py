@@ -25,21 +25,18 @@ class Blog(models.Model):
         ordering = ['-date']
 
 class Subscriber(models.Model):
-    INTEREST_CHOICES = [
-        ('Enterprise Web Solutions', 'Enterprise Web Solutions'),
-        ('Mobile App Development', 'Mobile App Development'),
-        ('UI/UX Design Strategy', 'UI/UX Design Strategy'),
-        ('System Architecture', 'System Architecture'),
-        # Legacy support if needed, but for now we align with frontend
-        ('Web Development', 'Web Development'),
-        ('UI/UX Design', 'UI/UX Design'),
-        ('App Development', 'App Development'),
-        ('Video Production', 'Video Production'),
-    ]
+    """An enquiry from the "Have a project in mind?" form. Its options are the services in the admin."""
+
+    # The options the form offered before it listed the services. Still accepted, so that a page built before the change
+    # (or a visitor who opened it then) can still send.
+    OLD_INTERESTS = (
+        'Enterprise Web Solutions', 'Mobile App Development', 'UI/UX Design Strategy', 'System Architecture',
+        'Web Development', 'UI/UX Design', 'App Development', 'Video Production',
+    )
 
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
-    interest = models.CharField(max_length=50, choices=INTEREST_CHOICES)
+    interest = models.CharField(max_length=200, help_text='The service picked on the form.')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -2,7 +2,9 @@
 // before as the fallback for anything the API doesn't send: an older backend, or one that is asleep.
 import wording from '../../home/site_text.json';
 
-export type SiteService = { title: string; slug: string };
+/** A service's card on the home page (Services > a service > Home page card): n is the card, 1 to 5 */
+export type HomeCard = { n: number; track: string; title: string; text: string; tags: string[]; icon: string };
+export type SiteService = { title: string; slug: string; card: HomeCard | null };
 export type StackGroup = 'ai' | 'frontend' | 'design' | 'backend' | 'cloud';
 export type StackTool = { name: string; slug: string; logo: string; group: StackGroup; use: string };
 export type Metric = { label: string; value: string; unit: string; note: string };
@@ -62,16 +64,71 @@ export const DEFAULT_SITE: Site = {
     { label: 'DATA PIPELINES', value: '<100', unit: 'ms', note: 'Edge telemetry response' },
   ],
   text: {},
-  // Mirrors /api/services/ (title + slug, in their display order)
+  // Mirrors the services in /api/home/site/ (in their display order), with the home page cards they had
   services: [
-    { title: 'AI Integration & Model Training', slug: 'ai-integration-model-training' },
-    { title: 'Web Development', slug: 'web-development' },
-    { title: 'Software Development', slug: 'software-development' },
-    { title: 'Mobile App', slug: 'mobile-app' },
-    { title: 'Digital Marketing', slug: 'Marketing' },
-    { title: 'UI/UX Design', slug: 'ui-ux-design' },
-    { title: 'SEO, AEO & GEO Services', slug: 'seo-aeo-geo-services' },
-    { title: 'Media Production', slug: 'media-production' },
+    {
+      title: 'AI Integration & Model Training',
+      slug: 'ai-integration-model-training',
+      card: {
+        n: 1,
+        track: 'Track 01 // Cognitive',
+        title: 'AI Integration & Autonomous Agents',
+        text: 'Fine-tuned large language models, retrieval-augmented generation (RAG) networks with low-latency embeddings, agentic workflow loops, and autonomous computer vision models integrated directly into your private business ecosystem.',
+        tags: ['LangChain', 'PyTorch Neural', 'OpenAI Whisper/GPT', 'PgVector DB'],
+        icon: 'neurology',
+      },
+    },
+    {
+      title: 'Web Development',
+      slug: 'web-development',
+      card: {
+        n: 2,
+        track: 'Track 02 // Web Runtimes',
+        title: 'Next-Gen Web Architecture',
+        text: 'Edge-rendered Next.js platforms, atomic design component trees, strictly typed contracts with sub-second page transitions.',
+        tags: ['Next.js', 'TypeScript', 'Tailwind'],
+        icon: 'code',
+      },
+    },
+    {
+      title: 'Software Development',
+      slug: 'software-development',
+      card: {
+        n: 3,
+        track: 'Track 03 // Enterprise',
+        title: 'Enterprise Systems & ERP',
+        text: 'Industrial resource planners, hospital clinical records, automated inventory pipelines, and high-concurrency relational data warehouses.',
+        tags: ['PostgreSQL', 'Python Backend'],
+        icon: 'domain',
+      },
+    },
+    {
+      title: 'Mobile App',
+      slug: 'mobile-app',
+      card: {
+        n: 4,
+        track: 'Track 04 // Cross-Platform',
+        title: 'Mobile Ecosystems',
+        text: 'Native-speed 60fps applications across iOS & Android. Offline-first synchronization, secure keychain biometrics, and push streaming.',
+        tags: ['Flutter', 'React Native'],
+        icon: 'devices',
+      },
+    },
+    { title: 'Digital Marketing', slug: 'Marketing', card: null },
+    { title: 'UI/UX Design', slug: 'ui-ux-design', card: null },
+    {
+      title: 'SEO, AEO & GEO Services',
+      slug: 'seo-aeo-geo-services',
+      card: {
+        n: 5,
+        track: 'Track 05 // Vitals',
+        title: 'Performance & Schema Growth',
+        text: '100/100 Google Lighthouse velocity metrics, algorithmic structured JSON-LD schemas, and CDN edge optimization ensuring maximum visibility.',
+        tags: ['100% Score', 'Edge Purge'],
+        icon: 'speed',
+      },
+    },
+    { title: 'Media Production', slug: 'media-production', card: null },
   ],
   stack: [
     ['OpenAI', 'openai', 'ai', 'LLM features, assistants and smart search'],
@@ -202,6 +259,8 @@ export const timeLong = (site: Site) => `${clockOf(minutesOf(site.hours.opens))}
 
 const str = (v: unknown, fallback: string) => (typeof v === 'string' ? v.trim() : fallback);
 const filled = (v: unknown, fallback: string) => (typeof v === 'string' && v.trim() ? v.trim() : fallback);
+// The icons a home page card can have (Service.CARD_ICONS in services/models.py; all loaded in app/layout.tsx)
+const CARD_ICONS = new Set(['neurology', 'code', 'domain', 'devices', 'speed', 'design_services', 'terminal', 'developer_board', 'travel_explore', 'search']);
 const num = (v: unknown, fallback: number) => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
 const GROUPS: StackGroup[] = ['ai', 'frontend', 'design', 'backend', 'cloud'];
 const isTime = (v: unknown): v is string => typeof v === 'string' && /^\d{1,2}:\d{2}$/.test(v);
@@ -221,8 +280,18 @@ export function toSite(api: unknown, apiBase = ''): Site {
         .filter((m: Json) => m && filled(m.label, '') && filled(m.value, ''))
         .map((m: Json) => ({ label: m.label.trim(), value: m.value.trim(), unit: str(m.unit, ''), note: str(m.note, '') }))
     : [];
+  // (a backend from before the home page cards were editable sends none: its services keep the cards they had)
+  const sendsCards = Array.isArray(a.services) && a.services.some((s: Json) => s && typeof s === 'object' && 'card' in s);
+  const cardOf = (c: Json, slug: string): HomeCard | null => {
+    if (!sendsCards) return d.services.find((x) => x.slug === slug)?.card ?? null;
+    if (!c || !Number.isInteger(c.n) || c.n < 1 || c.n > 5 || !filled(c.title, '')) return null;
+    const tags = Array.isArray(c.tags) ? c.tags.filter((t: unknown) => typeof t === 'string' && t.trim()).map((t: string) => t.trim()) : [];
+    return { n: c.n, track: str(c.track, ''), title: c.title.trim(), text: str(c.text, ''), tags, icon: CARD_ICONS.has(c.icon) ? c.icon : '' };
+  };
   const services: SiteService[] = Array.isArray(a.services)
-    ? a.services.filter((s: Json) => filled(s?.title, '') && filled(s?.slug, '')).map((s: Json) => ({ title: s.title.trim(), slug: s.slug.trim() }))
+    ? a.services
+        .filter((s: Json) => filled(s?.title, '') && filled(s?.slug, ''))
+        .map((s: Json) => ({ title: s.title.trim(), slug: s.slug.trim(), card: cardOf(s.card, s.slug.trim()) }))
     : [];
   const stack: StackTool[] = Array.isArray(a.stack)
     ? a.stack

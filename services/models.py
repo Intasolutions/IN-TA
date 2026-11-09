@@ -112,12 +112,76 @@ class Service(models.Model):
     order = models.IntegerField(default=0, help_text="Sort order for listing services (low->high)")
     is_active = models.BooleanField(default=True, help_text="If false, the service is hidden from public lists")
 
+    # Where the service sits in the site's fixed designs: a drawn part of the Services page board, and a card on the home
+    # page. Each spot holds one service. (services/migrations/0008 filled them in as the site showed them before.)
+    BOARD_PARTS = [
+        ("ai", "Neural engine: the large part in the centre"),
+        ("software", "Compute core: top left"),
+        ("ui", "Display engine: top middle"),
+        ("web", "Network block: top right"),
+        ("marketing", "Signal block: right"),
+        ("seo", "Index block: bottom right"),
+        ("media", "Media engine: bottom middle"),
+        ("mobile", "Mobile cluster: bottom left"),
+    ]
+    board_part = models.CharField(
+        "Part on the board", max_length=12, choices=BOARD_PARTS, blank=True,
+        help_text="Leave empty to list the service above the board instead.",
+    )
+    board_label = models.CharField(
+        "Name printed on the part", max_length=16, blank=True,
+        help_text="Short, e.g. 'Web'. Printed on the part and shown as the camera reaches it. Leave empty for the service's title.",
+    )
+
+    HOME_CARDS = [(1, "Card 1: the large one, with the network drawing"), (2, "Card 2"), (3, "Card 3"), (4, "Card 4"), (5, "Card 5")]
+    # The icons the website already loads (MATERIAL_ICONS in app/layout.tsx); a new one has to be added there too
+    CARD_ICONS = [
+        ("neurology", "Brain"),
+        ("code", "Code"),
+        ("domain", "Building"),
+        ("devices", "Phone and laptop"),
+        ("speed", "Speedometer"),
+        ("design_services", "Design tools"),
+        ("terminal", "Terminal"),
+        ("developer_board", "Circuit board"),
+        ("travel_explore", "Globe and magnifier"),
+        ("search", "Magnifier"),
+    ]
+    home_card = models.PositiveSmallIntegerField(
+        "Card on the home page", choices=HOME_CARDS, null=True, blank=True,
+        help_text="The home page's 'Specialized Capabilities' has five cards. The card links to this service's page.",
+    )
+    home_card_track = models.CharField("Card: small line", max_length=60, blank=True, help_text="Above the title, e.g. 'Track 02 // Web Runtimes'.")
+    home_card_title = models.CharField("Card: title", max_length=120, blank=True, help_text="Leave empty for the service's title.")
+    home_card_text = models.TextField("Card: text", blank=True, help_text="Leave empty for the short description.")
+    home_card_tags = models.CharField("Card: tags", max_length=200, blank=True, help_text="Separate them with commas.")
+    home_card_icon = models.CharField("Card: icon", max_length=24, choices=CARD_ICONS, blank=True, help_text="Leave empty for the card's usual one.")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["order", "title"]
         indexes = [models.Index(fields=["slug"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["board_part"], condition=~models.Q(board_part=""), name="one_service_per_board_part",
+                violation_error_message="Another service already sits on that part of the board. Clear it there first.",
+            ),
+            models.UniqueConstraint(
+                fields=["home_card"], condition=models.Q(home_card__isnull=False), name="one_service_per_home_card",
+                violation_error_message="Another service already has that home page card. Clear it there first.",
+            ),
+        ]
+
+    def spots(self):
+        """The fixed places this service holds, in words, for the admin's messages."""
+        held = []
+        if self.home_card:
+            held.append(f"home page card {self.home_card}")
+        if self.board_part:
+            held.append(f"the {self.get_board_part_display().split(':')[0]} on the Services page board")
+        return " and ".join(held)
 
     @property
     def icon_path(self):

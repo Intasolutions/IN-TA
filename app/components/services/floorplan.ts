@@ -1,10 +1,12 @@
 // The Services page: every service is a part on one circuit board. This file says where each part sits, how the copper
-// connects them and what the camera does there. Each service's title, description and features come from the admin; the
-// words here are the page's own. The one outside figure is from Wikipedia ("Transistor count").
+// connects them and what the camera does there. Which service sits on which part, and the name printed on it, are set in
+// the admin (Services > a service > Services page board), as are each service's title, description and features.
 
-export type ChipService = { slug: string; title: string; description: string; features: string[] };
-
-export const AI_SLUG = 'ai-integration-model-training';
+/** What the admin sends about a service's place on the board: undefined from a backend that doesn't have places yet */
+type Placed = { part?: BlockKind | null; label?: string | null };
+/** Any service, as far as the board needs to know it */
+export type Holder = { slug: string; title: string } & Placed;
+export type ChipService = { slug: string; title: string; description: string; features: string[] } & Placed;
 
 /** The order the field shader expects them in */
 export const KIND = { software: 0, ui: 1, web: 2, marketing: 3, seo: 4, media: 5, mobile: 6, ai: 7, yours: 8 } as const;
@@ -17,11 +19,12 @@ export type Block = {
   id: string;
   /** on the board: x0, z0, x1, z1 */
   rect: [number, number, number, number];
-  /** a short name, printed on the part and shown in the readout */
+  /** a short name, printed on the part and shown in the readout, unless the admin gives the part another */
   short: string;
   /** what this part would be called on a real board */
   part: string;
-  service?: { slug: string; fallbackTitle: string };
+  /** the service it held before the admin chose (for a backend without places, or one that can't be reached) */
+  standard?: { slug: string; title: string };
   shot: Shot;
 };
 
@@ -36,7 +39,7 @@ export const BLOCKS: Block[] = [
     rect: [-1, -1, -0.44, -0.36],
     short: 'Software',
     part: 'Compute core',
-    service: { slug: 'software-development', fallbackTitle: 'Software Development' },
+    standard: { slug: 'software-development', title: 'Software Development' },
     shot: { az: -24, el: 42, w: 0.86 },
   },
   {
@@ -45,7 +48,7 @@ export const BLOCKS: Block[] = [
     rect: [-0.3, -1, 0.3, -0.5],
     short: 'UI/UX',
     part: 'Display engine',
-    service: { slug: 'ui-ux-design', fallbackTitle: 'UI/UX Design' },
+    standard: { slug: 'ui-ux-design', title: 'UI/UX Design' },
     shot: { az: 14, el: 54, w: 0.84 },
   },
   {
@@ -54,7 +57,7 @@ export const BLOCKS: Block[] = [
     rect: [0.44, -1, 1, -0.32],
     short: 'Web',
     part: 'Network block',
-    service: { slug: 'web-development', fallbackTitle: 'Web Development' },
+    standard: { slug: 'web-development', title: 'Web Development' },
     shot: { az: -16, el: 44, w: 0.9 },
   },
   {
@@ -63,7 +66,7 @@ export const BLOCKS: Block[] = [
     rect: [0.5, -0.16, 1, 0.28],
     short: 'Marketing',
     part: 'Signal block',
-    service: { slug: 'Marketing', fallbackTitle: 'Digital Marketing' },
+    standard: { slug: 'Marketing', title: 'Digital Marketing' },
     shot: { az: 24, el: 42, w: 0.74 },
   },
   {
@@ -72,7 +75,7 @@ export const BLOCKS: Block[] = [
     rect: [0.44, 0.42, 1, 1],
     short: 'SEO / AEO / GEO',
     part: 'Index block',
-    service: { slug: 'seo-aeo-geo-services', fallbackTitle: 'SEO, AEO & GEO Services' },
+    standard: { slug: 'seo-aeo-geo-services', title: 'SEO, AEO & GEO Services' },
     shot: { az: -10, el: 56, w: 0.8 },
   },
   {
@@ -81,7 +84,7 @@ export const BLOCKS: Block[] = [
     rect: [-0.32, 0.52, 0.32, 1],
     short: 'Media',
     part: 'Media engine',
-    service: { slug: 'media-production', fallbackTitle: 'Media Production' },
+    standard: { slug: 'media-production', title: 'Media Production' },
     shot: { az: 12, el: 50, w: 0.84 },
   },
   {
@@ -90,7 +93,7 @@ export const BLOCKS: Block[] = [
     rect: [-1, 0.3, -0.46, 1],
     short: 'Mobile',
     part: 'Mobile cluster',
-    service: { slug: 'mobile-app', fallbackTitle: 'Mobile App' },
+    standard: { slug: 'mobile-app', title: 'Mobile App' },
     shot: { az: -26, el: 48, w: 0.92 },
   },
 ];
@@ -101,6 +104,7 @@ export const AI_BLOCK: Block = {
   rect: [-0.34, -0.36, 0.36, 0.38],
   short: 'AI',
   part: 'Neural engine',
+  standard: { slug: 'ai-integration-model-training', title: 'AI Integration & Model Training' },
   shot: { az: 10, el: 42, w: 1 },
 };
 
@@ -114,6 +118,40 @@ export const YOUR_BLOCK: Block = {
 };
 
 export const ALL_BLOCKS: Block[] = [...BLOCKS, AI_BLOCK, YOUR_BLOCK];
+
+// ---------- Which service is on which part ----------
+
+/** The parts a service can sit on */
+const PARTS: Block[] = [...BLOCKS, AI_BLOCK];
+const KINDS = new Set<string>(PARTS.map((b) => b.kind));
+
+/** A part as the API sends it ('' or an unknown one is no part; undefined means the backend doesn't send parts yet) */
+export const partOf = (value: unknown): BlockKind | null | undefined =>
+  value === undefined ? undefined : typeof value === 'string' && KINDS.has(value) ? (value as BlockKind) : null;
+
+export type Names = Partial<Record<BlockKind, string>>;
+export type Board<T> = { at: Map<BlockKind, T>; names: Names };
+
+/** Each part's service, and the names the admin printed on them. From a backend that doesn't send places yet, the parts
+ * keep the services they always had. */
+export function boardOf<T extends { slug: string } & Placed>(services: T[]): Board<T> {
+  const sendsParts = services.some((s) => s.part !== undefined);
+  const at = new Map<BlockKind, T>();
+  const names: Names = {};
+  PARTS.forEach((b) => {
+    const s = sendsParts ? services.find((x) => x.part === b.kind) : services.find((x) => x.slug === b.standard?.slug);
+    if (!s) return;
+    at.set(b.kind, s);
+    if (s.label?.trim()) names[b.kind] = s.label.trim();
+  });
+  return { at, names };
+}
+
+/** The board as it was, for when the API can't be reached at all: the page still shows every part */
+export const STANDARD_SERVICES: ChipService[] = PARTS.map((b) => ({ slug: b.standard!.slug, title: b.standard!.title, description: '', features: [], part: b.kind }));
+
+/** The name printed on a part */
+export const nameOf = (b: Block, names: Names) => names[b.kind] ?? b.short;
 
 /** Every part by the index the shader knows it by */
 export const RECTS: [number, number, number, number][] = (() => {
@@ -177,8 +215,7 @@ export const PLAN = {
   hint: 'Drag to turn the board. Pick any part to fly to it.',
 };
 
+// (the transistor figure in the AI part's wording is from https://en.wikipedia.org/wiki/Transistor_count)
 export const NOW = {
-  fallbackTitle: 'AI Integration & Model Training',
-  source: 'https://en.wikipedia.org/wiki/Transistor_count',
   words: ['AI', 'AUTOMATE', 'PREDICT', 'ANSWER', 'LEARN'],
 };

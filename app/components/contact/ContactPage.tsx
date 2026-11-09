@@ -31,6 +31,19 @@ const PORTS: { id: PortId; no: string; name: string }[] = [
   { id: 'visit', no: '04', name: 'Visit' },
 ];
 const isPort = (v: string): v is PortId => PORTS.some((p) => p.id === v);
+/** An email address may break onto a second line after its @, rather than anywhere in the middle */
+const breakable = (text: string) => {
+  const at = text.indexOf('@');
+  return at > 0 ? (
+    <>
+      {text.slice(0, at + 1)}
+      <wbr />
+      <span className="whitespace-nowrap">{text.slice(at + 1)}</span>
+    </>
+  ) : (
+    text
+  );
+};
 
 /** A short buzz on phones, once the visitor has touched the page (before that, browsers block it and log a warning) */
 const buzz = (ms: number) => {
@@ -531,8 +544,10 @@ export default function ContactPage() {
                       <span aria-hidden="true" className="patch-led" />
                     </span>
                     <span className="patch-name mt-1.5 max-w-full truncate font-mono text-[10px] font-bold uppercase tracking-wider sm:mt-2 sm:font-display sm:text-[1.15rem] sm:normal-case sm:tracking-tight">{port.name}</span>
-                    <span className="patch-value mt-0.5 hidden max-w-full truncate font-mono text-[11px] sm:block">{portValue(port.id)}</span>
-                    <span aria-hidden="true" className="mt-2.5 flex w-full justify-center sm:mt-4">
+                    {/* (on a tablet the ports are narrow: the line wraps onto a second one rather than being cut off, and the
+                        slots stay level along the panel's edge) */}
+                    <span className="patch-value mt-0.5 hidden max-w-full break-words font-mono text-[11px] leading-snug sm:line-clamp-2">{breakable(portValue(port.id))}</span>
+                    <span aria-hidden="true" className="mt-2.5 flex w-full flex-1 items-end justify-center sm:mt-4">
                       <span className="patch-slot relative">
                         <span className="patch-ring absolute bottom-0 left-1/2 opacity-0" />
                       </span>

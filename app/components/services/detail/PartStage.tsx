@@ -12,8 +12,7 @@ import { scrollToY } from '../../SmoothScroll';
 import { useReveal } from '../../../context/RevealContext';
 import { usePlayIntro } from '../../../context/usePlayIntro';
 import { createChip, type ChipEngine } from '../chipEngine';
-import { AI_SLUG, ALL_BLOCKS, BLOCKS, centreOf, KIND, NOW, type Block } from '../floorplan';
-import { useSite } from '../../../site/SiteContext';
+import { ALL_BLOCKS, BLOCKS, boardOf, centreOf, KIND, nameOf, STANDARD_SERVICES, type Block, type Board, type Holder } from '../floorplan';
 import { cameraAt, fieldOfView, FOV, partKeys, ramp, smooth, smoother } from '../score';
 import { refreshSoon } from './refresh';
 import { splitAccent, type DetailService, type Words } from './types';
@@ -70,6 +69,8 @@ type Props = {
   block: Block;
   /** the other parts of the board that have a page to go to */
   others: { block: Block; slug: string }[];
+  /** which service is on each part, and the names printed on them (from the admin) */
+  board: Board<Holder>;
   formId: string;
   insideId: string;
   facts: Fact[];
@@ -79,10 +80,9 @@ type Props = {
 };
 
 /** The opening of a service's page: its part lights up on the board and starts working, and scrolling flies down into it */
-export default function PartStage({ service, block, others, formId, insideId, facts, part, title, words: say }: Props) {
-  // the centre part carries the AI service's name, as the admin has it
-  const { services } = useSite();
-  const aiName = services.find((s) => s.slug === AI_SLUG)?.title ?? NOW.fallbackTitle;
+export default function PartStage({ service, block, others, board, formId, insideId, facts, part, title, words: say }: Props) {
+  // the centre part carries the title of the service the admin put there
+  const aiName = (board.at.get('ai') ?? STANDARD_SERVICES.find((s) => s.part === 'ai')!).title;
   const rootRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<gsap.core.Timeline | null>(null);
   const router = useRouter();
@@ -109,7 +109,7 @@ export default function PartStage({ service, block, others, formId, insideId, fa
         return;
       }
       const canvas = root.querySelector<HTMLCanvasElement>('[data-part="canvas"]')!;
-      const engine: ChipEngine | null = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true), aiName);
+      const engine: ChipEngine | null = createChip(canvas, () => setAttempt((n) => n + 1), () => setStill(true), aiName, board.names);
       if (!engine) {
         setStill(true);
         return;
@@ -311,7 +311,7 @@ export default function PartStage({ service, block, others, formId, insideId, fa
         hover.on += (hoverGoal - hover.on) * (1 - Math.exp(-dt * 7));
         hover.rect = (offered ? offered.block.rect : block.rect) as [number, number, number, number];
         hover.kind = offered ? KIND[offered.block.kind] : k;
-        const tipText = offered ? offered.block.short : '';
+        const tipText = offered ? nameOf(offered.block, board.names) : '';
         if (tipText !== shownTip) {
           shownTip = tipText;
           tipEl.textContent = tipText;
@@ -459,15 +459,16 @@ export default function PartStage({ service, block, others, formId, insideId, fa
   );
 }
 
-export const slugOf = (b: Block) => (b.kind === 'ai' ? AI_SLUG : b.service?.slug);
-
-/** Which part of the board a service is, if it has one, and the parts around it that have a page */
-export function partsFor(slug: string, known: { slug: string }[]) {
-  const block = ALL_BLOCKS.find((b) => slugOf(b) === slug) ?? null;
-  const has = new Set(known.map((k) => k.slug));
-  const others = ALL_BLOCKS.flatMap((b) => {
-    const s = slugOf(b);
-    return s && s !== slug && has.has(s) ? [{ block: b, slug: s }] : [];
-  });
-  return { block, others };
+/** Which part of the board a service is on, if any (as the admin set it), and the other parts that have a page to go to.
+ * If the list of services couldn't be loaded, the parts keep the services they always had and nothing links onwards. */
+export function partsFor(slug: string, related: Holder[]) {
+  const board = boardOf<Holder>(related.length ? related : STANDARD_SERVICES);
+  const block = ALL_BLOCKS.find((b) => board.at.get(b.kind)?.slug === slug) ?? null;
+  const others = related.length
+    ? ALL_BLOCKS.flatMap((b) => {
+        const s = board.at.get(b.kind);
+        return s && s.slug !== slug ? [{ block: b, slug: s.slug }] : [];
+      })
+    : [];
+  return { block, others, board };
 }

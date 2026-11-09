@@ -1,7 +1,7 @@
 // The solid parts of the scene: one circuit board, its modules and their lids, and everything printed on it.
 // All of it is generated here: nothing is downloaded.
 
-import { AI_BLOCK, ALL_BLOCKS, BLOCKS, BOARD, centreOf, LINKS, WEB_TILES, type Block, type Point } from './floorplan';
+import { AI_BLOCK, ALL_BLOCKS, BLOCKS, BOARD, centreOf, LINKS, nameOf, WEB_TILES, type Block, type Names, type Point } from './floorplan';
 
 /** How tall a closed lid stands */
 export const LID_TOP = 0.03;
@@ -236,8 +236,8 @@ function fitLines(g: CanvasRenderingContext2D, text: string, font: (px: number) 
   return { fs: 4, lines: [text] };
 }
 
-/** What's printed on the lids: the name of each part. The centre one carries the AI service's own name (from the admin). */
-export function drawLidPrint(size: number, display: string, mono: string, aiName: string) {
+/** What's printed on the lids: the name of each part (from the admin). The centre one carries its service's full title. */
+export function drawLidPrint(size: number, display: string, mono: string, aiName: string, names: Names) {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -267,7 +267,7 @@ export function drawLidPrint(size: number, display: string, mono: string, aiName
       lines.forEach((line, n) => g.fillText(line, w / 2, h * 0.43 + (n - (lines.length - 1) / 2) * lead));
     } else {
       let fs = h * 0.17;
-      const label = block.short.toUpperCase();
+      const label = nameOf(block, names).toUpperCase();
       g.font = `800 ${fs}px ${display}`;
       const room = w * 0.84;
       const width = g.measureText(label).width;
@@ -295,7 +295,7 @@ const BRAND = '#0144b5';
 const SOFT = '#9dbbff';
 
 /** The board's printing, drawn once. The art is what you see; the flow says, for the signals, how far along each trace a point is. */
-export function drawBoardArt(size: number, flowSize: number, display: string, mono: string) {
+export function drawBoardArt(size: number, flowSize: number, display: string, mono: string, names: Names) {
   const art = document.createElement('canvas');
   art.width = size;
   art.height = size;
@@ -455,7 +455,7 @@ export function drawBoardArt(size: number, flowSize: number, display: string, mo
     A.textBaseline = 'alphabetic';
     A.textAlign = 'left';
     A.font = `700 ${0.021 * S}px ${mono}`;
-    A.fillText(`U${n + 1}  ${b.short.toUpperCase()}`, ax(x0), ax(z0 - 0.036));
+    A.fillText(`U${n + 1}  ${nameOf(b, names).toUpperCase()}`, ax(x0), ax(z0 - 0.036));
   });
 
   // ---- The maker's name, and the marks a real board carries ----

@@ -194,7 +194,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         .from('[data-sm="kicker"]', { y: 12, autoAlpha: 0, duration: 0.8 }, 0)
         .from('[data-sm="word"]', { yPercent: 110, duration: 1.2, stagger: 0.12 }, 0.1)
         .from('[data-sm="copy"]', { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, 0.5)
-        .from('[data-sm="canvas"], [data-sm="gl"]', { autoAlpha: 0, scale: 0.92, duration: 1.8 }, 0)
+        .from('[data-sm="globe"]', { autoAlpha: 0, scale: 0.92, duration: 1.8 }, 0)
         .from('[data-sm="hud"]', { autoAlpha: 0, duration: 0.8 }, 0.8);
       if (playedRef.current) introRef.current.progress(1);
     },
@@ -759,8 +759,12 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         className="relative h-[440svh] [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[1040vh] motion-reduce:h-auto"
       >
         <div data-sm="stage" className="sticky top-0 h-svh overflow-hidden motion-reduce:relative motion-reduce:h-auto motion-reduce:min-h-svh">
-          <canvas data-sm="gl" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
-          <canvas data-sm="canvas" aria-hidden="true" className="absolute inset-0 w-full h-full touch-pan-y select-none" />
+          {/* The opening grows this in. The imagery's own canvas keeps its separate reveal (on its first frame), which a
+              tween on the canvas itself would pin at the hidden value it started from. */}
+          <div data-sm="globe" className="absolute inset-0">
+            <canvas data-sm="gl" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
+            <canvas data-sm="canvas" aria-hidden="true" className="absolute inset-0 w-full h-full touch-pan-y select-none" />
+          </div>
 
           {/* Name tag that sits on the coordinates and changes as the camera closes in */}
           <div data-sm="place" aria-hidden="true" className="opacity-0 pointer-events-none absolute left-0 top-0 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-white whitespace-nowrap [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]">

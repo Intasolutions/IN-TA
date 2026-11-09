@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Icon from '../../Icon';
-import { ALL_BLOCKS, BOARD, LINKS, type Block, type BlockKind } from '../floorplan';
-import { slugOf } from './PartStage';
+import { ALL_BLOCKS, BOARD, LINKS, nameOf, type Block, type BlockKind, type Board, type Holder } from '../floorplan';
 import { optimisable, type DetailFaq, type DetailTool, type RelatedService } from './types';
 
 // ---- Tools: two rows running opposite ways, or one still row when there are only a few ----
@@ -138,13 +137,13 @@ export function Questions({ faqs, windowTitle }: { faqs: DetailFaq[]; windowTitl
 const percent = (v: number) => `${((v + BOARD.half) / (BOARD.half * 2)) * 100}%`;
 const size = (v: number) => `${(v / (BOARD.half * 2)) * 100}%`;
 
-export function BoardMap({ block, related, formId, linkLabel }: { block: Block; related: RelatedService[]; formId: string; linkLabel: string }) {
+export function BoardMap({ block, board, related, formId, linkLabel }: { block: Block; board: Board<Holder>; related: RelatedService[]; formId: string; linkLabel: string }) {
   const [hot, setHot] = useState<BlockKind | null>(null);
   const joined = LINKS.filter((l) => l.from === block.kind || l.to === block.kind);
   const near = new Set(joined.map((l) => (l.from === block.kind ? l.to : l.from)));
   const list = ALL_BLOCKS.flatMap((b) => {
     if (!near.has(b.kind)) return [];
-    const service = related.find((r) => r.slug === slugOf(b));
+    const service = related.find((r) => r.slug === board.at.get(b.kind)?.slug);
     return service ? [{ b, service }] : [];
   });
   const h = BOARD.half;
@@ -175,14 +174,15 @@ export function BoardMap({ block, related, formId, linkLabel }: { block: Block; 
           const me = b.kind === block.kind;
           const socket = b.kind === 'yours';
           const close = near.has(b.kind);
-          const slug = slugOf(b);
+          const slug = board.at.get(b.kind)?.slug;
+          const name = nameOf(b, board.names);
           const tile = `absolute flex items-center justify-center rounded-md p-1 text-center font-mono text-[8px] font-bold uppercase leading-tight tracking-wider transition-[opacity,background-color,box-shadow] duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue sm:text-[10px] ${
             me ? 'bg-brand-blue text-white shadow-[0_0_0_3px_rgb(37_99_235/0.25)]' : socket ? 'border-2 border-dashed border-midnight/30 text-midnight/70 hover:border-brand-blue hover:text-brand-blue' : `bg-[#1a2a5e] text-white hover:bg-midnight ${close || hot === b.kind ? '' : 'opacity-45 hover:opacity-100'} ${hot === b.kind ? 'shadow-[0_0_0_3px_rgb(37_99_235/0.45)]' : ''}`
           }`;
           const place = { left: percent(x0), top: percent(z0), width: size(x1 - x0), height: size(z1 - z0) };
-          if (me) return <span key={b.id} aria-current="page" className={tile} style={place}>{b.short}</span>;
-          if (socket) return <a key={b.id} href={`#${formId}`} className={tile} style={place}>{b.short}</a>;
-          return slug ? <Link key={b.id} href={`/services/${slug}`} onPointerEnter={() => setHot(b.kind)} onPointerLeave={() => setHot(null)} className={tile} style={place}>{b.short}</Link> : null;
+          if (me) return <span key={b.id} aria-current="page" className={tile} style={place}>{name}</span>;
+          if (socket) return <a key={b.id} href={`#${formId}`} className={tile} style={place}>{name}</a>;
+          return slug ? <Link key={b.id} href={`/services/${slug}`} onPointerEnter={() => setHot(b.kind)} onPointerLeave={() => setHot(null)} className={tile} style={place}>{name}</Link> : null;
         })}
       </div>
 

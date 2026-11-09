@@ -1,4 +1,5 @@
 // A service as its detail page uses it. Everything comes from the admin, and anything the API doesn't send yet is simply empty.
+import type { BlockKind } from '../floorplan';
 
 export type DetailImage = { id: number; image: string; caption: string; alt: string };
 export type DetailFaq = { id: number; question: string; answer: string };
@@ -87,13 +88,15 @@ export function wordsFor(service: DetailService, part: string): Words {
   };
 }
 
-export type RelatedService = { slug: string; title: string; short: string };
+export type RelatedService = { slug: string; title: string; short: string; part?: BlockKind | null; label?: string | null };
 
 type Named = { name?: string; logo?: string | null } | string;
 
 export type ApiService = {
   slug: string;
   title: string;
+  board_part?: string;
+  board_label?: string;
   short_description?: string | null;
   long_description?: string | null;
   ideal_for?: string[];
