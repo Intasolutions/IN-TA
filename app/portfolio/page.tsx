@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PortfolioPage from '../components/portfolio/PortfolioPage';
 import { toWork, type ApiProject, type ApiSite } from '../components/portfolio/data';
+import { API_TAG } from '../site/cache';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite();
@@ -17,7 +18,7 @@ const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 async function getList<T>(path: string): Promise<T[]> {
   try {
-    const res = await fetch(`${apiBase}${path}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(12000) });
+    const res = await fetch(`${apiBase}${path}`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(12000) });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : data.results ?? [];
@@ -29,7 +30,7 @@ async function getList<T>(path: string): Promise<T[]> {
 /** Whether a site answers: visitors are only sent to the ones that do */
 async function answers(url: string) {
   try {
-    const res = await fetch(url, { method: 'HEAD', next: { revalidate: 3600 }, signal: AbortSignal.timeout(3000) });
+    const res = await fetch(url, { method: 'HEAD', next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(3000) });
     return res.status < 500 && res.status !== 404;
   } catch {
     return false;

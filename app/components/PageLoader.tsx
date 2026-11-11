@@ -13,12 +13,15 @@ import { INTRO_FIRST_FRAME } from './introFirstFrame';
  * The crop keeps the area the animation uses; everything outside it is the plain background, BACKDROP.
  */
 const BACKDROP = '#fefefe';
-/** If the video hasn't started this long after the page arrived, the finished logo shows instead (a slow connection) */
-const START_WITHIN_MS = 1500;
+/** If the video hasn't started this long after the page arrived, the finished logo shows instead (a very slow connection).
+ * Generous, so that every first-time visitor sees the animation: the video is only 28 KB, but a slow phone takes a while
+ * to load the page around it. */
+const START_WITHIN_MS = 3500;
 /** How long the finished logo shows when it stands in for the video */
 const STILL_MS = 650;
-/** Whatever happens, the opening never holds the page longer than this after it arrived */
-const HARD_STOP_MS = 4000;
+/** Whatever happens, the opening never holds the page longer than this after it arrived (a late start, plus the video's
+ * 2 seconds; globals.css gives up at the same time if this script never runs) */
+const HARD_STOP_MS = 6000;
 /** The fade at the end (globals.css, .page-loader) */
 const FADE_MS = 450;
 

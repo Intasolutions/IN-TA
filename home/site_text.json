@@ -4,7 +4,7 @@
     {
       "name": "Home: opening",
       "items": [
-        ["home_hero_kicker", "Small line at the top", "EST. 2023 // SPECIALIZED ENGINEERING UNIT"],
+        ["home_hero_kicker", "Small line at the top", "Since 2023 · Websites · Mobile Apps · Custom Software · AI"],
         ["home_hero_focus", "Focus areas beside it (separate with commas)", "ENTERPRISE ERP, AI PIPELINES, HIGH-CONCURRENCY WEB"],
         ["home_hero_badge", "Badge above the title", "CUSTOM SOFTWARE · AI · MOBILE APPS"],
         ["home_hero_tagline", "Line beside the badge", "LET'S BUILD WHAT'S NEXT"],
@@ -157,7 +157,8 @@
         ["seo_contact_title", "Contact: title", "Contact Us | Get in Touch for IT Consultations | INTA Solutions"],
         ["seo_contact_description", "Contact: description", "Have a project in mind? Contact INTA Solutions in Wayanad, Kerala to discuss your software, web, or AI development needs. Call, email, visit or send us a message."],
         ["seo_business_description", "Company description given to search engines", "Leading Software Development Company in Wayanad, Kerala. Specialized in SaaS Development, UI/UX Design, and Mobile App Development for the Malabar region."],
-        ["seo_area_served", "Towns and regions the company serves (separate with commas)", "Mananthavady, Kalpetta, Sulthan Bathery, Kerala"]
+        ["seo_area_served", "Towns and regions the company serves (separate with commas)", "Mananthavady, Kalpetta, Sulthan Bathery, Kerala"],
+        ["seo_google_profile", "Google Business Profile link (its Share link from Google Maps). Search engines are told it is the same business as the website. Leave empty if you have none", ""]
       ]
     }
   ]

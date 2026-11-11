@@ -108,6 +108,11 @@ REST_FRAMEWORK = {
     },
 }
 
+# The website to refresh when its content is saved here (home/revalidate.py): its refresh address, and the secret it
+# expects (set the same REVALIDATE_SECRET on the website). Several addresses can be given, separated by commas.
+FRONTEND_REVALIDATE_URLS = [u.strip() for u in os.getenv("FRONTEND_REVALIDATE_URLS", "").split(",") if u.strip()]
+REVALIDATE_SECRET = os.getenv("REVALIDATE_SECRET", "")
+
 # Static and media files (uploads)
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"

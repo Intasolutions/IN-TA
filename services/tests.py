@@ -145,3 +145,38 @@ class EnquiryTests(TestCase):
         make('hidden', is_active=False)
         self.assertEqual(self.post('Hidden').status_code, 400)
         self.assertEqual(self.post('Something made up').status_code, 400)
+
+
+class WebsiteRefreshTests(TestCase):
+    """Saving website content asks the website to refresh (home/revalidate.py); private data doesn't."""
+
+    def saves(self, action):
+        from unittest import mock
+
+        from home import revalidate
+
+        with mock.patch.object(revalidate, '_soon') as soon, self.captureOnCommitCallbacks(execute=True):
+            action()
+        return soon.call_count
+
+    def test_content_saves_refresh_the_website(self):
+        from django.test import override_settings
+
+        from blog.models import Subscriber
+
+        with override_settings(FRONTEND_REVALIDATE_URLS=['https://example.com/api/revalidate'], REVALIDATE_SECRET='s3cret'):
+            self.assertGreater(self.saves(lambda: make('web-development')), 0)
+            self.assertEqual(self.saves(lambda: Subscriber.objects.create(name='Asha', phone='123', interest='Web')), 0)
+        self.assertEqual(self.saves(lambda: make('mobile-app')), 0)  # not set up: nothing is sent
+
+    def test_refresh_sends_the_secret(self):
+        from unittest import mock
+
+        from django.test import override_settings
+
+        from home import revalidate
+
+        with override_settings(FRONTEND_REVALIDATE_URLS=['https://example.com/api/revalidate'], REVALIDATE_SECRET='s3cret'), mock.patch('urllib.request.urlopen') as urlopen:
+            revalidate._send()
+        request = urlopen.call_args[0][0]
+        self.assertEqual((request.full_url, request.get_method(), request.get_header('X-revalidate-secret')), ('https://example.com/api/revalidate', 'POST', 's3cret'))

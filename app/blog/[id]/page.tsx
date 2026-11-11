@@ -7,6 +7,7 @@ import { apiBase, plainText, relatedTo, serviceSlugOf, toPost, type ApiPost, typ
 
 import { absolute, pageMetadata } from '../../site/seo';
 import { breadcrumbs, jsonLdHtml, organizationRef } from '../../site/schema';
+import { API_TAG } from '../../site/cache';
 
 const RELATED = 3;
 
@@ -20,7 +21,7 @@ type Props = {
  */
 const getPost = cache(async (id: string): Promise<ApiPost | null> => {
   if (!/^\d+$/.test(id)) return null;
-  const res = await fetch(`${apiBase()}/api/blog/posts/${id}/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(12000) });
+  const res = await fetch(`${apiBase()}/api/blog/posts/${id}/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(12000) });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`The blog API answered ${res.status}`);
   return res.json();
@@ -28,7 +29,7 @@ const getPost = cache(async (id: string): Promise<ApiPost | null> => {
 
 async function getPosts(): Promise<Post[]> {
   try {
-    const res = await fetch(`${apiBase()}/api/blog/posts/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(12000) });
+    const res = await fetch(`${apiBase()}/api/blog/posts/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(12000) });
     if (!res.ok) return [];
     const data = await res.json();
     return ((Array.isArray(data) ? data : data.results ?? []) as ApiPost[]).map(toPost);
@@ -40,7 +41,7 @@ async function getPosts(): Promise<Post[]> {
 async function getService(slug: string | null) {
   if (!slug) return null;
   try {
-    const res = await fetch(`${apiBase()}/api/services/${slug}/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${apiBase()}/api/services/${slug}/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return null;
     const service = await res.json();
     return { slug, title: String(service.title).trim() };

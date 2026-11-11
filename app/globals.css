@@ -139,7 +139,7 @@ html {
    compositor, so a phone still busy starting the page can't stall the fade. Should that script never run, it gives the
    page back just after its four-second limit anyway. It plays once per visit: a visitor who has seen it never sees it flash on later
    pages ("seen"). Hidden, not removed from layout, so nothing inside it is measured at 0 x 0. */
-.page-loader { transition: opacity 0.45s cubic-bezier(0.33, 1, 0.68, 1), visibility 0s linear 0.45s; animation: page-loader-giveup 0.45s ease-out 4.3s forwards; }
+.page-loader { transition: opacity 0.45s cubic-bezier(0.33, 1, 0.68, 1), visibility 0s linear 0.45s; animation: page-loader-giveup 0.45s ease-out 6.3s forwards; }
 html[data-loader='left'] .page-loader { opacity: 0; visibility: hidden; }
 html[data-loader='seen'] .page-loader { visibility: hidden; transition: none; animation: none; }
 .page-loader:not([data-still]) .page-loader-still { opacity: 0; }

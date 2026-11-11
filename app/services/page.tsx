@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ServiceChip, { type ChipService } from '../components/services/ServiceChip';
 import { partOf } from '../components/services/floorplan';
+import { API_TAG } from '../site/cache';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite();
@@ -28,7 +29,7 @@ type ApiService = {
 
 async function getServices(): Promise<ChipService[]> {
   try {
-    const res = await fetch(`${apiBase}/api/services/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${apiBase}/api/services/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return [];
     const data = await res.json();
     const list: ApiService[] = Array.isArray(data) ? data : data.results ?? [];

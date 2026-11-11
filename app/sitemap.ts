@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { updatedOf } from './components/legal/document';
 import { getSite } from './site/server';
 import { absolute } from './site/seo';
+import { API_TAG } from './site/cache';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -15,7 +16,7 @@ type ApiProject = Dated & { is_active?: boolean };
 
 async function list<T>(path: string): Promise<T[]> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, { next: { revalidate }, signal: AbortSignal.timeout(12000) });
+    const res = await fetch(`${API_BASE}${path}`, { next: { revalidate, tags: [API_TAG] }, signal: AbortSignal.timeout(12000) });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : data.results ?? [];

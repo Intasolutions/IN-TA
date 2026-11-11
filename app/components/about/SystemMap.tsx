@@ -51,6 +51,22 @@ const CLIENTS_BUS_LENGTH = 0.5 * SCREEN;
 const CLIENTS_STUB_LENGTH = 0.12 * SCREEN;
 const CLIENTS_PLUG_LENGTH = 0.16 * SCREEN;
 const OUT_START = 7.8 * SCREEN; // back up to Earth
+// Without client logos there is no clients' board: the scroll goes straight from the orbit back to Earth, and the page is
+// that much shorter (the scene's own timings stay as they are; scrolling simply passes over that stretch)
+const CLIENTS_SCREENS = (OUT_START - CLIENTS_PAN_START) * SCENE_SCREENS;
+const SHORT_SCREENS = SCENE_SCREENS - CLIENTS_SCREENS;
+/** From where the page is scrolled (0 to 1) to where the scene is, and back */
+const sceneAt = (f: number, skip: boolean) => {
+  if (!skip) return f;
+  const s = f * SHORT_SCREENS;
+  return (s > CLIENTS_PAN_START * SCENE_SCREENS ? s + CLIENTS_SCREENS : s) / SCENE_SCREENS;
+};
+const scrollAt = (p: number, skip: boolean) => {
+  if (!skip) return p;
+  const s = p * SCENE_SCREENS;
+  const start = CLIENTS_PAN_START * SCENE_SCREENS;
+  return (s >= start + CLIENTS_SCREENS ? s - CLIENTS_SCREENS : Math.min(s, start)) / SHORT_SCREENS;
+};
 // Phones and tablets: the zoom, then the story, then the core lands
 const ROUTE_ZOOM_END = 0.5;
 const ROUTE_LAND = 0.82;
@@ -157,6 +173,7 @@ function StopsNav({ hasClients, stopChangedRef, onGo }: { hasClients: boolean; s
 /** The About page as one live system: zoom from the whole planet into the office coordinates, then travel across the board. */
 export default function SystemMap({ services, clients: initialClients }: { services: MapService[]; clients: MapClient[] }) {
   const clients = useClients(initialClients);
+  const noClientsRef = useRef(clients.length === 0);
   const boardStale = useRef(false);
   const site = useSite();
   const t = useText();
@@ -203,6 +220,11 @@ export default function SystemMap({ services, clients: initialClients }: { servi
   // (the real logos can arrive after the first paint: the traces to them are measured again)
   useEffect(() => {
     boardStale.current = true;
+    // (the page's length depends on them: see sceneAt)
+    if (noClientsRef.current !== (clients.length === 0)) {
+      noClientsRef.current = clients.length === 0;
+      ScrollTrigger.refresh();
+    }
   }, [clients]);
 
   // ---- Canvas + scroll ----
@@ -423,7 +445,8 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           // The camera moving across the board, from the services to the orbit
           let pan: Point = [0, 0];
           if (mode === 'scene') {
-            pan = [-orbitAt[0] * state.cam - (clientsAt[0] - orbitAt[0]) * state.camClients, -orbitAt[1] * state.cam - (clientsAt[1] - orbitAt[1]) * state.camClients];
+            const toClients = noClientsRef.current ? 0 : state.camClients; // (no board to go down to)
+            pan = [-orbitAt[0] * state.cam - (clientsAt[0] - orbitAt[0]) * toClients, -orbitAt[1] * state.cam - (clientsAt[1] - orbitAt[1]) * toClients];
             if (pan[0] !== panX || pan[1] !== panY) {
               panX = pan[0];
               panY = pan[1];
@@ -562,8 +585,9 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         const rise = { y: 0, scale: 1, autoAlpha: 1, ease: 'power2.out' };
         // (with a mouse the smooth scrolling already glides, so the scene follows it exactly; touch scrolling gets a little easing of its own)
         const scrub = window.matchMedia('(pointer: fine)').matches ? true : 0.3;
+        // (driven by the scroll through sceneAt, so that the clients' stretch can be passed over when there is none)
         const tl = gsap
-          .timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: track, start: 'top top', end: 'bottom bottom', scrub, invalidateOnRefresh: true } })
+          .timeline({ paused: true, defaults: { ease: 'none' } })
           .to(state, { p: 1, duration: 1 }, 0)
           .to('[data-sm="intro"]', { y: -60, autoAlpha: 0, duration: u(0.08), ease: 'power2.in' }, u(0.02))
           // the story, over the real terrain, while the camera holds on the coordinates
@@ -605,7 +629,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
 
           scrollToStop.current = (at: number) => {
             const r = track.getBoundingClientRect();
-            scrollToY(r.top + window.scrollY + at * (track.offsetHeight - window.innerHeight));
+            scrollToY(r.top + window.scrollY + scrollAt(at, noClientsRef.current) * (track.offsetHeight - window.innerHeight));
           };
         } else {
           tl.fromTo('[data-sm="stem"]', { scaleY: 0 }, { scaleY: 1, duration: 0.08 }, 0.92);
@@ -616,6 +640,15 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           });
           gsap.fromTo('[data-sm="dot"]', { y: -6 }, { y: 30, duration: 0.9, repeat: -1, ease: 'none', stagger: 0.12, scrollTrigger: { trigger: '[data-sm="route"]', toggleActions: 'play pause resume pause' } });
         }
+
+        // ---- The scroll drives all of the above (passing over the clients' stretch when there are none) ----
+        const goalAt = (f: number) => sceneAt(f, mode === 'scene' && noClientsRef.current);
+        const follow = (f: number) => {
+          if (scrub === true) tl.progress(goalAt(f));
+          else gsap.to(tl, { progress: goalAt(f), duration: scrub, ease: 'power3', overwrite: true });
+        };
+        const driver = ScrollTrigger.create({ trigger: track, start: 'top top', end: 'bottom bottom', invalidateOnRefresh: true, onUpdate: (self) => follow(self.progress), onRefresh: (self) => tl.progress(goalAt(self.progress)) });
+        tl.progress(goalAt(driver.progress));
 
         // Drag the globe to spin it (on touch: sideways swipes spin, vertical swipes still scroll the page)
         const overGlobe = (e: PointerEvent) => {
@@ -756,7 +789,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
       <section
         data-sm="track"
         aria-labelledby="sm-title"
-        className="relative h-[440svh] [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[1040vh] motion-reduce:h-auto"
+        className={`relative h-[440svh] motion-reduce:h-auto ${clients.length ? '[@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[1040vh]' : '[@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[840vh]'}`}
       >
         <div data-sm="stage" className="sticky top-0 h-svh overflow-hidden motion-reduce:relative motion-reduce:h-auto motion-reduce:min-h-svh">
           {/* The opening grows this in. The imagery's own canvas keeps its separate reveal (on its first frame), which a

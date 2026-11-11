@@ -14,7 +14,8 @@ const WEBSITE_ID = `${SITE_URL}/#website`;
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const phoneE164 = (phone: string) => phone.replace(/[^\d+]/g, '');
-const sameAs = (site: Site) => Object.values(site.socials).filter(Boolean);
+// The company's other profiles: its social pages and its Google Business Profile (all set in the admin)
+const sameAs = (site: Site) => [...Object.values(site.socials), textOf(site, 'seo_google_profile')].filter((url) => /^https:\/\//.test(url));
 
 /** The company, for pages that mention it (as provider, author, publisher, creator) */
 export const organizationRef = () => ({ '@type': 'Organization', '@id': ORG_ID, name: LEGAL_NAME, url: SITE_URL, logo: LOGO });

@@ -5,6 +5,7 @@ import { absolute, pageMetadata } from '../site/seo';
 import { organizationRef } from '../site/schema';
 import BlogIndex from '../components/blog/BlogIndex';
 import { apiBase, toPost, type ApiPost, type Post } from '../components/blog/posts';
+import { API_TAG } from '../site/cache';
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getPosts(): Promise<Post[]> {
   try {
-    const res = await fetch(`${apiBase()}/api/blog/posts/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(12000) });
+    const res = await fetch(`${apiBase()}/api/blog/posts/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(12000) });
     if (!res.ok) return [];
     const data = await res.json();
     return ((Array.isArray(data) ? data : data.results ?? []) as ApiPost[]).map(toPost);

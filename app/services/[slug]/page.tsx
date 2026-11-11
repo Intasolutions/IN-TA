@@ -7,6 +7,7 @@ import { toDetail, type ApiService, type RelatedService } from '../../components
 import { partOf } from '../../components/services/floorplan';
 import { absolute, pageMetadata } from '../../site/seo';
 import { breadcrumbs, jsonLdHtml, organizationRef } from '../../site/schema';
+import { API_TAG } from '../../site/cache';
 
 const LOCAL_API = 'http://127.0.0.1:8000';
 const apiBase = process.env.NEXT_PUBLIC_API_URL || LOCAL_API;
@@ -33,7 +34,7 @@ async function getService(slug: string): Promise<ServiceResponse | null> {
     if (local) return local;
     try {
         const res = await fetch(`${apiBase}/api/services/${slug}/`, {
-            next: { revalidate: 3600 } // Revalidate every hour
+            next: { revalidate: 3600, tags: [API_TAG] } // Revalidate every hour
         });
         if (!res.ok) return null;
         return res.json();
@@ -47,7 +48,7 @@ async function getRelated(): Promise<RelatedService[]> {
     try {
         let data = await fromLocal('/api/services/');
         if (!data) {
-            const res = await fetch(`${apiBase}/api/services/`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) });
+            const res = await fetch(`${apiBase}/api/services/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(8000) });
             if (!res.ok) return [];
             data = await res.json();
         }
