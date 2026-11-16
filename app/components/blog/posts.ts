@@ -94,7 +94,8 @@ export function toPost(b: ApiPost): Post {
     tag: tags[0] ?? 'Insights',
     tags,
     image: absolute(b.image ?? null),
-    alt: b.image_alt?.trim() || '',
+    // the cover's own description from the admin, or else the title it illustrates
+    alt: b.image_alt?.trim() || b.title.trim(),
     excerpt: excerptOf(b.meta_description?.trim() || body),
     minutes: Math.max(1, Math.round(body.split(' ').length / 220)),
   };

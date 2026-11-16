@@ -9,7 +9,7 @@ import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
 import ProjectForm from './ProjectForm';
 import { BlogHead, Cover, PostsFallback, ViewAll, shimmer } from './parts';
-import { calm, playOnView, usePosts } from './data';
+import { calm, playOnView, usePosts, type Post } from './data';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -19,9 +19,9 @@ const COUNT = 4;
 const FLOAT_QUERY = '(pointer: fine) and (min-width: 1024px)';
 
 /** Home page blog: the latest posts as big title rows (with a mouse, a cover floats after the cursor), then the enquiry band. */
-export default function BlogSection() {
+export default function BlogSection({ initial = null }: { initial?: Post[] | null }) {
   const ref = useRef<HTMLElement>(null);
-  const { posts, failed } = usePosts();
+  const { posts, failed } = usePosts(initial);
   const list = posts?.slice(0, COUNT) ?? [];
   // No posts in the admin: only the enquiry band stays
   const none = posts?.length === 0;
@@ -185,10 +185,9 @@ export default function BlogSection() {
       <div aria-hidden="true" className={`${none ? 'hidden' : 'hidden lg:block'} pointer-events-none select-none absolute left-0 top-4 whitespace-nowrap`}>
         <div
           data-bl="ghost"
-          className="font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4rem,9vw,8rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
-        >
-          Latest writing ✦ Latest writing ✦ Latest writing ✦ Latest writing
-        </div>
+          data-ghost="Latest writing ✦ Latest writing ✦ Latest writing ✦ Latest writing"
+          className="ghost-text font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4rem,9vw,8rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
+        />
       </div>
 
       <div className="relative">

@@ -14,7 +14,7 @@ export default function PostCard({ post, level = 'h2' }: { post: Post; level?: '
     <article data-blog="rise" className="group relative h-full">
       <div data-tilt="5" className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-midnight/10 bg-white transition-[border-color,box-shadow] duration-300 group-hover:border-brand-blue/40 group-hover:shadow-[0_24px_48px_-22px_rgb(1_7_43/0.45)]">
         <span className="relative block aspect-[3/2] shrink-0 overflow-hidden bg-midnight">
-          <BlogCover src={post.image} alt="" sizes={SIZES} zoom="group-hover:scale-[1.05]" />
+          <BlogCover src={post.image} alt={post.alt} sizes={SIZES} zoom="group-hover:scale-[1.05]" />
           <span aria-hidden="true" className="blog-sheen" />
           {/* wiped away by the scroll as the card arrives */}
           <span data-card="curtain" aria-hidden="true" className="absolute inset-0 origin-top scale-y-0 bg-linear-to-b from-midnight to-[#0a2a80]" />

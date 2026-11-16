@@ -2,6 +2,13 @@
   "_about": "The website's own wording, by page. The admin shows one box per entry (Site settings > Page wording) and saves only what was changed; an empty box means the standard text here. The website reads this same file for its standard text. Adding an entry needs no migration, only a change on the website that uses it. In a heading, | marks where the blue words start. {street}, {locality}, {district} and {region} become the office address from Site settings. A new line in a box starts a new line on the page where the design has one.",
   "groups": [
     {
+      "name": "Opening screen (first page of a visit)",
+      "about": "The short start-up screen a visitor sees once, on the first page of a visit: its lines are typed out one after another, then the logo moves into the header. The first line is typed as a command, after a $. In the other lines a | splits the line into a name and its value, with dots between them. {services} becomes the number of services on the website, {projects} the number of projects on the Work page, and {district} and {region} the office address. A line whose figure isn't known yet is left out. Up to eight lines.",
+      "items": [
+        ["opening_lines", "Its lines (one per line; | between a name and its value)", "boot in-ta.solutions\nservices | {services} online\nprojects | {projects} delivered\noffice | {district}, {region}\nready"]
+      ]
+    },
+    {
       "name": "Home: opening",
       "items": [
         ["home_hero_kicker", "Small line at the top", "Since 2023 · Websites · Mobile Apps · Custom Software · AI"],
@@ -58,6 +65,9 @@
         ["home_work_text", "Selected work: paragraph", "Hospital management, manufacturing execution, EdTech and e-commerce. A few of the products we've designed, engineered and launched for our clients."],
         ["home_work_industries", "Selected work: tags that name a client's industry, shown above each project (tag names, separate with commas)", "Healthcare Software, Manufacturing, EdTech, Education, E-commerce, Online Retail, Property Management, Community, Professional Education"],
         ["home_voices_kicker", "Testimonials: small line", "Testimonials // Client voices"],
+        ["home_faq_kicker", "Questions: small line above the heading", "Questions"],
+        ["home_faq_title", "Questions: heading (| before the blue words)", "Before you | ask"],
+        ["home_faq_text", "Questions: line beside the heading", "What clients usually ask us before a project starts. Anything else, just ask."],
         ["home_voices_title", "Testimonials: heading", "In their | own words"],
         ["home_voices_text", "Testimonials: paragraph", "What the people we've built for say about working with us."],
         ["home_blog_kicker", "Blog: small line", "Blog // Latest writing"],
@@ -144,18 +154,18 @@
     {
       "name": "Search engines",
       "items": [
-        ["seo_home_title", "Home: title", "Top IT Company in Wayanad | Mobile App Development Team | INTA Solutions"],
-        ["seo_home_description", "Home: description", "INTA Solutions is the #1 software development company in Wayanad, Kerala. We provide expert mobile app development, AI integration, and custom enterprise software solutions."],
-        ["seo_about_title", "About: title", "About Us | INTA Solutions"],
-        ["seo_about_description", "About: description", "How INTA Solutions is wired: a software company in Wayanad, Kerala, mapped as one system, from the services we run to the technology behind them."],
-        ["seo_services_title", "Services: title", "Our Services | Professional IT Solutions | INTA Solutions"],
-        ["seo_services_description", "Services: description", "Comprehensive software development services including web development, mobile app development, AI integration, and digital marketing. Transform your business with INTA Solutions."],
-        ["seo_portfolio_title", "Portfolio: title", "Our Portfolio | Showcase of Digital Innovation | INTA Solutions"],
-        ["seo_portfolio_description", "Portfolio: description", "Explore the diverse portfolio of INTA Solutions, featuring custom software, web and mobile apps, and enterprise platforms we have built."],
-        ["seo_blog_title", "Blog: title", "Insights & Stories | INTA Solutions Blog"],
-        ["seo_blog_description", "Blog: description", "Expert perspectives on custom software development, AI integration, and digital transformation from the team at INTA Solutions."],
-        ["seo_contact_title", "Contact: title", "Contact Us | Get in Touch for IT Consultations | INTA Solutions"],
-        ["seo_contact_description", "Contact: description", "Have a project in mind? Contact INTA Solutions in Wayanad, Kerala to discuss your software, web, or AI development needs. Call, email, visit or send us a message."],
+        ["seo_home_title", "Home: title", "Top IT Company in Wayanad | Mobile App Development Team | IN-TA Solutions"],
+        ["seo_home_description", "Home: description", "IN-TA Solutions is the #1 software development company in Wayanad, Kerala. We provide expert mobile app development, AI integration, and custom enterprise software solutions."],
+        ["seo_about_title", "About: title", "About Us | IN-TA Solutions"],
+        ["seo_about_description", "About: description", "How IN-TA Solutions is wired: a software company in Wayanad, Kerala, mapped as one system, from the services we run to the technology behind them."],
+        ["seo_services_title", "Services: title", "Our Services | Professional IT Solutions | IN-TA Solutions"],
+        ["seo_services_description", "Services: description", "Comprehensive software development services including web development, mobile app development, AI integration, and digital marketing. Transform your business with IN-TA Solutions."],
+        ["seo_portfolio_title", "Portfolio: title", "Our Portfolio | Showcase of Digital Innovation | IN-TA Solutions"],
+        ["seo_portfolio_description", "Portfolio: description", "Explore the diverse portfolio of IN-TA Solutions, featuring custom software, web and mobile apps, and enterprise platforms we have built."],
+        ["seo_blog_title", "Blog: title", "Insights & Stories | IN-TA Solutions Blog"],
+        ["seo_blog_description", "Blog: description", "Expert perspectives on custom software development, AI integration, and digital transformation from the team at IN-TA Solutions."],
+        ["seo_contact_title", "Contact: title", "Contact Us | Get in Touch for IT Consultations | IN-TA Solutions"],
+        ["seo_contact_description", "Contact: description", "Have a project in mind? Contact IN-TA Solutions in Wayanad, Kerala to discuss your software, web, or AI development needs. Call, email, visit or send us a message."],
         ["seo_business_description", "Company description given to search engines", "Leading Software Development Company in Wayanad, Kerala. Specialized in SaaS Development, UI/UX Design, and Mobile App Development for the Malabar region."],
         ["seo_area_served", "Towns and regions the company serves (separate with commas)", "Mananthavady, Kalpetta, Sulthan Bathery, Kerala"],
         ["seo_google_profile", "Google Business Profile link (its Share link from Google Maps). Search engines are told it is the same business as the website. Leave empty if you have none", ""]

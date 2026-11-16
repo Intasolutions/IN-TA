@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -165,8 +165,11 @@ export default function Philosophy() {
             id="philosophy-title"
             className="font-display font-extrabold text-[length:clamp(2rem,4.2vw,3.4rem)] text-midnight tracking-tight leading-[1.04] uppercase"
           >
+            {/* (the spaces between the lines keep the words apart where the heading is read as text) */}
             {linesOf(titleLines).map((line, i) => (
-              <span key={i} className="block overflow-hidden"><span data-ph="line" className="block">{line}</span></span>
+              <Fragment key={i}>
+                <span className="block overflow-hidden"><span data-ph="line" className="block">{line}</span></span>{' '}
+              </Fragment>
             ))}
             <span className="block overflow-hidden pb-[0.12em]">
               {/* Static version of the hero's gradient (only the hero animates); padded so g/p descenders aren't clipped */}
@@ -243,10 +246,9 @@ export default function Philosophy() {
               <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden">
                 <span
                   data-ph="watermark"
-                  className="absolute -right-2 bottom-0 font-display font-extrabold leading-none text-[length:clamp(7rem,14vw,11rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.09)] transition-[-webkit-text-stroke-color] duration-500 group-[.is-active]:[-webkit-text-stroke-color:rgb(1_68_181/0.16)] select-none"
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+                  data-ghost={String(i + 1).padStart(2, '0')}
+                  className="ghost-text absolute -right-2 bottom-0 font-display font-extrabold leading-none text-[length:clamp(7rem,14vw,11rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.09)] transition-[-webkit-text-stroke-color] duration-500 group-[.is-active]:[-webkit-text-stroke-color:rgb(1_68_181/0.16)] select-none"
+                />
                 <span
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                   style={{ background: 'radial-gradient(380px circle at var(--gx, 50%) var(--gy, 50%), rgb(1 68 181 / 0.06), transparent 70%)' }}

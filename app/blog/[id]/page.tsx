@@ -56,12 +56,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     api = await getPost(id);
   } catch {
-    return { title: 'Blog | INTA Solutions' };
+    return { title: 'Blog | IN-TA Solutions' };
   }
-  if (!api) return { title: 'Article not found | INTA Solutions' };
+  if (!api) return { title: 'Article not found | IN-TA Solutions' };
 
   const post = toPost(api);
-  const title = `${api.meta_title?.trim() || post.title} | INTA Solutions`;
+  const title = `${api.meta_title?.trim() || post.title} | IN-TA Solutions`;
   const description = api.meta_description?.trim() || plainText(api.content ?? '').slice(0, 160);
   return pageMetadata({
     title,

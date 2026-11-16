@@ -34,7 +34,7 @@ export function Title({ title, dark = false }: { title: string; dark?: boolean }
   const [plain, bright] = splitAccent(title);
   return (
     <h1 className={`heading-page ${dark ? 'text-white' : 'text-midnight'}`}>
-      {plain && <span data-part="word" className="block">{plain}</span>}
+      {plain && <span data-part="word" className="block">{plain}</span>}{plain && ' '}
       <span className="block"><span data-part="word" className={`${dark ? 'heading-accent-dark' : 'heading-accent'} heading-serif`}>{bright}</span></span>
     </h1>
   );

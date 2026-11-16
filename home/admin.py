@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import WEEKDAYS, ClientLogo, HeroMetric, SiteSettings, Testimonial
+from .models import WEEKDAYS, ClientLogo, HeroMetric, HomeQuestion, SiteSettings, Testimonial
 from .site_text import GROUP_NOTES, SITE_TEXT, TEXT_KEYS
 
 
@@ -38,6 +38,13 @@ class HeroMetricInline(admin.TabularInline):
     max_num = 4
     fields = ('label', 'value', 'unit', 'note', 'order')
     verbose_name_plural = 'Home page figures (up to four, along the bottom of the opening)'
+
+
+class HomeQuestionInline(admin.StackedInline):
+    model = HomeQuestion
+    extra = 0
+    fields = ('question', 'answer', 'order', 'is_active')
+    verbose_name_plural = 'Home page questions (FAQ: the section shows once there is at least one)'
 
 
 class SiteSettingsForm(forms.ModelForm):
@@ -96,7 +103,7 @@ def site_settings_form():
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     form = site_settings_form()
-    inlines = (HeroMetricInline,)
+    inlines = (HeroMetricInline, HomeQuestionInline)
     readonly_fields = ('updated_at',)
     fieldsets = (
         ('Contact', {

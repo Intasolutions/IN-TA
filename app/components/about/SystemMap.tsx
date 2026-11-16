@@ -818,7 +818,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
                 {t('about_kicker')}
               </span>
               <h1 id="sm-title" className="heading-page text-white">
-                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className="block">{titlePlain}</span></span>
+                <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className="block">{titlePlain}</span></span>{' '}
                 <span className="block overflow-hidden pb-[0.05em]"><span data-sm="word" className={`heading-serif ${GRADIENT_ON_DARK}`}>{titleBright}</span></span>
               </h1>
               <p data-sm="copy" className="mt-3 sm:mt-5 text-white/75 text-sm sm:text-base lg:text-lg leading-relaxed max-w-md">

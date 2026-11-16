@@ -21,6 +21,10 @@ export type Site = {
   text: Record<string, string>;
   services: SiteService[];
   stack: StackTool[];
+  /** Figures counted by the API: the projects on the Work page (null from an older API, so nothing states a guess) */
+  counts: { projects: number | null };
+  /** The home page's questions (Site settings > Home page questions); none hides the section */
+  faq: { q: string; a: string }[];
   /** When Site settings were last saved (null from an older API) */
   updatedAt: string | null;
 };
@@ -144,6 +148,8 @@ export const DEFAULT_SITE: Site = {
     ['AWS', 'aws', 'cloud', 'Hosting, storage and scalable infrastructure'],
     ['Docker', 'docker', 'cloud', 'Reproducible builds and deployments'],
   ].map(([name, slug, group, use]) => ({ name, slug, logo: LOGOS[slug], group: group as StackGroup, use })),
+  counts: { projects: null },
+  faq: [],
   updatedAt: null,
 };
 
@@ -329,6 +335,8 @@ export function toSite(api: unknown, apiBase = ''): Site {
     text,
     services: services.length ? services : d.services,
     stack: stack.length ? stack : d.stack,
+    counts: { projects: Number.isInteger(a.counts?.projects) && a.counts.projects >= 0 ? a.counts.projects : null },
+    faq: Array.isArray(a.faq) ? a.faq.filter((f: Json) => filled(f?.q, '') && filled(f?.a, '')).map((f: Json) => ({ q: f.q.trim(), a: f.a.trim() })) : [],
     updatedAt: filled(a.updated_at, '') || null,
   };
 }

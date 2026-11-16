@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import NavProgress from './components/NavProgress';
 import SmoothScroll from './components/SmoothScroll';
 import PageLoader from './components/PageLoader';
@@ -11,18 +11,16 @@ import type { Site } from './site/site';
 // import WhatsAppButton from './components/WhatsAppButton';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [opening, setOpening] = useState(true);
   const { setIntroReady } = useReveal();
 
-  // The visit's first page waits for the opening; every page after that plays its own entrance straight away
-  const handleLoaderDone = () => {
-    setIsFirstLoad(false);
-    setIntroReady(true);
-  };
+  // The visit's first page plays its entrance as the opening clears; every page after that plays its own straight away
+  const playIntro = useCallback(() => setIntroReady(true), [setIntroReady]);
+  const removeOpening = useCallback(() => setOpening(false), []);
 
   return (
     <>
-      {isFirstLoad && <PageLoader onDone={handleLoaderDone} />}
+      {opening && <PageLoader onReady={playIntro} onGone={removeOpening} />}
       <NavProgress />
       <SmoothScroll>{children}</SmoothScroll>
     </>

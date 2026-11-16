@@ -9,21 +9,10 @@ import { useGSAP } from '@gsap/react';
 import Icon from './Icon';
 import { useText } from '../site/SiteContext';
 import { accent, listOf } from '../site/site';
+import { toProjects, type Project } from './projects';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-type Project = {
-  id: number;
-  title: string;
-  slug: string;
-  role: string;
-  summary: string;
-  hero: string;
-  tags: { name: string; slug: string }[];
-  external_url: string;
-  featured: boolean;
-  order: number;
-};
 
 const GALLERY_COUNT = 6;
 // Pinned horizontal scrolling only where there's room for it; elsewhere it's a native swipe carousel.
@@ -40,25 +29,23 @@ const hostname = (url: string) => {
   }
 };
 
-function useProjects() {
-  const [projects, setProjects] = useState<Project[] | null>(null);
+/** The projects: sent with the page by the server, or asked for from the browser if the server couldn't get them */
+function useProjects(initial: Project[] | null) {
+  const [projects, setProjects] = useState<Project[] | null>(initial);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    if (initial) return;
     const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
     const controller = new AbortController();
     fetch(`${apiBase}/api/portfolio/projects/`, { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data) => {
-        const list: Project[] = Array.isArray(data) ? data : data.results ?? [];
-        list.sort((a, b) => Number(b.featured) - Number(a.featured) || a.order - b.order);
-        setProjects(list);
-      })
+      .then((data) => setProjects(toProjects(data)))
       .catch((err) => {
         if (err?.name !== 'AbortError') setFailed(true);
       });
     return () => controller.abort();
-  }, []);
+  }, [initial]);
 
   return { projects, failed };
 }
@@ -88,7 +75,7 @@ function ProjectCard({ project }: { project: Project }) {
         <span data-g="img" className="relative block w-full aspect-video shrink-0 bg-[#020a33] [@media(min-width:1024px)_and_(min-height:640px)]:absolute [@media(min-width:1024px)_and_(min-height:640px)]:inset-0 [@media(min-width:1024px)_and_(min-height:640px)]:aspect-auto">
           <Image
             src={project.hero}
-            alt=""
+            alt={`${project.title}: the finished work`}
             fill
             sizes="(min-width: 1024px) 50vw, 90vw"
             className="object-contain object-top"
@@ -204,14 +191,14 @@ function SeeAllCard({ projects }: { projects: Project[] }) {
   );
 }
 
-export default function Work() {
+export default function Work({ initial = null }: { initial?: Project[] | null }) {
   const t = useText();
   const [titlePlain, titleBright] = accent(t('home_work_title'));
   const ref = useRef<HTMLElement>(null);
   // Set by the active (desktop / mobile) animation branch so the buttons know how to move
   const navRef = useRef<((dir: 1 | -1) => void) | null>(null);
   const skipRef = useRef<(() => void) | null>(null);
-  const { projects, failed } = useProjects();
+  const { projects, failed } = useProjects(initial);
   const gallery = projects?.slice(0, GALLERY_COUNT) ?? [];
 
   // Header reveal
@@ -469,11 +456,10 @@ export default function Work() {
           <div aria-hidden="true" className="hidden lg:flex pointer-events-none select-none absolute inset-y-0 -left-4 sm:-left-6 -right-[50vw] items-center -z-10">
             <div
               data-g="ghost"
-              className="whitespace-nowrap font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4.5rem,10vw,9rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
+              data-ghost="Portfolio ✦ Portfolio ✦ Portfolio ✦ Portfolio ✦ Portfolio ✦ Portfolio"
+              className="ghost-text whitespace-nowrap font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4.5rem,10vw,9rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
               style={{ transform: 'translateX(-30%)' }}
-            >
-              Portfolio ✦ Portfolio ✦ Portfolio ✦ Portfolio ✦ Portfolio ✦ Portfolio
-            </div>
+            />
           </div>
           <div className="max-w-3xl">
             <span data-g="kicker" className="inline-flex items-center gap-3 font-mono text-[11px] text-brand-blue tracking-[0.3em] uppercase font-bold mb-3">

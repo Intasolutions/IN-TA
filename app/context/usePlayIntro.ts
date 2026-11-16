@@ -5,7 +5,7 @@ const never = () => () => {};
 
 /**
  * Whether the visitor could already see this page before the site's scripts took it over: a reload later in the visit
- * (no opening), or an opening that finished first, on a slow connection. A page entrance would then hide what they're
+ * (no opening), or an opening that had already started to clear, on a slow connection. A page entrance would then hide what they're
  * already reading and bring it back, so it's skipped and the page simply stays as it is. Only the page the visit
  * arrived on can be in that state: a page reached by a link is new, and its entrance plays.
  */
@@ -15,7 +15,7 @@ export function useShownOnArrival() {
   const [shown] = useState(() => {
     if (!takingOver || typeof document === 'undefined') return false;
     const opening = document.documentElement.dataset.loader;
-    return opening === 'seen' || opening === 'left';
+    return opening === 'seen' || opening === 'leaving' || opening === 'left';
   });
   return shown;
 }

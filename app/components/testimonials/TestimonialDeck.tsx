@@ -31,11 +31,11 @@ const pose = (depth: number) => ({
 });
 
 /** Client testimonials as a stack of cards: drag / flick the top one away, or use the arrows and photos. */
-export default function TestimonialDeck() {
+export default function TestimonialDeck({ initial = null }: { initial?: Testimonial[] | null }) {
   const t = useText();
   const [titlePlain, titleBright] = accent(t('home_voices_title'));
   const ref = useRef<HTMLElement>(null);
-  const { items, failed } = useTestimonials();
+  const { items, failed } = useTestimonials(initial);
   // The stack is the testimonials rotated by `rot`: order[0] is the card on top
   const [rot, setRot] = useState(0);
   const n = items?.length ?? 0;
@@ -325,10 +325,9 @@ export default function TestimonialDeck() {
       <div aria-hidden="true" className="hidden lg:block pointer-events-none select-none absolute left-0 top-4 whitespace-nowrap">
         <div
           data-td="ghost"
-          className="font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4rem,9vw,8rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
-        >
-          Client voices ✦ Client voices ✦ Client voices ✦ Client voices
-        </div>
+          data-ghost="Client voices ✦ Client voices ✦ Client voices ✦ Client voices"
+          className="ghost-text font-display font-extrabold uppercase leading-none tracking-tight text-[length:clamp(4rem,9vw,8rem)] text-transparent [-webkit-text-stroke:1.5px_rgb(1_68_181/0.07)]"
+        />
       </div>
       <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Text + (desktop) controls */}

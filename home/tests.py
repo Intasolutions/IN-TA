@@ -50,3 +50,33 @@ class ClientLogoTests(TestCase):
         self.assertEqual(saved.order, 3)
         self.assertEqual(self.client.get('/admin/home/clientlogo/').status_code, 200)
         self.assertEqual(self.client.get(f'/admin/home/clientlogo/{saved.pk}/change/').status_code, 200)
+
+
+class SiteCountsTests(TestCase):
+    def test_site_api_counts_the_projects_on_the_work_page(self):
+        from portfolio.models import Project
+
+        Project.objects.create(title='One', slug='one')
+        Project.objects.create(title='Two', slug='two')
+        Project.objects.create(title='Hidden', slug='hidden', is_active=False)
+
+        counts = self.client.get('/api/home/site/').json()['counts']
+
+        self.assertEqual(counts, {'projects': 2})
+
+
+class HomeQuestionTests(TestCase):
+    def test_site_api_sends_the_active_questions_in_order(self):
+        from .models import HomeQuestion, SiteSettings
+
+        settings = SiteSettings.load()
+        HomeQuestion.objects.create(settings=settings, question='Second?', answer='Yes.\r\n\r\nReally.', order=2)
+        HomeQuestion.objects.create(settings=settings, question='First?', answer='No.', order=1)
+        HomeQuestion.objects.create(settings=settings, question='Hidden?', answer='Never.', is_active=False)
+
+        faq = self.client.get('/api/home/site/').json()['faq']
+
+        self.assertEqual(faq, [{'q': 'First?', 'a': 'No.'}, {'q': 'Second?', 'a': 'Yes.\n\nReally.'}])
+
+    def test_no_questions_means_an_empty_list(self):
+        self.assertEqual(self.client.get('/api/home/site/').json()['faq'], [])

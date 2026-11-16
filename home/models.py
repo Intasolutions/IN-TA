@@ -100,3 +100,21 @@ class HeroMetric(models.Model):
 
     def __str__(self):
         return f'{self.label}: {self.value}{self.unit}'
+
+
+class HomeQuestion(models.Model):
+    """A question and its answer for the home page's FAQ. The section shows only once there is one; search engines are told
+    about them too (FAQPage)."""
+
+    settings = models.ForeignKey(SiteSettings, on_delete=models.CASCADE, related_name='questions')
+    question = models.CharField(max_length=200, help_text="As a visitor would ask it, e.g. How long does a website take?")
+    answer = models.TextField(max_length=1200, help_text="A short, plain answer: two or three sentences. A blank line starts a new paragraph.")
+    order = models.IntegerField(default=0, help_text="Lower numbers appear first.")
+    is_active = models.BooleanField(default=True, help_text="Untick to hide it without deleting it.")
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Home page question'
+
+    def __str__(self):
+        return self.question

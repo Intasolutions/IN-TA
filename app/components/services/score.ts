@@ -31,6 +31,9 @@ function roomFor(frame: Frame, aspect: number): Room {
     case 'ask':
       return wide ? { sx: 0, sy: 0.22, fw: 0.9, fh: 0.62 } : { sx: 0, sy: 0.3, fw: 0.98, fh: 0.5 };
     case 'close':
+      // (on an upright tablet the board comes closer, so that it runs past the bottom of the screen and the form rises
+      // over the board itself rather than over an empty floor beneath it)
+      if (!wide && aspect >= 0.6) return { sx: 0, sy: 0.02, fw: 0.94, fh: 0.43 };
       return { sx: 0, sy: 0.07, fw: 0.94, fh: wide ? 0.36 : 0.32 };
     case 'opening':
       return wide ? { sx: 0.5, sy: -0.06, fw: 0.5, fh: 0.86 } : { sx: 0, sy: -0.62, fw: 1, fh: 0.34 };

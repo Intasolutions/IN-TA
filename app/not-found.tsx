@@ -4,7 +4,7 @@ import Footer from './components/Footer';
 import NotFoundTrace from './components/NotFoundTrace';
 
 export const metadata: Metadata = {
-  title: 'Page not found | INTA Solutions',
+  title: 'Page not found | IN-TA Solutions',
   robots: { index: false },
 };
 

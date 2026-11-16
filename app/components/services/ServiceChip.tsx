@@ -1003,7 +1003,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         {t('services_kicker')}
       </p>
       <h1 id="chip-title" className="heading-page text-midnight">
-        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="block">{heroPlain}</span></span>
+        <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="block">{heroPlain}</span></span>{' '}
         <span className="block overflow-hidden pb-[0.05em]"><span data-hero="word" className="heading-accent heading-serif">{heroBright}</span></span>
       </h1>
       <p data-hero="in" className={`mt-3 sm:mt-5 max-w-2xl text-[15px] sm:text-base lg:text-lg leading-relaxed [@media(max-height:480px)]:hidden ${BODY}`}>{t('services_text')}</p>
@@ -1058,7 +1058,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         <section id={YOUR_BLOCK.id} className="relative px-4 pt-24 pb-10 text-center">
           <p className={`${KICKER} mb-3`}>{t('services_close_kicker')}</p>
           <h2 className="heading-section mx-auto max-w-5xl text-midnight">
-            <span className="block">{closePlain}</span>
+            <span className="block">{closePlain}</span>{' '}
             <span className="heading-accent block">{closeBright}</span>
           </h2>
         </section>
@@ -1100,7 +1100,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
                     {t('services_plan_kicker')}
                   </p>
                   <h2 className="heading-section text-midnight">
-                    <span className="block"><Words text={planHeading} /></span>
+                    <span className="block"><Words text={planHeading} /></span>{' '}
                     <span data-b className="heading-accent block">{planBright}</span>
                   </h2>
                   <p data-b className={`mt-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider ${READOUT_KEY} [@media(max-height:480px)]:hidden`}>{PLAN.hint}</p>
@@ -1199,7 +1199,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
                   {t('services_close_kicker')}
                 </p>
                 <h2 className="heading-section mx-auto max-w-5xl text-midnight">
-                  <span className="block"><Words text={closePlain} /></span>
+                  <span className="block"><Words text={closePlain} /></span>{' '}
                   <span data-b className="heading-accent block">{closeBright}</span>
                 </h2>
                 </div>

@@ -6,12 +6,16 @@ import { apiBase, toPost, type ApiPost, type Post } from './posts';
 export { apiBase };
 export type { Post };
 
-/** Blog posts from the Django API, newest first (shared by every Blog design). */
-export function usePosts() {
-  const [posts, setPosts] = useState<Post[] | null>(null);
+/**
+ * Blog posts from the Django API, newest first (shared by every Blog design). The home page sends them with the page
+ * (`initial`); only if the server couldn't get them are they asked for from the browser.
+ */
+export function usePosts(initial: Post[] | null = null) {
+  const [posts, setPosts] = useState<Post[] | null>(initial);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    if (initial) return;
     const controller = new AbortController();
     fetch(`${apiBase()}/api/blog/posts/`, { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
@@ -22,7 +26,7 @@ export function usePosts() {
         if (err?.name !== 'AbortError') setFailed(true);
       });
     return () => controller.abort();
-  }, []);
+  }, [initial]);
 
   return { posts, failed };
 }

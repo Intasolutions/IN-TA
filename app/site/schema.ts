@@ -92,6 +92,10 @@ export function homeJsonLd(site: Site) {
       organization(site),
       business(site),
       { '@type': 'WebSite', '@id': WEBSITE_ID, url: SITE_URL, name: 'IN-TA Solutions', alternateName: ALSO_KNOWN_AS, publisher: { '@id': ORG_ID }, inLanguage: 'en-IN' },
+      // the questions answered on the page, once there are any (Site settings > Home page questions)
+      ...(site.faq.length
+        ? [{ '@type': 'FAQPage', '@id': `${SITE_URL}/#faq`, url: SITE_URL, mainEntity: site.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }]
+        : []),
     ],
   };
 }

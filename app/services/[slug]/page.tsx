@@ -67,12 +67,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!service) {
         return {
-            title: 'Service Not Found | INTA Solutions',
+            title: 'Service Not Found | IN-TA Solutions',
         };
     }
 
-    const title = service.meta_title || `${service.title} Services | INTA Solutions`;
-    const description = service.meta_description || service.short_description || `Professional ${service.title} services by INTA Solutions.`;
+    const title = service.meta_title || `${service.title} Services | IN-TA Solutions`;
+    const description = service.meta_description || service.short_description || `Professional ${service.title} services by IN-TA Solutions.`;
     return {
         ...pageMetadata({
             title,

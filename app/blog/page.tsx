@@ -29,7 +29,7 @@ export default async function Page() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: 'INTA Solutions Blog',
+    name: 'IN-TA Solutions Blog',
     url: absolute('/blog'),
     publisher: organizationRef(),
     blogPost: posts.map((p) => ({

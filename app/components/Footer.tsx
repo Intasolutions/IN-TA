@@ -325,23 +325,26 @@ export default function Footer() {
 
             <div className="col-span-2 lg:col-span-3">
               <h3 data-ft="item" className={HEAD}>Visit us</h3>
-              <a
-                data-ft="item"
-                href={mapUrl(site)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-start gap-2.5 text-sm text-white/80 leading-relaxed transition-colors duration-300 hover:text-[#9dbbff]"
-              >
-                <Icon name="location_on" className="text-[18px] mt-0.5 text-[#7fa6ff]" />
-                <span>
-                  {street}
-                  <br />
-                  {region}
-                  <span className="ml-1.5 inline-flex align-middle opacity-0 -translate-x-1 transition-[opacity,translate] duration-300 group-hover:opacity-100 group-hover:translate-x-0">
-                    <Icon name="arrow_outward" className="text-[14px]" />
+              {/* the office's postal address, marked as the company's address */}
+              <address className="not-italic">
+                <a
+                  data-ft="item"
+                  href={mapUrl(site)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-start gap-2.5 text-sm text-white/80 leading-relaxed transition-colors duration-300 hover:text-[#9dbbff]"
+                >
+                  <Icon name="location_on" className="text-[18px] mt-0.5 text-[#7fa6ff]" />
+                  <span>
+                    {street}
+                    <br />
+                    {region}
+                    <span className="ml-1.5 inline-flex align-middle opacity-0 -translate-x-1 transition-[opacity,translate] duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                      <Icon name="arrow_outward" className="text-[14px]" />
+                    </span>
                   </span>
-                </span>
-              </a>
+                </a>
+              </address>
               <p data-ft="item" className="mt-2.5 flex items-center gap-2.5 text-sm text-white/60">
                 <Icon name="schedule" className="text-[18px] text-[#7fa6ff]" />
                 {hoursShort(site, true)}

@@ -313,17 +313,19 @@ export default function Hero() {
           </div>
 
           <div className="relative [perspective:1200px]">
+            {/* The title once, as search engines read it ("Smarter software & AI for your business"); its letters are
+                separate only for the entrance, so screen readers get the whole title from the label */}
             <h1
               data-hero="tilt"
+              aria-label={`${titleTop} ${titleBottom}`.trim()}
               className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.04em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
             >
-              <span className="sr-only">{`${titleTop} ${titleBottom}`.trim()}</span>
-              <span aria-hidden="true" className="block overflow-hidden pb-[0.06em]">
+              <span className="block overflow-hidden pb-[0.06em]">
                 {[...titleTop].map((ch, i) => (
                   <span key={i} className="hero-char inline-block">{ch}</span>
                 ))}
-              </span>
-              <span aria-hidden="true" className="block">
+              </span>{' '}
+              <span className="block">
                 {/* Gradient text only paints inside its box, so pad it to include the g/y descenders */}
                 <span
                   data-hero="gradient"

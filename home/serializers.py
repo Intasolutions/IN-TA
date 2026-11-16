@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
+from portfolio.models import Project
 from services.models import Service, Technology
 
-from .models import ClientLogo, HeroMetric, SiteSettings, Testimonial
+from .models import ClientLogo, HeroMetric, HomeQuestion, SiteSettings, Testimonial
 from .site_text import changed_text
 
 
@@ -54,10 +55,12 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
     text = serializers.SerializerMethodField()
     services = serializers.SerializerMethodField()
     stack = serializers.SerializerMethodField()
+    counts = serializers.SerializerMethodField()
+    faq = serializers.SerializerMethodField()
 
     class Meta:
         model = SiteSettings
-        fields = ['phone', 'email', 'address', 'map', 'hours', 'socials', 'metrics', 'text', 'services', 'stack', 'updated_at']
+        fields = ['phone', 'email', 'address', 'map', 'hours', 'socials', 'metrics', 'text', 'services', 'stack', 'counts', 'faq', 'updated_at']
 
     def get_address(self, obj):
         return {k: getattr(obj, k) for k in ('street', 'locality', 'district', 'region', 'postal_code', 'country')}
@@ -82,6 +85,16 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
             {'title': s.title, 'slug': s.slug, 'card': _card(s) if s.home_card else None}
             for s in Service.objects.filter(is_active=True).order_by('order', 'title').only(*fields)
         ]
+
+    def get_counts(self, obj):
+        """Figures the website states as facts (the opening's lines): the projects on the Work page."""
+        return {'projects': Project.objects.filter(is_active=True).count()}
+
+    def get_faq(self, obj):
+        """The home page's questions, in their order (an empty list hides the section)."""
+        questions = HomeQuestion.objects.filter(settings=obj, is_active=True)
+        # (line breaks typed in the admin arrive as \r\n)
+        return [{'q': q.question.strip(), 'a': q.answer.replace('\r\n', '\n').strip()} for q in questions]
 
     def get_stack(self, obj):
         request = self.context.get('request')

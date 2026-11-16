@@ -1,107 +1,145 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { getImageProps } from 'next/image';
 import { LOADER_SEEN } from '../site/loader';
-import { INTRO_FIRST_FRAME } from './introFirstFrame';
+import { openingLines } from '../site/opening';
+import { useSite } from '../site/SiteContext';
 
 /*
- * The opening, on a visit's first page: the brand's logo animation (2 s), on its own background colour, then the
- * page. The files in /public/intro come from the brand video (media/brand/IMG_3137.MOV, kept out of git):
- *   ffmpeg -i IMG_3137.MOV -an -vf "crop=900:500:90:698,scale=720:400:flags=lanczos,format=yuv420p"
- *     -c:v libx264 -preset veryslow -crf 23 -profile:v high -tune animation -movflags +faststart intro.mp4
- *   (the same with -c:v libvpx-vp9 -crf 33 -b:v 0 for intro.webm; intro-still.jpg is its last frame)
- * The crop keeps the area the animation uses; everything outside it is the plain background, BACKDROP.
+ * The opening, on a visit's first page: a short start-up screen. A few lines are typed out (real figures from the admin:
+ * the services, the projects, the office), a line fills, the INTA tile appears in the middle and glides up into its
+ * place in the header as the page clears. 2.8 seconds, all of it CSS animation (globals.css, .boot), so it runs on the
+ * compositor and plays in full even while a slow phone is still starting the page.
  */
-const BACKDROP = '#fefefe';
-/** If the video hasn't started this long after the page arrived, the finished logo shows instead (a very slow connection).
- * Generous, so that every first-time visitor sees the animation: the video is only 28 KB, but a slow phone takes a while
- * to load the page around it. */
-const START_WITHIN_MS = 3500;
-/** How long the finished logo shows when it stands in for the video */
-const STILL_MS = 650;
-/** Whatever happens, the opening never holds the page longer than this after it arrived (a late start, plus the video's
- * 2 seconds; globals.css gives up at the same time if this script never runs) */
-const HARD_STOP_MS = 6000;
-/** The fade at the end (globals.css, .page-loader) */
-const FADE_MS = 450;
+/** The whole opening; globals.css (.boot, --boot-t) runs on the same clock */
+const T_MS = 2800;
+/** At 80% the white starts to clear (globals.css, boot-veil) and the tile is on its way to the header */
+const LEAVING_MS = 2240;
+/** With reduced motion: the lines, still, then the page */
+const STILL_T_MS = 1400;
+const STILL_LEAVING_MS = 1000;
+/** The page's own entrance starts this long after the white starts to clear, when most of it has */
+const READY_AFTER_MS = 250;
+/** The last fade (globals.css, html[data-loader='left'] .boot) */
+const FADE_MS = 250;
 
-// Plain HTML with its own script, so the opening keeps time from the moment the page arrives, without waiting for the
-// site's scripts: on a slow phone those can take many seconds, and the page is there to read long before. The script
-// asks for the video at high priority (a <video> on its own is fetched last, after the page's scripts, and on a phone
-// would miss its moment), starts it (browsers hold back `autoplay` until every image has loaded), shows the finished
-// logo if it can't start in time, and ends the opening by marking <html data-loader="left">, which fades it out in CSS
-// (on the compositor, so a busy phone can't stall it). A visitor who has seen the opening doesn't download any of it.
-// (React wouldn't put `muted` into server-rendered HTML, and browsers only let muted video play on its own.)
-const OPENING_HTML = `<img class="page-loader-still absolute inset-0 h-auto w-full" src="/intro/intro-still.jpg" width="720" height="400" alt="">
-<video class="page-loader-video" muted playsinline preload="none" width="720" height="400" poster="${INTRO_FIRST_FRAME}"
-  style="display:block;width:100%;height:auto;background:${BACKDROP}">
-  <source src="/intro/intro.webm" type="video/webm"><source src="/intro/intro.mp4" type="video/mp4"></video>
-<script>(function(){var v=document.currentScript&&document.currentScript.previousElementSibling,h=document.documentElement;
-if(!v||h.dataset.loader==='seen')return;var box=v.closest('.page-loader'),img=box&&box.querySelector('img'),left=false,still=false;
-v.dataset.asked=String(Math.round(performance.now()));
-function leave(){if(left)return;left=true;try{sessionStorage.setItem('${LOADER_SEEN}','1')}catch(e){}
-h.dataset.loaderLeft=String(Math.round(performance.now()));h.dataset.loader='left';try{window.dispatchEvent(new Event('inta:opening-left'))}catch(e){}}
-function showStill(){if(still||left)return;still=true;try{v.pause()}catch(e){}
-var swap=function(){if(left)return;box.setAttribute('data-still','');setTimeout(leave,${STILL_MS})};
-if(!img||(img.complete&&img.naturalWidth>0))swap();else{img.addEventListener('load',swap,{once:true});img.addEventListener('error',leave,{once:true})}}
-try{setTimeout(leave,${HARD_STOP_MS});
-if(matchMedia('(prefers-reduced-motion: reduce)').matches){showStill();return}
-v.addEventListener('playing',function(){v.dataset.started=String(Math.round(performance.now()))},{once:true});
-v.addEventListener('ended',leave,{once:true});
-setTimeout(function(){if(!v.dataset.started)showStill()},${START_WITHIN_MS});
-var go=function(){if(left||still)return;v.preload='auto';var p=v.play();if(p&&p.catch)p.catch(showStill)};
-var file=v.canPlayType('video/webm; codecs="vp9"')?'/intro/intro.webm':'/intro/intro.mp4';
-if(window.fetch&&window.URL&&URL.createObjectURL)fetch(file,{priority:'high'}).then(function(r){if(!r.ok)throw 0;return r.blob()})
-.then(function(b){if(left||still)return;v.src=URL.createObjectURL(b);go()}).catch(go);else go()}catch(e){leave()}})();</script>`;
-// One object for every render: a new one makes React rewrite the HTML, which would restart the video
-const OPENING = { __html: OPENING_HTML };
+// The official logo, sized for the tile in the middle of the screen (up to 380 px wide)
+const { props: logo } = getImageProps({ src: '/logo/logo-inta.png', alt: '', width: 774, height: 322, sizes: '(max-width: 640px) 260px, 360px' });
+const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
+// Its own script, in the HTML, so the opening keeps time from the moment the page arrives without waiting for the site's
+// scripts. It measures where the header's tile is (the glide's end), ends the opening by marking <html data-loader>
+// ("leaving" as the white clears, "left" at the end, which fades it out in CSS) and remembers for this tab that it has
+// played. In a tab opened in the background it waits until the tab is looked at, so it's never over before it's seen.
+const SCRIPT = `(function(){var s=document.currentScript,b=s&&s.parentNode,h=document.documentElement;
+if(!b||h.dataset.loader==='seen')return;b.dataset.asked='1';
+var still=false;try{still=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+var T=still?${STILL_T_MS}:${T_MS},L=still?${STILL_LEAVING_MS}:${LEAVING_MS},going=false,gone=false,began=false;
+function now(){return String(Math.round(performance.now()))}
+function tell(n){try{window.dispatchEvent(new Event(n))}catch(e){}}
+function leave(){if(going)return;going=true;try{sessionStorage.setItem('${LOADER_SEEN}','1')}catch(e){}
+h.dataset.loaderLeaving=now();if(h.dataset.loader!=='left')h.dataset.loader='leaving';tell('inta:opening-left')}
+function end(){if(gone)return;leave();gone=true;h.dataset.loaderLeft=now();h.dataset.loader='left';tell('inta:opening-done')}
+function place(){try{var t=document.querySelector('[data-logo-tile]'),c=b.querySelector('.boot-tile');if(!c)return;
+var W=b.clientWidth,H=b.clientHeight,r=t&&t.getBoundingClientRect(),ok=!!r&&r.width>0&&r.bottom>4&&r.top<H,st=b.style;
+st.setProperty('--gx',ok?(r.left+r.width/2-W/2).toFixed(1)+'px':'0px');st.setProperty('--gy',ok?(r.top+r.height/2-H/2).toFixed(1)+'px':'0px');
+st.setProperty('--sx',ok?(r.width/c.offsetWidth).toFixed(4):'1');st.setProperty('--sy',ok?(r.height/c.offsetHeight).toFixed(4):'1')}catch(e){}}
+function begin(){if(began)return;began=true;setTimeout(place,L-140);setTimeout(leave,L);setTimeout(end,T)}
+function start(){b.removeAttribute('data-wait');place();if(still){begin();return}
+b.addEventListener('animationstart',begin,{once:true});setTimeout(begin,400)}
+try{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',place,{once:true});
+if(document.visibilityState==='hidden'){b.setAttribute('data-wait','');var v=function(){if(document.visibilityState==='hidden')return;
+document.removeEventListener('visibilitychange',v);start()};document.addEventListener('visibilitychange',v)}else start()}catch(e){end()}})();`;
 
 /**
- * The opening runs itself (above); this tells the site when it's over, so the page's entrance plays as it clears.
- * If the opening ended before the site's scripts arrived, the visitor has been reading the page already and its
- * entrance is skipped (see context/usePlayIntro). Later pages of the visit don't show it at all (see site/loader.ts).
+ * The opening runs itself (above); this tells the site when the page's entrance may play (as the white clears) and
+ * removes the opening once it has faded. If the opening ended before the site's scripts arrived, the visitor has been
+ * reading the page already and its entrance is skipped (see context/usePlayIntro). Later pages of the visit don't show
+ * it at all (see site/loader.ts); a page that takes long to arrive shows the short version (components/NavProgress).
  */
-export default function PageLoader({ onDone }: { onDone: () => void }) {
+export default function PageLoader({ onReady, onGone }: { onReady: () => void; onGone: () => void }) {
+  const site = useSite();
   const box = useRef<HTMLDivElement>(null);
-  const done = useRef(onDone);
+  const ready = useRef(onReady);
+  const gone = useRef(onGone);
   useEffect(() => {
-    done.current = onDone;
-  }, [onDone]);
+    ready.current = onReady;
+    gone.current = onGone;
+  }, [onReady, onGone]);
+
+  // One object per site: a new string would make React rewrite the HTML and restart the opening
+  const opening = useMemo(() => {
+    const lines = openingLines(site);
+    const gap = Math.min(0.29, 1.15 / Math.max(1, lines.length - 1));
+    const cols = Math.max(12, ...lines.map((l) => l.chars)) + 1;
+    const typed = lines
+      .map((l, i) => `<span class="boot-ln" style="--n:${l.chars};--d:${(0.05 + i * gap).toFixed(2)}s">${l.html}</span>`)
+      .join('');
+    return {
+      __html:
+        `<div class="boot" style="--cols:${cols};--type:${Math.min(0.28, gap).toFixed(2)}s"><div class="boot-veil"></div>` +
+        `<div class="boot-term">${typed}<span class="boot-bar"></span></div>` +
+        `<div class="boot-tile"><img src="${attr(logo.src)}" srcset="${attr(logo.srcSet ?? '')}" sizes="${attr(logo.sizes ?? '')}" width="774" height="322" alt="" decoding="async"></div>` +
+        `<script>${SCRIPT}</script></div>`,
+    };
+  }, [site]);
 
   useEffect(() => {
     const html = document.documentElement;
-    let timer = 0;
-    // once the fade has finished, so the opening isn't cut off halfway
-    const afterFade = () => {
-      const leftAt = Number(html.dataset.loaderLeft) || performance.now();
-      timer = window.setTimeout(() => done.current(), Math.max(0, leftAt + FADE_MS - performance.now()));
+    const timers: number[] = [];
+    const at = (fn: () => void, time: number) => timers.push(window.setTimeout(fn, Math.max(0, time - performance.now())));
+    let readied = false;
+    let removed = false;
+    const play = () => {
+      if (readied) return;
+      readied = true;
+      ready.current();
     };
+    const remove = () => {
+      if (removed) return;
+      removed = true;
+      gone.current();
+    };
+    const leaving = () => at(play, (Number(html.dataset.loaderLeaving) || performance.now()) + READY_AFTER_MS);
+    const left = () => {
+      leaving();
+      at(remove, (Number(html.dataset.loaderLeft) || performance.now()) + FADE_MS);
+    };
+
     if (html.dataset.loader === 'seen') {
-      const frame = requestAnimationFrame(() => done.current());
+      const frame = requestAnimationFrame(() => {
+        play();
+        remove();
+      });
       return () => cancelAnimationFrame(frame);
     }
-    if (html.dataset.loader === 'left') afterFade();
-    else if (!box.current?.querySelector('video')?.dataset.asked) {
-      // its script didn't run (it always should): end the opening here rather than leave it over the page
-      try {
-        sessionStorage.setItem(LOADER_SEEN, '1');
-      } catch {
-        // private browsing: the opening simply plays again next time
-      }
-      html.dataset.loaderLeft = String(Math.round(performance.now()));
-      html.dataset.loader = 'left';
-      afterFade();
-    } else window.addEventListener('inta:opening-left', afterFade, { once: true });
+    window.addEventListener('inta:opening-left', leaving);
+    window.addEventListener('inta:opening-done', left);
+    if (html.dataset.loader === 'left') left();
+    else if (html.dataset.loader === 'leaving') leaving();
+    else if (!box.current?.querySelector<HTMLElement>('.boot')?.dataset.asked) {
+      // its script didn't run (it always should): the opening plays anyway, in CSS, and ends here on time
+      const mark = (state: 'leaving' | 'left') => {
+        try {
+          sessionStorage.setItem(LOADER_SEEN, '1');
+        } catch {
+          // private browsing: the opening simply plays again next time
+        }
+        html.dataset[state === 'left' ? 'loaderLeft' : 'loaderLeaving'] = String(Math.round(performance.now()));
+        html.dataset.loader = state;
+        if (state === 'left') left();
+        else leaving();
+      };
+      at(() => mark('leaving'), LEAVING_MS);
+      at(() => mark('left'), T_MS);
+    }
     return () => {
-      window.removeEventListener('inta:opening-left', afterFade);
-      window.clearTimeout(timer);
+      window.removeEventListener('inta:opening-left', leaving);
+      window.removeEventListener('inta:opening-done', left);
+      timers.forEach((t) => window.clearTimeout(t));
     };
   }, []);
 
-  return (
-    <div ref={box} aria-hidden="true" className="page-loader fixed inset-0 z-[99999] flex items-center justify-center" style={{ background: BACKDROP }} suppressHydrationWarning>
-      {/* the logo animation, and its last frame to stand in when it can't play */}
-      <div className="relative w-[min(560px,86vw)]" dangerouslySetInnerHTML={OPENING} suppressHydrationWarning />
-    </div>
-  );
+  return <div ref={box} aria-hidden="true" className="page-loader fixed inset-0 z-[99999]" dangerouslySetInnerHTML={opening} suppressHydrationWarning />;
 }

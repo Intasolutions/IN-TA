@@ -4,11 +4,13 @@ import Capabilities from '../components/Capabilities';
 import TestimonialDeck from '../components/testimonials/TestimonialDeck';
 import BlogSection from '../components/blog/BlogSection';
 import Work from '../components/Work';
+import Questions from '../components/Questions';
 import { getSite } from '../site/server';
+import { getHomeLists } from '../site/homeLists';
 import { homeJsonLd, jsonLdHtml } from '../site/schema';
 
 const Home = async () => {
-  const site = await getSite();
+  const [site, lists] = await Promise.all([getSite(), getHomeLists()]);
   return (
     <main className="bg-canvas text-midnight">
       <HeroSlider />
@@ -18,11 +20,13 @@ const Home = async () => {
       <Philosophy />
       <Capabilities />
 
-      <Work />
+      <Work initial={lists.projects} />
 
-      <TestimonialDeck />
+      <TestimonialDeck initial={lists.testimonials} />
 
-      <BlogSection />
+      <Questions />
+
+      <BlogSection initial={lists.posts} />
     </main>
   );
 };
