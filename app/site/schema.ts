@@ -92,12 +92,27 @@ export function homeJsonLd(site: Site) {
       organization(site),
       business(site),
       { '@type': 'WebSite', '@id': WEBSITE_ID, url: SITE_URL, name: 'IN-TA Solutions', alternateName: ALSO_KNOWN_AS, publisher: { '@id': ORG_ID }, inLanguage: 'en-IN' },
-      // the questions answered on the page, once there are any (Site settings > Home page questions)
-      ...(site.faq.length
-        ? [{ '@type': 'FAQPage', '@id': `${SITE_URL}/#faq`, url: SITE_URL, mainEntity: site.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }]
-        : []),
+      ...faqGraph(site.questions.home, '/'),
     ],
   };
+}
+
+/**
+ * The questions answered on a page, for search engines: only those whose main page this is, since Google asks that a
+ * question shown in several places is marked up in one. None: nothing (the page may still show questions marked up
+ * elsewhere).
+ */
+function faqGraph(items: { q: string; a: string; main: boolean }[], path: string) {
+  const here = items.filter((f) => f.main);
+  if (!here.length) return [];
+  const url = absolute(path);
+  return [{ '@type': 'FAQPage', '@id': `${url}#faq`, url, inLanguage: 'en-IN', mainEntity: here.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }];
+}
+
+/** A page's questions as their own JSON-LD (null when the page marks none up) */
+export function faqJsonLd(items: { q: string; a: string; main: boolean }[], path: string) {
+  const graph = faqGraph(items, path);
+  return graph.length ? { '@context': 'https://schema.org', ...graph[0] } : null;
 }
 
 /** The contact page: the same office, under the same @id as on the home page */

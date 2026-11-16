@@ -1,9 +1,10 @@
+from django.db.models import Prefetch
 from rest_framework import serializers
 
 from portfolio.models import Project
 from services.models import Service, Technology
 
-from .models import ClientLogo, HeroMetric, HomeQuestion, SiteSettings, Testimonial
+from .models import ClientLogo, HeroMetric, Question, SiteSettings, Testimonial
 from .site_text import changed_text
 
 
@@ -56,11 +57,12 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
     services = serializers.SerializerMethodField()
     stack = serializers.SerializerMethodField()
     counts = serializers.SerializerMethodField()
+    questions = serializers.SerializerMethodField()
     faq = serializers.SerializerMethodField()
 
     class Meta:
         model = SiteSettings
-        fields = ['phone', 'email', 'address', 'map', 'hours', 'socials', 'metrics', 'text', 'services', 'stack', 'counts', 'faq', 'updated_at']
+        fields = ['phone', 'email', 'address', 'map', 'hours', 'socials', 'metrics', 'text', 'services', 'stack', 'counts', 'questions', 'faq', 'updated_at']
 
     def get_address(self, obj):
         return {k: getattr(obj, k) for k in ('street', 'locality', 'district', 'region', 'postal_code', 'country')}
@@ -90,11 +92,27 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
         """Figures the website states as facts (the opening's lines): the projects on the Work page."""
         return {'projects': Project.objects.filter(is_active=True).count()}
 
+    def _questions(self):
+        """Each page's questions (Questions & answers in the admin), the first few by order, worked out once per request.
+        `main`: search engines are told about the question on that page (each question is marked up on one page only)."""
+        if not hasattr(self, '_by_page'):
+            active = Service.objects.filter(is_active=True).order_by('order', 'title')
+            questions = Question.objects.filter(is_active=True).prefetch_related(Prefetch('services', queryset=active))
+            self._by_page = {page: [] for page, _ in Question.PAGES}
+            for q in questions:
+                main = q.main_key(q.services.all())
+                for page in q.page_list:
+                    if len(self._by_page[page]) < Question.LIMITS[page]:
+                        # (line breaks typed in the admin arrive as \r\n)
+                        self._by_page[page].append({'q': q.question.strip(), 'a': q.answer.replace('\r\n', '\n').strip(), 'main': main == page})
+        return self._by_page
+
+    def get_questions(self, obj):
+        return self._questions()
+
     def get_faq(self, obj):
-        """The home page's questions, in their order (an empty list hides the section)."""
-        questions = HomeQuestion.objects.filter(settings=obj, is_active=True)
-        # (line breaks typed in the admin arrive as \r\n)
-        return [{'q': q.question.strip(), 'a': q.answer.replace('\r\n', '\n').strip()} for q in questions]
+        """The home page's questions as the website before the shared questions read them (kept while it is replaced)."""
+        return [{'q': q['q'], 'a': q['a']} for q in self._questions()['home']]
 
     def get_stack(self, obj):
         request = self.context.get('request')

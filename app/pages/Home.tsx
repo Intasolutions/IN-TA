@@ -4,7 +4,7 @@ import Capabilities from '../components/Capabilities';
 import TestimonialDeck from '../components/testimonials/TestimonialDeck';
 import BlogSection from '../components/blog/BlogSection';
 import Work from '../components/Work';
-import Questions from '../components/Questions';
+import FaqSection from '../components/FaqSection';
 import { getSite } from '../site/server';
 import { getHomeLists } from '../site/homeLists';
 import { homeJsonLd, jsonLdHtml } from '../site/schema';
@@ -24,7 +24,7 @@ const Home = async () => {
 
       <TestimonialDeck initial={lists.testimonials} />
 
-      <Questions />
+      <FaqSection page="home" />
 
       <BlogSection initial={lists.posts} />
     </main>

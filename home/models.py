@@ -103,8 +103,8 @@ class HeroMetric(models.Model):
 
 
 class HomeQuestion(models.Model):
-    """A question and its answer for the home page's FAQ. The section shows only once there is one; search engines are told
-    about them too (FAQPage)."""
+    """Before the shared questions (Question): kept only until its table is dropped, once the site reads Question. Not used
+    by the website or the admin any more; its rows were copied into Question (home 0005)."""
 
     settings = models.ForeignKey(SiteSettings, on_delete=models.CASCADE, related_name='questions')
     question = models.CharField(max_length=200, help_text="As a visitor would ask it, e.g. How long does a website take?")
@@ -118,3 +118,58 @@ class HomeQuestion(models.Model):
 
     def __str__(self):
         return self.question
+
+
+class Question(models.Model):
+    """A question and its answer, shown on the pages it is given to (Questions & answers in the admin). A page shows no
+    question section at all until it has one. One question can be on several pages; search engines are told about it on
+    one of them only (its main page), as Google asks for answers that appear in more than one place."""
+
+    PAGES = [('home', 'Home'), ('services', 'Services'), ('about', 'About'), ('contact', 'Contact')]
+    SERVICE_PAGE = 'service'
+    # How many each page shows (the first ones, by order): enough to answer, few enough not to bury the page
+    LIMITS = {'home': 8, 'services': 6, 'about': 5, 'contact': 5, SERVICE_PAGE: 5}
+    # Where a question is told to search engines when its main page is left on automatic: the most specific page first
+    MAIN_ORDER = (SERVICE_PAGE, 'contact', 'about', 'services', 'home')
+
+    question = models.CharField(
+        max_length=200,
+        help_text='As people would type it into Google, in under about 12 words, e.g. "Can you build a booking website for a homestay?"',
+    )
+    answer = models.TextField(
+        max_length=1200,
+        help_text='Answer in the first sentence ("Yes. ..."), then add the useful detail: 40 to 80 words. Name the service and the place where it '
+        'fits naturally, and only state what is true. A blank line starts a new paragraph.',
+    )
+    pages = models.CharField(max_length=60, blank=True, help_text='The pages it is shown on.')
+    services = models.ManyToManyField('services.Service', blank=True, related_name='questions', help_text="Also shown on these services' pages.")
+    main_page = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text='Where search engines are told about it, if it is on more than one page. Automatic picks the most specific: '
+        'a service page, then Contact, About, Services, Home.',
+    )
+    order = models.IntegerField(default=0, help_text='Lower numbers appear first.')
+    is_active = models.BooleanField(default=True, help_text='Untick to hide it everywhere without deleting it.')
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Question'
+        verbose_name_plural = 'Questions & answers'
+
+    def __str__(self):
+        return self.question
+
+    @property
+    def page_list(self):
+        return [p for p in self.pages.split(',') if p in dict(self.PAGES)]
+
+    def main_key(self, services=None):
+        """'home', 'services', 'about', 'contact' or 'service:<id>': the one page where search engines are told about it.
+        `services` are its active services in their order (given when they are already loaded)."""
+        services = list(services if services is not None else self.services.filter(is_active=True).order_by('order', 'title'))
+        shown = {p: True for p in self.page_list}
+        if services:
+            shown[self.SERVICE_PAGE] = True
+        choice = self.main_page if shown.get(self.main_page) else next((p for p in self.MAIN_ORDER if shown.get(p)), '')
+        return f'{self.SERVICE_PAGE}:{services[0].id}' if choice == self.SERVICE_PAGE else choice

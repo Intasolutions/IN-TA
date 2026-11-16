@@ -1,10 +1,12 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import WEEKDAYS, ClientLogo, HeroMetric, HomeQuestion, SiteSettings, Testimonial
+from services.models import Service
+
+from .models import WEEKDAYS, ClientLogo, HeroMetric, Question, SiteSettings, Testimonial
 from .site_text import GROUP_NOTES, SITE_TEXT, TEXT_KEYS
 
 
@@ -40,11 +42,90 @@ class HeroMetricInline(admin.TabularInline):
     verbose_name_plural = 'Home page figures (up to four, along the bottom of the opening)'
 
 
-class HomeQuestionInline(admin.StackedInline):
-    model = HomeQuestion
-    extra = 0
-    fields = ('question', 'answer', 'order', 'is_active')
-    verbose_name_plural = 'Home page questions (FAQ: the section shows once there is at least one)'
+class QuestionForm(forms.ModelForm):
+    """The pages as tick boxes (kept as a comma list), the services as tick boxes, and the main page as a choice."""
+
+    pages = forms.MultipleChoiceField(choices=Question.PAGES, widget=forms.CheckboxSelectMultiple, required=False, label='Show on')
+    main_page = forms.ChoiceField(
+        choices=[('', 'Automatic (recommended)'), *Question.PAGES, (Question.SERVICE_PAGE, 'Its first service page')],
+        required=False,
+        label='Main page for search engines',
+        help_text=Question._meta.get_field('main_page').help_text,
+    )
+
+    class Meta:
+        model = Question
+        fields = ('question', 'answer', 'pages', 'services', 'main_page', 'order', 'is_active')
+        widgets = {'services': forms.CheckboxSelectMultiple}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.initial['pages'] = self.instance.page_list
+        self.fields['services'].queryset = Service.objects.order_by('order', 'title')
+        self.fields['services'].label = 'Also show on service pages'
+
+    def clean(self):
+        data = super().clean()
+        pages, services, main = data.get('pages') or [], data.get('services'), data.get('main_page')
+        if data.get('is_active') and not pages and not services:
+            raise forms.ValidationError('Choose at least one page to show it on (or untick Active to keep it as a draft).')
+        if main == Question.SERVICE_PAGE and not services:
+            self.add_error('main_page', 'Choose a service page above first, or leave this on Automatic.')
+        elif main and main != Question.SERVICE_PAGE and main not in pages:
+            self.add_error('main_page', 'It has to be one of the pages it is shown on, or Automatic.')
+        return data
+
+    def clean_pages(self):
+        return ','.join(p for p, _ in Question.PAGES if p in (self.cleaned_data.get('pages') or []))
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    form = QuestionForm
+    list_display = ('question', 'shown_on', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+    list_filter = ('is_active', 'services')
+    search_fields = ('question', 'answer')
+    fieldsets = (
+        (None, {
+            'description': 'Questions with short answers, on the pages where they help. A page shows its first few by order '
+            '(Home 8, Services 6, About and Contact 5, a service page 5) and has no question section until it has one. '
+            'A question can be on several pages; search engines are told about it on one of them.',
+            'fields': ('question', 'answer'),
+        }),
+        ('Where it shows', {'fields': ('pages', 'services', 'main_page')}),
+        (None, {'fields': ('order', 'is_active')}),
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('services')
+
+    @admin.display(description='Shown on')
+    def shown_on(self, obj):
+        names = dict(Question.PAGES)
+        return ', '.join([names[p] for p in obj.page_list] + [s.title for s in obj.services.all()]) or '-'
+
+    def changelist_view(self, request, extra_context=None):
+        """Says which pages have more questions than they show, and which questions appear twice on one page."""
+        if request.method != 'GET':
+            return super().changelist_view(request, extra_context)
+        live = list(Question.objects.filter(is_active=True).prefetch_related('services'))
+        names = dict(Question.PAGES)
+        on_page = {}
+        for q in live:
+            for key in [names[p] for p in q.page_list] + [f'the {s.title} page' for s in q.services.all()]:
+                on_page.setdefault(key, []).append(q)
+        for page, questions in on_page.items():
+            limit = Question.LIMITS['service' if page.startswith('the ') else next(k for k, v in names.items() if v == page)]
+            if len(questions) > limit:
+                messages.warning(request, f'{page} has {len(questions)} questions and shows the first {limit} by order. Untick or reorder the rest.')
+            seen = set()
+            for q in questions:
+                text = ' '.join(q.question.lower().split()).rstrip('?')
+                if text in seen:
+                    messages.warning(request, f'"{q.question}" is on {page} twice.')
+                seen.add(text)
+        return super().changelist_view(request, extra_context)
 
 
 class SiteSettingsForm(forms.ModelForm):
@@ -103,7 +184,7 @@ def site_settings_form():
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     form = site_settings_form()
-    inlines = (HeroMetricInline, HomeQuestionInline)
+    inlines = (HeroMetricInline,)
     readonly_fields = ('updated_at',)
     fieldsets = (
         ('Contact', {

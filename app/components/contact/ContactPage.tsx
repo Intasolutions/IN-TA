@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -111,7 +111,7 @@ function Clocks() {
   );
 }
 
-export default function ContactPage() {
+export default function ContactPage({ children }: { children?: ReactNode }) {
   const site = useSite();
   const t = useText();
   const socials = useSocials();
@@ -652,6 +652,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      {children}
     </main>
   );
 }

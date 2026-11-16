@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from portfolio.models import Project
-from .models import Service, ServiceCapability, ServiceFAQ, ServiceImage, Feature, Technology, Benefit
+from .models import Service, ServiceCapability, ServiceImage, Feature, Technology, Benefit
 
 
 def absolute_url(serializer, image):
@@ -64,12 +64,6 @@ class ServiceCapabilitySerializer(serializers.ModelSerializer):
         return lines_of(obj.points)
 
 
-class ServiceFAQSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ServiceFAQ
-        fields = ("id", "question", "answer")
-
-
 class ServiceProjectSerializer(serializers.ModelSerializer):
     hero = serializers.SerializerMethodField()
     tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
@@ -89,7 +83,7 @@ class ServiceSerializer(serializers.ModelSerializer):
     capabilities = ServiceCapabilitySerializer(many=True, read_only=True)
     ideal_for = serializers.SerializerMethodField()
     gallery = ServiceImageSerializer(many=True, read_only=True)
-    faqs = ServiceFAQSerializer(many=True, read_only=True)
+    faqs = serializers.SerializerMethodField()
     projects = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     secondary_image = serializers.SerializerMethodField()
@@ -140,6 +134,23 @@ class ServiceSerializer(serializers.ModelSerializer):
     def get_projects(self, obj):
         live = [p for p in obj.projects.all() if p.is_active]
         return ServiceProjectSerializer(live, many=True, context=self.context).data
+
+    def get_faqs(self, obj):
+        """The questions given to this service's page (Questions & answers in the admin), the first few by order. `main`:
+        search engines are told about the question on this page (each question is marked up on one page only)."""
+        from home.models import Question
+
+        questions = [q for q in obj.questions.all() if q.is_active][: Question.LIMITS[Question.SERVICE_PAGE]]
+        here = f'{Question.SERVICE_PAGE}:{obj.id}'
+        return [
+            {
+                'id': q.id,
+                'question': q.question.strip(),
+                'answer': q.answer.replace('\r\n', '\n').strip(),
+                'main': q.main_key([sv for sv in q.services.all() if sv.is_active]) == here,
+            }
+            for q in questions
+        ]
 
     def get_image(self, obj):
         if obj.image:

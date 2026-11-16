@@ -2,7 +2,10 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SystemMap, { type MapService } from '../components/about/SystemMap';
 import { CLIENTS_PATH, toClients, type MapClient } from '../components/about/clients';
+import FaqSection from '../components/FaqSection';
 import { API_TAG } from '../site/cache';
+import { faqJsonLd, jsonLdHtml } from '../site/schema';
+import { getSite } from '../site/server';
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -33,12 +36,15 @@ async function getClients(): Promise<MapClient[]> {
 }
 
 export default async function Page() {
-  const [services, clients] = await Promise.all([getServices(), getClients()]);
+  const [services, clients, site] = await Promise.all([getServices(), getClients(), getSite()]);
+  const faq = faqJsonLd(site.questions.about, '/about');
   return (
     <>
+      {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(faq) }} />}
       <Header />
       <main>
         <SystemMap services={services} clients={clients} />
+        <FaqSection page="about" tone="dark" className="relative bg-midnight" />
       </main>
       <Footer />
     </>

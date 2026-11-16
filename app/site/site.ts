@@ -8,6 +8,11 @@ export type SiteService = { title: string; slug: string; card: HomeCard | null }
 export type StackGroup = 'ai' | 'frontend' | 'design' | 'backend' | 'cloud';
 export type StackTool = { name: string; slug: string; logo: string; group: StackGroup; use: string };
 export type Metric = { label: string; value: string; unit: string; note: string };
+/** The pages that can have questions (besides the services' own pages, which get theirs with the service) */
+export const FAQ_PAGES = ['home', 'services', 'about', 'contact'] as const;
+export type FaqPage = (typeof FAQ_PAGES)[number];
+/** A question, its answer, and whether search engines are told about it on this page (each one on a single page) */
+export type Faq = { q: string; a: string; main: boolean };
 
 export type Site = {
   phone: string;
@@ -23,8 +28,8 @@ export type Site = {
   stack: StackTool[];
   /** Figures counted by the API: the projects on the Work page (null from an older API, so nothing states a guess) */
   counts: { projects: number | null };
-  /** The home page's questions (Site settings > Home page questions); none hides the section */
-  faq: { q: string; a: string }[];
+  /** Each page's questions (Questions & answers in the admin); a page without any has no question section */
+  questions: Record<FaqPage, Faq[]>;
   /** When Site settings were last saved (null from an older API) */
   updatedAt: string | null;
 };
@@ -149,7 +154,7 @@ export const DEFAULT_SITE: Site = {
     ['Docker', 'docker', 'cloud', 'Reproducible builds and deployments'],
   ].map(([name, slug, group, use]) => ({ name, slug, logo: LOGOS[slug], group: group as StackGroup, use })),
   counts: { projects: null },
-  faq: [],
+  questions: { home: [], services: [], about: [], contact: [] },
   updatedAt: null,
 };
 
@@ -273,6 +278,18 @@ const isTime = (v: unknown): v is string => typeof v === 'string' && /^\d{1,2}:\
 // What the API sends, before it's checked field by field below
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
+const faqOf = (f: Json, main: boolean): Faq | null =>
+  filled(f?.q, '') && filled(f?.a, '') ? { q: f.q.trim(), a: f.a.trim(), main: typeof f.main === 'boolean' ? f.main : main } : null;
+
+/** Each page's questions. A backend from before the shared questions sends only the home page's, as `faq` */
+function questionsOf(a: Json): Record<FaqPage, Faq[]> {
+  const list = (items: unknown, main: boolean) => (Array.isArray(items) ? items.map((f) => faqOf(f, main)).filter((f): f is Faq => !!f) : []);
+  if (a.questions && typeof a.questions === 'object') {
+    return Object.fromEntries(FAQ_PAGES.map((page) => [page, list(a.questions[page], false)])) as Record<FaqPage, Faq[]>;
+  }
+  return { home: list(a.faq, true), services: [], about: [], contact: [] };
+}
+
 /** /api/home/site/ made safe: anything missing or malformed keeps what the site showed before */
 export function toSite(api: unknown, apiBase = ''): Site {
   const d = DEFAULT_SITE;
@@ -336,7 +353,7 @@ export function toSite(api: unknown, apiBase = ''): Site {
     services: services.length ? services : d.services,
     stack: stack.length ? stack : d.stack,
     counts: { projects: Number.isInteger(a.counts?.projects) && a.counts.projects >= 0 ? a.counts.projects : null },
-    faq: Array.isArray(a.faq) ? a.faq.filter((f: Json) => filled(f?.q, '') && filled(f?.a, '')).map((f: Json) => ({ q: f.q.trim(), a: f.a.trim() })) : [],
+    questions: questionsOf(a),
     updatedAt: filled(a.updated_at, '') || null,
   };
 }

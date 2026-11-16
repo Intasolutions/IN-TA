@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin, messages
 from django.utils.html import format_html
-from .models import Feature, Service, ServiceCapability, ServiceFAQ, ServiceImage, Technology, Benefit
+from .models import Feature, Service, ServiceCapability, ServiceImage, Technology, Benefit
 from .page_text import PAGE_SECTIONS, PAGE_TEXT, TEXT_KEYS
 
 # The narrowest image that still looks sharp where it is used
@@ -91,12 +91,6 @@ class ServiceCapabilityInline(admin.StackedInline):
         return thumbnail(obj.image)
 
 
-class ServiceFAQInline(admin.StackedInline):
-    model = ServiceFAQ
-    extra = 1
-    fields = ("question", "answer", "order")
-
-
 def interest_choices():
     """The enquiry form's options: the services the website lists, as it lists them."""
     titles = Service.objects.filter(is_active=True).order_by("order", "title").values_list("title", flat=True)
@@ -175,7 +169,7 @@ class ServiceAdmin(admin.ModelAdmin):
     filter_horizontal = ("features", "technologies", "benefits", "projects")
     ordering = ("order", "title")
     readonly_fields = ("image_preview", "secondary_image_preview")
-    inlines = (ServiceCapabilityInline, ServiceImageInline, ServiceFAQInline)
+    inlines = (ServiceCapabilityInline, ServiceImageInline)
 
     fieldsets = (
         ("Main Content", {

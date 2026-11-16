@@ -123,11 +123,12 @@ export default async function Page({ params }: Props) {
             areaServed: [{ '@type': 'State', name: 'Kerala' }, { '@type': 'Country', name: 'India' }],
             ...(service.image ? { image: service.image } : {}),
         },
-        ...(service.faqs.length
+        // only the questions whose main page this is: a question on several pages is marked up on one of them
+        ...(service.faqs.some((f) => f.main)
             ? [{
                 '@context': 'https://schema.org',
                 '@type': 'FAQPage',
-                mainEntity: service.faqs.map((f) => ({
+                mainEntity: service.faqs.filter((f) => f.main).map((f) => ({
                     '@type': 'Question',
                     name: f.question,
                     acceptedAnswer: { '@type': 'Answer', text: f.answer },

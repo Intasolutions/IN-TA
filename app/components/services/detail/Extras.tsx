@@ -114,9 +114,10 @@ export function Questions({ faqs, windowTitle }: { faqs: DetailFaq[]; windowTitl
             <li key={f.id}>
               <h3>
                 <button type="button" aria-expanded={isOpen} onClick={() => setOpen(isOpen ? -1 : i)} className="flex w-full items-start gap-3 px-4 py-3.5 text-left focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#9dbbff] sm:px-5 sm:py-4">
-                  <span aria-hidden="true" className="mt-0.5 font-mono text-sm font-bold text-[#9dbbff] sm:text-base">&gt;</span>
+                  {/* (the prompt and the icon are drawn, not text: the heading reads as the question alone) */}
+                  <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="#9dbbff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="mt-[0.45em] shrink-0 sm:mt-[0.55em]"><path d="M4 3l6 5-6 5" /></svg>
                   <span className="heading-sub flex-1 text-white">{f.question}</span>
-                  <Icon name="add" className={`mt-0.5 shrink-0 text-[20px] text-[#9dbbff] transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`} />
+                  <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="#9dbbff" strokeWidth="1.8" strokeLinecap="round" className={`mt-[0.4em] shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}><path d="M8 2v12M2 8h12" /></svg>
                 </button>
               </h3>
               <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>

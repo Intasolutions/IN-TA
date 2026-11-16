@@ -231,7 +231,8 @@ class ServiceCapability(models.Model):
 
 
 class ServiceFAQ(models.Model):
-    """A common question on a service's page."""
+    """Before the shared questions (home.Question): kept only until its table is dropped. Not used by the website or the
+    admin any more; its rows were copied into home.Question (home 0005)."""
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="faqs")
     question = models.CharField(max_length=255)
     answer = models.TextField()

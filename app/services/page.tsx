@@ -2,9 +2,10 @@ import { Metadata } from 'next';
 import { getSite } from '../site/server';
 import { textOf } from '../site/site';
 import { absolute, pageMetadata } from '../site/seo';
-import { organizationRef } from '../site/schema';
+import { faqJsonLd, jsonLdHtml, organizationRef } from '../site/schema';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import FaqSection from '../components/FaqSection';
 import ServiceChip, { type ChipService } from '../components/services/ServiceChip';
 import { partOf } from '../components/services/floorplan';
 import { API_TAG } from '../site/cache';
@@ -50,7 +51,8 @@ async function getServices(): Promise<ChipService[]> {
 }
 
 export default async function Page() {
-  const services = await getServices();
+  const [services, site] = await Promise.all([getServices(), getSite()]);
+  const faq = faqJsonLd(site.questions.services, '/services');
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -70,8 +72,13 @@ export default async function Page() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(faq) }} />}
       <Header />
-      <ServiceChip services={services} />
+      <main>
+        <ServiceChip services={services} />
+        {/* (over the board's fixed canvas, so it needs its own place in the stacking order and its own white) */}
+        <FaqSection page="services" className="relative bg-white" />
+      </main>
       <Footer />
     </>
   );

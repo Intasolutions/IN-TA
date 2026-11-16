@@ -3,14 +3,14 @@
 import { API_TAG } from '../site/cache';
 import { getSite } from '../site/server';
 import { absolute, SITE_NAME } from '../site/seo';
-import { addressLines, textOf } from '../site/site';
+import { addressLines, FAQ_PAGES, textOf } from '../site/site';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 // Rebuilt hourly like the sitemap, and at once when something is saved in the admin (the API tag)
 export const revalidate = 3600;
 
-type ApiService = { slug: string; title: string; short_description?: string | null; is_active?: boolean };
+type ApiService = { slug: string; title: string; short_description?: string | null; is_active?: boolean; faqs?: { question: string; answer: string }[] };
 type ApiPost = { id: number; title: string; meta_description?: string | null };
 
 async function list<T>(path: string): Promise<T[]> {
@@ -33,6 +33,10 @@ export async function GET() {
   const [site, services, posts] = await Promise.all([getSite(), list<ApiService>('/api/services/'), list<ApiPost>('/api/blog/posts/')]);
   const [street, region] = addressLines(site);
   const live = services.filter((s) => s.is_active !== false && s.slug && s.title);
+  // every question once, wherever it is shown (Questions & answers in the admin)
+  const seen = new Set<string>();
+  const questions = [...FAQ_PAGES.flatMap((page) => site.questions[page]), ...live.flatMap((s) => (s.faqs ?? []).map((f) => ({ q: f.question, a: f.answer })))]
+    .filter((f) => f.q && f.a && !seen.has(f.q.toLowerCase()) && seen.add(f.q.toLowerCase()));
 
   const text = [
     `# ${SITE_NAME}`,
@@ -51,6 +55,7 @@ export async function GET() {
     item('Contact', '/contact', textOf(site, 'seo_contact_description')),
     ...(live.length ? ['', '## Services', '', ...live.map((s) => item(s.title, `/services/${s.slug}`, s.short_description))] : []),
     ...(posts.length ? ['', '## Articles', '', ...posts.filter((p) => p.title).map((p) => item(p.title, `/blog/${p.id}`, p.meta_description))] : []),
+    ...(questions.length ? ['', '## Questions and answers', '', ...questions.map((f) => `- **${plain(f.q)}** ${plain(f.a)}`)] : []),
     '',
     '## Optional',
     '',

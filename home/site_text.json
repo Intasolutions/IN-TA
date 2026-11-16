@@ -65,9 +65,9 @@
         ["home_work_text", "Selected work: paragraph", "Hospital management, manufacturing execution, EdTech and e-commerce. A few of the products we've designed, engineered and launched for our clients."],
         ["home_work_industries", "Selected work: tags that name a client's industry, shown above each project (tag names, separate with commas)", "Healthcare Software, Manufacturing, EdTech, Education, E-commerce, Online Retail, Property Management, Community, Professional Education"],
         ["home_voices_kicker", "Testimonials: small line", "Testimonials // Client voices"],
-        ["home_faq_kicker", "Questions: small line above the heading", "Questions"],
-        ["home_faq_title", "Questions: heading (| before the blue words)", "Before you | ask"],
-        ["home_faq_text", "Questions: line beside the heading", "What clients usually ask us before a project starts. Anything else, just ask."],
+        ["home_faq_kicker", "Questions: small line above the heading", "FAQ"],
+        ["home_faq_title", "Questions: heading (| before the blue words)", "Frequently asked | questions"],
+        ["home_faq_text", "Questions: line beside the heading", "Quick answers about our services, prices, process and office in {district}. Anything else? Just ask."],
         ["home_voices_title", "Testimonials: heading", "In their | own words"],
         ["home_voices_text", "Testimonials: paragraph", "What the people we've built for say about working with us."],
         ["home_blog_kicker", "Blog: small line", "Blog // Latest writing"],
@@ -93,7 +93,10 @@
         ["about_clients_title", "Clients: heading", "Who we | build for."],
         ["about_closing_kicker", "Closing: small line", "Our reach // Where it runs"],
         ["about_closing_title", "Closing: heading", "Built in {district}. | Running wherever you are."],
-        ["about_closing_text", "Closing: text", "One point on the map. Software that reaches well beyond it."]
+        ["about_closing_text", "Closing: text", "One point on the map. Software that reaches well beyond it."],
+        ["about_faq_kicker", "Questions: small line above the heading", "FAQ"],
+        ["about_faq_title", "Questions: heading (| before the blue words)", "Questions about | IN-TA Solutions"],
+        ["about_faq_text", "Questions: line beside the heading", "Who we are, where we work and how we build, in short answers."]
       ]
     },
     {
@@ -111,7 +114,10 @@
         ["services_ask_note", "AI part: order note", "Say what you need. It finds the right part of the board and reads the details from our live service data."],
         ["services_orders", "AI part: example orders (one per line)", "Build me a mobile app\nGet us found on Google\nAutomate our support\nMake a product video"],
         ["services_close_kicker", "Ending: small line", "Next // Your project"],
-        ["services_close_title", "Ending: heading", "This socket is still empty. | What are we building?"]
+        ["services_close_title", "Ending: heading", "This socket is still empty. | What are we building?"],
+        ["services_faq_kicker", "Questions: small line above the heading", "FAQ"],
+        ["services_faq_title", "Questions: heading (| before the blue words)", "Questions about | our services"],
+        ["services_faq_text", "Questions: line beside the heading", "Not sure which service fits? These answers help you choose, or just ask us."]
       ]
     },
     {
@@ -140,7 +146,10 @@
         ["contact_text", "Paragraph", "Four lines into our team in {district}."],
         ["contact_message_port", "Message port: line under its name", "Tell us what you need"],
         ["contact_call_text", "Call: text ({days} and {time} come from the office hours)", "Call our office in {district}, {days}, {time} India time."],
-        ["contact_email_text", "Email: text", "Good for briefs, files and anything you'd like in writing. Tell us what you're building and where it's stuck."]
+        ["contact_email_text", "Email: text", "Good for briefs, files and anything you'd like in writing. Tell us what you're building and where it's stuck."],
+        ["contact_faq_kicker", "Questions: small line above the heading", "FAQ"],
+        ["contact_faq_title", "Questions: heading (| before the blue words)", "Before you | get in touch"],
+        ["contact_faq_text", "Questions: line beside the heading", "Replies, quotes and visits to our office in {district}, answered."]
       ]
     },
     {
