@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type RefObject } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import gsap from 'gsap';
@@ -16,7 +16,10 @@ import { AI_BLOCK, BLOCKS, boardOf, centreOf, HERO, KIND, linkBetween, nameOf, N
 import { useText } from '../../site/SiteContext';
 import { accent, linesOf, standardText } from '../../site/site';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
-import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, ramp, smooth, smoother, type Camera, type Key, fieldOfView } from './score';
+import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, paceOf, ramp, smooth, smoother, type Camera, type Key, fieldOfView } from './score';
+
+/** A phone (Tailwind's max-md): there the services pass with less scrolling, see paceOf */
+const QUICK = '(max-width: 767.98px)';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -373,6 +376,8 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
     return buildScore(labels, ai.title, (b) => board.at.has(b.kind));
   }, [board, ai.title]);
   const shown = score.services.map((b) => ({ beat: b, service: board.at.get(b.block.kind)! }));
+  // (the page's length on a phone, where the services pass quicker)
+  const quickTotal = useMemo(() => paceOf(score, true).total, [score]);
   // A service the admin hasn't put on a part is listed above the board, so it still has a way in
   const placed = new Set(board.at.values());
   const extras = services.filter((s) => !placed.has(s));
@@ -387,7 +392,8 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
     if (!stage || !stop) return;
     const top = stage.getBoundingClientRect().top + window.scrollY;
     const run = Math.max(1, stage.offsetHeight - window.innerHeight);
-    const target = id === YOUR_BLOCK.id ? top + run : top + (stop.s / score.total) * run;
+    const pace = paceOf(score, window.matchMedia(QUICK).matches);
+    const target = id === YOUR_BLOCK.id ? top + run : top + (pace.toScroll(stop.s) / pace.total) * run;
     if (flyRef.current) flyRef.current(target);
     else jumpToY(target);
   };
@@ -447,8 +453,9 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         .from('[data-hero="in"]', { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.1 }, 0.5);
       if (attempt > 0 || playedRef.current) introRef.current.progress(1); // (restarting: the page is long past its opening)
 
-      // One timeline for all the words on the page, in screens of scrolling
-      const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: stageEl, start: 'top top', end: 'bottom bottom', scrub } });
+      // One timeline for all the words on the page, in screens of the full-length page (driven by the scroll through
+      // the pace, below: on a phone the services take less scrolling)
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
       tl.to({}, { duration: S.total }, 0);
       tl.to('[data-hero="copy"]', { y: -50, autoAlpha: 0, duration: 0.34, ease: 'sine.in' }, S.hero.out).to('[data-hero="shade"]', { autoAlpha: 0, duration: 0.3 }, S.hero.out + 0.08);
 
@@ -500,6 +507,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       // ---- The page, measured ----
       let top = 0;
       let run = 1;
+      let pace = paceOf(S, window.matchMedia(QUICK).matches);
       let keys: Key[] = S.keys;
       const measure = () => {
         const zoom = screenZoom(window.innerWidth, window.innerHeight);
@@ -508,6 +516,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         });
         top = stageEl.getBoundingClientRect().top + window.scrollY;
         run = Math.max(1, stageEl.offsetHeight - window.innerHeight);
+        pace = paceOf(S, window.matchMedia(QUICK).matches);
         // On a tall screen the opening board sits under the words. A phone's words fill most of the screen and the board
         // keeps its usual place; a tablet's leave half of it, and there the board takes all the room they leave.
         const copy = root.querySelector<HTMLElement>('[data-hero="copy"]');
@@ -521,6 +530,19 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       };
       measure();
       ScrollTrigger.addEventListener('refresh', measure);
+      // the words follow the scroll through the pace
+      const wordsAt = (f: number) => pace.toScore(f * pace.total) / S.total;
+      const wordsDriver = ScrollTrigger.create({
+        trigger: stageEl,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          if (scrub === true) tl.progress(wordsAt(self.progress));
+          else gsap.to(tl, { progress: wordsAt(self.progress), duration: scrub, ease: 'power3', overwrite: true });
+        },
+        onRefresh: (self) => tl.progress(wordsAt(self.progress)),
+      });
+      tl.progress(wordsAt(wordsDriver.progress));
 
       // ---- The visitor's hand: hover to light a part, click to fly to it or send a ring through its pins, drag to turn the board ----
       const pickable: Block[] = [...S.services.map((b) => b.block), AI_BLOCK, YOUR_BLOCK];
@@ -684,7 +706,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         lastTime = time;
         clock = time;
         const y = window.scrollY;
-        const raw = Math.min(1, Math.max(0, (y - top) / run)) * S.total;
+        const raw = pace.toScore(Math.min(1, Math.max(0, (y - top) / run)) * pace.total);
         // (a little weight on the camera, so that scrolling turns into one long, even glide)
         if (smoothed < 0) smoothed = raw;
         else smoothed += (raw - smoothed) * (1 - Math.exp(-dt * 8));
@@ -953,7 +975,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       const hash = window.location.hash.slice(1);
       if (hash && S.stops.some((st) => st.id === decodeURIComponent(hash))) {
         const stop = S.stops.find((st) => st.id === decodeURIComponent(hash))!;
-        jumpToY(top + (stop.s / S.total) * run);
+        jumpToY(top + (pace.toScroll(stop.s) / pace.total) * run);
       }
 
       return () => {
@@ -1055,7 +1077,12 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       <canvas key={attempt} data-chip="canvas" aria-hidden="true" className="fixed left-0 top-0 h-lvh w-full opacity-0 transition-opacity duration-500 data-[drawn]:opacity-100" />
 
       <div className="relative">
-        <section data-chip="stage" aria-labelledby="chip-title" className="relative touch-pan-y" style={{ height: `${(score.total + 1) * 100}svh` }}>
+        <section
+          data-chip="stage"
+          aria-labelledby="chip-title"
+          className="relative touch-pan-y h-[calc(var(--chip-run)*100svh)] max-md:h-[calc(var(--chip-run-quick)*100svh)]"
+          style={{ '--chip-run': score.total + 1, '--chip-run-quick': quickTotal + 1 } as CSSProperties}
+        >
           <div data-chip="words" className="sticky top-0 h-svh overflow-hidden">
             {/* ---- Opening: what we do, and the whole board ---- */}
             <div data-hero="shade" aria-hidden="true" className={SHADE_HERO} />

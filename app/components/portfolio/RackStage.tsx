@@ -648,9 +648,16 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
         }
         const focus = (index: number): View => ({ row: ROWS_ABOVE + index, px: cx, py: hinge, scale: 1, ry: 0, rx: 0 });
         const emptyRow = ROWS_ABOVE + projects.length + 0.5;
+        // On a narrow screen the closing words sit at the bottom, under the rack. A tablet held upright is tall enough to
+        // leave an empty floor between them, so there the rack comes down until it ends just above the words.
+        const closeScale = 0.86;
+        const wordsH = (closingEl.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0;
+        const underSlot = (ROWS_BELOW - 0.5) * uh * closeScale; // from the empty slot to the rack's foot, on screen
+        const upright = Math.round(H * 0.27);
+        const closeY = !wide && W >= 600 && wordsH ? Math.max(upright, Math.round(H - 16 - wordsH - 28 - underSlot)) : upright;
         const closing: View = wide
-          ? { row: emptyRow, px: cx, py: Math.round(H * 0.5), scale: 0.86, ry: -9, rx: 2 }
-          : { row: emptyRow, px: Math.round(W / 2), py: Math.round(H * 0.27), scale: 0.86, ry: -7, rx: 3 };
+          ? { row: emptyRow, px: cx, py: Math.round(H * 0.5), scale: closeScale, ry: -9, rx: 2 }
+          : { row: emptyRow, px: Math.round(W / 2), py: closeY, scale: closeScale, ry: -7, rx: 3 };
 
         keys = [
           { ...overview, s: 0 },

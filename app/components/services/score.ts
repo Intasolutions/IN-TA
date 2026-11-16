@@ -247,3 +247,41 @@ export function cameraAt(keys: Key[], s: number, aspect: number, lean: [number, 
   const up: [number, number, number] = [Math.sin(roll), Math.cos(roll), 0];
   return { eye, target, up, sx, sy, dist, w };
 }
+
+// On a phone the services pass quicker: the flight to each part and the time on its card take less scrolling. The board
+// still flies from part to part behind the cards, only sooner; everything else keeps its length.
+const QUICK_TRAVEL = 0.5;
+const QUICK_DWELL = 0.6;
+
+/** The score (in screens of the full-length page) and the scroll (in screens of this page), mapped both ways */
+export type Pace = { total: number; toScroll: (s: number) => number; toScore: (t: number) => number };
+
+export function paceOf(score: Score, quick: boolean): Pace {
+  const knots: [number, number][] = [[0, 0]];
+  let last = 0;
+  let t = 0;
+  const reach = (s: number, rate: number) => {
+    if (s <= last) return;
+    t += (s - last) * rate;
+    last = s;
+    knots.push([s, t]);
+  };
+  if (quick) {
+    score.services.forEach((b) => {
+      reach(b.from, 1);
+      reach(b.arrive, QUICK_TRAVEL);
+      reach(b.leave, QUICK_DWELL);
+    });
+  }
+  reach(score.total, 1);
+  const through = (x: number, from: 0 | 1) => {
+    const to = from === 0 ? 1 : 0;
+    if (x <= knots[0][from]) return knots[0][to];
+    for (let i = 1; i < knots.length; i++) {
+      const [a, b] = [knots[i - 1], knots[i]];
+      if (x <= b[from]) return a[to] + ((x - a[from]) / (b[from] - a[from])) * (b[to] - a[to]);
+    }
+    return knots[knots.length - 1][to];
+  };
+  return { total: t, toScroll: (s) => through(s, 0), toScore: (x) => through(x, 1) };
+}

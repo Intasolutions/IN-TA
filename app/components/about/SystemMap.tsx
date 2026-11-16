@@ -321,8 +321,10 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           center = [c.left + c.width / 2 - o.left, c.top + c.height / 2 - o.top];
 
           if (mode === 'scene') {
-            radius0 = Math.min(w * 0.3, h * 0.4);
-            start = [w * 0.68, h * 0.54];
+            // (on a screen taller than it is wide, a tablet held upright, the words sit above the planet instead of beside it)
+            const upright = w / h < 1.15;
+            radius0 = upright ? Math.min(w * 0.42, h * 0.29) : Math.min(w * 0.3, h * 0.4);
+            start = upright ? [w * 0.5, h * 0.68] : [w * 0.68, h * 0.54];
 
             // Circuit traces: pin on the core, out to a channel beside the middle column, across to the module
             const mid = root.querySelector<HTMLElement>('[data-sm="mid"]')!.getBoundingClientRect();
@@ -808,7 +810,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           <div
             data-sm="intro"
             className="absolute inset-x-0 top-0 mx-auto max-w-[1520px] px-4 sm:px-6 pt-[calc(var(--header-h)+1.25rem)] pointer-events-none motion-reduce:relative
-              [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:inset-y-0 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:flex [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:items-center"
+              [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:inset-y-0 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:flex [@media(min-width:1024px)_and_(min-height:640px)_and_(min-aspect-ratio:23/20)_and_(prefers-reduced-motion:no-preference)]:items-center"
           >
             <div className="max-w-xl">
               <span data-sm="kicker" className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-3 sm:mb-4">
@@ -847,7 +849,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           {/* ---- Back to Earth: the closing words, beside the whole planet again ---- */}
           <div
             data-sm="outro"
-            className="invisible opacity-0 pointer-events-none absolute inset-x-0 inset-y-0 mx-auto hidden max-w-[1520px] items-center px-6 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:flex"
+            className="invisible opacity-0 pointer-events-none absolute inset-x-0 inset-y-0 mx-auto hidden max-w-[1520px] px-6 pt-[calc(var(--header-h)+1.25rem)] [@media(min-aspect-ratio:23/20)]:items-center [@media(min-aspect-ratio:23/20)]:pt-0 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:flex"
           >
             <div className="max-w-xl">
               <span className="mb-3 inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff]">
