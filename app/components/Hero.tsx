@@ -374,8 +374,9 @@ export default function Hero() {
                   href="/about"
                   className="px-6 py-4 rounded-xl bg-white hover:bg-canvas border border-brand-blue/30 hover:border-brand-blue text-midnight hover:text-brand-blue font-mono text-[12px] sm:text-[13px] tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-sm font-semibold active:scale-[0.97]"
                 >
-                  <Icon name="developer_board" className="text-brand-blue text-[18px]" />
-                  <span>{t('home_hero_cta_secondary')}</span>
+                  {/* (it opens the About page: its words and its globe say so) */}
+                  <Icon name="travel_explore" className="text-brand-blue text-[18px]" />
+                  <span>{t('home_hero_cta_about')}</span>
                 </Link>
               </span>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { calm, playOnView } from './blog/data';
@@ -9,17 +9,24 @@ import { accent, type FaqPage } from '../site/site';
 
 gsap.registerPlugin(useGSAP);
 
-/** A short wait before pointing at a question shows its answer, so that sweeping across the list doesn't flicker */
-const PREVIEW_MS = 70;
-/** Leaving the list goes back to the answer that was clicked, after this */
-const BACK_MS = 220;
+/** A short wait before pointing at a panel opens it, so that sweeping across the row doesn't flicker */
+const PREVIEW_MS = 90;
+/** Leaving the row goes back to the panel that was clicked, after this */
+const BACK_MS = 300;
+/** The open panel's padding at each side (globals.css, .slat-body) */
+const PAD = 34;
+/** The row is never lower than this; it grows to fit the longest answer */
+const MIN_ROW = 460;
+/** The open panel's text column at most (about 65 characters of answer) */
+const MAX_TEXT = 560;
 
 /**
- * A page's questions (Questions & answers in the admin); no section at all while the page has none.
- * With a mouse and room to spare (globals.css, .qa): the questions on the left and the answer beside them. Pointing at a
- * question shows its answer, clicking keeps it there. Otherwise (phones, tablets, narrow places): tap a question to open
- * its answer under it. Every answer is in the page either way, for search engines; the page marks up for them only the
- * questions whose main page it is (site/schema.ts).
+ * A page's questions (Questions & answers in the admin) as "slats"; no section at all while the page has none.
+ * Where there is room (globals.css, .slats): a row of tall panels, each with its question running up its side. Pointing
+ * at one (or tapping it) widens it to show the question and its answer while the others narrow; the row keeps its size,
+ * so nothing on the page moves. Narrower: the panels stack, and a tap opens one under its question.
+ * Every question and answer is in the page once, for search engines (the sideways label is drawn from data-q, not
+ * text); the page marks up for them only the questions whose main page it is (site/schema.ts).
  */
 export default function FaqSection({ page, tone = 'light', className = '' }: { page: FaqPage; tone?: 'light' | 'dark'; className?: string }) {
   const items = useSite().questions[page];
@@ -28,13 +35,13 @@ export default function FaqSection({ page, tone = 'light', className = '' }: { p
   const ref = useRef<HTMLElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(0);
-  // the answer that was clicked: pointing at the others only previews them
+  // the panel that was clicked: pointing at the others only opens them while the pointer is there
   const pinned = useRef(0);
   const wait = useRef(0);
   const uid = useId();
 
-  /** Whether the questions and the answer are side by side (set in CSS, from the screen and the room) */
-  const sideBySide = () => !!list.current && getComputedStyle(list.current).getPropertyValue('--qa-split').trim() === '1';
+  /** Whether the panels stand in a row (set in CSS from the room there is) */
+  const inRow = () => !!list.current && getComputedStyle(list.current).getPropertyValue('--slats-row').trim() === '1';
 
   useGSAP(
     () => {
@@ -45,23 +52,31 @@ export default function FaqSection({ page, tone = 'light', className = '' }: { p
         .from('[data-qa="kicker"]', { y: move(10), autoAlpha: 0, duration: 0.7 }, 0)
         .from('[data-qa="word"]', { yPercent: move(110), autoAlpha: calm() ? 0 : 1, duration: 1.1, stagger: 0.1 }, 0.1)
         .from('[data-qa="lede"]', { y: move(16), autoAlpha: 0, duration: 0.9 }, 0.3)
-        // (the questions rise, the answers only fade: a transform on anything between the list and an answer would become
-        // the box the answer is placed in, and the side-by-side answer would land inside the question column)
-        .from('[data-qa="row"]', { y: move(20), autoAlpha: 0, duration: 0.8, stagger: 0.06 }, 0.3)
-        .from('.qa-a', { autoAlpha: 0, duration: 0.8 }, 0.45);
+        .from('[data-qa="slat"]', { y: move(28), autoAlpha: 0, duration: 0.9, stagger: 0.06 }, 0.25);
       return playOnView(ref.current, tl);
     },
     { scope: ref, dependencies: [items.length] },
   );
 
-  // Side by side, the answers sit beside the list: it is kept as tall as the longest, so none runs into the next section
+  // In a row: the open panel's text column is set from the room there is (so its words never re-wrap as it opens), and
+  // the row is as tall as the longest answer needs
   useEffect(() => {
     const el = list.current;
     if (!el) return;
     const fit = () => {
-      const tallest = sideBySide() ? Math.max(0, ...[...el.querySelectorAll<HTMLElement>('[data-qa-panel]')].map((a) => a.offsetHeight)) : 0;
-      const want = tallest ? `${tallest}px` : '';
-      if (el.style.minHeight !== want) el.style.minHeight = want;
+      if (!inRow()) {
+        el.style.removeProperty('--slat-text');
+        el.style.removeProperty('--slats-h');
+        return;
+      }
+      const n = el.children.length;
+      const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+      const room = el.clientWidth - gap * (n - 1);
+      const grow = Math.max(5, n);
+      const text = Math.min(MAX_TEXT, Math.round((room * grow) / (n - 1 + grow)) - 2 * PAD);
+      el.style.setProperty('--slat-text', `${Math.max(240, text)}px`);
+      const tallest = Math.max(0, ...[...el.querySelectorAll<HTMLElement>('.slat-body')].map((b) => b.scrollHeight));
+      el.style.setProperty('--slats-h', `${Math.max(MIN_ROW, Math.ceil(tallest) + 8)}px`);
     };
     const watch = new ResizeObserver(fit);
     watch.observe(el);
@@ -78,14 +93,14 @@ export default function FaqSection({ page, tone = 'light', className = '' }: { p
     window.clearTimeout(wait.current);
     wait.current = window.setTimeout(fn, ms);
   };
-  const preview = (i: number) => later(() => setOpen(i), PREVIEW_MS);
+  // (a click anywhere on a panel lands here: the panel's button bubbles up to it, and so does a key press on the button)
   const choose = (i: number) => {
     window.clearTimeout(wait.current);
-    const next = sideBySide() || open !== i ? i : -1;
+    const next = inRow() || open !== i ? i : -1;
     pinned.current = next;
     setOpen(next);
   };
-  const fromMouse = (e: PointerEvent) => e.pointerType === 'mouse' && sideBySide();
+  const byMouse = (e: PointerEvent) => e.pointerType === 'mouse' && inRow();
 
   return (
     <section ref={ref} id={page === 'home' ? 'faq' : `${page}-faq`} aria-labelledby={`${page}-faq-title`} className={`qa-${tone} ${className}`}>
@@ -101,35 +116,45 @@ export default function FaqSection({ page, tone = 'light', className = '' }: { p
           <p data-qa="lede" className="qa-lede max-w-md text-sm leading-relaxed sm:text-[15px]">{t(`${page}_faq_text`)}</p>
         </div>
 
-        <div className="qa">
-          <ul ref={list} className="qa-list" onPointerLeave={(e) => fromMouse(e) && later(() => setOpen(pinned.current), BACK_MS)}>
+        <div className="slats-room">
+          <ul
+            ref={list}
+            className="slats"
+            style={{ '--grow': Math.max(5, items.length) } as CSSProperties}
+            onPointerLeave={(e) => byMouse(e) && later(() => setOpen(pinned.current), BACK_MS)}
+          >
             {items.map((f, i) => (
-              <li key={i} data-open={open === i || undefined} className="qa-item" onPointerEnter={(e) => fromMouse(e) && preview(i)}>
-                <h3 data-qa="row" className="qa-heading">
-                  <button
-                    type="button"
-                    id={`${uid}-q${i}`}
-                    aria-expanded={open === i}
-                    aria-controls={`${uid}-a${i}`}
-                    onClick={() => choose(i)}
-                    onFocus={() => sideBySide() && preview(i)}
-                    className="qa-q"
-                  >
-                    {/* (the number and the icons are drawn, not text: the heading reads as the question alone) */}
-                    <span aria-hidden="true" className="qa-n" />
-                    <span className="qa-text">{f.q}</span>
-                    <span aria-hidden="true" className="qa-icon qa-icon-open">
-                      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M8 2v12M2 8h12" /></svg>
-                    </span>
-                    <span aria-hidden="true" className="qa-icon qa-icon-point">
-                      <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
-                    </span>
-                  </button>
-                </h3>
-                <div id={`${uid}-a${i}`} role="region" aria-labelledby={`${uid}-q${i}`} data-qa-panel className="qa-a">
-                  <div className="qa-a-inner">
-                    <span aria-hidden="true" className="qa-a-label" />
-                    <div className="qa-a-text">
+              <li
+                key={i}
+                data-qa="slat"
+                data-open={open === i || undefined}
+                className="slat"
+                onPointerEnter={(e) => byMouse(e) && later(() => setOpen(i), PREVIEW_MS)}
+                onClick={(e) => {
+                  // (stacked, a tap on the answer itself leaves it open: people tap text they are reading)
+                  if (!inRow() && (e.target as Element).closest('.slat-a')) return;
+                  choose(i);
+                }}
+              >
+                {/* (drawn, not text: the number and the question up the side; the question is in the heading below once) */}
+                <span aria-hidden="true" className="slat-n" />
+                <span aria-hidden="true" className="slat-v" data-q={f.q} />
+                <span aria-hidden="true" className="slat-glow" />
+                <div className="slat-body">
+                  <h3 className="slat-h">
+                    <button
+                      type="button"
+                      id={`${uid}-q${i}`}
+                      aria-expanded={open === i}
+                      aria-controls={`${uid}-a${i}`}
+                      onFocus={() => inRow() && setOpen(i)}
+                      className="slat-q"
+                    >
+                      {f.q}
+                    </button>
+                  </h3>
+                  <div id={`${uid}-a${i}`} role="region" aria-labelledby={`${uid}-q${i}`} className="slat-a">
+                    <div className="slat-a-inner">
                       {f.a.split(/\n\s*\n/).map((para, k) => (
                         <p key={k}>{para.trim()}</p>
                       ))}

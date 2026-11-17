@@ -17,8 +17,9 @@ const Home = async () => {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(homeJsonLd(site)) }} />
 
-      <Philosophy />
+      {/* what we do first, right under the opening; then how we work */}
       <Capabilities />
+      <Philosophy />
 
       <Work initial={lists.projects} />
 

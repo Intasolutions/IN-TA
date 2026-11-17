@@ -189,76 +189,101 @@ html[data-loader='seen'] .boot, html[data-loader='seen'] .boot *, html[data-load
 @keyframes nav-boot-slide { from { transform: translateX(-100%); } to { transform: translateX(286%); } }
 @media (prefers-reduced-motion: reduce) { .nav-boot-track::after { animation-duration: 3s; } }
 
-/* Questions & answers (FaqSection). Stacked: tap a question to open its answer under it. With a mouse and a list at least
-   52rem wide: the questions on the left, the answer beside them, shown by pointing at its question and kept by a click.
-   Side by side only opacity and transform move, so nothing on the page shifts; --qa-split tells the script which it is. */
+/* Questions & answers (FaqSection) as slats. In a row (the room at least 56rem wide): tall panels, each with its question
+   running up its side; the open one widens (flex-grow) to show the question and answer while the others narrow, and the
+   row keeps its height (--slats-h, from the longest answer), so nothing on the page moves. Its text column has a fixed
+   width (--slat-text), so the words never re-wrap while it opens. Narrower: the panels stack and open under their
+   question. --slats-row tells the script which it is. Tones: on the light pages white panels like the home page's cards
+   (the open one tinted blue, with a brand line along its top); on the dark pages glass, the open one glowing blue. */
 .qa-light {
-  --qa-ink: #01072b; --qa-muted: rgb(1 7 43 / 0.78); --qa-line: rgb(1 68 181 / 0.15); --qa-accent: #0144b5; --qa-on-accent: #fff;
-  --qa-soft: rgb(1 68 181 / 0.06); --qa-panel: #fff; --qa-panel-line: rgb(1 68 181 / 0.18); --qa-answer: #1d7a4a;
-  --qa-shadow: 0 24px 60px -30px rgb(1 7 43 / 0.35);
+  --qa-ink: #01072b; --qa-muted: rgb(1 7 43 / 0.78); --qa-accent: #0144b5;
+  --sl-bg: #fff; --sl-bg-alt: linear-gradient(170deg, #fbfcff, #f5f8ff);
+  --sl-open: linear-gradient(165deg, #ffffff 0%, #f4f8ff 55%, #e9f0ff 100%); --sl-edge: rgb(1 68 181 / 0.18);
+  --sl-edge-open: rgb(1 68 181 / 0.42); --sl-shadow: 0 30px 60px -36px rgb(1 68 181 / 0.45);
+  --sl-ink: #01072b; --sl-side: rgb(1 7 43 / 0.82); --sl-muted: rgb(1 7 43 / 0.76); --sl-num: #0144b5; --sl-answer: #1d7a4a;
+  --sl-glow: rgb(59 123 247 / 0.16); --sl-icon: #0144b5; --sl-ring: rgb(1 68 181 / 0.3); --sl-bar: linear-gradient(90deg, #0144b5, #2563eb, #3b7bf7);
 }
 .qa-dark {
-  --qa-ink: #fff; --qa-muted: rgb(255 255 255 / 0.78); --qa-line: rgb(255 255 255 / 0.12); --qa-accent: #9dbbff; --qa-on-accent: #01072b;
-  --qa-soft: rgb(157 187 255 / 0.08); --qa-panel: rgb(10 22 80 / 0.55); --qa-panel-line: rgb(157 187 255 / 0.25); --qa-answer: #7ee2a8;
-  --qa-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.8);
+  --qa-ink: #fff; --qa-muted: rgb(255 255 255 / 0.78); --qa-accent: #9dbbff;
+  --sl-bg: linear-gradient(170deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.025)); --sl-bg-alt: linear-gradient(170deg, rgb(157 187 255 / 0.08), rgb(255 255 255 / 0.03));
+  --sl-open: linear-gradient(160deg, rgb(1 68 181 / 0.6) 0%, rgb(10 29 92 / 0.75) 55%, rgb(4 12 56 / 0.85) 100%); --sl-edge: rgb(157 187 255 / 0.16);
+  --sl-edge-open: rgb(157 187 255 / 0.42); --sl-shadow: 0 26px 60px -30px rgb(0 0 0 / 0.85);
+  --sl-ink: #fff; --sl-side: rgb(255 255 255 / 0.88); --sl-muted: rgb(255 255 255 / 0.8); --sl-num: #9dbbff; --sl-answer: #7ee2a8;
+  --sl-glow: rgb(59 123 247 / 0.32); --sl-icon: #9dbbff; --sl-ring: rgb(157 187 255 / 0.35); --sl-bar: linear-gradient(90deg, #5b8cff, #9dbbff);
 }
 .qa-kicker { color: var(--qa-accent); }
 .qa-title { color: var(--qa-ink); }
 .qa-lede { color: var(--qa-muted); }
-.qa { container: qa / inline-size; }
-.qa-list { --qa-split: 0; position: relative; border-top: 1px solid var(--qa-line); counter-reset: qa; }
-.qa-item { border-bottom: 1px solid var(--qa-line); counter-increment: qa; }
-/* Q.01 and A.: drawn here, so that the question heading and the answer read as themselves */
-.qa-n::before { content: "Q." counter(qa, decimal-leading-zero); }
-.qa-a-label::before { content: "A."; }
-.qa-q {
-  display: flex; width: 100%; align-items: flex-start; gap: 0.875rem; padding: 1.15rem 0; text-align: left; color: var(--qa-ink);
-  cursor: pointer; border-radius: 0.75rem; -webkit-tap-highlight-color: transparent;
+.slats-room { container: slats / inline-size; }
+.slats { --slats-row: 0; display: grid; gap: 0.625rem; counter-reset: slat; }
+.slat {
+  position: relative; overflow: hidden; border-radius: 1.25rem; color: var(--sl-ink); cursor: pointer; counter-increment: slat;
+  background: var(--sl-bg); box-shadow: inset 0 0 0 1px var(--sl-edge); -webkit-tap-highlight-color: transparent;
+  transition: box-shadow 0.4s ease;
 }
-.qa-q:focus-visible { outline: 2px solid var(--qa-accent); outline-offset: 2px; }
-.qa-n { width: 2.5rem; flex-shrink: 0; margin-top: 0.35em; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--qa-accent); }
-.qa-text {
-  flex: 1; min-width: 0; font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif; font-weight: 700; letter-spacing: -0.01em;
-  font-size: clamp(1.05rem, 0.98rem + 0.4vw, 1.35rem); line-height: 1.3; text-wrap: pretty; transition: color 0.3s ease;
+.slat:nth-child(even) { background: var(--sl-bg-alt); }
+.slat[data-open] { background: var(--sl-open); box-shadow: inset 0 0 0 1px var(--sl-edge-open), var(--sl-shadow); }
+.slat:has(.slat-q:focus-visible) { outline: 2px solid var(--qa-accent); outline-offset: 3px; }
+/* the open panel's brand line along its top */
+.slat::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--sl-bar); transform: scaleX(0); transform-origin: left; transition: transform 0.6s cubic-bezier(0.2, 0.85, 0.25, 1); }
+.slat[data-open]::before { transform: scaleX(1); }
+.slat-n { position: absolute; left: 1.25rem; top: 1.45rem; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--sl-num); }
+.slat-n::before { content: "Q." counter(slat, decimal-leading-zero); }
+.slat-v { display: none; }
+.slat-glow { position: absolute; inset: auto -20% -45% -20%; height: 70%; background: radial-gradient(closest-side, var(--sl-glow), transparent); opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
+.slat[data-open] .slat-glow { opacity: 1; }
+.slat-body { position: relative; }
+.slat-h { margin: 0; }
+.slat-q {
+  display: block; width: 100%; padding: 1.15rem 3.25rem 1.15rem 4.25rem; text-align: left; color: var(--sl-ink); cursor: pointer; outline: none;
+  font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif; font-weight: 700; letter-spacing: -0.01em; text-wrap: pretty;
+  font-size: clamp(1.02rem, 0.96rem + 0.35vw, 1.2rem); line-height: 1.3;
 }
-.qa-item[data-open] .qa-text { color: var(--qa-accent); }
-@media (hover: hover) { .qa-q:hover .qa-text { color: var(--qa-accent); } }
-.qa-icon {
-  display: flex; height: 2rem; width: 2rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 9999px;
-  border: 1px solid var(--qa-panel-line); color: var(--qa-accent); transition: rotate 0.3s ease, translate 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+/* (stacked: a plus in the corner that turns into a cross) */
+.slat::after {
+  content: ""; position: absolute; right: 1.15rem; top: 1.2rem; width: 1.6rem; height: 1.6rem; border-radius: 9999px; pointer-events: none;
+  background: linear-gradient(var(--sl-icon), var(--sl-icon)) center / 0.75rem 1.6px no-repeat, linear-gradient(var(--sl-icon), var(--sl-icon)) center / 1.6px 0.75rem no-repeat;
+  box-shadow: inset 0 0 0 1px var(--sl-ring); transition: rotate 0.35s ease;
 }
-.qa-icon-point { display: none; }
-.qa-item[data-open] .qa-icon-open { rotate: 45deg; background: var(--qa-accent); color: var(--qa-on-accent); }
-.qa-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s cubic-bezier(0.33, 1, 0.68, 1); }
-.qa-item[data-open] .qa-a { grid-template-rows: 1fr; }
-.qa-a-inner { display: flex; min-height: 0; gap: 0.875rem; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s linear 0.35s; }
-.qa-item[data-open] .qa-a-inner { opacity: 1; visibility: visible; transition: opacity 0.35s ease 0.05s; }
-.qa-a-label { width: 2.5rem; flex-shrink: 0; padding-top: 0.2rem; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 11px; font-weight: 700; color: var(--qa-answer); }
-.qa-a-text { display: grid; flex: 1; min-width: 0; max-width: 65ch; gap: 0.75rem; padding: 0 2.875rem 1.4rem 0; color: var(--qa-muted); font-size: 15px; line-height: 1.65; }
-.qa-a-text p { white-space: pre-line; }
-@media (min-width: 40rem) { .qa-a-text { font-size: 1rem; } }
-@media (hover: hover) and (pointer: fine) {
-  @container qa (min-width: 52rem) {
-    .qa-list { --qa-split: 1; padding-right: 52%; border-top: 0; }
-    .qa-item { border-bottom: 0; }
-    .qa-q { align-items: center; padding: 0.95rem 1rem 0.95rem 0.85rem; border-bottom: 1px solid var(--qa-line); border-radius: 0; transition: background-color 0.3s ease; }
-    .qa-item:first-child .qa-q { border-top: 1px solid var(--qa-line); }
-    .qa-item[data-open] .qa-q { background: var(--qa-soft); box-shadow: inset 3px 0 0 var(--qa-accent); }
-    .qa-n { margin-top: 0; }
-    .qa-icon-open { display: none; }
-    .qa-icon-point { display: flex; border-color: transparent; opacity: 0; translate: -0.5rem 0; transition: opacity 0.3s ease, translate 0.3s ease; }
-    .qa-item[data-open] .qa-icon-point { opacity: 1; translate: 0 0; }
-    .qa-a { position: absolute; top: 0; right: 0; width: calc(52% - 2.5rem); display: block; transition: none; }
-    .qa-a-inner {
-      overflow: visible; padding: 1.75rem 1.75rem 1.6rem; border: 1px solid var(--qa-panel-line); border-radius: 1.25rem; background: var(--qa-panel);
-      box-shadow: var(--qa-shadow); transform: translateY(0.6rem); transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
-    }
-    .qa-item[data-open] .qa-a-inner { transform: none; transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
-    .qa-a-text { padding: 0; font-size: 1.05rem; }
+.slat[data-open]::after { rotate: 45deg; }
+.slat-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.45s cubic-bezier(0.2, 0.85, 0.25, 1); }
+.slat[data-open] .slat-a { grid-template-rows: 1fr; }
+.slat-a-inner { min-height: 0; overflow: hidden; display: grid; gap: 0.75rem; padding: 0 1.4rem 0 4.25rem; color: var(--sl-muted); font-size: 15px; line-height: 1.7; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s linear 0.45s; }
+.slat-a-inner > :last-child { margin-bottom: 1.4rem; }
+.slat-a-inner::before { content: "A."; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 11px; font-weight: 700; color: var(--sl-answer); margin-bottom: -0.25rem; }
+.slat[data-open] .slat-a-inner { opacity: 1; visibility: visible; transition: opacity 0.4s ease 0.1s; }
+.slat-a-inner p { white-space: pre-line; max-width: 65ch; }
+@container slats (min-width: 56rem) {
+  .slats { --slats-row: 1; display: flex; height: var(--slats-h, 28.75rem); }
+  .slat { flex: 1 1 0; min-width: 3.5rem; transition: flex-grow 0.65s cubic-bezier(0.2, 0.85, 0.25, 1), box-shadow 0.4s ease; }
+  .slat[data-open] { flex-grow: var(--grow, 6); cursor: default; }
+  .slat::after { display: none; }
+  .slat-n { left: 50%; translate: -50% 0; transition: left 0.5s ease, translate 0.5s ease; }
+  .slat[data-open] .slat-n { left: 2.125rem; translate: 0 0; }
+  /* the question up the side, drawn from data-q (it is in the heading once) */
+  .slat-v {
+    display: block; position: absolute; left: 50%; bottom: 1.4rem; translate: -50% 0; rotate: 180deg; writing-mode: vertical-rl;
+    max-height: calc(var(--slats-h, 28.75rem) - 5.25rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: var(--font-space-grotesk), ui-sans-serif, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.005em; line-height: 1.2; color: var(--sl-side);
+    transition: opacity 0.3s ease;
   }
+  .slat-v::before { content: attr(data-q); }
+  .slat[data-open] .slat-v { opacity: 0; }
+  .slat-body {
+    position: absolute; left: 0; top: 0; width: calc(var(--slat-text, 30rem) + 4.25rem); padding: 3.4rem 2.125rem 2rem;
+    opacity: 0; translate: 0.9rem 0; transition: opacity 0.2s ease, translate 0.2s ease; pointer-events: none;
+  }
+  .slat[data-open] .slat-body { opacity: 1; translate: 0 0; pointer-events: auto; transition: opacity 0.45s ease 0.22s, translate 0.55s cubic-bezier(0.2, 0.85, 0.25, 1) 0.18s; }
+  .slat-q { padding: 0 0 1rem; font-size: clamp(1.25rem, 0.9rem + 0.9vw, 1.65rem); line-height: 1.2; letter-spacing: -0.015em; text-wrap: balance; cursor: default; }
+  .slat-a { display: block; transition: none; }
+  .slat-a-inner { padding: 0; opacity: 1; visibility: visible; transition: none; overflow: visible; }
+  .slat-a-inner > :last-child { margin-bottom: 0; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .slat:not([data-open]):hover { box-shadow: inset 0 0 0 1px var(--sl-edge-open); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .qa-a, .qa-a-inner, .qa-icon, .qa-q { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+  .slat, .slat-body, .slat-a, .slat-a-inner, .slat-v, .slat-n, .slat-glow, .slat::after { transition-duration: 0.01s !important; transition-delay: 0s !important; }
 }
 
 /* The big outlined words that glide behind some headings: drawn by CSS from data-ghost, so they are decoration only

@@ -150,7 +150,7 @@ export default function Philosophy() {
   );
 
   return (
-    <section ref={ref} id="philosophy" aria-labelledby="philosophy-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-16 sm:pt-20 lg:pt-28 pb-12 sm:pb-16 lg:pb-20">
+    <section ref={ref} id="philosophy" aria-labelledby="philosophy-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-16 lg:pb-20">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Thesis column (pinned on desktop) */}
         <div data-ph="intro" className="lg:col-span-5 lg:sticky lg:top-36 h-fit">

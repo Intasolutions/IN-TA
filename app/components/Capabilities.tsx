@@ -264,7 +264,7 @@ export default function Capabilities() {
   );
 
   return (
-    <section ref={ref} id="services" aria-labelledby="capabilities-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24">
+    <section ref={ref} id="services" aria-labelledby="capabilities-title" className="max-w-[1520px] mx-auto px-4 sm:px-6 pt-16 sm:pt-20 lg:pt-28 pb-16 sm:pb-20 lg:pb-24">
       {/* Heading */}
       <div data-cap="header" className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 mb-10 sm:mb-14 lg:mb-16">
         <div>
