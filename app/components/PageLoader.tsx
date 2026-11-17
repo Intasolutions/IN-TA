@@ -1,20 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import { getImageProps } from 'next/image';
 import { LOADER_SEEN } from '../site/loader';
 import { openingLines } from '../site/opening';
 import { useSite } from '../site/SiteContext';
 
 /*
  * The opening, on a visit's first page: a short start-up screen. A few lines are typed out (real figures from the admin:
- * the services, the projects, the office), a line fills, the INTA tile appears in the middle and glides up into its
- * place in the header as the page clears. 2.8 seconds, all of it CSS animation (globals.css, .boot), so it runs on the
- * compositor and plays in full even while a slow phone is still starting the page.
+ * the services, the projects, the office) while a line fills under them; the finished screen stays a moment to be read,
+ * then clears into the page. 2.8 seconds, all of it CSS animation (globals.css, .boot), so it runs on the compositor and
+ * plays in full even while a slow phone is still starting the page.
  */
 /** The whole opening; globals.css (.boot, --boot-t) runs on the same clock */
 const T_MS = 2800;
-/** At 80% the white starts to clear (globals.css, boot-veil) and the tile is on its way to the header */
+/** At 80% the screen starts to clear (globals.css, boot-veil and boot-term) */
 const LEAVING_MS = 2240;
 /** With reduced motion: the lines, still, then the page */
 const STILL_T_MS = 1400;
@@ -24,12 +23,8 @@ const READY_AFTER_MS = 250;
 /** The last fade (globals.css, html[data-loader='left'] .boot) */
 const FADE_MS = 250;
 
-// The official logo, sized for the tile in the middle of the screen (up to 380 px wide)
-const { props: logo } = getImageProps({ src: '/logo/logo-inta.png', alt: '', width: 774, height: 322, sizes: '(max-width: 640px) 260px, 360px' });
-const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-
 // Its own script, in the HTML, so the opening keeps time from the moment the page arrives without waiting for the site's
-// scripts. It measures where the header's tile is (the glide's end), ends the opening by marking <html data-loader>
+// scripts. It ends the opening by marking <html data-loader>
 // ("leaving" as the white clears, "left" at the end, which fades it out in CSS) and remembers for this tab that it has
 // played. In a tab opened in the background it waits until the tab is looked at, so it's never over before it's seen.
 const SCRIPT = `(function(){var s=document.currentScript,b=s&&s.parentNode,h=document.documentElement;
@@ -41,15 +36,10 @@ function tell(n){try{window.dispatchEvent(new Event(n))}catch(e){}}
 function leave(){if(going)return;going=true;try{sessionStorage.setItem('${LOADER_SEEN}','1')}catch(e){}
 h.dataset.loaderLeaving=now();if(h.dataset.loader!=='left')h.dataset.loader='leaving';tell('inta:opening-left')}
 function end(){if(gone)return;leave();gone=true;h.dataset.loaderLeft=now();h.dataset.loader='left';tell('inta:opening-done')}
-function place(){try{var t=document.querySelector('[data-logo-tile]'),c=b.querySelector('.boot-tile');if(!c)return;
-var W=b.clientWidth,H=b.clientHeight,r=t&&t.getBoundingClientRect(),ok=!!r&&r.width>0&&r.bottom>4&&r.top<H,st=b.style;
-st.setProperty('--gx',ok?(r.left+r.width/2-W/2).toFixed(1)+'px':'0px');st.setProperty('--gy',ok?(r.top+r.height/2-H/2).toFixed(1)+'px':'0px');
-st.setProperty('--sx',ok?(r.width/c.offsetWidth).toFixed(4):'1');st.setProperty('--sy',ok?(r.height/c.offsetHeight).toFixed(4):'1')}catch(e){}}
-function begin(){if(began)return;began=true;setTimeout(place,L-140);setTimeout(leave,L);setTimeout(end,T)}
-function start(){b.removeAttribute('data-wait');place();if(still){begin();return}
+function begin(){if(began)return;began=true;setTimeout(leave,L);setTimeout(end,T)}
+function start(){b.removeAttribute('data-wait');if(still){begin();return}
 b.addEventListener('animationstart',begin,{once:true});setTimeout(begin,400)}
-try{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',place,{once:true});
-if(document.visibilityState==='hidden'){b.setAttribute('data-wait','');var v=function(){if(document.visibilityState==='hidden')return;
+try{if(document.visibilityState==='hidden'){b.setAttribute('data-wait','');var v=function(){if(document.visibilityState==='hidden')return;
 document.removeEventListener('visibilitychange',v);start()};document.addEventListener('visibilitychange',v)}else start()}catch(e){end()}})();`;
 
 /**
@@ -71,16 +61,16 @@ export default function PageLoader({ onReady, onGone }: { onReady: () => void; o
   // One object per site: a new string would make React rewrite the HTML and restart the opening
   const opening = useMemo(() => {
     const lines = openingLines(site);
-    const gap = Math.min(0.29, 1.15 / Math.max(1, lines.length - 1));
+    // (all typed by about 1.25 s, so the finished screen is up a full second before it clears at 2.24 s)
+    const gap = Math.min(0.26, 0.95 / Math.max(1, lines.length - 1));
     const cols = Math.max(12, ...lines.map((l) => l.chars)) + 1;
     const typed = lines
       .map((l, i) => `<span class="boot-ln" style="--n:${l.chars};--d:${(0.05 + i * gap).toFixed(2)}s">${l.html}</span>`)
       .join('');
     return {
       __html:
-        `<div class="boot" style="--cols:${cols};--type:${Math.min(0.28, gap).toFixed(2)}s"><div class="boot-veil"></div>` +
+        `<div class="boot" style="--cols:${cols};--type:${Math.min(0.26, gap).toFixed(2)}s"><div class="boot-veil"></div>` +
         `<div class="boot-term">${typed}<span class="boot-bar"></span></div>` +
-        `<div class="boot-tile"><img src="${attr(logo.src)}" srcset="${attr(logo.srcSet ?? '')}" sizes="${attr(logo.sizes ?? '')}" width="774" height="322" alt="" decoding="async"></div>` +
         `<script>${SCRIPT}</script></div>`,
     };
   }, [site]);

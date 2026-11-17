@@ -84,11 +84,9 @@ export default function Header() {
             className="group flex items-center gap-3 sm:gap-4 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-blue"
             aria-label="IN-TA Solutions — home"
           >
-            {/* Logo tile: dark navy glass with a soft blue glow, holding the official white INTA wordmark. (The opening's
-                tile glides into this one: data-logo-tile is where it measures.) */}
+            {/* Logo tile: dark navy glass with a soft blue glow, holding the official white INTA wordmark */}
             <span
               aria-hidden="true"
-              data-logo-tile
               className="relative flex items-center justify-center h-11 sm:h-12 px-1.5 sm:px-2 rounded-xl overflow-hidden
                 bg-[linear-gradient(145deg,#01072b_0%,#06123f_55%,#0a1d5c_100%)]
                 border border-brand-blue/40 ring-1 ring-inset ring-white/5

@@ -136,15 +136,13 @@ html {
 .blog-prose th { font-weight: 700; color: var(--color-midnight); }
 .blog-prose code { font-family: var(--font-mono, ui-monospace), monospace; font-size: 0.9em; }
 /* The opening (PageLoader): a start-up screen on a visit's first page, 2.8 s, all of it here so it runs on the compositor
-   while a slow phone is still starting the page. The lines are typed by a white cover stepping off each one, a line
-   fills, the tile appears and glides into the header (its script measures where: --gx, --gy, --sx, --sy) as the white
-   clears. The script ends it by marking <html data-loader="left">; should it never run, the opening still gives the page
+   while a slow phone is still starting the page. The lines are typed by a white cover stepping off each one while a line
+   fills under them; the finished screen stays to be read, then lifts away as the white clears. The script ends it by marking <html data-loader="left">; should it never run, the opening still gives the page
    back just after it ends. It plays once per visit: a visitor who has seen it never sees it flash on later pages
    ("seen"). Hidden, not removed from layout, so nothing inside it is measured at 0 x 0. */
 .page-loader { pointer-events: none; }
 .boot {
   --boot-t: 2.8s; --boot-bg: #fff;
-  --cw: clamp(200px, min(60vw, 42vh), 380px); --ch: calc(var(--cw) * 12 / 31);
   position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; pointer-events: auto;
   animation: boot-giveup 0.3s ease-out 3.6s forwards;
 }
@@ -162,14 +160,6 @@ html {
 .boot-caret { display: inline-block; width: 0.6em; height: 1.05em; vertical-align: -0.15em; background: #0144b5; animation: boot-blink 0.8s steps(1) infinite; }
 .boot-bar { position: relative; justify-self: stretch; height: 2px; margin-top: 0.9em; overflow: hidden; background: #dfe5f2; }
 .boot-bar::after { content: ''; position: absolute; inset: 0; background: #2563eb; transform-origin: left; animation: boot-bar var(--boot-t) linear both; }
-.boot-tile {
-  position: absolute; left: 50%; top: 50%; width: var(--cw); height: var(--ch); margin: calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2);
-  display: grid; place-items: center; overflow: hidden; border-radius: calc(var(--ch) * 0.25);
-  background: linear-gradient(145deg, #01072b 0%, #06123f 55%, #0a1d5c 100%); border: 1px solid rgb(1 68 181 / 0.4);
-  box-shadow: 0 14px 40px -12px rgb(1 68 181 / 0.55); opacity: 0;
-  animation: boot-tile var(--boot-t) linear both;
-}
-.boot-tile img { display: block; width: auto; height: 91.5%; }
 html[data-loader='left'] .boot { opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s linear 0.25s; }
 html[data-loader='seen'] .page-loader { visibility: hidden; }
 html[data-loader='seen'] .boot, html[data-loader='seen'] .boot *, html[data-loader='seen'] .boot *::after { animation: none !important; }
@@ -177,18 +167,14 @@ html[data-loader='seen'] .boot, html[data-loader='seen'] .boot *, html[data-load
 .boot[data-wait], .boot[data-wait] *, .boot[data-wait] *::after { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) {
   .boot-veil, .boot-term, .boot-bar::after, .boot-caret { animation: none; }
-  .boot-ln::after, .boot-tile { display: none; }
+  .boot-ln::after { display: none; }
 }
 @keyframes boot-veil { 0%, 80% { opacity: 1; } 95%, 100% { opacity: 0; } }
-@keyframes boot-term { 0%, 55% { opacity: 1; transform: none; } 62%, 100% { opacity: 0; transform: translateY(-0.75em); } }
+/* (the screen stays whole until the white starts to clear, at 80%, then lifts away with it) */
+@keyframes boot-term { 0%, 80% { opacity: 1; transform: none; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); } 95%, 100% { opacity: 0; transform: translateY(-0.6em); } }
 @keyframes boot-type { from { transform: translateX(0); } to { transform: translateX(100%); } }
-@keyframes boot-bar { 0%, 3% { transform: scaleX(0); } 52%, 100% { transform: scaleX(1); } }
-@keyframes boot-tile {
-  0%, 60% { opacity: 0; transform: translate(0px, 0px) scale(0.9, 0.9); animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1); }
-  68% { opacity: 1; transform: translate(0px, 0px) scale(1, 1); }
-  78.6% { opacity: 1; transform: translate(0px, 0px) scale(1, 1); animation-timing-function: cubic-bezier(0.65, 0, 0.25, 1); }
-  100% { opacity: 1; transform: translate(var(--gx, 0px), var(--gy, 0px)) scale(var(--sx, 1), var(--sy, 1)); }
-}
+/* (the line fills for as long as the screen is up, and is full just before it clears) */
+@keyframes boot-bar { 0%, 3% { transform: scaleX(0); } 76%, 100% { transform: scaleX(1); } }
 @keyframes boot-blink { 50% { opacity: 0; } }
 @keyframes boot-giveup { to { opacity: 0; visibility: hidden; } }
 /* The opening's short version (NavProgress), over the screen while a page takes really long to arrive */

@@ -11,8 +11,11 @@ void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
 // Two layers, tinted brand blue on a transparent canvas:
 //  1. tileable water caustics (after Dave Hoskins) that lean towards the cursor
 //  2. a blueprint dot grid — dots swell near the cursor, clicks send ripple waves through it
+// Full precision: the caustics work with values in the hundreds and the grid with pixel positions in the thousands. In
+// 16 bits (what mediump really is on tablet and phone GPUs; laptops quietly use 32) they round into flat squares that
+// flicker as the picture moves. A GPU without 32-bit precision here gets no canvas (see below).
 const FRAG = `
-precision mediump float;
+precision highp float;
 uniform vec2 u_res;
 uniform float u_time;
 uniform float u_dpr;
@@ -84,6 +87,9 @@ void main() {
 }
 `;
 
+// The caustics' clock (u_time * 0.34) is back where it started after 240π: every wave runs at a multiple of 1/120 of it
+const WRAP = (240 * Math.PI) / 0.34;
+
 function compile(gl: WebGLRenderingContext, type: number, src: string) {
   const s = gl.createShader(type)!;
   gl.shaderSource(s, src);
@@ -99,6 +105,12 @@ export default function HeroCanvas({ className = '' }: { className?: string }) {
     if (!canvas) return;
     const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false });
     if (!gl) return; // no WebGL → the CSS aura behind still looks fine
+    // (an old GPU whose "highp" is not really 32-bit would draw the squares again: it keeps the CSS aura instead)
+    const high = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+    if (!high || high.precision < 23) {
+      releaseContext(gl, canvas);
+      return;
+    }
 
     const vs = compile(gl, gl.VERTEX_SHADER, VERT);
     const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
@@ -126,10 +138,10 @@ export default function HeroCanvas({ className = '' }: { className?: string }) {
 
     // Reduced-motion visitors still get the ambient effect, just calmer
     const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0.6 : 1;
-    // Touch screens have no hover, so a "virtual cursor" drifts around until someone touches
+    // Touch screens have no hover: the glow wanders on its own, as it does on a laptop left alone, and a tap sends a ripple
+    // as a click does. (No ripples on their own: waves of lit squares crossing the screen every few seconds read as flicker.)
     const coarse = window.matchMedia('(pointer: coarse)').matches;
     let lastPointerAt = -1e9;
-    const AUTO_RIPPLE_EVERY = 4.5; // seconds, touch screens only
     const mouse = { x: 0.7, y: 0.6 };
     const target = { x: 0.7, y: 0.6 };
     const ripples = new Float32Array([0, 0, -99, 0, 0, -99, 0, 0, -99, 0, 0, -99]);
@@ -161,8 +173,17 @@ export default function HeroCanvas({ className = '' }: { className?: string }) {
       nextRipple = (nextRipple + 1) % 4;
     };
 
+    // The shader's clock goes round every WRAP seconds, at a point where every wave in the caustics is back where it
+    // started (each runs at a multiple of 1/120 of the base speed), so a page left open for hours stays as sharp
+    let lastTime = 0;
     const draw = () => {
-      const time = elapsed() * speed;
+      const time = (elapsed() * speed) % WRAP;
+      if (time < lastTime) {
+        // (round again: ripples still under way belong to the old lap)
+        ripples.set([0, 0, -99, 0, 0, -99, 0, 0, -99, 0, 0, -99]);
+        lastRippleAt = -99;
+      }
+      lastTime = time;
       if (performance.now() - lastPointerAt > 2500) {
         // Idle: wander on a slow Lissajous path so the dot-grid glow keeps moving
         target.x = 0.5 + 0.34 * Math.sin(time * 0.33);
@@ -170,10 +191,6 @@ export default function HeroCanvas({ className = '' }: { className?: string }) {
       }
       mouse.x += (target.x - mouse.x) * 0.09;
       mouse.y += (target.y - mouse.y) * 0.09;
-      // Touch screens: while nobody is touching, the wandering glow sends out a ripple now and then
-      if (coarse && performance.now() - lastPointerAt > 2500 && time - lastRippleAt > AUTO_RIPPLE_EVERY) {
-        addRipple(mouse.x * canvas.width, mouse.y * canvas.height, time);
-      }
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, time);
       gl.uniform1f(uLive, time - lastRippleAt < RIPPLE_LIFE ? 1 : 0);
@@ -207,7 +224,7 @@ export default function HeroCanvas({ className = '' }: { className?: string }) {
       lastPointerAt = performance.now();
       target.x = (e.clientX - r.left) / r.width;
       target.y = 1 - (e.clientY - r.top) / r.height;
-      addRipple(target.x * canvas.width, target.y * canvas.height, elapsed() * speed);
+      addRipple(target.x * canvas.width, target.y * canvas.height, (elapsed() * speed) % WRAP);
     };
 
     const io = new IntersectionObserver(([entry]) => {
