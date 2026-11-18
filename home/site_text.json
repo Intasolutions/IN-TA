@@ -18,8 +18,7 @@
         ["home_hero_title", "Big title (| before the second, blue line)", "Engineering | Digital Reality"],
         ["home_hero_text", "Paragraph under the title", "We forge hyper-scaled software architecture, resilient manufacturing execution backends, and fine-tuned AI ecosystems for enterprise leaders across Kerala and global markets."],
         ["home_hero_cta_primary", "Main button", "Explore Selected Work"],
-        ["home_hero_cta_about", "Second button (it opens the About page)", "Who We Are"],
-        ["home_marquee", "Moving strip of services (separate with commas)", "Custom Software, Web Platforms, Mobile Apps, AI Integration, ERP Systems, UI/UX Design, SaaS Products, Cloud & DevOps"]
+        ["home_hero_cta_about", "Second button (it opens the About page)", "Who We Are"]
       ]
     },
     {

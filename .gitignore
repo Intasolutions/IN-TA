@@ -107,3 +107,7 @@ migrate_media.py
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Font downloads: the site loads only the .woff2 copies in app/fonts (the .ttf originals stay on disk)
+app/fonts/**/*.ttf
+app/fonts/**/static/

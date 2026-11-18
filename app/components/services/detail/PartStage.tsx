@@ -13,7 +13,7 @@ import { useReveal } from '../../../context/RevealContext';
 import { usePlayIntro } from '../../../context/usePlayIntro';
 import { createChip, type ChipEngine } from '../chipEngine';
 import { ALL_BLOCKS, BLOCKS, boardOf, centreOf, KIND, nameOf, STANDARD_SERVICES, type Block, type Board, type Holder } from '../floorplan';
-import { cameraAt, fieldOfView, FOV, partKeys, ramp, smooth, smoother } from '../score';
+import { cameraAt, partKeys, ramp, smooth, smoother } from '../score';
 import { refreshSoon } from './refresh';
 import { splitAccent, type DetailService, type Words } from './types';
 
@@ -129,7 +129,6 @@ export default function PartStage({ service, block, others, board, formId, insid
       tl.to('[data-part="callout"]', { autoAlpha: 0, duration: 0.14 }, 0.72);
       tl.fromTo('[data-part="entering"]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.14, ease: 'sine.out' }, 0.98);
       tl.to('[data-part="entering"]', { autoAlpha: 0, duration: 0.12 }, 1.5);
-      tl.to('[data-part="hud"]', { autoAlpha: 0, duration: 0.14 }, 1.56);
       tl.fromTo('[data-part="fade"]', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'sine.in' }, 1.66);
 
       // ---- The page, measured ----
@@ -229,7 +228,6 @@ export default function PartStage({ service, block, others, board, formId, insid
 
       const tipEl = root.querySelector<HTMLElement>('[data-part="tip"]')!;
       const calloutEl = root.querySelector<HTMLElement>('[data-part="callout"]')!;
-      const fieldEl = root.querySelector<HTMLElement>('[data-part="field"]')!;
       const on = new Float32Array(9);
       const prog = new Float32Array(9);
       const openGoal = new Float32Array(9);
@@ -248,7 +246,6 @@ export default function PartStage({ service, block, others, board, formId, insid
       let smoothed = -1;
       let shownTip = '';
       let shownCursor = '';
-      let shownField = '';
       let openedAt = -1;
 
       const tick = (time: number) => {
@@ -355,15 +352,10 @@ export default function PartStage({ service, block, others, board, formId, insid
           room: 1 - 0.7 * dive,
         });
 
-        // ---- The name on the part, and how close the camera is ----
+        // ---- The name on the part ----
         if (s < 0.95) {
           const [px, py] = engine.project(cx, 0.06, cz);
           calloutEl.style.transform = `translate3d(${px.toFixed(1)}px,${py.toFixed(1)}px,0)`;
-        }
-        const fieldText = fieldOfView(2 * cam.dist * aspect * Math.tan(FOV / 2));
-        if (fieldText !== shownField) {
-          shownField = fieldText;
-          fieldEl.textContent = fieldText;
         }
       };
       gsap.ticker.add(tick);
@@ -447,10 +439,6 @@ export default function PartStage({ service, block, others, board, formId, insid
           <span className="rounded-full bg-white px-4 py-2 shadow-lg">{say('diving')}</span>
         </p>
 
-        <dl data-part="hud" aria-hidden="true" className="pointer-events-none absolute bottom-3 left-3 z-10 hidden rounded-xl bg-white/90 px-3 py-2 font-mono text-[10px] uppercase tracking-wider shadow-md sm:left-6 sm:bottom-5 sm:block [@media(max-height:480px)]:hidden">
-          <div className="flex gap-3"><dt className="w-[8.5em] text-midnight/65">{say('hud_target')}</dt><dd className="font-bold text-brand-blue">{part}</dd></div>
-          <div className="flex gap-3"><dt className="w-[8.5em] text-midnight/65">{say('hud_field')}</dt><dd data-part="field" className="font-bold tabular-nums text-midnight">-</dd></div>
-        </dl>
 
         <div data-part="fade" aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 bg-midnight opacity-0" />
         <div data-part="tip" aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 rounded-md bg-midnight px-2 py-1 font-mono text-[10px] uppercase tracking-wider font-bold text-white opacity-0 transition-opacity duration-200" />

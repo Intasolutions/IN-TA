@@ -1,24 +1,30 @@
 'use client';
 
 import { useRef } from 'react';
+import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { useText } from '../site/SiteContext';
-import { listOf } from '../site/site';
+import { useSite } from '../site/SiteContext';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// The services in the strip are set in the admin (Site settings > Page wording)
+// The strip lists the services from the Services admin (in their order there), each one a link to its own page
 
-function Row({ items, hidden = false }: { items: string[]; hidden?: boolean }) {
+type Item = { title: string; slug: string };
+
+function Row({ items, hidden = false }: { items: Item[]; hidden?: boolean }) {
   return (
     <ul aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
       {items.map((item, i) => (
-        <li key={i} className="flex items-center">
-          <span className={`transition-colors duration-300 hover:text-brand-blue ${i % 2 === 0 ? 'text-midnight' : 'text-midnight/55'}`}>
-            {item}
-          </span>
+        <li key={item.slug} className="flex items-center">
+          <Link
+            href={`/services/${item.slug}`}
+            tabIndex={hidden ? -1 : undefined}
+            className={`transition-colors duration-300 hover:text-brand-blue focus-visible:text-brand-blue focus-visible:outline-none ${i % 2 === 0 ? 'text-midnight' : 'text-midnight/55'}`}
+          >
+            {item.title}
+          </Link>
           <span aria-hidden="true" className="mx-6 sm:mx-10 text-brand-blue">✦</span>
         </li>
       ))}
@@ -31,8 +37,7 @@ function Row({ items, hidden = false }: { items: string[]; hidden?: boolean }) {
  * Drifts on its own, speeds up with scroll velocity, follows scroll direction, and eases down on hover.
  */
 export default function Marquee() {
-  const t = useText();
-  const items = listOf(t('home_marquee'));
+  const items: Item[] = useSite().services.map(({ title, slug }) => ({ title, slug }));
   const wrapRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 

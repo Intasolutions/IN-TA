@@ -190,12 +190,6 @@ export function partKeys(block: Block, total: number, opening?: Room): Key[] {
   ];
 }
 
-/** How much of the board is in view, in millimetres (it is drawn as if it were 130 mm across) */
-export function fieldOfView(worldWidth: number) {
-  const mm = worldWidth * 50;
-  return mm >= 10 ? `${Math.round(mm)} mm` : `${mm.toFixed(1)} mm`;
-}
-
 export type Camera = {
   eye: [number, number, number];
   target: [number, number, number];

@@ -22,8 +22,6 @@ PAGE_TEXT = (
         ("fact_tools", "Count label: tools", "Tools"),
         ("fact_projects", "Count label: projects", "Live projects"),
         ("diving", "Line shown while flying into the part", "Going inside // {part}"),
-        ("hud_target", "Readout: target", "Target"),
-        ("hud_field", "Readout: field of view", "Field of view"),
     )),
     ("What it does", (
         ("overview_kicker", "Small line", "What it does // {part}"),

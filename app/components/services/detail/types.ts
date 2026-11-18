@@ -43,8 +43,6 @@ const STANDARD_WORDS = {
   fact_tools: 'Tools',
   fact_projects: 'Live projects',
   diving: 'Going inside // {part}',
-  hud_target: 'Target',
-  hud_field: 'Field of view',
   overview_kicker: 'What it does // {part}',
   overview_title: 'What it | does.',
   ideal_for_label: 'Right for you if',
