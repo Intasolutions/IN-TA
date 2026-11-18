@@ -1,20 +1,26 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSite, useText } from '../../site/SiteContext';
 import { linesOf, standardText } from '../../site/site';
 import { useOfficeStatus } from '../OfficeStatus';
 import type { Guide as GuideApi, GuideLines } from './engine';
+import GuideChat from './GuideChat';
+import type { PagePlan, PlanReply } from './chatTypes';
+import { pageContext, spotByText } from './pageContext';
 import css from './guide.module.css';
 
 // The website guide: a small 3D character beside the WhatsApp button, on every page (mounted once in ClientLayout, so
 // he stays put as the visitor moves between pages). The 3D engine (./engine, with three.js) is only fetched on a
 // computer that can run it comfortably, after the opening has cleared and the browser has a quiet moment, so it never
-// slows the page down. His lines are in the admin (Site settings > Page wording > Website guide).
+// slows the page down. His lines are in the admin (Site settings > Page wording > Website guide). "Ask me" opens his
+// chat (GuideChat.tsx), answered by Google's Gemini on the server (app/api/guide/route.ts). On each page Gemini also
+// writes his plan (app/api/guide/plan/route.ts): what he walks to, says and does there; his admin lines are the fallback.
 
 const MET = 'inta-guide-met'; // he has greeted this browser before
 const HIDDEN = 'inta-guide-hidden'; // hidden by the visitor, for this visit
+const PLAN = 'inta-guide-plan:'; // + the page's address: Gemini's plan for it, kept for this visit
 
 const read = (store: () => Storage, key: string) => { try { return store().getItem(key); } catch { return null; } };
 const write = (store: () => Storage, key: string, value: string) => { try { store().setItem(key, value); } catch { /* private mode */ } };
@@ -42,7 +48,8 @@ type Bubble = { text: string; x: number; y: number; ms: number; id: number } | n
 
 const NO_LINES: GuideLines = {
   welcome: [], back: [], tab: [], hover: () => [], pokes: [], about: [], serviceLines: [], services: [], dropped: [], missed: [], madeIt: [],
-  stroll: [], strollHome: [], section: () => [], sectionAny: [], look: { heading: [], button: [], image: [], field: [] },
+  stroll: [], strollHome: [], section: () => [], sectionAny: [], look: { heading: [], button: [], image: [], field: [] }, invite: [],
+  plan: null, resolve: () => null,
 };
 
 /** Typing speed for each character: a natural rhythm, with a breath after the end of a sentence or a comma */
@@ -85,9 +92,21 @@ export default function Guide() {
   const zzEl = useRef<HTMLSpanElement>(null);
   const [tuckedOn, setTuckedOn] = useState<string | null>(null);
   const tucked = tuckedOn === pathname;
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOnly, setChatOnly] = useState(false); // no robot on this screen, but the chat still works
+  const [chatOut, setChatOut] = useState(false); // the chat sent him out on the page to show something
+  // the open chat takes the whole height: he steps away, and only comes back to walk to what the chat is showing
+  const offstage = tucked || (chatOpen && !chatOut);
+  const chatOpenRef = useRef(false);
+  const refocus = useRef(false); // closing the chat puts the keyboard back on "Ask me" once it's back on screen
+  const openChat = () => { chatOpenRef.current = true; setBubble(null); setChatOpen(true); };
+  const closeChat = useCallback(() => { chatOpenRef.current = false; refocus.current = true; setChatOpen(false); }, []);
 
   // his lines, read fresh whenever he speaks (they follow the admin wording and the office hours)
   const lines = useRef<() => GuideLines>(() => NO_LINES);
+  // Gemini's plan for the page on screen, and the things on it, numbered as when the plan was asked for (fresh: by
+  // this very page view, so the numbers can be trusted; a plan kept from earlier finds things by their words)
+  const plan = useRef<{ path: string; plan: PagePlan; spots: Map<string, Element>; fresh: boolean } | null>(null);
 
   useEffect(() => {
     lines.current = () => ({
@@ -109,12 +128,22 @@ export default function Guide() {
     section: (key) => (/^[a-z0-9-]+$/.test(key) && standardText(`guide_section_${key.replace(/-/g, '_')}`) !== '' ? linesOf(t(`guide_section_${key.replace(/-/g, '_')}`)) : []),
     sectionAny: linesOf(t('guide_section_any')),
     look: { heading: linesOf(t('guide_look_heading')), button: linesOf(t('guide_look_button')), image: linesOf(t('guide_look_image')), field: linesOf(t('guide_look_field')) },
+    invite: linesOf(t('guide_chat_invite')),
+    plan: plan.current?.path === window.location.pathname ? plan.current.plan : null,
+    resolve: (beat) => {
+      const p = plan.current;
+      if (!p || p.path !== window.location.pathname) return null;
+      const el = p.fresh ? p.spots.get(beat.target) : null;
+      return el?.isConnected ? el : spotByText(beat.text);
+    },
     });
   });
 
   // start: only where he can run, once the opening is done and the browser is idle
   useEffect(() => {
-    if (read(() => sessionStorage, HIDDEN) || !canRun()) return;
+    if (read(() => sessionStorage, HIDDEN)) return;
+    // where he can't run (less motion asked for, a small device), "Ask me" still opens the chat, once the opening is done
+    if (!canRun()) return afterOpening(() => setChatOnly(true));
     let stopped = false;
     let idle = 0;
     const cancelOpening = afterOpening(() => {
@@ -124,7 +153,11 @@ export default function Guide() {
         const firstVisit = !read(() => localStorage, MET);
         import('./engine')
           .then(({ startGuide }) => startGuide(host.current!, canvas.current!, {
-            say: (text, at, ms = 2200) => { setTyped(''); setBubble({ text, x: at.x, y: at.y, ms, id: Date.now() + Math.random() }); },
+            // while the chat is open its panel has the words: no bubble over it, except what the chat asked him to say
+            say: (text, at, ms = 2200, force) => {
+              if (chatOpenRef.current && !force) return;
+              setTyped(''); setBubble({ text, x: at.x, y: at.y, ms, id: Date.now() + Math.random() });
+            },
             hush: () => setBubble(null),
             sleeping: (z, at) => setZz(z ? at : null),
             // the bubble and the z's ride along above his head (moved directly, without re-rendering)
@@ -163,7 +196,7 @@ export default function Guide() {
             api.current = g;
             write(() => localStorage, MET, '1');
           })
-          .catch(() => setOn(false)); // no model or no WebGL after all: the page simply has no guide
+          .catch(() => { setOn(false); setChatOnly(true); }); // no model or no WebGL after all: just the chat
       };
       if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(begin, { timeout: 3000 });
       else idle = window.setTimeout(begin, 1200);
@@ -176,6 +209,41 @@ export default function Guide() {
       api.current = null;
     };
   }, []);
+
+  // each page: Gemini's plan for it, once the page has settled (kept for the visit, and by the server for everyone)
+  useEffect(() => {
+    if (!on) return;
+    plan.current = null;
+    let gone = false;
+    let timer = 0;
+    const path = window.location.pathname;
+    const get = async () => {
+      if (gone) return;
+      if (!api.current) { timer = window.setTimeout(get, 1000); return; } // he's still arriving
+      const { page, spots } = pageContext(false);
+      let got: PagePlan | null = null;
+      let fresh = false;
+      try { got = JSON.parse(read(() => sessionStorage, PLAN + path) ?? 'null'); } catch { got = null; }
+      if (!got) {
+        try {
+          const res = await fetch('/api/guide/plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ page }) });
+          const reply: PlanReply = await res.json();
+          if (reply.ok) { got = reply.plan; fresh = true; write(() => sessionStorage, PLAN + path, JSON.stringify(got)); }
+        } catch { /* no plan: his admin lines carry on */ }
+      }
+      if (gone || !got || window.location.pathname !== path) return;
+      plan.current = { path, plan: got, spots, fresh };
+      // its greeting as soon as he's free (he may be mid-line or mid-walk), a few tries at most
+      const intro = got.intro;
+      const greet = (tries: number) => {
+        if (gone || window.location.pathname !== path) return;
+        if (!api.current?.announce(intro) && tries > 0) timer = window.setTimeout(() => greet(tries - 1), 2500);
+      };
+      greet(5);
+    };
+    timer = window.setTimeout(get, 2200);
+    return () => { gone = true; window.clearTimeout(timer); };
+  }, [pathname, on]);
 
   // the speech bubble types itself out at a natural rhythm, stays long enough to read (the engine's ms), then goes
   useEffect(() => {
@@ -215,22 +283,24 @@ export default function Guide() {
   }, [pathname]);
 
   // no drawing while he's tucked away, hidden, or the tab isn't being looked at; a hello when the visitor comes back
-  useEffect(() => { api.current?.pause(tucked || hidden); }, [tucked, hidden]);
+  useEffect(() => { api.current?.pause(offstage || hidden); }, [offstage, hidden]);
   useEffect(() => {
     let away = 0;
     const onVis = () => {
       if (document.hidden) { away = performance.now(); api.current?.pause(true); return; }
-      api.current?.pause(tucked || hidden);
+      api.current?.pause(offstage || hidden);
       if (away && performance.now() - away > 5000) api.current?.greetTab();
     };
     document.addEventListener('visibilitychange', onVis);
     return () => document.removeEventListener('visibilitychange', onVis);
-  }, [tucked, hidden]);
+  }, [offstage, hidden]);
 
   const hide = () => {
     write(() => sessionStorage, HIDDEN, '1');
     setHidden(true);
     setBubble(null);
+    chatOpenRef.current = false;
+    setChatOpen(false);
     api.current?.stop();
     api.current = null;
     document.documentElement.classList.remove('guide-hot');
@@ -239,10 +309,10 @@ export default function Guide() {
   if (hidden) return null;
   return (
     <>
-      <div ref={host} aria-hidden="true" className={`guide ${css.host} ${on ? css.on : ''} ${tucked ? css.tucked : ''}`}>
+      <div ref={host} aria-hidden="true" className={`guide ${css.host} ${on ? css.on : ''} ${offstage ? css.tucked : ''}`}>
         <canvas ref={canvas} />
       </div>
-      {bubble && !tucked && (
+      {bubble && !offstage && (
         // the whole line takes its space from the start (hidden), so the bubble doesn't grow and shift as it types
         <div ref={(el) => { bubbleEl.current = el; if (el) place(el, lastAt.current ?? bubble); }} aria-hidden="true" className={`guide-say ${css.say}`} key={bubble.id}>
           <span className={css.full}>{bubble.text}</span>
@@ -256,12 +326,21 @@ export default function Guide() {
         </span>
       ))}
       {zz && <span ref={zzEl} aria-hidden="true" className={`guide-z ${css.z}`} style={{ left: zz.x + 18, top: zz.y - 6 }}>z</span>}
-      {on && !tucked && docked && (
+      {on && !tucked && docked && !chatOpen && (
         <button type="button" onClick={hide} onPointerEnter={() => setCloseShown(true)} className={`guide-hide ${css.hide} ${closeShown ? css.shown : ''}`} aria-label="Hide the guide character"
           style={hideAt ? { left: Math.min(hideAt.x + 16, window.innerWidth - 60), top: Math.max(8, hideAt.y - 30) } : undefined}>
           Hide
         </button>
       )}
+      {((on && docked) || chatOnly) && !tucked && !chatOpen && (
+        // always there while he's on his button (or, with no robot, over the WhatsApp button): the way into his chat
+        <button ref={(el) => { if (el && refocus.current) { refocus.current = false; el.focus({ preventScroll: true }); } }} type="button" onClick={openChat}
+          className={`guide-ask ${css.ask} ${on ? '' : css.askAlone}`} aria-haspopup="dialog"
+          style={on && hideAt ? { left: Math.max(8, hideAt.x - 12), top: Math.max(8, hideAt.y - 30) } : undefined}>
+          {t('guide_chat_button')}
+        </button>
+      )}
+      {(on || chatOnly) && <GuideChat api={api} open={chatOpen} onClose={closeChat} robot={on} onOut={setChatOut} />}
     </>
   );
 }

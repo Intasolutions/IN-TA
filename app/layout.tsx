@@ -16,7 +16,7 @@ const MATERIAL_ICONS = [
   'arrow_outward', 'close', 'developer_board', 'location_on', 'menu',
   'north_east', 'schedule', 'travel_explore', 'design_services', 'terminal',
   'neurology', 'code', 'domain', 'devices', 'speed', 'lock',
-  'arrow_back', 'arrow_forward', 'south', 'mouse', 'article', 'check', 'arrow_upward', 'call', 'mail', 'add', 'east', 'west', 'open_in_full', 'search',
+  'arrow_back', 'arrow_forward', 'south', 'mouse', 'article', 'check', 'arrow_upward', 'call', 'mail', 'add', 'east', 'west', 'open_in_full', 'search', 'restart_alt', 'stop',
 ].sort().join(',');
 
 const API_ORIGIN = (() => {

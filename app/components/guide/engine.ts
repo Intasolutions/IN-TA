@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { LOOPS, type Clip, type Feeling } from './character';
 import { loadRobot } from './robot';
+import type { Gesture, Mood, PagePlan, PlanBeat } from './chatTypes';
 
 /** Each moment's lines from the admin: one is picked at random each time (the pokes go round in a shuffled order) */
 export type GuideLines = {
@@ -35,13 +36,19 @@ export type GuideLines = {
   sectionAny: string[];
   /** standing under something on the screen and looking up at it; {text} is its own words */
   look: Record<SpotKind, string[]>;
+  /** clicking him: an invitation to ask him something in the chat (empty while the chat can't be used) */
+  invite: string[];
+  /** Gemini's plan for this page (null without one: then the lines above are all he has) */
+  plan: PagePlan | null;
+  /** the thing on the page a beat of the plan points at */
+  resolve: (beat: PlanBeat) => Element | null;
 };
 
 export type SpotKind = 'heading' | 'button' | 'image' | 'field';
 
 export type GuideHooks = {
-  /** a speech bubble over his head, at this point on the screen */
-  say: (text: string, at: { x: number; y: number }, ms?: number) => void;
+  /** a speech bubble over his head, at this point on the screen (force: even while the chat is open) */
+  say: (text: string, at: { x: number; y: number }, ms?: number, force?: boolean) => void;
   hush: () => void;
   /** where his head is now, every frame: the speech bubble and the z's ride along with him */
   anchor: (at: { x: number; y: number }) => void;
@@ -59,7 +66,26 @@ export type GuideHooks = {
   lines: () => GuideLines;
 };
 
-export type Guide = { stop: () => void; pause: (on: boolean) => void; greetTab: () => void; moved: () => void };
+export type Guide = {
+  stop: () => void; pause: (on: boolean) => void; greetTab: () => void; moved: () => void;
+  /** the chat is open (he stays on his button and keeps an eye on it, panel) or closed */
+  chat: (on: boolean, panel: Element | null) => void;
+  /** working on an answer: a thoughtful look up and away */
+  think: (on: boolean) => void;
+  /** a move an answer asked for, and the face he makes */
+  gesture: (g: Gesture, mood?: Mood) => void;
+  /**
+   * walk down to this (on screen now) and look up at it, saying the caption when he gets there. On a walk already, he
+   * goes straight on to it. hold: he waits there (for the next stop of a tour) until release(). False if he can't now.
+   */
+  show: (el: Element, opts?: { caption?: string; hold?: boolean }) => boolean;
+  /** the tour is over (or stopped): back to his button */
+  release: () => void;
+  /** what he's doing, for the chat's status line */
+  status: () => 'home' | 'walking' | 'looking' | 'away';
+  /** a new page's plan has come: he greets the page with its line (false if he's busy) */
+  announce: (text: string) => boolean;
+};
 
 // docked: a box standing on top of the WhatsApp button, his feet just on it (this size at his full size)
 const DOCK = { w: 150, h: 170 };
@@ -357,15 +383,15 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   let sayTimer = 0;
   let saying = 0; // each line said gets a number: a line still waiting is dropped when a newer one starts
   /** say a line for this moment, after a short, human pause; gesture plays as he speaks. Returns how long it's on screen (ms) */
-  const speak = (moment: string, list: string[], { vars = {}, delay = rand(120, 380), gesture, text: given }:
-    { vars?: Record<string, string>; delay?: number; gesture?: () => void; text?: string } = {}) => {
+  const speak = (moment: string, list: string[], { vars = {}, delay = rand(120, 380), gesture, text: given, force }:
+    { vars?: Record<string, string>; delay?: number; gesture?: () => void; text?: string; force?: boolean } = {}) => {
     const text = given ?? pick(moment, list, vars);
     if (!text) return 0;
     const mine = ++saying;
     window.clearTimeout(sayTimer);
     sayTimer = window.setTimeout(() => {
       if (mine !== saying) return;
-      hooks.say(text, headAt(), readFor(text));
+      hooks.say(text, headAt(), readFor(text), force);
       gesture?.();
     }, delay);
     return delay + text.length * 32 + readFor(text);
@@ -374,8 +400,8 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   // ---- behaviours ----
   // A click: the kinds of line take turns (a fun one, then one of our services, then one about us), each kind from its
   // own shuffled bag, and the services themselves come round one by one in a shuffled order, each with its own name.
-  const CLICK_ORDER = ['fun', 'service', 'about'] as const;
-  const CLICK_MOVES: Record<(typeof CLICK_ORDER)[number], Clip[]> = { fun: ['Jump', 'Yes', 'Wave'], service: ['ThumbsUp', 'Yes'], about: ['Yes', 'Wave', 'ThumbsUp'] };
+  const CLICK_ORDER = ['fun', 'service', 'about', 'ask'] as const;
+  const CLICK_MOVES: Record<(typeof CLICK_ORDER)[number], Clip[]> = { fun: ['Jump', 'Yes', 'Wave'], service: ['ThumbsUp', 'Yes'], about: ['Yes', 'Wave', 'ThumbsUp'], ask: ['Wave', 'ThumbsUp'] };
   let clicks = 0;
   let lastPoke: Clip | null = null;
   function pokeHim() {
@@ -385,8 +411,9 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     let service = '';
     for (let i = 0; i < CLICK_ORDER.length && !text; i++) {
       kind = CLICK_ORDER[(clicks + i) % CLICK_ORDER.length];
-      if (kind === 'fun') text = pick('click:fun', L.pokes);
+      if (kind === 'fun') text = L.plan?.pokes.length ? pick('click:plan', L.plan.pokes) : pick('click:fun', L.pokes);
       else if (kind === 'about') text = pick('click:about', L.about);
+      else if (kind === 'ask') text = chat.on ? '' : pick('click:ask', L.invite);
       else if (L.services.length) {
         service = pick('click:service-name', L.services);
         text = pick('click:service', L.serviceLines, { service });
@@ -402,7 +429,45 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     speak(`click:${kind}`, [], { text, delay: rand(60, 200) });
     busyUntil = now() + rand(1500, 2100) + (text ? text.length * 20 : 0);
   }
-  function endStroll() { stroll.spot = null; look.at = null; }
+  function endStroll() { stroll.spot = null; stroll.silent = false; stroll.hold = false; stroll.caption = ''; stroll.beat = null; look.at = null; }
+
+  // ---- Gemini's plan for the page: its beats in order, each once, whichever are on screen when he's ready ----
+  const beatsDone = new WeakSet<PlanBeat>();
+  const CLIPS: Record<Exclude<Gesture, 'none'>, Clip> = { wave: 'Wave', nod: 'Yes', shake_head: 'No', thumbs_up: 'ThumbsUp', jump: 'Jump', dance: 'Dance', sit: 'Sitting' };
+  const moodOf = (m: Mood) => {
+    if (m === 'surprised') feel('Surprised', 0.9, 1300);
+    else if (m === 'sad') feel('Sad', 0.6, 1800);
+    else if (m === 'happy') feel('Surprised', 0.3, 900);
+  };
+  /** a move from the plan or the chat; Sitting and Dance loop, so they're ended by hand */
+  const playGesture = (g: Gesture) => {
+    const clip = g === 'none' ? null : CLIPS[g];
+    if (!clip) return;
+    play(clip, { speed: clip === 'Sitting' ? 1 : rand(0.95, 1.1), then: () => play('Idle') });
+    if (clip === 'Dance') window.setTimeout(() => { if (ch.is('Dance')) play('Idle'); }, rand(2400, 3000));
+    if (clip === 'Sitting') window.setTimeout(() => { if (ch.is('Sitting') && state === 'home') play('Idle', { fade: 0.5 }); }, 3400);
+  };
+  /** the next beat not yet played: a move where he stands, or something on screen now to walk to */
+  function nextBeat(walksOnly = false): { beat: PlanBeat; el: Element | null } | null {
+    const L = hooks.lines();
+    for (const beat of L.plan?.beats ?? []) {
+      if (beatsDone.has(beat)) continue;
+      if (!beat.target) { if (walksOnly) continue; return { beat, el: null }; }
+      const el = L.resolve(beat);
+      if (el && inView(el, el.getBoundingClientRect())) return { beat, el };
+    }
+    return null;
+  }
+  /** a beat where he stands: the move and the line */
+  function beatHere(beat: PlanBeat) {
+    beatsDone.add(beat);
+    busyUntil = now() + 2600;
+    lookAt(null, rand(1500, 2200));
+    moodOf(beat.mood);
+    playGesture(beat.gesture);
+    speak('plan', [], { text: beat.say, delay: rand(150, 350) });
+    nextStrollAt = now() + rand(16000, 26000);
+  }
   function pickUp() {
     state = 'carried';
     endStroll();
@@ -571,6 +636,8 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   }
   function chooseGaze() {
     const r = Math.random();
+    if (chat.thinking) { Object.assign(gaze, { el: null, viewer: true, dx: rand(-60, -30), dy: rand(-150, -110), until: now() + rand(900, 1600) }); return; }
+    if (chat.on) { if (r < 0.7 && chat.panel?.isConnected) lookAt(chat.panel, rand(2500, 4500)); else lookAt(null, rand(1500, 2500)); return; }
     const spot = r < 0.5 ? pickSpot(sectionNow()) : null;
     if (spot) lookAt(spot.el, rand(1600, 3400));
     else if (r < 0.75) lookAt(null, rand(1800, 3600));
@@ -579,7 +646,9 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
 
   // ---- walks: off the button, along the bottom of the screen to something on it, a look and a word, then back ----
   type Spot = { el: Element; kind: SpotKind; text: string };
-  const stroll = { spot: null as Spot | null, x: 0, phase: 'walk' as 'walk' | 'look', until: 0, visits: 0 };
+  const stroll = { spot: null as Spot | null, x: 0, phase: 'walk' as 'walk' | 'look', until: 0, visits: 0, silent: false, hold: false, caption: '', beat: null as PlanBeat | null };
+  // the chat: open (he stays on his button watching it, no walks, remarks or naps), and working on an answer
+  const chat = { on: false, panel: null as Element | null, thinking: false };
   let nextStrollAt = now() + rand(12000, 20000);
   let strollsSinceMove = 0;
   let lastScroll = 0;
@@ -635,6 +704,8 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   function sayAboutSection(s: Section, gesture?: () => void) {
     talkedAbout.add(sectionKeyOf(s));
     const L = hooks.lines();
+    const planned = s.el.id ? L.plan?.sections[s.el.id] : '';
+    if (planned) return speak('section:plan', [], { text: planned, gesture });
     const own = s.key ? L.section(s.key) : [];
     const page = own.length ? own : L.section(s.page);
     const [moment, list] = page.length ? [`section:${own.length ? s.key : s.page}`, page] : ['section:any', L.sectionAny];
@@ -682,9 +753,12 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
 
   function startStroll() {
     const sec = sectionNow();
-    const spot = pickSpot(sec);
+    const planned = nextBeat();
+    if (planned && !planned.el) { beatHere(planned.beat); return; }
+    if (planned) beatsDone.add(planned.beat);
+    const spot: Spot | null = planned?.el ? { el: planned.el, kind: 'heading', text: '' } : pickSpot(sec);
     if (!spot) { nextStrollAt = now() + rand(15000, 25000); return; }
-    stroll.spot = spot; stroll.visits = 0; stroll.phase = 'walk';
+    stroll.spot = spot; stroll.visits = 0; stroll.phase = 'walk'; stroll.silent = false; stroll.beat = planned?.beat ?? null;
     strollsSinceMove += 1;
     busyUntil = Infinity;
     hooks.hush();
@@ -719,6 +793,24 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     looked.add(spot.el);
     look.on = true;
     play('Idle', { fade: 0.25 });
+    if (stroll.silent) {
+      // showing what the chat is talking about: a nod up at it and the caption, then back (or, on a tour, he waits)
+      const nod = () => { if (state === 'strolling' && stroll.spot === spot) play(any(['Yes', 'ThumbsUp'] as const)); };
+      const said = stroll.caption ? speak('caption', [], { text: stroll.caption, force: true, delay: rand(250, 400), gesture: nod }) : 0;
+      if (!said) window.setTimeout(nod, rand(300, 500));
+      stroll.until = now() + (stroll.hold ? 16000 : Math.max(said, 3200) + rand(200, 600));
+      return;
+    }
+    if (stroll.beat) {
+      // a beat from the plan: its own line, move and face
+      const beat = stroll.beat;
+      stroll.beat = null;
+      moodOf(beat.mood);
+      const said = speak('plan', [], { text: beat.say, delay: rand(400, 700),
+        gesture: () => { if (state === 'strolling' && stroll.spot === spot) playGesture(beat.gesture === 'none' || beat.gesture === 'sit' ? 'nod' : beat.gesture); } });
+      stroll.until = now() + Math.max(said, 1800) + rand(300, 900);
+      return;
+    }
     const gesture: Clip = spot.kind === 'button' ? any(['ThumbsUp', 'Wave', 'Jump'] as const)
       : spot.kind === 'image' ? any(['Yes', 'ThumbsUp'] as const)
       : spot.kind === 'field' ? 'Wave' : any(['Yes', 'ThumbsUp', 'Wave'] as const);
@@ -732,10 +824,17 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     // sometimes one more thing nearby, otherwise back to the button
     look.at = null;
     stroll.visits += 1;
-    const next = stroll.visits < 3 && Math.random() < 0.45 ? pickSpot(sectionNow()) : null;
+    let next: Spot | null = null;
+    if (!stroll.silent && stroll.visits < 3) {
+      // one more thing nearby now and then: the plan's next beat on screen if there is one, else anything worth a look
+      const planned = nextBeat(true);
+      if (planned?.el) { if (Math.random() < 0.55) { beatsDone.add(planned.beat); stroll.beat = planned.beat; next = { el: planned.el, kind: 'heading', text: '' }; } }
+      else if (Math.random() < 0.45) next = pickSpot(sectionNow());
+    }
     if (next) { stroll.spot = next; strollWalk(); return; }
     stroll.spot = null;
-    if (Math.random() < 0.45) speak('strollHome', hooks.lines().strollHome);
+    if (!stroll.silent && Math.random() < 0.45) speak('strollHome', hooks.lines().strollHome);
+    stroll.silent = false;
     walkHome();
   }
   function intro() {
@@ -857,8 +956,14 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     } else if (state === 'strolling') {
       const spot = stroll.spot;
       const r = spot && spot.el.isConnected ? spot.el.getBoundingClientRect() : null;
-      if (!spot || !r || !inView(spot.el, r)) strollOn(); // scrolled away or gone: something else, or home
-      else if (stroll.phase === 'walk') {
+      if (!spot || !r || !inView(spot.el, r)) {
+        // scrolled away or gone: something else, or home; on a tour he waits where he is for the next stop
+        if (stroll.hold && spot && now() < stroll.until) {
+          look.at = null;
+          me.turn += (0 - me.turn) * 0.12;
+          if (stroll.phase === 'walk') { stroll.phase = 'look'; play('Idle', { fade: 0.25 }); }
+        } else strollOn();
+      } else if (stroll.phase === 'walk') {
         const dx = stroll.x - me.x;
         me.turn += ((dx > 0 ? 1 : -1) * Math.PI / 2 - me.turn) * 0.15;
         me.x += Math.sign(dx) * Math.min(Math.abs(dx), WALK * S * 0.9 * dt);
@@ -932,22 +1037,22 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
         waveCooldown = now() + rand(8000, 12000);
         busyUntil = now() + 1800;
         play('Wave', { speed: rand(0.9, 1.1) });
-      } else if (sec && !scrolling && now() - sectionSince > 1400 && now() > talkCooldown && !talkedAbout.has(sectionKeyOf(sec))) {
+      } else if (!chat.on && sec && !scrolling && now() - sectionSince > 1400 && now() > talkCooldown && !talkedAbout.has(sectionKeyOf(sec))) {
         // settled on a new part of the page: most of the time a word about it (once each), a gesture to go with it
         talkCooldown = now() + rand(8000, 12000);
         if (Math.random() < 0.65) {
           const said = sayAboutSection(sec, () => play(any(['Wave', 'ThumbsUp', 'Yes'] as const)));
           if (said) busyUntil = now() + Math.min(said, 3500);
         } else talkedAbout.add(sectionKeyOf(sec));
-      } else if (now() > nextStrollAt && !scrolling && !pointerNear && strollsSinceMove < 3 && document.visibilityState === 'visible') {
+      } else if (!chat.on && now() > nextStrollAt && !scrolling && !pointerNear && strollsSinceMove < 3 && document.visibilityState === 'visible') {
         startStroll();
-      } else if ((quiet > SLEEP_AFTER && strollsSinceMove >= 2) || quiet > SLEEP_AFTER * 3) {
+      } else if (!chat.on && ((quiet > SLEEP_AFTER && strollsSinceMove >= 2) || quiet > SLEEP_AFTER * 3)) {
         state = 'asleep';
         look.on = false;
         feel('Sad', 0.5);
         play(base = 'Sitting', { fade: 0.6 });
         hooks.sleeping(true, headAt());
-      } else if (base === 'Idle' && now() > fidgetAt) {
+      } else if (base === 'Idle' && !chat.thinking && now() > fidgetAt) {
         // fidgets: a little dance step, a nod, a thumbs up to nobody in particular
         fidgetAt = now() + rand(14000, 30000);
         busyUntil = now() + 2500;
@@ -992,6 +1097,65 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
       busyUntil = now() + 1800;
       play('Wave');
       speak('tab', hooks.lines().tab);
+    },
+    chat(on, panel) {
+      chat.on = on; chat.panel = panel; chat.thinking = false;
+      if (on) { wake(); gaze.until = 0; }
+      else nextStrollAt = Math.max(nextStrollAt, now() + rand(15000, 25000));
+    },
+    think(on) {
+      chat.thinking = on;
+      gaze.until = 0;
+      if (on && state === 'home') { wake(); feel('Surprised', 0.3, 700); }
+    },
+    gesture(g, mood = 'neutral') {
+      // the face first (the model has no smile: happy is a bright, open look), then the move
+      moodOf(g === 'shake_head' && mood === 'neutral' ? 'sad' : mood);
+      if (g === 'none' || (state !== 'home' && state !== 'asleep')) return;
+      wake();
+      busyUntil = now() + (g === 'sit' ? 3600 : 2000);
+      lookAt(null, rand(1500, 2200)); // to the visitor as he answers
+      playGesture(g);
+    },
+    announce(text) {
+      // a new page's plan: its greeting now (if he's free), and his first walk soon after
+      nextStrollAt = Math.min(nextStrollAt, now() + rand(9000, 15000));
+      if (!text || state !== 'home' || chat.on || now() < busyUntil) return false;
+      busyUntil = now() + 2400;
+      lookAt(null, rand(1500, 2200));
+      play(any(['Wave', 'ThumbsUp', 'Yes'] as const));
+      speak('intro', [], { text, delay: rand(150, 300) });
+      return true;
+    },
+    show(el, { caption = '', hold = false } = {}) {
+      if (state === 'asleep') wake();
+      const r = el.getBoundingClientRect();
+      if (!inView(el, r)) return false;
+      const spot: Spot = { el, kind: 'heading', text: '' };
+      if (state === 'strolling' && stroll.silent) {
+        // already out on a walk for the chat: straight on to the next thing
+        Object.assign(stroll, { spot, caption, hold, visits: 0 });
+        stateSince = simT; // a new stop: the safety net counts from here, so a long tour isn't cut short
+        hooks.hush();
+        strollWalk();
+        return true;
+      }
+      if (state !== 'home') return false;
+      Object.assign(stroll, { spot, caption, hold, visits: 0, phase: 'walk', silent: true });
+      busyUntil = Infinity;
+      hooks.hush();
+      hopDown(standX(el) < homeOf().x ? -1 : 1);
+      return true;
+    },
+    release() {
+      stroll.hold = false;
+      if (state === 'strolling' && stroll.silent) { stroll.until = 0; if (stroll.phase === 'walk') strollOn(); }
+    },
+    status() {
+      if (state === 'home' || state === 'asleep' || state === 'intro') return 'home';
+      if (state === 'strolling') return stroll.phase === 'look' ? 'looking' : 'walking';
+      if (state === 'hopping' && hop.down) return 'walking';
+      return 'away';
     },
     moved() {
       // a new page: a walk in progress ends (what he was looking at has gone), and new parts of the page get remarks
