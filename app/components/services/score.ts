@@ -19,16 +19,24 @@ const rad = (d: number) => (d * Math.PI) / 180;
 type Frame = 'hero' | 'plan' | 'card' | 'free' | 'ask' | 'close' | 'opening' | 'fill' | 'centre';
 export type Room = { sx: number; sy: number; fw: number; fh: number };
 
+// On a phone the board is the background: it fills the screen behind the words (which sit on see-through white) instead
+// of sharing the screen with them. Wider than the screen (fw > 1), so it runs past both edges like a backdrop.
+const PHONE_BACKDROP: Room = { sx: 0, sy: 0.1, fw: 1.7, fh: 0.9 };
+const isPhone = (aspect: number) => aspect < 0.6;
+
 function roomFor(frame: Frame, aspect: number): Room {
   const wide = aspect > 1.15;
   switch (frame) {
     case 'hero':
+      if (isPhone(aspect)) return { ...PHONE_BACKDROP, sy: 0 };
       return wide ? { sx: 0.5, sy: -0.08, fw: 0.5, fh: 0.86 } : { sx: 0, sy: -0.72, fw: 1, fh: 0.25 };
     case 'plan':
       return wide ? { sx: 0.36, sy: -0.02, fw: 0.64, fh: 0.94 } : { sx: 0, sy: -0.22, fw: 1, fh: 0.66 };
     case 'card':
+      if (isPhone(aspect)) return PHONE_BACKDROP;
       return wide ? { sx: 0.44, sy: 0, fw: 0.54, fh: 0.86 } : { sx: 0, sy: 0.5, fw: 0.98, fh: 0.42 };
     case 'ask':
+      if (isPhone(aspect)) return PHONE_BACKDROP;
       return wide ? { sx: 0, sy: 0.22, fw: 0.9, fh: 0.62 } : { sx: 0, sy: 0.3, fw: 0.98, fh: 0.5 };
     case 'close':
       // (on an upright tablet the board comes closer, so that it runs past the bottom of the screen and the form rises

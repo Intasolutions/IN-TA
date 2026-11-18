@@ -194,14 +194,20 @@ export default function Guide() {
   // the cursor shows he can be picked up (the "Hide" button stays a moment after the pointer leaves him: see hot above)
   useEffect(() => { document.documentElement.classList.toggle('guide-hot', hot); }, [hot]);
 
-  // he steps aside wherever the WhatsApp button does (the hero's buttons, the footer's back-to-top row)
+  // he steps aside wherever the WhatsApp button does (the hero's buttons, the footer's back-to-top row), and on his own
+  // where [data-guide-clear] shows, on the screens its value names as a media query (the services board on phones and
+  // tablets, whose cards sit just above the button: he and his bubble would cover their words)
   useEffect(() => {
-    const targets = [...document.querySelectorAll('[data-floating-clear]')];
+    const targets = [...document.querySelectorAll('[data-floating-clear], [data-guide-clear]')];
     api.current?.moved();
     if (!targets.length) return;
     const seen = new Set<Element>();
+    const applies = (el: Element) => {
+      const media = (el as HTMLElement).dataset.guideClear;
+      return !media || window.matchMedia(media).matches;
+    };
     const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)));
+      entries.forEach((e) => (e.isIntersecting && applies(e.target) ? seen.add(e.target) : seen.delete(e.target)));
       setTuckedOn(seen.size ? pathname : null);
     });
     targets.forEach((el) => io.observe(el));
@@ -236,7 +242,7 @@ export default function Guide() {
       <div ref={host} aria-hidden="true" className={`guide ${css.host} ${on ? css.on : ''} ${tucked ? css.tucked : ''}`}>
         <canvas ref={canvas} />
       </div>
-      {bubble && (
+      {bubble && !tucked && (
         // the whole line takes its space from the start (hidden), so the bubble doesn't grow and shift as it types
         <div ref={(el) => { bubbleEl.current = el; if (el) place(el, lastAt.current ?? bubble); }} aria-hidden="true" className={`guide-say ${css.say}`} key={bubble.id}>
           <span className={css.full}>{bubble.text}</span>

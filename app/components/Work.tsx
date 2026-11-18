@@ -171,14 +171,15 @@ function SeeAllCard({ projects }: { projects: Project[] }) {
             </span>
           </span>
           <span className="mt-6 flex items-center justify-between gap-4">
-            <span className="flex -space-x-3">
+            {/* (the alt text is for search engines; the link already says where it goes, so screen readers skip these) */}
+            <span aria-hidden="true" className="flex -space-x-3">
               {projects.slice(GALLERY_COUNT, GALLERY_COUNT + 5).map((p, i) => (
                 <span
                   key={p.id}
                   className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-[#06123f] bg-white/10 transition-transform duration-300 group-hover:-translate-y-1"
                   style={{ transitionDelay: `${i * 50}ms` }}
                 >
-                  <Image src={p.hero} alt="" fill sizes="48px" className="object-cover object-top" />
+                  <Image src={p.hero} alt={`${p.title}: the finished work`} fill sizes="48px" className="object-cover object-top" />
                 </span>
               ))}
             </span>

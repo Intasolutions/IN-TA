@@ -58,7 +58,7 @@ export function Cover({ post, sizes, zoom = '', priority = false }: { post: Post
   }
   return (
     <>
-      <Image src={post.image} alt="" fill sizes={sizes} aria-hidden="true" className="object-cover scale-125 blur-2xl saturate-150" />
+      <Image src={post.image} alt={post.alt} fill sizes={sizes} aria-hidden="true" className="object-cover scale-125 blur-2xl saturate-150" />
       <span className={`absolute inset-0 transition-transform duration-700 ease-out ${zoom}`}>
         <Image src={post.image} alt={post.alt} fill sizes={sizes} {...(priority ? { loading: 'eager' as const, fetchPriority: 'high' as const } : {})} className="object-contain" />
       </span>

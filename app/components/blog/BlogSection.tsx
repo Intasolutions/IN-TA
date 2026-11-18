@@ -170,8 +170,9 @@ export default function BlogSection({ initial = null }: { initial?: Post[] | nul
           {list.map((p, i) =>
             p.image ? (
               <span key={p.id} data-bl-img={i} className="absolute inset-0">
-                <Image src={p.image} alt="" fill sizes="280px" className="object-cover scale-125 blur-xl saturate-150" />
-                <Image src={p.image} alt="" fill sizes="280px" className="object-contain" />
+                {/* (inside aria-hidden: the alt text is for search engines only) */}
+                <Image src={p.image} alt={p.alt} fill sizes="280px" className="object-cover scale-125 blur-xl saturate-150" />
+                <Image src={p.image} alt={p.alt} fill sizes="280px" className="object-contain" />
               </span>
             ) : (
               <span key={p.id} data-bl-img={i} className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-midnight via-[#0a2a80] to-brand-blue">

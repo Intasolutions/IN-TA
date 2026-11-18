@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useGSAPWhenNear } from './useGSAPWhenNear';
 import Icon from './Icon';
+import H2 from './H2';
 import { IstClock } from './Header';
 import { useOfficeStatus } from './OfficeStatus';
 import { scrollToTop } from './SmoothScroll';
@@ -71,6 +72,7 @@ export function useSocials() {
   return SOCIAL_ICONS.filter((s) => socials[s.key]).map((s) => ({ name: s.name, href: socials[s.key], icon: s.icon }));
 }
 
+// Column labels: headings for screen readers, not page topics for search engines (see H2)
 const HEAD = 'mb-3 font-display text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-white/45';
 
 /** Label that rolls up to a blue copy of itself when its link (a `group/roll`) is hovered or focused */
@@ -214,7 +216,7 @@ export default function Footer() {
       {/* The logo file, huge and faint, rising out of the bottom edge */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center translate-y-[30%]">
         <div data-ft="mark" className="w-[min(1500px,130%)] shrink-0 opacity-[0.06]">
-          <Image src="/logo/logo-inta.png" alt="" width={774} height={322} sizes="100vw" className="w-full h-auto" />
+          <Image src="/logo/logo-inta.png" alt="IN-TA Solutions logo" width={774} height={322} sizes="100vw" className="w-full h-auto" />
         </div>
       </div>
 
@@ -299,7 +301,7 @@ export default function Footer() {
             </div>
 
             <nav aria-label="Footer" className="lg:col-span-2">
-              <h2 data-ft="item" className={HEAD}>Explore</h2>
+              <H2 plain data-ft="item" className={HEAD}>Explore</H2>
               <ul className="space-y-2">
                 {EXPLORE.map((l) => (
                   <li key={l.href} data-ft="item">
@@ -312,7 +314,7 @@ export default function Footer() {
             </nav>
 
             <div className="lg:col-span-3">
-              <h2 data-ft="item" className={HEAD}>Services</h2>
+              <H2 plain data-ft="item" className={HEAD}>Services</H2>
               <ul className="space-y-2">
                 {site.services.map((s) => (
                   <li key={s.slug} data-ft="item">
@@ -325,7 +327,7 @@ export default function Footer() {
             </div>
 
             <div className="col-span-2 lg:col-span-3">
-              <h2 data-ft="item" className={HEAD}>Visit us</h2>
+              <H2 plain data-ft="item" className={HEAD}>Visit us</H2>
               {/* the office's postal address, marked as the company's address */}
               <address className="not-italic">
                 <a
@@ -351,7 +353,7 @@ export default function Footer() {
                 {hoursShort(site)}
               </p>
 
-              <h2 data-ft="item" className={`${HEAD} mt-6`}>Follow</h2>
+              <H2 plain data-ft="item" className={`${HEAD} mt-6`}>Follow</H2>
               <ul className="flex flex-wrap gap-2">
                 {socials.map((s) => (
                   <li key={s.name} data-ft="item">

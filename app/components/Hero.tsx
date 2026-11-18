@@ -316,17 +316,22 @@ export default function Hero() {
           </div>
 
           <div className="relative [perspective:1200px]">
-            {/* The title once, as search engines read it ("Smarter software & AI for your business"); its letters are
-                separate only for the entrance, so screen readers get the whole title from the label */}
+            {/* The title once in the page text, as search engines read it ("Smarter software & AI for your business").
+                The first line's letters are separate inline-block spans for the entrance, which screen readers would spell
+                out ("S m a r t e r"), so they're hidden from them and the word is given back by CSS (.hero-title-sr,
+                content: attr()), which crawlers don't count. An aria-label did the same, but audit tools read the label and
+                the text together and reported the title twice */}
             <h1
               data-hero="tilt"
-              aria-label={`${titleTop} ${titleBottom}`.trim()}
               className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.02em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
             >
               <span className="block overflow-hidden pb-[0.06em]">
-                {[...titleTop].map((ch, i) => (
-                  <span key={i} className="hero-char inline-block">{ch}</span>
-                ))}
+                <span aria-hidden="true">
+                  {[...titleTop].map((ch, i) => (
+                    <span key={i} className="hero-char inline-block">{ch}</span>
+                  ))}
+                </span>
+                <span className="hero-title-sr sr-only" data-label={titleTop} />
               </span>{' '}
               <span className="block">
                 {/* Gradient text only paints inside its box, so pad it to include the g/y descenders */}

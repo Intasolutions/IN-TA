@@ -12,6 +12,7 @@ import { scrollToY } from '../SmoothScroll';
 import { IstClock } from '../Header';
 import { useOfficeStatus } from '../OfficeStatus';
 import TechOrbit from '../stack/TechOrbit';
+import H2 from '../H2';
 import { usePlayIntro } from '../../context/usePlayIntro';
 import { ClientBoard, ClientRoute, useClients } from './ClientLogos';
 import EarthReturn from './EarthReturn';
@@ -130,18 +131,19 @@ function Core({ className = '' }: { className?: string }) {
   );
 }
 
-function Heading({ count }: { count: number }) {
+/** `plain` on the large-screen copy, so the page's outline holds each heading once (see H2) */
+function Heading({ count, plain = false }: { count: number; plain?: boolean }) {
   const t = useText();
-  const [plain, bright] = accent(t('about_services_title', { n: countInWords(count) }));
+  const [words, bright] = accent(t('about_services_title', { n: countInWords(count) }));
   return (
     <div data-sm="head" className="motion-safe:invisible motion-safe:opacity-0 text-center">
       <span className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-2">
         <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
         {t('about_services_kicker')}
       </span>
-      <h2 className="heading-section text-white">
-        {plain} <span className={GRADIENT_ON_DARK}>{bright}</span>
-      </h2>
+      <H2 plain={plain} className="heading-section text-white">
+        {words} <span className={GRADIENT_ON_DARK}>{bright}</span>
+      </H2>
     </div>
   );
 }
@@ -783,7 +785,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         aria-labelledby="sm-title"
         className={`relative h-[440svh] motion-reduce:h-auto ${clients.length ? '[@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[1040vh]' : '[@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:h-[840vh]'}`}
       >
-        <div data-sm="stage" className="sticky top-0 h-svh overflow-hidden motion-reduce:relative motion-reduce:h-auto motion-reduce:min-h-svh">
+        <div data-sm="stage" data-guide-clear="(max-width: 1023.98px)" className="sticky top-0 h-svh overflow-hidden motion-reduce:relative motion-reduce:h-auto motion-reduce:min-h-svh">
           {/* The opening grows this in. The imagery's own canvas keeps its separate reveal (on its first frame), which a
               tween on the canvas itself would pin at the hidden value it started from. */}
           <div data-sm="globe" className="absolute inset-0">
@@ -821,10 +823,12 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           </div>
 
           {/* ---- Where it started: over the real terrain, while the camera holds on the coordinates ---- */}
+          {/* (on phones it sits above the WhatsApp button, whose top is 80px up; the guide character steps aside over this
+              scene on phones and tablets: data-guide-clear on the stage) */}
           <div
             data-sm="story"
             // hidden until the scroll brings it in (with reduced motion it's a plain block under the map)
-            className="motion-safe:invisible motion-safe:opacity-0 pointer-events-none absolute left-4 right-4 bottom-20 [@media(max-height:480px)]:bottom-3 rounded-2xl border border-white/12 bg-[#01072b]/80 p-4 sm:p-6 sm:left-6 sm:right-auto sm:max-w-md [@media(max-height:480px)]:max-w-[20rem] [@media(max-height:480px)]:p-3
+            className="motion-safe:invisible motion-safe:opacity-0 pointer-events-none absolute left-4 right-4 bottom-[5.75rem] sm:bottom-20 [@media(max-height:480px)]:bottom-3 rounded-2xl border border-white/12 bg-[#01072b]/80 p-4 sm:p-6 sm:left-6 sm:right-auto sm:max-w-md [@media(max-height:480px)]:max-w-[20rem] [@media(max-height:480px)]:p-3
               motion-reduce:relative motion-reduce:inset-auto motion-reduce:mx-4 motion-reduce:mt-6
               [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:top-1/2 [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:bottom-auto [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:-translate-y-1/2"
           >
@@ -846,9 +850,10 @@ export default function SystemMap({ services, clients: initialClients }: { servi
                 <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
                 {t('about_closing_kicker')}
               </span>
-              <h2 className="heading-section text-white">
+              {/* (large screens only; EarthReturn holds the same words as the page's real heading) */}
+              <H2 plain className="heading-section text-white">
                 {closingPlain} <span className={GRADIENT_ON_DARK}>{closingBright}</span>
-              </h2>
+              </H2>
               <p className="mt-4 max-w-md text-sm sm:text-base lg:text-lg text-white/75 leading-relaxed">{t('about_closing_text')}</p>
             </div>
           </div>
@@ -886,7 +891,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           <div data-sm="world" className="pointer-events-none absolute inset-0 hidden will-change-transform [@media(min-width:1024px)_and_(min-height:640px)_and_(prefers-reduced-motion:no-preference)]:block">
             {/* ---- Stop: services, with the core the zoom landed on in the middle ---- */}
             <div data-sm="system" className="absolute inset-0 flex flex-col items-center justify-center gap-[clamp(1rem,3.5vh,2.5rem)]">
-              <Heading count={modules.length} />
+              <Heading count={modules.length} plain />
               <div className="w-full max-w-[1360px] px-12 xl:px-6 grid grid-cols-[minmax(0,1fr)_minmax(15rem,20rem)_minmax(0,1fr)] gap-x-[clamp(3.5rem,7vw,7.5rem)] items-center">
                 <ul className="flex flex-col gap-[clamp(0.5rem,1.9vh,1.25rem)]">{modules.slice(0, half).map((m, i) => moduleCard(m, i))}</ul>
 

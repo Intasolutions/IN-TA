@@ -115,7 +115,7 @@ export default function Header() {
               {/* The official logo file, shown as-is */}
               <Image
                 src="/logo/logo-inta.png"
-                alt=""
+                alt="IN-TA Solutions logo"
                 width={774}
                 height={322}
                 sizes="106px"

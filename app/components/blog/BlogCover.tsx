@@ -36,7 +36,7 @@ export default function BlogCover({ src, alt, sizes, priority = false, zoom = ''
   const direct = !optimisable(src);
   return (
     <>
-      <Image src={src} alt="" aria-hidden="true" fill sizes="96px" unoptimized={direct} onError={missing} className="scale-125 object-cover blur-2xl saturate-150" />
+      <Image src={src} alt={alt} aria-hidden="true" fill sizes="96px" unoptimized={direct} onError={missing} className="scale-125 object-cover blur-2xl saturate-150" />
       <span className={`absolute inset-0 transition-transform duration-700 ease-out ${zoom}`}>
         <Image src={src} alt={alt} fill sizes={sizes} quality={90} {...(priority ? { loading: 'eager' as const, fetchPriority: 'high' as const } : {})} unoptimized={direct} onError={missing} className="object-contain" />
       </span>

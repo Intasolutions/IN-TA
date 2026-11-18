@@ -322,6 +322,10 @@ html[data-loader='seen'] .boot, html[data-loader='seen'] .boot *, html[data-load
    and never read as the page's text (search engines read text that is merely aria-hidden) */
 .ghost-text::before { content: attr(data-ghost); }
 
+/* The hero title's first word for screen readers (its visible letters are split for the entrance and hidden from them);
+   drawn by CSS so crawlers don't read the word twice */
+.hero-title-sr::before { content: attr(data-label); }
+
 /* The 404 trace's cursor, after "no route" */
 .nf-caret { animation: nfBlink 1.1s steps(1) infinite; }
 @keyframes nfBlink { 50% { opacity: 0; } }

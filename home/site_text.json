@@ -15,7 +15,7 @@
         ["home_hero_focus", "Focus areas beside it (separate with commas)", "ENTERPRISE ERP, AI PIPELINES, HIGH-CONCURRENCY WEB"],
         ["home_hero_badge", "Badge above the title", "CUSTOM SOFTWARE · AI · MOBILE APPS"],
         ["home_hero_tagline", "Line beside the badge", "LET'S BUILD WHAT'S NEXT"],
-        ["home_hero_title", "Big title (| before the second, blue line)", "Engineering | Digital Reality"],
+        ["home_hero_title", "Big title (| before the second, blue line)", "Smarter |custom software & AI for your business"],
         ["home_hero_text", "Paragraph under the title", "We forge hyper-scaled software architecture, resilient manufacturing execution backends, and fine-tuned AI ecosystems for enterprise leaders across Kerala and global markets."],
         ["home_hero_cta_primary", "Main button", "Explore Selected Work"],
         ["home_hero_cta_about", "Second button (it opens the About page)", "Who We Are"]
@@ -52,7 +52,7 @@
       "about": "The heading over the five cards. Leave a box empty to use the standard wording shown under it; in the heading, put | before the words that should be in blue. The cards themselves are set on the services: Services > a service > Home page card.",
       "items": [
         ["home_cap_kicker", "Small line", "Engineering disciplines"],
-        ["home_cap_title", "Heading", "Specialized | Capabilities"],
+        ["home_cap_title", "Heading", "AI, custom software, mobile apps and websites for your business"],
         ["home_cap_text", "Paragraph", "Tailored technical capabilities calibrated to solve complex computational and operational bottlenecks with zero bloat."]
       ]
     },
@@ -60,7 +60,7 @@
       "name": "Home: work, testimonials and blog",
       "items": [
         ["home_work_kicker", "Selected work: small line", "Selected work // Case studies"],
-        ["home_work_title", "Selected work: heading", "Built, shipped | & live"],
+        ["home_work_title", "Selected work: heading", "Websites, apps & software, |launched and live"],
         ["home_work_text", "Selected work: paragraph", "Hospital management, manufacturing execution, EdTech and e-commerce. A few of the products we've designed, engineered and launched for our clients."],
         ["home_work_industries", "Selected work: tags that name a client's industry, shown above each project (tag names, separate with commas)", "Healthcare Software, Manufacturing, EdTech, Education, E-commerce, Online Retail, Property Management, Community, Professional Education"],
         ["home_voices_kicker", "Testimonials: small line", "Testimonials // Client voices"],
@@ -74,7 +74,7 @@
         ["home_voices_title", "Testimonials: heading", "In their | own words"],
         ["home_voices_text", "Testimonials: paragraph", "What the people we've built for say about working with us."],
         ["home_blog_kicker", "Blog: small line", "Blog // Latest writing"],
-        ["home_blog_title", "Blog: heading", "Insights & | stories"],
+        ["home_blog_title", "Blog: heading", "AI & software tips |for businesses"],
         ["home_blog_text", "Blog: paragraph", "Practical writing on custom software, automation and AI, from the team that builds it."]
       ]
     },
@@ -82,7 +82,7 @@
       "name": "About page",
       "items": [
         ["about_kicker", "Small line", "About // System map"],
-        ["about_title", "Title (| before the blue word)", "How we're | wired"],
+        ["about_title", "Title (| before the blue word)", "About IN-TA |Solutions"],
         ["about_text", "Paragraph", "IN-TA Solutions, drawn as what it really is: one system, running from {district}, {region}."],
         ["about_services_kicker", "Services: small line", "Services // What runs here"],
         ["about_services_title", "Services: heading ({n} becomes the number of services)", "One core. | {n} modules."],
@@ -106,7 +106,7 @@
       "name": "Services page (the board)",
       "items": [
         ["services_kicker", "Small line", "Services // One board"],
-        ["services_title", "Title", "Everything we build. | On one board."],
+        ["services_title", "Title", "Software, websites, apps & AI. |One team."],
         ["services_text", "Paragraph", "Software, websites, apps, design, marketing, search, media and AI. Each one is a part on the same board: it does its own job, and the copper connects it to all the others."],
         ["services_plan_kicker", "Board view: small line", "The board // Our services"],
         ["services_plan_title", "Board view: heading ({n} becomes the number of parts)", "{n} parts are ours. | One socket is empty."],
@@ -127,7 +127,7 @@
       "name": "Portfolio page",
       "items": [
         ["portfolio_kicker", "Small line", "Our work"],
-        ["portfolio_title", "Title", "One rack. | All our work."],
+        ["portfolio_title", "Title", "Websites, apps & software |we've built."],
         ["portfolio_text", "Paragraph", "Every screen here is a real project we designed and built. Scroll, and they come home to the rack, then open one at a time."],
         ["portfolio_empty_title", "Empty slot: heading", "This slot is | still empty."],
         ["portfolio_empty_text", "Empty slot: text", "Tell us what you want to build, and it could be the next one in the rack."]
@@ -137,7 +137,7 @@
       "name": "Blog page",
       "items": [
         ["blog_kicker", "Small line", "Blog // Latest writing"],
-        ["blog_title", "Title", "Insights & | stories."],
+        ["blog_title", "Title", "AI & software tips |for businesses."],
         ["blog_text", "Paragraph", "Practical writing on custom software, automation and AI, from the team that builds it."]
       ]
     },
@@ -145,7 +145,7 @@
       "name": "Contact page",
       "items": [
         ["contact_kicker", "Small line", "Contact // Patch panel"],
-        ["contact_title", "Title", "Plug in. | We'll pick up."],
+        ["contact_title", "Title", "Talk to IN-TA |about your project."],
         ["contact_text", "Paragraph", "Four lines into our team in {district}."],
         ["contact_message_port", "Message port: line under its name", "Tell us what you need"],
         ["contact_call_text", "Call: text ({days} and {time} come from the office hours)", "Call our office in {district}, {days}, {time} India time."],
@@ -215,7 +215,7 @@
       "name": "Search engines",
       "items": [
         ["seo_home_title", "Home: title", "Software, AI & Automation Company in Wayanad, Kerala | IN-TA Solutions"],
-        ["seo_home_description", "Home: description", "Custom software, mobile apps, AI integration and business automation for companies in Kerala and abroad, from WhatsApp lead bots to ERP systems. Call +91 94475 95381."],
+        ["seo_home_description", "Home: description", "Custom software, mobile apps, AI and WhatsApp automation for businesses in Kerala and abroad, from lead bots to ERP systems. Call +91 94475 95381."],
         ["seo_about_title", "About: title", "About Us | Software & AI Company in Wayanad, Kerala"],
         ["seo_about_description", "About: description", "IN-TA Solutions is a software and AI company in Mananthavady, Wayanad. Since 2023 we've built websites, apps, custom software and AI tools for businesses in India, Canada, Georgia and the UAE."],
         ["seo_services_title", "Services: title", "Our Services | AI, Software, Web & App Development in Kerala | IN-TA Solutions"],

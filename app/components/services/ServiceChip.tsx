@@ -38,12 +38,20 @@ const FIELD = 'border-brand-blue/30 bg-white focus-within:border-brand-blue';
 const FIELD_TEXT = 'text-midnight placeholder:text-midnight/55';
 const READOUT_KEY = 'text-midnight/65';
 // The words sit on clean white cards, as on the Home page, so that the board stays sharp all the way across the screen
-const CARD = 'pointer-events-auto rounded-3xl border border-brand-blue/20 bg-white p-5 sm:p-7 shadow-xl shadow-brand-blue/10 [@media(max-height:480px)]:rounded-2xl [@media(max-height:480px)]:p-3';
+// (on a phone the board runs behind the cards as their background, so they're a little see-through there; no blur,
+// which would be redrawn with every frame of the board)
+const CARD = 'pointer-events-auto rounded-3xl border border-brand-blue/20 bg-white [@media(max-aspect-ratio:3/5)]:bg-white/85 p-5 sm:p-7 shadow-xl shadow-brand-blue/10 [@media(max-height:480px)]:rounded-2xl [@media(max-height:480px)]:p-3';
 const LINE_CARD = 'pointer-events-auto inline-block rounded-2xl border border-brand-blue/20 bg-white px-5 py-3 sm:px-7 sm:py-4 shadow-xl shadow-brand-blue/10';
 // (on a tall screen the opening words and the board share the height, so the top of the board fades under the words)
 const SHADE_HERO = 'absolute inset-0 bg-linear-to-b from-white from-55% to-transparent to-66% [@media(min-aspect-ratio:23/20)]:hidden';
 const SHADE_PLAN = 'absolute inset-x-0 top-0 h-[28%] bg-linear-to-b from-white from-60% to-transparent [@media(min-aspect-ratio:23/20)]:hidden';
-const CARD_PLACE = 'absolute inset-x-0 bottom-[max(1rem,2.5svh)] [@media(min-aspect-ratio:23/20)]:inset-y-0 [@media(min-aspect-ratio:23/20)]:bottom-0 [@media(min-aspect-ratio:23/20)]:flex [@media(min-aspect-ratio:23/20)]:items-center';
+// On phones the cards and lines sit above the WhatsApp button (its top is 80px up the screen, 120px from md), so it never
+// covers their words; from md (cards) or lg (the wider lines) they're narrower than the screen and clear it beside it.
+// The guide character steps aside over the whole board on these screens (data-guide-clear on the stage).
+const ABOVE_BUTTON = 'bottom-[5.75rem] md:bottom-[max(1rem,2.5svh)]';
+const LINE_ABOVE_BUTTON = 'bottom-[5.75rem] md:bottom-[8rem] lg:bottom-[max(1.5rem,5svh)]';
+const GUIDE_CLEAR = '(max-width: 1023.98px)';
+const CARD_PLACE = `absolute inset-x-0 ${ABOVE_BUTTON} [@media(min-aspect-ratio:23/20)]:inset-y-0 [@media(min-aspect-ratio:23/20)]:bottom-0 [@media(min-aspect-ratio:23/20)]:flex [@media(min-aspect-ratio:23/20)]:items-center`;
 const CARD_WIDTH = 'max-w-[36rem] [@media(min-aspect-ratio:23/20)]:max-w-[min(34rem,42vw)]';
 
 // Large monitors: the words grow with the screen instead of sitting small in a corner of it (as on the About page)
@@ -574,16 +582,22 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         top = stageEl.getBoundingClientRect().top + window.scrollY;
         run = Math.max(1, stageEl.offsetHeight - window.innerHeight);
         pace = paceOf(S, window.matchMedia(QUICK).matches);
-        // On a tall screen the opening board sits under the words. A phone's words fill most of the screen and the board
-        // keeps its usual place; a tablet's leave half of it, and there the board takes all the room they leave.
+        // On a tall screen the opening board sits under the words: a tablet's leave half of it, and there the board takes all
+        // the room they leave. On a phone the board is the background behind the words instead (score.ts, PHONE_BACKDROP).
         const copy = root.querySelector<HTMLElement>('[data-hero="copy"]');
         const y0 = copy ? (copy.offsetTop + copy.offsetHeight * Number(zoom) + 14) / window.innerHeight : 1;
-        const roomy = window.innerWidth / window.innerHeight <= 1.15 && 0.985 - y0 > 0.3;
+        const phone = window.innerWidth / window.innerHeight < 0.6;
+        const roomy = !phone && window.innerWidth / window.innerHeight <= 1.15 && 0.985 - y0 > 0.3;
         const room = { sx: 0, sy: 1 - y0 - 0.985, fw: 1, fh: 0.985 - y0 };
         keys = roomy ? S.keys.map((k) => (k.frame === 'hero' ? { ...k, room } : k)) : S.keys;
         // (the white behind the words then ends where they do, rather than fading the board's far edge)
+        // On a phone the board is the words' background (score.ts, PHONE_BACKDROP): an even veil of white over all of it
+        // keeps them readable, instead of white above and the board below
         const shade = root.querySelector<HTMLElement>('[data-hero="shade"]');
-        if (shade) shade.style.backgroundImage = roomy ? `linear-gradient(to bottom, #fff ${((y0 - 0.05) * 100).toFixed(1)}%, transparent ${((y0 + 0.02) * 100).toFixed(1)}%)` : '';
+        if (shade) {
+          shade.style.backgroundImage = roomy ? `linear-gradient(to bottom, #fff ${((y0 - 0.05) * 100).toFixed(1)}%, transparent ${((y0 + 0.02) * 100).toFixed(1)}%)` : phone ? 'none' : '';
+          shade.style.backgroundColor = phone ? 'rgb(255 255 255 / 0.8)' : '';
+        }
       };
       measure();
       ScrollTrigger.addEventListener('refresh', measure);
@@ -1104,6 +1118,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       <div className="relative">
         <section
           data-chip="stage"
+          data-guide-clear={GUIDE_CLEAR}
           aria-labelledby="chip-title"
           className="relative touch-pan-y h-[calc(var(--chip-run)*100svh)] max-md:h-[calc(var(--chip-run-quick)*100svh)]"
           style={{ '--chip-run': score.total + 1, '--chip-run-quick': quickTotal + 1 } as CSSProperties}
@@ -1163,7 +1178,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
 
             {/* ---- The centre of the board ---- */}
             <div id={AI_BLOCK.id} data-beat="ai-fact" aria-label={ai.title} className="invisible pointer-events-none absolute inset-0 text-center">
-              <div className="absolute inset-x-0 bottom-[max(1.5rem,5svh)] px-4">
+              <div className={`absolute inset-x-0 ${LINE_ABOVE_BUTTON} px-4`}>
                 <div data-zoom data-card className={`${LINE_CARD} max-w-4xl`}>
                   <p className="heading-lead text-midnight"><Words text={t('services_ai_fact')} /></p>
                 </div>
@@ -1171,7 +1186,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
             </div>
             {beats.map((text, i) => (
               <div key={i} data-beat={`ai-b${i + 1}`} className="invisible pointer-events-none absolute inset-0 text-center">
-                <div className="absolute inset-x-0 bottom-[max(1.5rem,5svh)] px-4">
+                <div className={`absolute inset-x-0 ${LINE_ABOVE_BUTTON} px-4`}>
                   <div data-zoom data-card className={`${LINE_CARD} max-w-3xl`}>
                     <p className="heading-lead text-midnight"><Words text={text} /></p>
                     {i === 2 && (
@@ -1195,7 +1210,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
             </div>
             <div data-beat="ai-ask" className="invisible pointer-events-none absolute inset-0 text-center">
               <div className={`absolute inset-0 transition-opacity duration-500 ${order ? 'invisible opacity-0' : ''}`}>
-                <div className="absolute inset-x-0 bottom-[max(0.75rem,2.5svh)] px-3 sm:px-4">
+                <div className={`absolute inset-x-0 ${LINE_ABOVE_BUTTON} px-3 sm:px-4`}>
                   <div data-zoom data-card className={`${CARD} mx-auto max-w-2xl`}>
                   <p className="heading-section text-midnight">{t('services_ask')}</p>
                   <p className={`mx-auto mt-2 mb-3 max-w-md text-sm sm:text-base ${BODY} [@media(max-height:620px)]:hidden`}>{t('services_ask_note')}</p>

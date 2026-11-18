@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useSite, useText } from '../../site/SiteContext';
+import H2 from '../H2';
 import { accent, type StackGroup } from '../../site/site';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -337,10 +338,11 @@ export default function TechOrbit({
             <span className={`w-2 h-2 rounded-full animate-pulse ${c.dot}`} />
             {t('about_stack_kicker')}
           </span>
-          <h2 id={titleId} className={`font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] tracking-tight uppercase ${c.title}`}>
+          {/* embedded = the About page's large-screen copy; the page's real heading is the one in its route (see H2) */}
+          <H2 plain={embedded} id={titleId} className={`font-display font-extrabold text-[length:clamp(2.25rem,5vw,3.5rem)] leading-[1] tracking-tight uppercase ${c.title}`}>
             <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className="inline-block">{titlePlain}</span></span>{' '}
             <span className="inline-block overflow-hidden align-bottom pb-[0.06em]"><span data-orb="word" className={`inline-block pb-[0.06em] ${c.gradient}`}>{titleBright}</span></span>
-          </h2>
+          </H2>
           <p data-orb="lede" className={`mt-4 text-sm sm:text-base leading-relaxed max-w-xl ${c.copy}`}>
             {t('about_stack_text')}
           </p>

@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
+import H2 from '../H2';
 import { useSocials } from '../Footer';
 import { underHeader } from '../underHeader';
 import { useOfficeStatus } from '../OfficeStatus';
@@ -515,7 +516,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
           <div data-contact="panel" className="rack-plate relative z-[4] rounded-lg">
             <div className="flex items-center gap-3 border-b border-black/30 px-3 py-2.5 sm:gap-4 sm:px-4">
               <span aria-hidden="true" className="rack-screw shrink-0 [--uh:44px]" />
-              <Image src="/logo/logo-inta.png" alt="" width={120} height={50} className="h-5 w-auto shrink-0 sm:h-6" />
+              <Image src="/logo/logo-inta.png" alt="IN-TA Solutions logo" width={120} height={50} className="h-5 w-auto shrink-0 sm:h-6" />
               <span aria-hidden="true" className="rack-vent hidden h-4 min-w-0 flex-1 rounded-[2px] sm:block" />
               <p className="ml-auto inline-flex min-w-0 items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-wider sm:ml-0 sm:text-[11px]">
                 <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${open ? 'bg-[#9dbbff] shadow-[0_0_8px_2px_#5b8cff]' : 'bg-white/25'}`} />
@@ -574,7 +575,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
 
                 <div data-line-panel="call" hidden={active !== 'call'}>
                   <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 02 // Call</p>
-                  <h2 data-line className="heading-section mt-2.5 text-white [overflow-wrap:anywhere]"><a href={phone.href} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{phone.label}</a></h2>
+                  <H2 plain data-line className="heading-section mt-2.5 text-white [overflow-wrap:anywhere]"><a href={phone.href} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{phone.label}</a></H2>
                   <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_call_text', { days: daysLong(site), time: timeLong(site) })}</p>
                   <div data-line className="mt-5 flex flex-wrap gap-2.5">
                     <a href={phone.href} className={`${ACTION} max-sm:w-full`}>
@@ -587,7 +588,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
 
                 <div data-line-panel="email" hidden={active !== 'email'}>
                   <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 03 // Email</p>
-                  <h2 data-line className="mt-2.5 font-display text-[clamp(1.35rem,4.2vw,3rem)] font-extrabold leading-[1.05] tracking-tight text-white [overflow-wrap:anywhere]"><a href={`mailto:${email}`} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{email}</a></h2>
+                  <H2 plain data-line className="mt-2.5 font-display text-[clamp(1.35rem,4.2vw,3rem)] font-extrabold leading-[1.05] tracking-tight text-white [overflow-wrap:anywhere]"><a href={`mailto:${email}`} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{email}</a></H2>
                   <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_email_text')}</p>
                   <div data-line className="mt-5 flex flex-wrap gap-2.5">
                     <a href={`mailto:${email}`} className={`${ACTION} max-sm:w-full`}>

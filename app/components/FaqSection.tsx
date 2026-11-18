@@ -203,7 +203,7 @@ export default function FaqSection({ page, tone = 'light', className = '' }: { p
             {/* The hub: the company's own tile */}
             <div aria-hidden="true" className="net-hub">
               <span data-net="tile" className="net-tile">
-                <Image src="/logo/logo-inta.png" alt="" width={774} height={322} sizes="104px" className="h-9 w-auto sm:h-10" />
+                <Image src="/logo/logo-inta.png" alt="IN-TA Solutions logo" width={774} height={322} sizes="104px" className="h-9 w-auto sm:h-10" />
               </span>
             </div>
             <ul className="net-list">
