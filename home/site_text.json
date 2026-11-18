@@ -111,9 +111,9 @@
         ["services_text", "Paragraph", "Software, websites, apps, design, marketing, search, media and AI. Each one is a part on the same board: it does its own job, and the copper connects it to all the others."],
         ["services_plan_kicker", "Board view: small line", "The board // Our services"],
         ["services_plan_title", "Board view: heading ({n} becomes the number of parts)", "{n} parts are ours. | One socket is empty."],
-        ["services_ai_fact", "AI part: opening fact (its source link stays: Wikipedia, Transistor count)", "One AI processor now holds 208 billion switches. The most advanced part on the board is the one that learns."],
-        ["services_ai_beats", "AI part: the three lines that follow (one per line)", "One switch knows almost nothing.\nConnect billions of them, and it starts to learn.\nIt gets things wrong, measures how wrong, and adjusts. That is training."],
-        ["services_ai_note", "AI part: note under the last line", "A model is only as good as what it learns from. We train it on your business."],
+        ["services_ai_fact", "AI part: opening line", "This is the AI chip, the part of the board that learns. It can read messages, sort information and answer customers, day and night."],
+        ["services_ai_beats", "AI part: the three lines that follow, one per line (shown over: one switch, billions of them connected, then training)", "On its own, one tiny switch can only say yes or no.\nLink billions of them, and the chip starts to spot patterns.\nShow it examples. It guesses, sees how far off it was, and improves. That is training."],
+        ["services_ai_note", "AI part: note under the last line", "The better the examples, the smarter it gets. We train it on your own business, so it works the way your team does."],
         ["services_ask", "AI part: order heading", "Give it an order."],
         ["services_ask_note", "AI part: order note", "Say what you need. It finds the right part of the board and reads the details from our live service data."],
         ["services_orders", "AI part: example orders (one per line)", "Build me a mobile app\nGet us found on Google\nAutomate our support\nMake a product video"],
@@ -165,6 +165,21 @@
       ]
     },
     {
+      "name": "WhatsApp messages",
+      "about": "The message a chat starts with when a visitor taps the WhatsApp button. It depends on the page they tap it from, and they can change it before sending. Leave a box empty to use the standard wording shown under it; {service} and {post} are filled in by the website.",
+      "items": [
+        ["whatsapp_home", "Home page (and any page without its own message)", "Hi IN-TA Solutions! I found you on your website and I'd like to talk about a project."],
+        ["whatsapp_services", "Services page", "Hi! I'm looking at your services and I'd like help choosing the right one for my business."],
+        ["whatsapp_service", "A service's page ({service} is the service's name)", "Hi! I'm interested in {service} for my business. Could you tell me more?"],
+        ["whatsapp_portfolio", "Work page", "Hi! I saw your work on your website. I'd like something similar for my business."],
+        ["whatsapp_blog", "Blog page", "Hi! I was reading your blog and I have a question."],
+        ["whatsapp_post", "A blog post ({post} is the post's title)", "Hi! I just read “{post}” on your blog and I have a question."],
+        ["whatsapp_post_service", "A blog post with a related service ({post} is the post's title, {service} the service's name)", "Hi! I just read “{post}” on your blog. I'd like to know more about {service}."],
+        ["whatsapp_about", "About page", "Hi! I was reading about IN-TA Solutions and I'd like to talk to your team."],
+        ["whatsapp_contact", "Contact page", "Hi! I'd like to talk about a project."]
+      ]
+    },
+    {
       "name": "Website guide (the robot on the WhatsApp button)",
       "about": "What the little robot standing on the WhatsApp button says. He appears on computers, greets a visitor once, can be clicked, picked up and dragged around, and now and then walks along the bottom of the screen to look at something on the page. Keep each line short: it appears in a small speech bubble. Each box can hold several lines, one per line: they come in a shuffled order, each once before any repeats. {district} and {region} are filled from the office address.",
       "items": [
@@ -202,7 +217,7 @@
       "items": [
         ["seo_home_title", "Home: title", "Software, AI & Automation Company in Wayanad, Kerala | IN-TA Solutions"],
         ["seo_home_description", "Home: description", "Custom software, mobile apps, AI integration and business automation for companies in Kerala and abroad, from WhatsApp lead bots to ERP systems. Call +91 94475 95381."],
-        ["seo_about_title", "About: title", "About IN-TA Solutions | Software & AI Company in Wayanad, Kerala"],
+        ["seo_about_title", "About: title", "About Us | Software & AI Company in Wayanad, Kerala"],
         ["seo_about_description", "About: description", "IN-TA Solutions is a software and AI company in Mananthavady, Wayanad. Since 2023 we've built websites, apps, custom software and AI tools for businesses in India, Canada, Georgia and the UAE."],
         ["seo_services_title", "Services: title", "Our Services | AI, Software, Web & App Development in Kerala | IN-TA Solutions"],
         ["seo_services_description", "Services: description", "AI solutions, custom software, websites, mobile apps, UI/UX design, digital marketing, SEO and media production for businesses in Wayanad, Kerala and abroad."],
@@ -210,7 +225,7 @@
         ["seo_portfolio_description", "Portfolio: description", "See websites, mobile apps and custom software we've built for hospitals, retailers, academies and businesses in India and abroad."],
         ["seo_blog_title", "Blog: title", "Blog | AI, Software & Business Tips | IN-TA Solutions"],
         ["seo_blog_description", "Blog: description", "Practical articles on AI, custom software, automation and digital growth for businesses in Kerala, from the IN-TA Solutions team."],
-        ["seo_contact_title", "Contact: title", "Contact IN-TA Solutions | Software & AI Company in Wayanad, Kerala"],
+        ["seo_contact_title", "Contact: title", "Contact Us | Software & AI Company in Wayanad, Kerala"],
         ["seo_contact_description", "Contact: description", "Get a free quote for your website, app, custom software or AI project. Call +91 94475 95381, email info@in-tasolutions.com, or visit us in Mananthavady, Wayanad."],
         ["seo_business_description", "Company description given to search engines", "Software and AI company in Wayanad, Kerala, building AI solutions, custom software, websites and mobile apps for businesses in India, Canada, Georgia and the UAE."],
         ["seo_area_served", "Towns and regions the company serves (separate with commas)", "Mananthavady, Kalpetta, Sulthan Bathery, Wayanad, Kozhikode, Kannur, Kerala, India, Canada, Georgia, UAE"],

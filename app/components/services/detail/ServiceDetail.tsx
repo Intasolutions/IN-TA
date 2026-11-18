@@ -15,6 +15,7 @@ import Pinout from './Pinout';
 import { refreshSoon } from './refresh';
 import ScrollLit from './ScrollLit';
 import { optimisable, plainTitle, splitAccent, wordsFor, type DetailService, type RelatedService } from './types';
+import { WhatsAppTopic } from '../../whatsappTopic';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -208,6 +209,7 @@ export default function ServiceDetail({ service, related }: { service: DetailSer
 
   return (
     <main id="main" ref={rootRef} className="bg-midnight text-white">
+      <WhatsAppTopic service={service.title} />
       {block ? (
         <PartStage key={service.slug} service={service} block={block} others={others} board={board} formId={lastId} insideId={firstId} facts={facts} part={part} title={service.text.hero_title || service.title} words={say} />
       ) : (

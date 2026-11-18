@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { useSite } from '../site/SiteContext';
 import { phoneDigits } from '../site/site';
+import { useWhatsAppTopic, whatsappLink, whatsappMessage } from './whatsappTopic';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,6 +30,9 @@ export default function WhatsAppButton() {
   // Tuck the button away while any element marked [data-floating-clear] is on screen (the hero's buttons, the footer's
   // back-to-top row), so it never covers them. Keyed by path so it resets on navigation.
   const pathname = usePathname();
+  // The chat opens with a message about the page it was opened from (the visitor can change it before sending)
+  const topic = useWhatsAppTopic();
+  const chatHref = whatsappLink(phoneDigits(site.phone), whatsappMessage(site, pathname, topic));
   const [tuckedOn, setTuckedOn] = useState<string | null>(null);
   const tucked = tuckedOn === pathname;
 
@@ -143,7 +147,7 @@ export default function WhatsAppButton() {
         <div
           ref={tooltipRef}
           className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 items-center gap-3 bg-white/80 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.1)] pl-5 pr-10 py-3 rounded-2xl opacity-0 scale-95 origin-right transition-colors hover:bg-white/90 cursor-pointer z-[-1]"
-          onClick={() => window.open(`https://wa.me/${phoneDigits(site.phone)}`, '_blank')}
+          onClick={() => window.open(chatHref, '_blank', 'noopener,noreferrer')}
         >
           <div className="flex flex-col items-start min-w-[120px]">
             <p ref={textTitleRef} className="text-[15px] font-bold text-slate-800 leading-none mb-1">
@@ -174,7 +178,7 @@ export default function WhatsAppButton() {
 
           <a
             ref={btnRef}
-            href={`https://wa.me/${phoneDigits(site.phone)}`}
+            href={chatHref}
             target="_blank"
             rel="noopener noreferrer"
             // RESPONSIVE: Slightly smaller on mobile if needed, but w-14 (56px) is a standard good touch target

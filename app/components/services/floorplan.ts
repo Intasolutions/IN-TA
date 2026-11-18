@@ -215,7 +215,7 @@ export const PLAN = {
   hint: 'Drag to turn the board. Pick any part to fly to it.',
 };
 
-// (the transistor figure in the AI part's wording is from https://en.wikipedia.org/wiki/Transistor_count)
+// (the AI part's wording is in home/site_text.json: services_ai_fact, services_ai_beats and services_ai_note)
 export const NOW = {
   words: ['AI', 'AUTOMATE', 'PREDICT', 'ANSWER', 'LEARN'],
 };

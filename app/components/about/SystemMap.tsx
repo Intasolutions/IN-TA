@@ -97,9 +97,6 @@ type Places = { country: string; region: string; district: string; street: strin
 const placeName = (fov: number, p: Places) =>
   fov > 6000 ? 'IN-TA Solutions' : fov > 1200 ? p.country : fov > 240 ? p.region : fov > 60 ? p.district : p.street;
 
-const formatKm = (fov: number) =>
-  (fov >= 1000 ? Math.round(fov / 10) * 10 : fov >= 100 ? Math.round(fov) : Number(fov.toFixed(1))).toLocaleString('en-US');
-
 function StatusPill() {
   const site = useSite();
   const status = useOfficeStatus();
@@ -235,7 +232,6 @@ export default function SystemMap({ services, clients: initialClients }: { servi
       const stage = root.querySelector<HTMLElement>('[data-sm="stage"]')!;
       const track = root.querySelector<HTMLElement>('[data-sm="track"]')!;
       const hud = root.querySelector<HTMLElement>('[data-sm="hud"]')!;
-      const fovEl = root.querySelector<HTMLElement>('[data-sm="fov"]')!;
       const placeEl = root.querySelector<HTMLElement>('[data-sm="place"]')!;
       const placeText = root.querySelector<HTMLElement>('[data-sm="placetext"]')!;
       const world = root.querySelector<HTMLElement>('[data-sm="world"]')!;
@@ -276,7 +272,6 @@ export default function SystemMap({ services, clients: initialClients }: { servi
         let orbitAt: Point = [0, 0];
         let shownStop = 0;
         let lastZ = 0;
-        let lastFov = '';
         let lastPlace = '';
         let lastTime = 0;
         let glIdle = false;
@@ -516,11 +511,6 @@ export default function SystemMap({ services, clients: initialClients }: { servi
           if (mode === 'scene') showClients(p);
 
           // Readouts: written only when they change
-          const km = formatKm(fov);
-          if (km !== lastFov) {
-            lastFov = km;
-            fovEl.textContent = km;
-          }
           const name = placeName(fov, placesRef.current);
           if (name !== lastPlace) {
             lastPlace = name;
@@ -863,22 +853,19 @@ export default function SystemMap({ services, clients: initialClients }: { servi
             </div>
           </div>
 
-          {/* Live readout: the true field of view at this zoom */}
-          <dl data-sm="hud" className="pointer-events-none absolute left-4 sm:left-6 bottom-4 sm:bottom-6 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider motion-reduce:hidden [@media(max-height:480px)]:hidden [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]">
+          {/* The office's coordinates (the imagery credits sit under them) */}
+          <dl data-sm="hud" className="pointer-events-none absolute left-4 sm:left-6 bottom-9 sm:bottom-11 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider motion-reduce:hidden [@media(max-height:480px)]:hidden [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]">
             <div className="flex gap-3">
               <dt className="w-[10.5em] whitespace-nowrap text-white/70">Target</dt>
               <dd className="text-white">{coords(site)}</dd>
             </div>
-            <div className="flex gap-3 mt-1">
-              <dt className="w-[10.5em] whitespace-nowrap text-white/70">Field of view</dt>
-              <dd className="text-[#9dbbff] font-bold tabular-nums"><span data-sm="fov">12,740</span> km</dd>
-            </div>
           </dl>
 
-          {/* Imagery credits (the Sentinel-2 licence requires attribution; a link to it is allowed) */}
-          <div data-sm="credit" className="absolute right-4 sm:right-6 bottom-4 sm:bottom-6 text-right">
+          {/* Imagery credits, small and in the bottom-left corner, away from the WhatsApp button (the Sentinel-2 licence asks
+              for attribution in a reasonable manner for the medium, with no minimum size; a link that opens it is allowed) */}
+          <div data-sm="credit" className="absolute left-4 sm:left-6 bottom-4 sm:bottom-6">
             {credits && (
-              <p id="sm-credits" className="absolute bottom-full right-0 mb-2 w-[min(19rem,80vw)] rounded-xl border border-white/15 bg-[#050d3a]/95 p-3 text-left text-[11px] leading-relaxed text-white/80">
+              <p id="sm-credits" className="absolute bottom-full left-0 mb-2 w-[min(19rem,80vw)] rounded-xl border border-white/15 bg-[#050d3a]/95 p-3 text-left text-[11px] leading-relaxed text-white/80">
                 World, cloud and night-light imagery: NASA. Close-up imagery:{' '}
                 <a href="https://cloudless.eox.at" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white">EOxCloudless</a> by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016), adjusted for this page,{' '}
                 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white">CC BY 4.0</a>.
@@ -889,7 +876,7 @@ export default function SystemMap({ services, clients: initialClients }: { servi
               aria-expanded={credits}
               aria-controls="sm-credits"
               onClick={() => setCredits((v) => !v)}
-              className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-white/55 underline underline-offset-2 hover:text-white [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]"
+              className="font-mono text-[8px] uppercase tracking-wider text-white/40 underline underline-offset-2 hover:text-white focus-visible:text-white [text-shadow:0_1px_4px_rgb(1_7_43/0.95)]"
             >
               Imagery credits
             </button>

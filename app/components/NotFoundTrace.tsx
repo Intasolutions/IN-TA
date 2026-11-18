@@ -14,7 +14,7 @@ gsap.registerPlugin(useGSAP);
 // The site's pages, by address
 const ROUTES = [
   { href: '/portfolio', name: 'Work' },
-  { href: '/services', name: 'Capabilities' },
+  { href: '/services', name: 'Services' },
   { href: '/about', name: 'About' },
   { href: '/blog', name: 'Blog' },
   { href: '/contact', name: 'Contact' },

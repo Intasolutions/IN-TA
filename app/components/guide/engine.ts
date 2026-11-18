@@ -68,7 +68,9 @@ const GRAVITY = 2600; // px/s²
 const WALK = 150; // px/s
 const FLOOR_GAP = 10; // px from the bottom of the window to where his feet touch the floor
 
-const MISS_CHANCE = 0.4; // how often the jump back onto the button falls short (never twice in a row)
+// How often he falls: 2 or 3 times in 10, whether it's the jump back onto the button falling short (never twice in a
+// row) or a hard landing after being thrown (otherwise he lands on his feet, knees well bent)
+const FALL_CHANCE = 0.25;
 
 export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, hooks: GuideHooks): Promise<Guide> {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
@@ -447,7 +449,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     me.y = ground;
     hooks.fx('dust', { x: me.x, y: me.y }, clamp(impact / 1600, 0.25, 1));
     if (arriving) { arriving = false; land(Math.min(impact, 500)); return; }
-    if (onFloor && (impact > 1500 || Math.abs(me.spin) > 0.85)) {
+    if (onFloor && (impact > 1500 || Math.abs(me.spin) > 0.85) && Math.random() < FALL_CHANCE) {
       fallOver('dropped', me.spin > 0.3 ? 1 : me.spin < -0.3 ? -1 : me.vx < 0 ? 1 : -1);
       return;
     }
@@ -519,7 +521,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     state = 'hopping';
     const h = homeOf();
     const side = me.x > h.x ? 1 : -1;
-    const miss = !retrying && !missedLast && Math.random() < (fromStroll ? 0.18 : MISS_CHANCE);
+    const miss = !retrying && !missedLast && Math.random() < FALL_CHANCE;
     missedLast = miss;
     Object.assign(hop, { t: 0, x0: me.x, y0: me.y, x1: miss ? h.x + side * 30 * S : h.x, y1: miss ? h.y + 40 * S : h.y, peak: (miss ? 46 : 70) * S, miss, side, down: false });
     play('Jump', { fade: 0.15, then: () => {} });
@@ -540,7 +542,6 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     endStroll();
     me.turn = 0;
     me.spin = 0; me.omega = 0; me.vx = 0; me.vy = 0;
-    fromStroll = false;
     ch.plant?.(false);
     setMode('dock');
     ({ x: me.x, y: me.y } = homeOf());
@@ -581,7 +582,6 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   const stroll = { spot: null as Spot | null, x: 0, phase: 'walk' as 'walk' | 'look', until: 0, visits: 0 };
   let nextStrollAt = now() + rand(12000, 20000);
   let strollsSinceMove = 0;
-  let fromStroll = false;
   let lastScroll = 0;
   const looked = new WeakSet<Element>(); // each thing on the page gets one look per visit
   const talkedAbout = new Set<string>(); // and each part of a page one remark
@@ -736,7 +736,6 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     if (next) { stroll.spot = next; strollWalk(); return; }
     stroll.spot = null;
     if (Math.random() < 0.45) speak('strollHome', hooks.lines().strollHome);
-    fromStroll = true;
     walkHome();
   }
   function intro() {
@@ -839,7 +838,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
           // down on the floor: off he goes
           me.squashV = -7;
           hooks.fx('dust', { x: me.x, y: me.y }, 0.35);
-          if (stroll.spot) strollWalk(); else { fromStroll = true; walkHome(); }
+          if (stroll.spot) strollWalk(); else walkHome();
         } else if (hop.miss) bonk();
         else {
           me.squashV = -7;

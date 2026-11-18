@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 const EXPLORE = [
   { name: 'Home', href: '/' },
   { name: 'Work', href: '/portfolio' },
-  { name: 'Capabilities', href: '/services' },
+  { name: 'Services', href: '/services' },
   { name: 'About', href: '/about' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },

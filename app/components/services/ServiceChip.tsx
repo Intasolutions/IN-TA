@@ -17,7 +17,7 @@ import { AI_BLOCK, BLOCKS, boardOf, centreOf, HERO, KIND, linkBetween, nameOf, N
 import { useText } from '../../site/SiteContext';
 import { accent, countInWords, linesOf, standardText } from '../../site/site';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
-import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, paceOf, ramp, smooth, smoother, type Camera, type Key, fieldOfView } from './score';
+import { buildScore, cameraAt, flyBetween, mixCameras, orderKeys, paceOf, ramp, smooth, smoother, type Camera, type Key } from './score';
 
 /** A phone (Tailwind's max-md): there the services pass with less scrolling, see paceOf */
 const QUICK = '(max-width: 767.98px)';
@@ -49,9 +49,6 @@ const CARD_WIDTH = 'max-w-[36rem] [@media(min-aspect-ratio:23/20)]:max-w-[min(34
 // Large monitors: the words grow with the screen instead of sitting small in a corner of it (as on the About page)
 const ZOOMED = '[data-zoom]';
 const screenZoom = (w: number, h: number) => Math.min(1.9, Math.max(1, Math.min(w / 1480, h / 800))).toFixed(3);
-
-// The readout changes over to the next part a little way into the flight
-const TARGET_AT = 0.55;
 
 function Words({ text }: { text: string }) {
   return (
@@ -686,17 +683,11 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       });
       seen.observe(root);
 
-      const hudRoot = root.querySelector<HTMLElement>('[data-chip="hud"]')!;
-      const hudTarget = root.querySelector<HTMLElement>('[data-hud="target"]')!;
-      const hudField = root.querySelector<HTMLElement>('[data-hud="field"]')!;
       const tipEl = root.querySelector<HTMLElement>('[data-chip="tip"]')!;
       const chrome = gsap.utils.toArray<HTMLElement>('[data-chip="nav"], [data-chip="skip"]', root);
       const labelEls = gsap.utils.toArray<HTMLElement>('[data-label]', root);
       const labelCentres = labelEls.map((el) => centreOf(planParts.find((x) => x.id === el.dataset.label)!));
       let chromeShown = false;
-      let hudShown = true;
-      let shownTarget = '';
-      let shownField = '';
       let shownNav = -2;
       let shownTip = '';
       let shownCursor = '';
@@ -985,35 +976,9 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
           });
         }
 
-        // ---- The readout: written only when it changes ----
-        let target = 'Board';
-        S.services.forEach((b) => {
-          if (s >= b.from + TARGET_AT * (b.arrive - b.from)) target = nameOf(b.block, names);
-        });
-        if (s >= A.from + TARGET_AT * (A.arrive - A.from)) target = nameOf(AI_BLOCK, names);
-        if (s >= A.oneIn && s < A.wake[0] + 0.1) target = 'One switch';
-        if (s >= S.close.from + TARGET_AT * (S.close.arrive - S.close.from)) target = YOUR_BLOCK.short;
-        if (orderPhase > 1.2 && orderBlock) target = nameOf(orderBlock, names);
-        if (target !== shownTarget) {
-          shownTarget = target;
-          hudTarget.textContent = target;
-          gsap.fromTo(hudTarget, { y: 6, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out', overwrite: true });
-        }
-        const fieldText = fieldOfView(2 * cam.dist * aspect * Math.tan(FOV / 2));
-        if (fieldText !== shownField) {
-          shownField = fieldText;
-          hudField.textContent = fieldText;
-        }
-
         // ---- Side menu and skip button, once past the opening words ----
         const wantChrome = s > 0.32 && s < S.total - 0.32;
         if (wantChrome !== chromeShown) showChrome(wantChrome);
-        // (on a short laptop screen the opening words need the corner the readout sits in)
-        const wantHud = s < S.total - 0.32 && (s > 0.3 || h >= 780 || aspect < 1.15 || w < 1024);
-        if (wantHud !== hudShown) {
-          hudShown = wantHud;
-          hudRoot.style.opacity = wantHud ? '1' : '0';
-        }
         let currentStop = -1;
         S.stops.forEach((st, i) => {
           if (s >= st.s - 0.45) currentStop = i;
@@ -1275,17 +1240,6 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
         </div>
       </div>
 
-      {/* The readout, as on the About page: what the camera is on, and how much of the board it can see */}
-      <dl data-chip="hud" data-zoom className="pointer-events-none fixed left-3 sm:left-6 top-[max(env(safe-area-inset-top),0.5rem)] z-20 flex gap-3 rounded-lg bg-white/95 px-2.5 py-1 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider shadow-md ring-1 ring-brand-blue/15 transition-opacity duration-500 lg:top-auto lg:bottom-6 lg:block lg:px-3 lg:py-2">
-        <div className="flex gap-1.5 lg:gap-3">
-          <dt className={`whitespace-nowrap lg:w-[9.5em] ${READOUT_KEY}`}>Target</dt>
-          <dd data-hud="target" className="font-bold text-brand-blue">Board</dd>
-        </div>
-        <div className="flex gap-1.5 lg:mt-1 lg:gap-3">
-          <dt className={`whitespace-nowrap lg:w-[9.5em] ${READOUT_KEY}`}>Field of view</dt>
-          <dd data-hud="field" className="font-bold tabular-nums text-midnight">&nbsp;</dd>
-        </div>
-      </dl>
       {/* The name of the part under the hand */}
       <div data-chip="tip" aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 rounded-md bg-midnight px-2 py-1 font-mono text-[10px] uppercase tracking-wider font-bold text-white opacity-0 transition-opacity duration-200" />
       <StopsNav items={score.stops} currentRef={navChangedRef} onGo={go} onSkip={skip} />

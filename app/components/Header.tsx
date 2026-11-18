@@ -12,7 +12,7 @@ import { lockScroll } from './SmoothScroll';
 const HOME_LINK: NavLink = { name: 'Home', href: '/' };
 const NAV_LINKS: NavLink[] = [
   { name: 'Work', href: '/portfolio' },
-  { name: 'Capabilities', href: '/services' },
+  { name: 'Services', href: '/services' },
   { name: 'About', href: '/about' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },

@@ -17,6 +17,7 @@ import { calm } from './data';
 import { ViewAll } from './parts';
 import type { Post } from './posts';
 import { underHeader } from '../underHeader';
+import { WhatsAppTopic } from '../whatsappTopic';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -105,6 +106,7 @@ export default function ArticlePage({ article, related }: { article: Article; re
 
   return (
     <main id="main" ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
+      <WhatsAppTopic post={article.title} service={article.service?.title} />
       {/* How far through the article */}
       <div aria-hidden="true" data-article="progress" className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0 bg-linear-to-r from-brand-blue to-[#7fa6ff]" />
 
