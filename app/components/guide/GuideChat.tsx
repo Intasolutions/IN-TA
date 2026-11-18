@@ -1,53 +1,86 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, useState, type RefObject } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useEffectEvent, useId, useRef, useState, type RefObject } from 'react';
 import { useSite, useText } from '../../site/SiteContext';
 import { linesOf, phoneDigits } from '../../site/site';
 import Icon from '../Icon';
 import { scrollToY } from '../SmoothScroll';
 import { whatsappLink } from '../whatsappTopic';
-import { LIMITS, type Answer, type AskReply, type ChatTurn, type Mood, type Unavailable } from './chatTypes';
+import { LIMITS, NO_LEAD, withName, type Answer, type AskMode, type AskReply, type ChatTurn, type LeadInfo, type Mood, type Unavailable } from './chatTypes';
+import { journeyText } from './journey';
+import StartForm, { type Details } from './StartForm';
 import { clip, pageContext, short } from './pageContext';
 import type { Guide as GuideApi } from './engine';
 import css from './guide.module.css';
 
-// The robot's chat: a panel above him, dressed like his visor (midnight, with his two eyes in the corner reacting as
-// he listens, thinks and answers). A question goes to app/api/guide/route.ts (Google's Gemini, answering from what
-// the admin says about IN-TA and the page being read); the answer comes back with what he does: a move and a face,
-// and sometimes a walk to something on the page (lit up while he looks at it), a tour of the page, or a trip to
-// another one. Everything it says around the answers is in the admin (Page wording > Website guide, guide_chat_*).
+// The robot's chat. It starts with a short form (StartForm: name, and a phone number or an email), then he talks:
+// he greets them by name, guides them round the site (walks to things, tours pages, takes them to other pages),
+// learns what they need and recommends the right service. Questions go to app/api/guide/route.ts (Google's Gemini);
+// the visitor's name, phone and email never do: the AI writes {name} and it's filled in here, and a number or email
+// typed into the chat is kept back the same way.
+//
+// The whole conversation is saved for the team (Django: Contact > Robot chats), with their details, what he learned
+// of their needs and the pages they looked at. Everything said around the answers is in the admin (guide_chat_*).
 // Where the robot can't run (less motion asked for, a small device), the chat still works on its own.
 
-type GuideMsg = Answer & { id: number; from: 'guide'; question: string; done: string; spots: Map<string, Element> };
+export type GuideMsg = Answer & { id: number; from: 'guide'; question: string; done: string; spots: Map<string, Element> };
 type Message =
-  | { id: number; from: 'visitor'; text: string }
+  | { id: number; from: 'visitor'; text: string; sent: string }
   | GuideMsg
   | { id: number; from: 'note'; reason: Unavailable; question: string };
+
+/** How the chat was opened: with a question to answer, or with his opening line already written (the teaser) */
+export type ChatStart = { id: number; question?: string; seed?: { answer: Answer; spots: Map<string, Element> } } | null;
 
 type Activity =
   | { kind: 'idle' }
   | { kind: 'walking' | 'looking'; target: string }
   | { kind: 'going'; page: string };
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
+// ---- the visitor and their conversation, for this visit: who they are, and where it's saved ----
+type Me = Details & { id?: number; token?: string };
+const ME = 'inta-guide-me';
+const readMe = (): Me | null => { try { return JSON.parse(sessionStorage.getItem(ME) ?? 'null'); } catch { return null; } };
+const keepMe = (me: Me) => { try { sessionStorage.setItem(ME, JSON.stringify(me)); } catch { /* private mode */ } };
+/** Their first name, once they've given it (the teaser uses it too) */
+export const savedName = () => readMe()?.name.split(/\s+/)[0] ?? '';
+
+// Contact details typed into the chat: kept out of what goes to the AI, and saved with the conversation
+const EMAIL = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
+const PHONE = /\+?\d[\d\s().-]{5,}\d/g;
+const digits = (s: string) => s.replace(/\D/g, '').length;
+function keepBack(text: string) {
+  const emails = text.match(EMAIL) ?? [];
+  let phone = '';
+  const sent = text.replace(EMAIL, '[email shared]').replace(PHONE, (m) => {
+    if (digits(m) < 7 || digits(m) > 15) return m;
+    phone ||= m.trim();
+    return '[phone number shared]';
+  });
+  return { sent, email: emails[0] ?? '', phone };
+}
+const CONTINUE = 'inta-guide-continue'; // he's taking them to this page, and will carry on guiding there
+
 const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 let availability: Promise<{ available: boolean; reason?: Unavailable }> | null = null;
-const checkAvailable = () => (availability ??= fetch('/api/guide', { cache: 'no-store' })
+export const checkAvailable = () => (availability ??= fetch('/api/guide', { cache: 'no-store' })
   .then((r) => r.json())
   .catch(() => { availability = null; return { available: false, reason: 'busy' as const }; }));
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** A reply typing itself out (all at once when less motion is asked for) */
+/** A reply typing itself out, quickly (all at once when less motion is asked for) */
 function Typed({ text, onDone }: { text: string; onDone?: () => void }) {
   const [n, setN] = useState(() => (typeof window !== 'undefined' && reducedMotion() ? text.length : 0));
-  const done = useRef(onDone);
-  useEffect(() => { done.current = onDone; });
+  const finished = useEffectEvent(() => onDone?.());
   useEffect(() => {
-    if (n >= text.length) { done.current?.(); return; }
-    const t = window.setTimeout(() => setN((x) => Math.min(text.length, x + 2)), /[.!?,]/.test(text[n] ?? '') ? 70 : 16);
+    if (n >= text.length) { finished(); return; }
+    const t = window.setTimeout(() => setN((x) => Math.min(text.length, x + 3)), /[.!?]/.test(text[n] ?? '') ? 45 : 12);
     return () => window.clearTimeout(t);
   }, [n, text]);
   return <>{text.slice(0, n)}{n < text.length && <span className={css.caret} />}</>;
@@ -83,7 +116,9 @@ function Spotlight({ el, caption }: { el: Element; caption: string }) {
   );
 }
 
-export default function GuideChat({ api, open, onClose, robot, onOut }: {
+type Fetched = { reply: AskReply; spots: Map<string, Element> };
+
+export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
   api: RefObject<GuideApi | null>;
   open: boolean;
   onClose: () => void;
@@ -91,14 +126,18 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
   robot: boolean;
   /** he's out on the page showing something (the robot hides while the chat is open, except then) */
   onOut: (out: boolean) => void;
+  /** how it was opened (a question, or his opening line from the teaser) */
+  start: ChatStart;
 }) {
   const t = useText();
   const site = useSite();
   const router = useRouter();
+  const pathname = usePathname();
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLDivElement>(null);
+  const [me, setMe] = useState<Me | null>(readMe);
   const [messages, setMessages] = useState<Message[]>([]);
   const [question, setQuestion] = useState('');
   const [thinking, setThinking] = useState(false);
@@ -110,10 +149,61 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
   const [mood, setMood] = useState<Mood>('neutral');
   const [typedUpTo, setTypedUpTo] = useState(0); // the newest reply that has finished typing
   const [announce, setAnnounce] = useState('');
+  const [lead, setLead] = useState<LeadInfo>(NO_LEAD); // what he has understood of their needs
   const run = useRef(0); // each walk or tour gets a number: a newer one (or closing, or a new chat) stops the older
-
   const seq = useRef(0); // message numbers, in order
   const nextId = () => ++seq.current;
+  const name = me?.name.split(/\s+/)[0] ?? '';
+  const reasonText = (r: Unavailable) => t(r === 'region' ? 'guide_chat_region' : r === 'limit' ? 'guide_chat_limit' : 'guide_chat_busy');
+
+  // his opening line, asked for while the visitor fills in the form, and a question waiting for it
+  const opener = useRef<Promise<Fetched | null> | null>(null);
+  const waiting = useRef<string>('');
+  const started = useRef(false);
+
+  // ---- saving the conversation for the team (Django: Contact > Robot chats) ----
+  const unsaved = useRef<{ role: 'visitor' | 'robot'; text: string; at: string; action?: string }[]>([]);
+  const saving = useRef(false);
+  const saveTimer = useRef(0);
+  const meRef = useRef(me);
+  const leadRef = useRef(lead);
+  useEffect(() => { meRef.current = me; leadRef.current = lead; });
+  const save = async (extra: { phone?: string; email?: string } = {}) => {
+    const who = meRef.current;
+    if (!who || saving.current) return;
+    saving.current = true;
+    try {
+      let { id, token } = who;
+      if (!id || !token) {
+        // the conversation starts on the server (retried with the next message if it can't be reached now)
+        const res = await fetch(`${API}/api/contact/chats/`, {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name: who.name, phone: who.phone, email: who.email, pages: journeyText().slice(0, 4000), source: window.location.pathname }),
+        });
+        if (!res.ok) throw new Error(`start ${res.status}`);
+        ({ id, token } = await res.json());
+        const saved = { ...who, id, token };
+        keepMe(saved);
+        meRef.current = saved;
+        setMe(saved);
+      }
+      const batch = unsaved.current.splice(0);
+      const res = await fetch(`${API}/api/contact/chats/${id}/append/`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ token, messages: batch, lead: leadRef.current, pages: journeyText().slice(0, 4000), ...extra }),
+      });
+      if (!res.ok) { unsaved.current.unshift(...batch); throw new Error(`append ${res.status}`); }
+    } catch (e) {
+      if (process.env.NODE_ENV === 'development') console.warn('Robot chat not saved yet:', e);
+    } finally {
+      saving.current = false;
+    }
+  };
+  const record = (role: 'visitor' | 'robot', text: string, action?: string) => {
+    unsaved.current.push({ role, text, at: new Date().toISOString(), ...(action ? { action } : {}) });
+    window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => save(), 600);
+  };
 
   // a new question, a new chat or closing it: any walk or tour stops, and he heads home
   const stopAll = () => {
@@ -124,30 +214,150 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
     setTourAt(null);
     api.current?.release();
   };
-  const stopRef = useRef(stopAll);
-  useEffect(() => { stopRef.current = stopAll; });
+
+  /** ask Gemini: the visitor's words (already kept back), what he's said so far, the page and the visit */
+  const fetchAnswer = async (sent: string, mode: AskMode, history: ChatTurn[]): Promise<Fetched> => {
+    const { page, spots } = pageContext();
+    try {
+      const res = await fetch('/api/guide', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ question: sent, history, page, journey: journeyText(), mode, named: true }),
+      });
+      return { reply: await res.json(), spots };
+    } catch {
+      return { reply: { ok: false, reason: 'busy' }, spots };
+    }
+  };
+
+  /** an answer arrives: into the conversation, his move and face, what he learned, and saved */
+  const take = ({ reply, spots }: Fetched, q: string, mode: AskMode) => {
+    const id = nextId();
+    const name = meRef.current?.name.split(/\s+/)[0] ?? ''; // (just given, when it's his first line)
+    if (reply.ok) {
+      setLead((was) => ({
+        service: reply.lead.service || was.service, need: reply.lead.need || was.need, business: reply.lead.business || was.business,
+        timeline: reply.lead.timeline || was.timeline, budget: reply.lead.budget || was.budget,
+      }));
+      setMessages((m) => [...m, { ...reply, id, from: 'guide', question: q, done: '', spots }]);
+      setMood(reply.mood);
+      setAnnounce(withName(reply.reply, name));
+      api.current?.gesture(reply.gesture, reply.mood);
+      record('robot', withName(reply.reply, name), reply.action === 'none' ? undefined : `${reply.action}${reply.label ? `: ${reply.label}` : ''}`);
+    } else if (mode === 'ask') {
+      if (reply.reason === 'region') setClosed('region');
+      setMessages((m) => [...m, { id, from: 'note', reason: reply.reason, question: q }]);
+      setMood('sad');
+      setAnnounce(reasonText(reply.reason));
+      api.current?.gesture('shake_head', 'sad');
+    }
+    // (his opening line or the tour on arrival didn't come: the standard hello does)
+  };
+
+  const historyOf = (list: Message[]): ChatTurn[] => list.flatMap((m): ChatTurn[] => (
+    m.from === 'visitor' ? [{ role: 'visitor', text: m.sent }] : m.from === 'guide' ? [{ role: 'guide', text: m.reply }] : []
+  )).slice(-LIMITS.turns);
+
+  const ask = async (raw: string, mode: AskMode = 'ask') => {
+    const q = raw.replace(/\s+/g, ' ').trim().slice(0, LIMITS.question);
+    if ((mode === 'ask' && !q) || thinking) return;
+    stopAll();
+    let sent = q;
+    if (mode === 'ask') {
+      setQuestion('');
+      const kept = keepBack(q);
+      sent = kept.sent;
+      setMessages((m) => [...m, { id: nextId(), from: 'visitor', text: q, sent }]);
+      record('visitor', q);
+      if (kept.phone || kept.email) save({ phone: kept.phone, email: kept.email });
+    }
+    const history = historyOf(messages);
+    setThinking(true);
+    api.current?.think(true);
+    const got = await fetchAnswer(sent, mode, history);
+    setThinking(false);
+    api.current?.think(false);
+    take(got, q, mode);
+  };
+
+  /** the form's done: they're in, the conversation starts on the server, and he greets them (the line's ready) */
+  const begin = async (details: Details) => {
+    const who: Me = { ...details };
+    keepMe(who);
+    meRef.current = who;
+    setMe(who);
+    save();
+    const q = waiting.current;
+    waiting.current = '';
+    if (q) { ask(q); return; }
+    setThinking(true);
+    api.current?.think(true);
+    const got = (await opener.current) ?? (await fetchAnswer('', 'opener', []));
+    opener.current = null;
+    setThinking(false);
+    api.current?.think(false);
+    take(got, '', 'opener');
+  };
 
   // opening: is the chat usable from here, and he turns to watch it; closing: back to his own business
+  const greet = useEffectEvent((available: boolean) => {
+    if (!available || started.current) return;
+    started.current = true;
+    if (!me) opener.current ??= fetchAnswer('', 'opener', []); // ready by the time the form is filled in
+    else if (!messages.length) ask('', 'opener');
+  });
+  const leave = useEffectEvent(() => stopAll());
   useEffect(() => {
     if (!open) return;
     const guide = api.current;
     guide?.chat(true, panel.current);
-    // straight to typing with a keyboard; on a phone the keyboard waits for a tap, so it doesn't cover the chat
-    if (window.matchMedia('(pointer: fine)').matches) input.current?.focus({ preventScroll: true });
     let gone = false;
-    checkAvailable().then((a) => { if (!gone) setClosed(a.available ? null : a.reason ?? 'busy'); });
+    checkAvailable().then((a) => {
+      if (gone) return;
+      setClosed(a.available ? null : a.reason ?? 'busy');
+      greet(a.available);
+    });
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
-    return () => { gone = true; window.removeEventListener('keydown', onKey); stopRef.current(); guide?.chat(false, null); };
+    return () => { gone = true; window.removeEventListener('keydown', onKey); leave(); guide?.chat(false, null); };
   }, [open, api, onClose]);
 
-  useEffect(() => { list.current?.scrollTo({ top: list.current.scrollHeight, behavior: 'smooth' }); }, [messages, thinking, typedUpTo]);
+  // straight to typing with a keyboard (on a phone the keyboard waits for a tap, so it doesn't cover the chat)
+  useEffect(() => {
+    if (open && me && window.matchMedia('(pointer: fine)').matches) input.current?.focus({ preventScroll: true });
+  }, [open, me]);
+
+  // opened with something: his line from the teaser, or a question (the Contact page, a link elsewhere)
+  const opened = useEffectEvent((how: NonNullable<ChatStart>) => {
+    started.current = true;
+    if (how.seed) {
+      const seed: Fetched = { reply: how.seed.answer, spots: how.seed.spots };
+      if (me) take(seed, '', 'opener'); else opener.current = Promise.resolve(seed);
+    }
+    if (how.question) { if (me) ask(how.question); else waiting.current = how.question; }
+  });
+  useEffect(() => {
+    if (!start) return;
+    const timer = window.setTimeout(() => opened(start), 0); // after the chat has rendered open
+    return () => window.clearTimeout(timer);
+  }, [start]);
+
+  // a new page he took them to: he carries on guiding them there
+  const arrivedThere = useEffectEvent(() => ask('', 'continue'));
+  useEffect(() => {
+    let to = '';
+    try { to = sessionStorage.getItem(CONTINUE) ?? ''; } catch { /* private mode */ }
+    if (!open || !to || to.toLowerCase() !== pathname.toLowerCase()) return;
+    try { sessionStorage.removeItem(CONTINUE); } catch { /* private mode */ }
+    const timer = window.setTimeout(() => arrivedThere(), 1500);
+    return () => window.clearTimeout(timer);
+  }, [pathname, open]);
+
+  useEffect(() => { list.current?.scrollTo({ top: list.current.scrollHeight, behavior: 'smooth' }); }, [messages, thinking, typedUpTo, me]);
 
   // he's out on the page: the robot shows (Guide.tsx hides him while the chat simply sits open)
   const out = open && (activity.kind === 'walking' || activity.kind === 'looking' || !!tourAt);
-  const onOutRef = useRef(onOut);
-  useEffect(() => { onOutRef.current = onOut; });
-  useEffect(() => { onOutRef.current(out); }, [out]);
+  const tellOut = useEffectEvent((o: boolean) => onOut(o));
+  useEffect(() => { tellOut(out); }, [out]);
 
   // a phone's keyboard covers the bottom of the screen: the chat fits in what's left, so the box stays in view
   useEffect(() => {
@@ -177,21 +387,21 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
   };
 
   /** bring it into view, light it up, and (with the robot) walk over to it; resolves once he's looking at it */
-  const walkTo = async (me: number, el: Element, label: string, caption: string, hold: boolean) => {
+  const walkTo = async (mine: number, el: Element, label: string, caption: string, hold: boolean) => {
     const r = el.getBoundingClientRect();
     const inView = r.top > 110 && r.bottom < window.innerHeight * 0.62;
     if (!inView) {
       scrollToY(window.scrollY + r.top - window.innerHeight * 0.3);
       await wait(reducedMotion() ? 150 : 1900);
     }
-    if (run.current !== me) return false;
+    if (run.current !== mine) return false;
     setPeek(false);
     setSpot({ el, caption: robot ? '' : caption });
-    const going = api.current?.show(el, { caption, hold }) ?? false;
+    const going = api.current?.show(el, { caption: withName(caption, name), hold }) ?? false;
     if (!going) { setActivity({ kind: 'looking', target: label }); return true; }
     setActivity({ kind: 'walking', target: label });
-    for (let i = 0; i < 70 && run.current === me && api.current?.status() === 'walking'; i++) await wait(150);
-    if (run.current !== me) return false;
+    for (let i = 0; i < 70 && run.current === mine && api.current?.status() === 'walking'; i++) await wait(150);
+    if (run.current !== mine) return false;
     setActivity({ kind: 'looking', target: label });
     return true;
   };
@@ -199,25 +409,25 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
   const show = async (msg: GuideMsg) => {
     const el = resolve(msg, msg.target);
     if (!el) return;
-    const me = ++run.current;
-    if (!(await walkTo(me, el, msg.label, msg.caption, false))) return;
+    const mine = ++run.current;
+    if (!(await walkTo(mine, el, msg.label, msg.caption, false))) return;
     mark(msg.id, t('guide_chat_did_show', { target: msg.label }));
     await wait(robot ? 3400 + msg.caption.length * 40 : 3800);
-    if (run.current !== me) return;
+    if (run.current !== mine) return;
     setSpot(null);
     setActivity({ kind: 'idle' });
   };
 
   const tour = async (msg: GuideMsg) => {
-    const me = ++run.current;
+    const mine = ++run.current;
     const stops = msg.steps.map((s) => ({ ...s, el: resolve(msg, s.target) })).filter((s): s is typeof s & { el: Element } => !!s.el);
     for (let i = 0; i < stops.length; i++) {
       setTourAt({ n: i + 1, total: stops.length });
       const s = stops[i];
       const label = clip(s.el.textContent ?? '') || s.target;
-      if (!(await walkTo(me, s.el, label, s.say, i < stops.length - 1))) return;
-      await wait(1600 + s.say.length * 55);
-      if (run.current !== me) return;
+      if (!(await walkTo(mine, s.el, label, s.say, i < stops.length - 1))) return;
+      await wait(1500 + s.say.length * 50);
+      if (run.current !== mine) return;
     }
     mark(msg.id, t('guide_chat_did_tour', { total: stops.length }));
     setSpot(null);
@@ -227,15 +437,16 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
   };
 
   const go = async (msg: GuideMsg) => {
-    const me = ++run.current;
+    const mine = ++run.current;
     setActivity({ kind: 'going', page: msg.label });
     api.current?.gesture('jump', 'happy');
-    await wait(900);
-    if (run.current !== me) return;
+    await wait(700);
+    if (run.current !== mine) return;
+    try { sessionStorage.setItem(CONTINUE, msg.target); } catch { /* private mode */ }
     router.push(msg.target);
     mark(msg.id, t('guide_chat_did_go', { page: msg.label }));
     await wait(1200);
-    if (run.current === me) setActivity({ kind: 'idle' });
+    if (run.current === mine) setActivity({ kind: 'idle' });
   };
 
   /** the answer has typed out: now he acts on it */
@@ -245,50 +456,14 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
     else if (msg.action === 'go') go(msg);
   };
 
-  const ask = async (raw: string) => {
-    const q = raw.replace(/\s+/g, ' ').trim().slice(0, LIMITS.question);
-    if (!q || thinking) return;
-    stopAll();
-    setQuestion('');
-    const history: ChatTurn[] = messages.flatMap((m): ChatTurn[] => (m.from === 'visitor' ? [{ role: 'visitor', text: m.text }] : m.from === 'guide' ? [{ role: 'guide', text: m.reply }] : []))
-      .slice(-LIMITS.turns);
-    setMessages((m) => [...m, { id: nextId(), from: 'visitor', text: q }]);
-    setThinking(true);
-    api.current?.think(true);
-    const { page, spots } = pageContext();
-    let reply: AskReply;
-    try {
-      const res = await fetch('/api/guide', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: q, history, page }) });
-      reply = await res.json();
-    } catch {
-      reply = { ok: false, reason: 'busy' };
-    }
-    setThinking(false);
-    api.current?.think(false);
-    const id = nextId();
-    if (reply.ok) {
-      setMessages((m) => [...m, { ...reply, id, from: 'guide', question: q, done: '', spots }]);
-      setMood(reply.mood);
-      setAnnounce(reply.reply);
-      api.current?.gesture(reply.gesture, reply.mood);
-    } else {
-      if (reply.reason === 'region') setClosed('region');
-      setMessages((m) => [...m, { id, from: 'note', reason: reply.reason, question: q }]);
-      setMood('sad');
-      setAnnounce(reasonText(reply.reason));
-      api.current?.gesture('shake_head', 'sad');
-    }
-  };
-
   const newChat = () => {
     stopAll();
     setMessages([]);
     setMood('neutral');
     setTypedUpTo(0);
-    input.current?.focus({ preventScroll: true });
+    setLead(NO_LEAD);
+    ask('', 'opener');
   };
-
-  const reasonText = (r: Unavailable) => t(r === 'region' ? 'guide_chat_region' : r === 'limit' ? 'guide_chat_limit' : 'guide_chat_busy');
 
   if (!open) return null;
 
@@ -308,7 +483,7 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
 
   return (
     <>
-      {spot && <Spotlight el={spot.el} caption={spot.caption} />}
+      {spot && <Spotlight el={spot.el} caption={withName(spot.caption, name)} />}
       <div ref={panel} role="dialog" aria-modal="false" aria-labelledby={titleId} className={`guide-chat ${css.chat} ${folded ? css.chatFolded : ''}`}>
         <div className={css.chatHead}>
           <Visor look={look} />
@@ -344,67 +519,80 @@ export default function GuideChat({ api, open, onClose, robot, onOut }: {
         )}
 
         <div ref={list} className={css.chatList} data-lenis-prevent>
-          <p className={css.fromGuide}>{closed ? reasonText(closed) : t('guide_chat_hello')}</p>
-          {closed && <a className={css.cta} href={wa('')} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>}
-
-          {!closed && !messages.length && chips.length > 0 && (
-            <div className={css.starters}>
-              <p>{t('guide_chat_try')}</p>
-              {chips.map((c) => (
-                <button key={c} type="button" onClick={() => ask(c)}><span>{c}</span><Icon name="east" className="text-[15px]" /></button>
-              ))}
-            </div>
-          )}
-
-          {messages.map((m) => (m.from === 'visitor' ? (
-            <p key={m.id} className={css.fromVisitor}>{m.text}</p>
-          ) : m.from === 'guide' ? (
-            <div key={m.id} className={css.guideTurn}>
-              <p className={css.fromGuide}>
-                {m.id > typedUpTo ? <Typed text={m.reply} onDone={() => { setTypedUpTo(m.id); act(m); }} /> : m.reply}
-              </p>
-              {m.id <= typedUpTo && (
-                <>
-                  {m.done && <p className={css.receipt}><Icon name="check" className="text-[13px]" />{m.done}</p>}
-                  <div className={css.ctas}>
-                    {m.action === 'link' && <Link className={css.cta} href={m.target}>{t('guide_chat_open', { page: m.label })}<Icon name="north_east" className="text-[14px]" /></Link>}
-                    {m.action === 'go' && !m.done && <Link className={css.cta} href={m.target}>{t('guide_chat_open', { page: m.label })}<Icon name="north_east" className="text-[14px]" /></Link>}
-                    {m.action === 'whatsapp' && <a className={`${css.cta} ${css.ctaMain}`} href={wa(m.question)} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>}
-                    {(m.action === 'show' || m.action === 'tour') && m.done && (
-                      <button type="button" className={css.cta} onClick={() => act(m)}>{t('guide_chat_again')}</button>
-                    )}
-                  </div>
-                  {m === lastGuide && !thinking && m.followUps.length > 0 && (
-                    <div className={css.followUps}>
-                      {m.followUps.map((f) => <button key={f} type="button" onClick={() => ask(f)}>{f}</button>)}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+          {closed ? (
+            <>
+              <p className={css.fromGuide}>{reasonText(closed)}</p>
+              <a className={`${css.cta} ${css.ctaMain}`} href={wa('')} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>
+            </>
+          ) : !me ? (
+            // first, who they are: then he talks
+            <>
+              <p className={css.fromGuide}>{t('guide_chat_start_intro')}</p>
+              <StartForm onDone={begin} />
+            </>
           ) : (
-            <div key={m.id} className={css.guideTurn}>
-              <p className={css.fromGuide}>{reasonText(m.reason)}</p>
-              <a className={`${css.cta} ${css.ctaMain}`} href={wa(m.question)} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>
-            </div>
-          )))}
+            <>
+              {!messages.length && !thinking && <p className={css.fromGuide}>{withName(t('guide_chat_hello'), name)}</p>}
+              {!messages.some((m) => m.from === 'visitor') && !thinking && chips.length > 0 && (
+                <div className={css.starters}>
+                  <p>{t('guide_chat_try')}</p>
+                  {chips.map((c) => (
+                    <button key={c} type="button" onClick={() => ask(c)}><span>{c}</span><Icon name="east" className="text-[15px]" /></button>
+                  ))}
+                </div>
+              )}
+
+              {messages.map((m) => (m.from === 'visitor' ? (
+                <p key={m.id} className={css.fromVisitor}>{m.text}</p>
+              ) : m.from === 'guide' ? (
+                <div key={m.id} className={css.guideTurn}>
+                  <p className={css.fromGuide}>
+                    {m.id > typedUpTo ? <Typed text={withName(m.reply, name)} onDone={() => { setTypedUpTo(m.id); act(m); }} /> : withName(m.reply, name)}
+                  </p>
+                  {m.id <= typedUpTo && (
+                    <>
+                      {m.done && <p className={css.receipt}><Icon name="check" className="text-[13px]" />{m.done}</p>}
+                      <div className={css.ctas}>
+                        {m.action === 'link' && <Link className={css.cta} href={m.target}>{t('guide_chat_open', { page: m.label })}<Icon name="north_east" className="text-[14px]" /></Link>}
+                        {m.action === 'go' && !m.done && <Link className={css.cta} href={m.target}>{t('guide_chat_open', { page: m.label })}<Icon name="north_east" className="text-[14px]" /></Link>}
+                        {m.action === 'whatsapp' && <a className={`${css.cta} ${css.ctaMain}`} href={wa(m.question)} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>}
+                        {(m.action === 'show' || m.action === 'tour') && m.done && (
+                          <button type="button" className={css.cta} onClick={() => act(m)}>{t('guide_chat_again')}</button>
+                        )}
+                      </div>
+                      {m === lastGuide && !thinking && m.followUps.length > 0 && (
+                        <div className={css.followUps}>
+                          {m.followUps.map((f) => <button key={f} type="button" onClick={() => ask(f)}>{f}</button>)}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div key={m.id} className={css.guideTurn}>
+                  <p className={css.fromGuide}>{reasonText(m.reason)}</p>
+                  <a className={`${css.cta} ${css.ctaMain}`} href={wa(m.question)} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>
+                </div>
+              )))}
+            </>
+          )}
           {thinking && <p className={`${css.fromGuide} ${css.dots}`} aria-label={t('guide_chat_thinking')}><i /><i /><i /></p>}
         </div>
         <p className="sr-only" aria-live="polite">{announce}</p>
 
+        {!closed && me && (
+          <form className={css.chatForm} onSubmit={(e) => { e.preventDefault(); ask(question); }}>
+            <input ref={input} value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={LIMITS.question}
+              placeholder={t('guide_chat_placeholder')} aria-label={t('guide_chat_placeholder')} enterKeyHint="send" autoComplete="off" />
+            <button type="submit" disabled={thinking || !question.trim()} aria-label={t('guide_chat_send')}>
+              <Icon name="arrow_upward" className="text-[18px]" />
+            </button>
+          </form>
+        )}
         {!closed && (
-          <>
-            <form className={css.chatForm} onSubmit={(e) => { e.preventDefault(); ask(question); }}>
-              <input ref={input} value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={LIMITS.question}
-                placeholder={t('guide_chat_placeholder')} aria-label={t('guide_chat_placeholder')} enterKeyHint="send" autoComplete="off" />
-              <button type="submit" disabled={thinking || !question.trim()} aria-label={t('guide_chat_send')}>
-                <Icon name="arrow_upward" className="text-[18px]" />
-              </button>
-            </form>
-            <p className={css.chatNote}>
-              {t(messages.length ? 'guide_chat_note_short' : 'guide_chat_note')} <Link href="/privacy">{t('guide_chat_privacy')}</Link>
-            </p>
-          </>
+          <p className={css.chatNote}>
+            <Link href="/privacy">{t('guide_chat_privacy')}</Link>
+          </p>
         )}
       </div>
     </>

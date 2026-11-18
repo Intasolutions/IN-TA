@@ -3,7 +3,7 @@
 // (Guide.tsx). Only the page's own content: nothing the visitor typed or did.
 import { LIMITS, type PageContext } from './chatTypes';
 
-const SKIP = 'header, footer, nav, [aria-hidden="true"], .guide-chat, .guide-ask, a[aria-label="Chat on WhatsApp"]';
+const SKIP = 'header, footer, nav, [aria-hidden="true"], .guide-chat, [data-guide-dock]';
 export const clip = (t: string) => t.replace(/\s+/g, ' ').trim();
 
 /** a name short enough for a status line, cut between words */

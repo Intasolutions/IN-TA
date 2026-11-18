@@ -105,7 +105,7 @@ export default function Header() {
             {/* Logo tile: dark navy glass with a soft blue glow, holding the official white INTA wordmark */}
             <span
               aria-hidden="true"
-              className="relative flex items-center justify-center h-11 sm:h-12 px-1.5 sm:px-2 rounded-xl overflow-hidden
+              className="relative shrink-0 flex items-center justify-center h-11 sm:h-12 px-1.5 sm:px-2 rounded-xl overflow-hidden
                 bg-[linear-gradient(145deg,#01072b_0%,#06123f_55%,#0a1d5c_100%)]
                 border border-brand-blue/40 ring-1 ring-inset ring-white/5
                 shadow-[0_6px_20px_-6px_rgb(1_68_181/0.55)]

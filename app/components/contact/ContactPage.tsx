@@ -11,7 +11,9 @@ import { useSocials } from '../Footer';
 import { underHeader } from '../underHeader';
 import { useOfficeStatus } from '../OfficeStatus';
 import { useSite, useText } from '../../site/SiteContext';
-import { accent, addressLines, coords, daysLong, hoursShort, mapUrl, phoneHref, timeLong, TIME_ZONE } from '../../site/site';
+import { accent, addressLines, coords, daysLong, hoursShort, mapUrl, phoneDigits, phoneHref, timeLong, TIME_ZONE } from '../../site/site';
+import { whatsappLink, whatsappMessage } from '../whatsappTopic';
+import { openGuideChat } from '../guide/openChat';
 import { calm } from '../blog/data';
 import { scrollToY } from '../SmoothScroll';
 import { usePlayIntro } from '../../context/usePlayIntro';
@@ -22,14 +24,16 @@ import { createCable, type Cable } from './patchCable';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-type PortId = 'message' | 'call' | 'email' | 'visit';
+type PortId = 'message' | 'robot' | 'whatsapp' | 'call' | 'email' | 'visit';
 
 // The line under each port's name comes from Site settings (see `portValue` in the page)
 const PORTS: { id: PortId; no: string; name: string }[] = [
   { id: 'message', no: '01', name: 'Message' },
-  { id: 'call', no: '02', name: 'Call' },
-  { id: 'email', no: '03', name: 'Email' },
-  { id: 'visit', no: '04', name: 'Visit' },
+  { id: 'robot', no: '02', name: 'Robot' },
+  { id: 'whatsapp', no: '03', name: 'WhatsApp' },
+  { id: 'call', no: '04', name: 'Call' },
+  { id: 'email', no: '05', name: 'Email' },
+  { id: 'visit', no: '06', name: 'Visit' },
 ];
 const isPort = (v: string): v is PortId => PORTS.some((p) => p.id === v);
 /** An email address may break onto a second line after its @, rather than anywhere in the middle */
@@ -119,10 +123,14 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
   const address = addressLines(site);
   const phone = { href: phoneHref(site.phone), label: site.phone };
   const email = site.email;
+  // WhatsApp lives on this page only: its first line is already written (Page wording > WhatsApp messages)
+  const whatsapp = whatsappLink(phoneDigits(site.phone), whatsappMessage(site, '/contact', null));
   const [titlePlain, titleBright] = accent(t('contact_title'));
   const portValue = (id: PortId) =>
     ({
       message: t('contact_message_port'),
+      robot: t('contact_robot_port'),
+      whatsapp: site.phone,
       call: site.phone,
       email,
       visit: [site.address.locality, site.address.district].filter(Boolean).join(', '),
@@ -524,7 +532,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
               </p>
               <span aria-hidden="true" className="rack-screw shrink-0 [--uh:44px]" />
             </div>
-            <div role="radiogroup" aria-label="How would you like to reach us?" className="grid grid-cols-4">
+            <div role="radiogroup" aria-label="How would you like to reach us?" className="grid grid-cols-6">
               {PORTS.map((port, i) => {
                 const on = active === port.id && connected;
                 return (
@@ -573,8 +581,33 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
                   <MessageLine onKey={onFormKey} onSending={onSending} onSent={onSent} />
                 </div>
 
+                <div data-line-panel="robot" hidden={active !== 'robot'}>
+                  <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 02 // Robot</p>
+                  <H2 plain data-line className="heading-section mt-2.5 text-white">{t('contact_robot_title')}</H2>
+                  <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_robot_text')}</p>
+                  <div data-line className="mt-5 flex flex-wrap gap-2.5">
+                    <button type="button" onClick={() => openGuideChat()} className={`${ACTION} max-sm:w-full`}>
+                      {t('contact_robot_button')}
+                      <Icon name="east" className="text-[16px]" />
+                    </button>
+                  </div>
+                </div>
+
+                <div data-line-panel="whatsapp" hidden={active !== 'whatsapp'}>
+                  <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 03 // WhatsApp</p>
+                  <H2 plain data-line className="heading-section mt-2.5 text-white [overflow-wrap:anywhere]"><a href={whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp" className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{phone.label}</a></H2>
+                  <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_whatsapp_text')}</p>
+                  <div data-line className="mt-5 flex flex-wrap gap-2.5">
+                    <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={`${ACTION} max-sm:w-full`}>
+                      {t('contact_whatsapp_button')}
+                      <Icon name="north_east" className="text-[16px]" />
+                    </a>
+                    <Copy text={phone.label} label="Copy number" />
+                  </div>
+                </div>
+
                 <div data-line-panel="call" hidden={active !== 'call'}>
-                  <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 02 // Call</p>
+                  <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 04 // Call</p>
                   <H2 plain data-line className="heading-section mt-2.5 text-white [overflow-wrap:anywhere]"><a href={phone.href} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{phone.label}</a></H2>
                   <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_call_text', { days: daysLong(site), time: timeLong(site) })}</p>
                   <div data-line className="mt-5 flex flex-wrap gap-2.5">
@@ -587,7 +620,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
                 </div>
 
                 <div data-line-panel="email" hidden={active !== 'email'}>
-                  <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 03 // Email</p>
+                  <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 05 // Email</p>
                   <H2 plain data-line className="mt-2.5 font-display text-[clamp(1.35rem,4.2vw,3rem)] font-extrabold leading-[1.05] tracking-tight text-white [overflow-wrap:anywhere]"><a href={`mailto:${email}`} className="rounded transition-colors duration-300 hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9dbbff]">{email}</a></H2>
                   <p data-line className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/85 sm:text-base">{t('contact_email_text')}</p>
                   <div data-line className="mt-5 flex flex-wrap gap-2.5">
@@ -603,7 +636,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
                   {everVisit && <VisitGlobe active={active === 'visit'} />}
                   <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
                     <div>
-                      <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 04 // Visit</p>
+                      <p data-line className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">Line 06 // Visit</p>
                       <address data-line className="mt-2 font-display text-lg font-bold not-italic leading-snug tracking-tight text-white sm:text-2xl">{address[0]}<br />{address[1]}</address>
                       <p data-line className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/60 sm:text-[11px]">{coords(site)}</p>
                     </div>

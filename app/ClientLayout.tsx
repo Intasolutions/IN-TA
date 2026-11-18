@@ -8,9 +8,8 @@ import SkipLink from './components/SkipLink';
 import { RevealProvider, useReveal } from './context/RevealContext';
 import { SiteProvider } from './site/SiteContext';
 import type { Site } from './site/site';
-// The WhatsApp button, on every page (it steps aside while the hero's buttons are on screen)
-import WhatsAppButton from './components/WhatsAppButton';
-// The website guide beside it: a 3D character, on computers only, fetched after the page is ready
+// The website guide: the chat button in the corner (his face), with the 3D robot standing on it, fetched after the
+// page is ready. WhatsApp is in the header (HeaderWhatsApp).
 import Guide from './components/guide/Guide';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -27,7 +26,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       {opening && <PageLoader onReady={playIntro} onGone={removeOpening} />}
       <NavProgress />
       <SmoothScroll>{children}</SmoothScroll>
-      <WhatsAppButton />
       <Guide />
     </>
   );

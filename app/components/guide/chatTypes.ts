@@ -33,7 +33,24 @@ export type PageContext = {
   text: string;
 };
 
-export type AskRequest = { question: string; history: ChatTurn[]; page: PageContext };
+/**
+ * ask: the visitor's question. continue: he has just taken them to this page and goes on guiding them there.
+ * opener: he starts the conversation himself (the chat was opened, or he noticed what they're reading).
+ */
+export type AskMode = 'ask' | 'continue' | 'opener';
+/** named: the visitor gave their name in the chat's form (the AI never sees it: it writes {name}, filled in here) */
+export type AskRequest = { question: string; history: ChatTurn[]; page: PageContext; journey: string; mode: AskMode; named: boolean };
+
+/** His words with the visitor's first name in place of {name} (or, before he knows it, without it) */
+export function withName(text: string, name: string) {
+  if (name) return text.replace(/\{name\}/g, name);
+  const out = text.replace(/,?\s*\{name\}/g, '').replace(/^[\s,!.]+/, '').replace(/\s+([!?.,])/g, '$1');
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+/** What he has learned about what the visitor wants (nothing personal: that goes through the form) */
+export type LeadInfo = { service: string; need: string; business: string; timeline: string; budget: string };
+export const NO_LEAD: LeadInfo = { service: '', need: '', business: '', timeline: '', budget: '' };
 
 /** Why there's no answer: the region can't use the free AI, one visitor asked too much, or the AI is busy or down */
 export type Unavailable = 'region' | 'limit' | 'busy';
@@ -55,6 +72,8 @@ export type Answer = {
   steps: TourStep[];
   /** questions the visitor might ask next */
   followUps: string[];
+  /** what he understood of their needs so far */
+  lead: LeadInfo;
 };
 
 export type AskReply = Answer | { ok: false; reason: Unavailable };

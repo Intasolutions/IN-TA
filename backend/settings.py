@@ -105,6 +105,8 @@ REST_FRAMEWORK = {
     # The public forms write to the database and email real people: one visitor can send at most this many
     "DEFAULT_THROTTLE_RATES": {
         "forms": "20/hour",
+        # the website robot's chats saving their messages
+        "chat": "240/hour",
     },
 }
 

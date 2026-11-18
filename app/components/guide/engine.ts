@@ -1,4 +1,4 @@
-// The website guide: a small 3D character beside the WhatsApp button (components/guide/Guide.tsx mounts it).
+// The website guide: a small 3D character standing on his chat button in the corner (components/guide/Guide.tsx).
 //
 // It's drawn with three.js into a transparent canvas whose units are CSS pixels (an orthographic camera), so the
 // character's position is simply where he stands on the screen. Docked, the canvas is a small box by the button; while
@@ -173,10 +173,10 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   // The outer box always covers the window and never moves; the canvas inside it stays anchored at its top-left
   // corner. Docked it's a small box moved into place with a transform, free it fills the window. Its top-left corner
   // never moves, so growing and shrinking it is never counted as a layout shift.
-  // The WhatsApp button's place on the screen, read from the page's layout (so not moved by its hover pull or its
-  // tuck-away slide). Without it, where it stands on a computer and on a phone.
+  // His chat button's place on the screen ([data-guide-dock]), read from the page's layout (so not moved by its hover
+  // lift or its tuck-away slide). Without it, where it stands on a computer and on a phone.
   const waButton = () => {
-    const el = document.querySelector<HTMLElement>('a[aria-label="Chat on WhatsApp"]');
+    const el = document.querySelector<HTMLElement>('[data-guide-dock]');
     if (!el || !el.offsetWidth) return null;
     let x = 0, y = 0;
     for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) { x += n.offsetLeft; y += n.offsetTop; }
@@ -185,7 +185,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   const dockBox = () => {
     const w = Math.round(DOCK.w * S), h = Math.round(DOCK.h * S);
     const wide = window.innerWidth >= 768;
-    const wa = waButton() ?? { cx: window.innerWidth - (wide ? 92 : 52), top: window.innerHeight - (wide ? 120 : 80) };
+    const wa = waButton() ?? { cx: window.innerWidth - (wide ? 64 : 50), top: window.innerHeight - (wide ? 96 : 80) };
     return { left: Math.round(wa.cx - w / 2), top: Math.round(wa.top + 8 * S - h), w, h };
   };
   let dock = dockBox();
@@ -323,14 +323,18 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     grab = null;
     if (state === 'carried') drop();
   };
+  // pointing at WhatsApp in the header: he looks up at it and says so; at his chat button: he looks down and invites you
   const onWaHover = (e: PointerEvent) => {
-    const wa = (e.target as Element | null)?.closest?.('a[aria-label="Chat on WhatsApp"]');
-    if (!wa || state !== 'home' || now() < busyUntil) return;
+    const target = e.target as Element | null;
+    const wa = target?.closest?.('a[aria-label="Chat on WhatsApp"]');
+    const mine = wa ? null : target?.closest?.('[data-guide-dock]');
+    if ((!wa && !mine) || state !== 'home' || now() < busyUntil || chat.on) return;
     busyUntil = now() + rand(2000, 2600);
     feel(null);
     play(any(['ThumbsUp', 'ThumbsUp', 'Wave', 'Yes'] as const));
-    lookAt(wa, rand(2000, 2800)); // a look down at the button you're pointing at
-    speak('hover', hooks.lines().hover(), { delay: rand(80, 260) });
+    lookAt(wa ?? mine!, rand(2000, 2800));
+    if (wa) speak('hover', hooks.lines().hover(), { delay: rand(80, 260) });
+    else speak('invite', hooks.lines().invite, { delay: rand(80, 260) });
   };
   window.addEventListener('pointermove', onMove, { passive: true });
   window.addEventListener('pointerdown', onDown, { capture: true });
@@ -658,7 +662,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   const onScroll = () => { lastScroll = now(); };
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  const SKIP = 'header, footer, nav, [aria-hidden="true"], a[aria-label="Chat on WhatsApp"]';
+  const SKIP = 'header, footer, nav, [aria-hidden="true"], [data-guide-dock], .guide-chat';
   const shortText = (s: string, max: number) => {
     const t = s.replace(/\s+/g, ' ').trim();
     if (t.length <= max) return t;

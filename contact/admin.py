@@ -1,7 +1,8 @@
 from django.contrib import admin, messages
+from django.utils.html import format_html, format_html_join
 from django.conf import settings
 from django.core.mail import mail_admins, send_mail
-from .models import ContactMessage
+from .models import ChatConversation, ContactMessage
 
 
 @admin.register(ContactMessage)
@@ -46,3 +47,48 @@ class ContactMessageAdmin(admin.ModelAdmin):
         if failed:
             self.message_user(request, f"Failed to resend for {failed} messages.", level=messages.ERROR)
     resend_notifications.short_description = 'Re-send admin/user notifications for selected messages'
+
+
+@admin.register(ChatConversation)
+class ChatConversationAdmin(admin.ModelAdmin):
+    """Every conversation with the website robot: who they are, what they need, and the whole chat."""
+    list_display = ('name', 'phone', 'email', 'service', 'message_count', 'updated_at', 'reviewed')
+    list_filter = ('reviewed', 'created_at')
+    search_fields = ('name', 'phone', 'email', 'service', 'need', 'business')
+    readonly_fields = ('conversation', 'pages', 'source', 'created_at', 'updated_at')
+    exclude = ('messages',)
+    fieldsets = (
+        (None, {'fields': ('name', 'phone', 'email', 'reviewed')}),
+        ('What the robot learned', {'fields': ('service', 'need', 'business', 'timeline', 'budget')}),
+        ('The conversation', {'fields': ('conversation',)}),
+        ('Visit', {'fields': ('pages', 'source', 'created_at', 'updated_at')}),
+    )
+    actions = ['mark_reviewed']
+
+    @admin.display(description='Messages')
+    def message_count(self, obj):
+        return len(obj.messages or [])
+
+    @admin.display(description='Conversation')
+    def conversation(self, obj):
+        if not obj.messages:
+            return 'No messages yet.'
+        rows = format_html_join(
+            '',
+            '<div style="margin:0 0 10px;padding:8px 12px;border-radius:10px;max-width:640px;{}">'
+            '<div style="font-size:11px;opacity:.65;margin-bottom:2px">{} {}</div><div style="white-space:pre-wrap">{}</div></div>',
+            (
+                (
+                    'background:#0144b5;color:#fff;margin-left:auto' if m.get('role') == 'visitor' else 'background:#eef2f8;color:#01072b',
+                    'Visitor' if m.get('role') == 'visitor' else 'Robot',
+                    f"· {m.get('at', '')[:16].replace('T', ' ')}" + (f" · {m['action']}" if m.get('action') else ''),
+                    m.get('text', ''),
+                )
+                for m in obj.messages
+            ),
+        )
+        return format_html('<div style="display:flex;flex-direction:column">{}</div>', rows)
+
+    def mark_reviewed(self, request, queryset):
+        queryset.update(reviewed=True)
+    mark_reviewed.short_description = 'Mark selected chats as reviewed'

@@ -54,16 +54,29 @@
 @keyframes fade { 0%, 82% { opacity: 1; } 100% { opacity: 0; } }
 
 
-/* "Ask me": always beside his head while he's on his button (to the left; "Hide" is on the right). With no robot on
-   the screen it sits over the WhatsApp button instead (.askAlone). */
-.ask { position: fixed; z-index: 9999; left: calc(100% - 150px); top: calc(100% - 262px); transform: translateX(-100%); padding: 5px 11px; border-radius: 999px;
-  background: var(--color-brand-blue); color: #fff; font: 700 10px var(--font-jakarta), sans-serif; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
-  box-shadow: 0 6px 16px -6px rgb(1 68 181 / 0.6); animation: ask-in 0.4s 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
-.ask:hover { background: var(--color-midnight); }
-.ask:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
-.askAlone { left: auto; top: auto; right: 20px; bottom: 92px; transform: none; }
-@media (min-width: 768px) { .askAlone { right: 34px; bottom: 132px; } }
-@keyframes ask-in { from { opacity: 0; scale: 0.6; } }
+/* His chat button in the corner: his face, two blinking eyes on a midnight disc in a brand-blue rim. He stands on top
+   of it. Pointed at, the eyes smile and "Ask me" shows beside it. Faded out (still in the page, so he can dock on it)
+   on the hero, by the footer, and while the chat is open. */
+.launcher { position: fixed; z-index: 9997; right: 20px; bottom: 20px; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(85% 85% at 30% 22%, #0d2478, var(--color-midnight)); color: #fff;
+  box-shadow: inset 0 0 0 2.5px var(--color-brand-blue), 0 16px 32px -12px rgb(1 7 43 / 0.6), 0 0 24px -6px rgb(1 68 181 / 0.85);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1), box-shadow 0.25s ease; animation: launch-in 0.5s 0.3s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+@media (min-width: 768px) { .launcher { right: 32px; bottom: 32px; width: 64px; height: 64px; } }
+.launcher:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2.5px #3b7bf7, 0 20px 36px -12px rgb(1 7 43 / 0.6), 0 0 30px -4px rgb(59 123 247 / 0.9); }
+.launcher:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
+.launcherAway { opacity: 0; transform: translateY(14px) scale(0.75); pointer-events: none; }
+@keyframes launch-in { from { opacity: 0; scale: 0.5; } }
+.launcherEyes { display: flex; gap: 9px; }
+.launcherEyes i { display: block; width: 9px; height: 16px; border-radius: 5px; background: #d8e8ff; box-shadow: 0 0 10px rgb(150 200 255 / 0.95);
+  transition: height 0.25s ease, width 0.25s ease, border-radius 0.25s ease, transform 0.3s ease; animation: blink 4.6s infinite; }
+.launcherEyes i:last-child { animation-delay: 0.04s; }
+.launcher:hover .launcherEyes i, .launcher:focus-visible .launcherEyes i { height: 8px; width: 11px; background: none; border: 3px solid #d8e8ff; border-bottom: 0; border-radius: 10px 10px 0 0;
+  box-shadow: none; filter: drop-shadow(0 0 4px rgb(150 200 255 / 0.9)); animation: none; transform: translateY(-2px); }
+.launcherTip { position: absolute; right: calc(100% + 12px); top: 50%; translate: 0 -50%; padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  background: #fff; color: var(--color-midnight); font: 700 12px var(--font-jakarta), sans-serif; box-shadow: 0 8px 24px -10px rgb(1 7 43 / 0.45), 0 0 0 1px rgb(1 7 43 / 0.06);
+  opacity: 0; transform: translateX(6px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+.launcher:hover .launcherTip, .launcher:focus-visible .launcherTip { opacity: 1; transform: none; }
+@media (hover: none) { .launcherTip { display: none; } }
 
 /* ---- his chat: a calm white panel under a midnight header that carries his visor (his two eyes) ----
    Open, it takes the whole height on the right (the robot steps away meanwhile); on a phone, nearly the whole screen
@@ -71,7 +84,7 @@
    at the top, so the page and he can be seen. */
 .chat { --ink: var(--color-midnight); --muted: #5b6785; --soft: #f2f5fa; --line: rgb(1 7 43 / 0.07); --accent: #7fa6ff;
   position: fixed; z-index: 10001; right: 16px; top: calc(var(--header-h, 80px) + 10px); bottom: 16px; width: min(420px, calc(100vw - 24px)); display: flex; flex-direction: column; overflow: hidden;
-  border-radius: 24px; background: #fff; color: var(--ink); font: 500 14.5px/1.6 var(--font-jakarta), system-ui, sans-serif;
+  border-radius: 24px; background: #fff; color: var(--ink); font: 500 13.5px/1.55 var(--font-jakarta), system-ui, sans-serif;
   box-shadow: 0 32px 80px -30px rgb(1 7 43 / 0.5), 0 0 0 1px var(--line); animation: chat-in 0.35s cubic-bezier(0.2, 1.2, 0.4, 1); transform-origin: 85% 100%; }
 .chat.chatFolded { bottom: auto; }
 @media (max-width: 639.98px) { .chat { inset: 8px; width: auto; border-radius: 20px; } .chat.chatFolded { bottom: auto; height: auto !important; } }
@@ -80,8 +93,8 @@
 .chatHead { display: flex; align-items: center; gap: 12px; padding: 16px 12px 16px 18px; color: #fff;
   background: radial-gradient(120% 140% at 0% 0%, rgb(1 68 181 / 0.55), transparent 60%), var(--color-midnight); }
 .chatTitle { flex: 1; min-width: 0; }
-.chatTitle > p:first-child { font: 700 15.5px/1.25 var(--font-heading), sans-serif; letter-spacing: -0.01em; }
-.status { display: flex; align-items: center; gap: 7px; margin-top: 3px; font-size: 12px; line-height: 1.3; color: rgb(255 255 255 / 0.65); }
+.chatTitle > p:first-child { font: 700 14.5px/1.25 var(--font-heading), sans-serif; letter-spacing: -0.01em; }
+.status { display: flex; align-items: center; gap: 7px; margin-top: 2px; font-size: 11.5px; line-height: 1.3; color: rgb(255 255 255 / 0.65); }
 .status span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .status i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #3ddc97; color: rgb(61 220 151 / 0.6); animation: live 2.4s ease-out infinite; }
 .status[data-state='busy'] i { background: var(--accent); color: rgb(127 166 255 / 0.7); animation-duration: 1s; }
@@ -122,7 +135,7 @@
 .chatList > :first-child { margin-top: auto; } /* a short conversation sits at the bottom, by the box, as in any chat */
 .chatList { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 14px; padding: 20px 18px 16px;
   scrollbar-width: thin; scrollbar-color: rgb(1 7 43 / 0.15) transparent; }
-.fromGuide, .fromVisitor { max-width: 86%; padding: 11px 15px; border-radius: 18px; overflow-wrap: anywhere; }
+.fromGuide, .fromVisitor { max-width: 86%; padding: 9px 13px; border-radius: 16px; overflow-wrap: anywhere; }
 .fromGuide { align-self: flex-start; background: var(--soft); border-bottom-left-radius: 6px; }
 .fromVisitor { align-self: flex-end; background: var(--color-brand-blue); color: #fff; border-bottom-right-radius: 6px; }
 .guideTurn { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -131,22 +144,22 @@
 
 /* the first questions: a light grid of things to try */
 .starters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-.starters > p { grid-column: 1 / -1; margin: 0 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
-.starters button { display: flex; align-items: flex-start; padding: 12px 13px; border-radius: 14px; text-align: left; background: var(--soft); color: var(--ink);
-  font-size: 13.5px; font-weight: 600; line-height: 1.35; transition: background-color 0.2s, color 0.2s; }
+.starters > p { grid-column: 1 / -1; margin: 0 2px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.starters button { display: flex; align-items: flex-start; padding: 10px 12px; border-radius: 13px; text-align: left; background: var(--soft); color: var(--ink);
+  font-size: 12.5px; font-weight: 600; line-height: 1.35; transition: background-color 0.2s, color 0.2s; }
 .starters button > span:last-child { display: none; }
 .starters button:hover { background: #e6edf8; color: var(--color-brand-blue); }
 
 /* under an answer: what he did, a button or two, and what to ask next */
-.receipt { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; font-size: 12px; color: var(--muted); }
+.receipt { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; font-size: 11px; color: var(--muted); }
 .ctas { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-left: 6px; }
 .ctas:empty { display: none; }
-.cta { display: inline-flex; align-items: center; gap: 4px; padding: 2px 0; color: var(--color-brand-blue); font-size: 13.5px; font-weight: 700; transition: color 0.2s; }
+.cta { display: inline-flex; align-items: center; gap: 4px; padding: 2px 0; color: var(--color-brand-blue); font-size: 12.5px; font-weight: 700; transition: color 0.2s; }
 .cta:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .ctaMain { padding: 7px 14px; border-radius: 999px; background: #1faa59; color: #fff; }
 .ctaMain:hover { background: #178a48; color: #fff; text-decoration: none; }
 .followUps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.followUps button { padding: 6px 12px; border-radius: 999px; border: 1px solid rgb(1 68 181 / 0.18); color: var(--color-brand-blue); font-size: 13px; font-weight: 600; text-align: left;
+.followUps button { padding: 6px 12px; border-radius: 999px; border: 1px solid rgb(1 68 181 / 0.18); color: var(--color-brand-blue); font-size: 12px; font-weight: 600; text-align: left;
   transition: background-color 0.2s, border-color 0.2s; }
 .followUps button:hover { background: #eef3fb; border-color: rgb(1 68 181 / 0.35); }
 
@@ -158,16 +171,48 @@
 
 /* the question box, with its send button inside it */
 .chatForm { position: relative; padding: 12px 16px 8px; border-top: 1px solid var(--line); }
-.chatForm input { width: 100%; padding: 13px 54px 13px 18px; border-radius: 999px; border: 1px solid transparent; background: var(--soft); color: var(--ink); font-size: 16px; transition: border-color 0.2s, background-color 0.2s; }
-@media (min-width: 640px) { .chatForm input { font-size: 14.5px; } }
+.chatForm input { width: 100%; padding: 11px 50px 11px 16px; border-radius: 999px; border: 1px solid transparent; background: var(--soft); color: var(--ink); font-size: 16px; transition: border-color 0.2s, background-color 0.2s; }
+@media (min-width: 640px) { .chatForm input { font-size: 13.5px; } }
 .chatForm input::placeholder { color: #8a95ad; }
 .chatForm input:focus { outline: none; background: #fff; border-color: rgb(1 68 181 / 0.55); box-shadow: 0 0 0 3px rgb(1 68 181 / 0.08); }
-.chatForm button { position: absolute; right: 23px; top: 50%; translate: 0 calc(-50% + 2px); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+.chatForm button { position: absolute; right: 22px; top: 50%; translate: 0 calc(-50% + 2px); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
   background: var(--color-brand-blue); color: #fff; transition: background-color 0.2s, opacity 0.2s; }
 .chatForm button:hover:not(:disabled) { background: var(--ink); }
 .chatForm button:disabled { opacity: 0.3; }
-.chatNote { padding: 0 20px 14px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
-.chatNote a { text-decoration: underline; text-underline-offset: 2px; color: var(--ink); }
+.chatNote { padding: 0 20px 12px; font-size: 11px; line-height: 1.4; color: var(--muted); text-align: center; }
+.chatNote a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.chatNote a:hover { color: var(--ink); }
+
+/* his ask for their details, inside the chat: it goes to our team, not to the AI */
+.lead { align-self: stretch; display: flex; flex-direction: column; gap: 4px; margin-top: 2px; padding: 14px; border-radius: 16px; background: #fff; border: 1px solid rgb(1 68 181 / 0.18);
+  box-shadow: 0 10px 24px -16px rgb(1 7 43 / 0.35); }
+.leadTitle { margin-bottom: 6px; font-weight: 700; font-size: 13px; line-height: 1.4; color: var(--ink); }
+.lead label { margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.lead input { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid rgb(1 7 43 / 0.12); background: var(--soft); color: var(--ink); font-size: 16px; }
+@media (min-width: 640px) { .lead input { font-size: 13.5px; } }
+.lead input:focus { outline: none; background: #fff; border-color: rgb(1 68 181 / 0.55); box-shadow: 0 0 0 3px rgb(1 68 181 / 0.08); }
+.lead button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; padding: 10px 14px; border-radius: 999px;
+  background: var(--color-brand-blue); color: #fff; font-weight: 700; font-size: 13px; transition: background-color 0.2s, opacity 0.2s; }
+.lead button:hover:not(:disabled) { background: var(--ink); }
+.lead button:disabled { opacity: 0.5; }
+.leadProblem { margin-top: 6px; font-size: 12px; color: #c0392b; }
+.leadNote { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 6px; font-size: 11px; color: var(--muted); }
+.trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+/* his opening line, offered by his button when the visitor has been reading a while */
+.teaser { position: fixed; z-index: 9999; right: 16px; bottom: 236px; width: min(300px, calc(100vw - 32px)); padding: 14px 16px; border-radius: 18px 18px 6px 18px;
+  background: #fff; color: var(--color-midnight); font: 500 13.5px/1.5 var(--font-jakarta), system-ui, sans-serif;
+  box-shadow: 0 22px 50px -22px rgb(1 7 43 / 0.55), 0 0 0 1px rgb(1 7 43 / 0.06); animation: teaser-in 0.4s cubic-bezier(0.3, 1.4, 0.5, 1); transform-origin: 90% 100%; }
+@media (min-width: 768px) { .teaser { right: 28px; bottom: 268px; } }
+.teaserAlone { bottom: 96px; }
+@media (min-width: 768px) { .teaserAlone { bottom: 112px; } }
+.teaser > div { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.teaser button:first-child { padding: 7px 14px; border-radius: 999px; background: var(--color-brand-blue); color: #fff; font-weight: 700; font-size: 12.5px; transition: background-color 0.2s; }
+.teaser button:first-child:hover { background: var(--color-midnight); }
+.teaser button:last-child { font-size: 12.5px; font-weight: 600; color: #5b6785; }
+.teaser button:last-child:hover { color: var(--color-midnight); }
+.teaser button:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
+@keyframes teaser-in { from { opacity: 0; scale: 0.9; translate: 0 8px; } }
 
 /* folded down to its header while he's out showing something */
 .chatFolded .chatList, .chatFolded .chatForm, .chatFolded .chatNote { display: none; }
@@ -181,6 +226,6 @@
 @keyframes spot-pulse { 50% { box-shadow: 0 0 0 2px #3b7bf7, 0 0 0 11px rgb(59 123 247 / 0.12), 0 0 56px 10px rgb(59 123 247 / 0.28); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .chat, .ask, .spot { animation: none; }
-  .dots i, .visor i, .status i, .caret { animation: none; }
+  .chat, .launcher, .spot, .teaser { animation: none; }
+  .dots i, .visor i, .status i, .caret, .launcherEyes i { animation: none; }
 }

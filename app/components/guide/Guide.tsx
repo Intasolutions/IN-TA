@@ -6,8 +6,10 @@ import { useSite, useText } from '../../site/SiteContext';
 import { linesOf, standardText } from '../../site/site';
 import { useOfficeStatus } from '../OfficeStatus';
 import type { Guide as GuideApi, GuideLines } from './engine';
-import GuideChat from './GuideChat';
-import type { PagePlan, PlanReply } from './chatTypes';
+import GuideChat, { checkAvailable, savedName, type ChatStart } from './GuideChat';
+import { withName, type AskReply, type PagePlan, type PlanReply } from './chatTypes';
+import { arrived, engagement, journeyText, spent } from './journey';
+import { OPEN_CHAT } from './openChat';
 import { pageContext, spotByText } from './pageContext';
 import css from './guide.module.css';
 
@@ -21,6 +23,8 @@ import css from './guide.module.css';
 const MET = 'inta-guide-met'; // he has greeted this browser before
 const HIDDEN = 'inta-guide-hidden'; // hidden by the visitor, for this visit
 const PLAN = 'inta-guide-plan:'; // + the page's address: Gemini's plan for it, kept for this visit
+const CHATTED = 'inta-guide-chatted'; // the visitor has opened the chat this visit: he doesn't nudge any more
+const NUDGES = 'inta-guide-nudges'; // how many times he has opened the conversation himself this visit (two at most)
 
 const read = (store: () => Storage, key: string) => { try { return store().getItem(key); } catch { return null; } };
 const write = (store: () => Storage, key: string, value: string) => { try { store().setItem(key, value); } catch { /* private mode */ } };
@@ -98,8 +102,13 @@ export default function Guide() {
   // the open chat takes the whole height: he steps away, and only comes back to walk to what the chat is showing
   const offstage = tucked || (chatOpen && !chatOut);
   const chatOpenRef = useRef(false);
-  const refocus = useRef(false); // closing the chat puts the keyboard back on "Ask me" once it's back on screen
-  const openChat = () => { chatOpenRef.current = true; setBubble(null); setChatOpen(true); };
+  const refocus = useRef(false); // closing the chat puts the keyboard back on the chat button once it's back
+  const [start, setStart] = useState<ChatStart>(null);
+  // his own opening line, offered in a card by his button: the visitor has been reading a while
+  const [teaser, setTeaser] = useState<(NonNullable<NonNullable<ChatStart>['seed']> & { name: string }) | null>(null);
+  const openChat = () => { chatOpenRef.current = true; write(() => sessionStorage, CHATTED, '1'); setBubble(null); setTeaser(null); setChatOpen(true); };
+  const openRef = useRef(openChat);
+  useEffect(() => { openRef.current = openChat; });
   const closeChat = useCallback(() => { chatOpenRef.current = false; refocus.current = true; setChatOpen(false); }, []);
 
   // his lines, read fresh whenever he speaks (they follow the admin wording and the office hours)
@@ -141,9 +150,9 @@ export default function Guide() {
 
   // start: only where he can run, once the opening is done and the browser is idle
   useEffect(() => {
-    if (read(() => sessionStorage, HIDDEN)) return;
-    // where he can't run (less motion asked for, a small device), "Ask me" still opens the chat, once the opening is done
-    if (!canRun()) return afterOpening(() => setChatOnly(true));
+    // hidden by the visitor, or where he can't run (less motion asked for, a small device): the chat button is still
+    // there, once the opening is done
+    if (read(() => sessionStorage, HIDDEN) || !canRun()) return afterOpening(() => setChatOnly(true));
     let stopped = false;
     let idle = 0;
     const cancelOpening = afterOpening(() => {
@@ -171,8 +180,8 @@ export default function Guide() {
             dock: (at) => setHideAt((was) => (was && was.x === at.x && was.y === at.y ? was : at)),
             fx: (kind, at, size = 1) => {
               if (kind === 'wobble') {
-                // the WhatsApp logo wobbles where he bumped into the button
-                document.querySelector('a[aria-label="Chat on WhatsApp"] svg')?.animate(
+                // the chat button wobbles where he bumped into it
+                document.querySelector('[data-guide-dock] > span')?.animate(
                   [{ transform: 'rotate(0)' }, { transform: 'rotate(-16deg) scale(0.9)' }, { transform: 'rotate(11deg)' }, { transform: 'rotate(-6deg)' }, { transform: 'rotate(0)' }],
                   { duration: 520, easing: 'ease-out' },
                 );
@@ -245,6 +254,69 @@ export default function Guide() {
     return () => { gone = true; window.clearTimeout(timer); };
   }, [pathname, on]);
 
+  // the visit: each page, the time on it and the parts read (for the robot to talk about, and for the team with a lead)
+  useEffect(() => {
+    const timer = window.setTimeout(() => arrived(window.location.pathname, document.title), 700);
+    return () => window.clearTimeout(timer);
+  }, [pathname]);
+
+  // the chat opened from elsewhere on the site (the Contact page's Robot line), with a question or without
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const question = (e as CustomEvent<{ question?: string }>).detail?.question;
+      setStart({ id: Date.now(), question });
+      openRef.current();
+    };
+    window.addEventListener(OPEN_CHAT, onOpen);
+    return () => window.removeEventListener(OPEN_CHAT, onOpen);
+  }, []);
+
+  // Every five seconds: time on the page and what's being read; and, when the visitor has been reading a while (a
+  // page for over a minute, or two pages and half a minute on this one), he opens the conversation himself, about what
+  // they're looking at: twice a visit at most, never once they've used the chat
+  const readyRef = useRef(false);
+  const tuckedRef = useRef(false);
+  useEffect(() => { readyRef.current = on || chatOnly; tuckedRef.current = tucked; });
+  useEffect(() => {
+    let asking = false;
+    let lastNudge = 0;
+    const partNow = () => {
+      const mid = window.innerHeight * 0.45;
+      const sec = [...document.querySelectorAll('main section[id]')].filter((x) => { const r = x.getBoundingClientRect(); return r.top <= mid && r.bottom >= mid; }).pop();
+      return sec ? (sec.getAttribute('aria-label') || sec.querySelector('h1, h2, h3')?.textContent || sec.id).replace(/\s+/g, ' ').trim() : '';
+    };
+    const tick = async () => {
+      if (document.visibilityState !== 'visible') return;
+      spent(5, partNow());
+      const e = engagement();
+      const nudges = Number(read(() => sessionStorage, NUDGES) ?? 0);
+      if (asking || !readyRef.current || tuckedRef.current || chatOpenRef.current || read(() => sessionStorage, CHATTED)) return;
+      if (nudges >= 2 || Date.now() - lastNudge < 120_000 || !(e.here >= 60 || (e.pages >= 2 && e.here >= 30))) return;
+      asking = true;
+      lastNudge = Date.now();
+      write(() => sessionStorage, NUDGES, String(nudges + 1));
+      try {
+        const a = await checkAvailable();
+        if (!a.available) return;
+        const { page, spots } = pageContext();
+        const res = await fetch('/api/guide', { method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ question: '', history: [], page, journey: journeyText(), mode: 'opener' }) });
+        const reply: AskReply = await res.json();
+        if (!reply.ok || chatOpenRef.current) return;
+        setTeaser({ answer: reply, spots, name: savedName() });
+        api.current?.gesture(reply.gesture === 'none' ? 'wave' : reply.gesture, 'happy');
+      } catch { /* no line this time */ } finally { asking = false; }
+    };
+    const timer = window.setInterval(tick, 5000);
+    return () => window.clearInterval(timer);
+  }, []);
+  // the card goes by itself after a while
+  useEffect(() => {
+    if (!teaser) return;
+    const timer = window.setTimeout(() => setTeaser(null), 30_000);
+    return () => window.clearTimeout(timer);
+  }, [teaser]);
+
   // the speech bubble types itself out at a natural rhythm, stays long enough to read (the engine's ms), then goes
   useEffect(() => {
     if (!bubble) return;
@@ -262,7 +334,7 @@ export default function Guide() {
   // the cursor shows he can be picked up (the "Hide" button stays a moment after the pointer leaves him: see hot above)
   useEffect(() => { document.documentElement.classList.toggle('guide-hot', hot); }, [hot]);
 
-  // he steps aside wherever the WhatsApp button does (the hero's buttons, the footer's back-to-top row), and on his own
+  // he and his button step aside where [data-floating-clear] shows (the hero's buttons, the footer's back-to-top row), and
   // where [data-guide-clear] shows, on the screens its value names as a media query (the services board on phones and
   // tablets, whose cards sit just above the button: he and his bubble would cover their words)
   useEffect(() => {
@@ -295,23 +367,27 @@ export default function Guide() {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [offstage, hidden]);
 
+  // "Hide": the robot goes for this visit; his chat button stays
   const hide = () => {
     write(() => sessionStorage, HIDDEN, '1');
     setHidden(true);
     setBubble(null);
-    chatOpenRef.current = false;
-    setChatOpen(false);
+    setZz(null);
+    setOn(false);
+    setChatOnly(true);
     api.current?.stop();
     api.current = null;
     document.documentElement.classList.remove('guide-hot');
   };
 
-  if (hidden) return null;
+  const ready = on || chatOnly;
   return (
     <>
-      <div ref={host} aria-hidden="true" className={`guide ${css.host} ${on ? css.on : ''} ${offstage ? css.tucked : ''}`}>
-        <canvas ref={canvas} />
-      </div>
+      {!hidden && (
+        <div ref={host} aria-hidden="true" className={`guide ${css.host} ${on ? css.on : ''} ${offstage ? css.tucked : ''}`}>
+          <canvas ref={canvas} />
+        </div>
+      )}
       {bubble && !offstage && (
         // the whole line takes its space from the start (hidden), so the bubble doesn't grow and shift as it types
         <div ref={(el) => { bubbleEl.current = el; if (el) place(el, lastAt.current ?? bubble); }} aria-hidden="true" className={`guide-say ${css.say}`} key={bubble.id}>
@@ -332,15 +408,32 @@ export default function Guide() {
           Hide
         </button>
       )}
-      {((on && docked) || chatOnly) && !tucked && !chatOpen && (
-        // always there while he's on his button (or, with no robot, over the WhatsApp button): the way into his chat
-        <button ref={(el) => { if (el && refocus.current) { refocus.current = false; el.focus({ preventScroll: true }); } }} type="button" onClick={openChat}
-          className={`guide-ask ${css.ask} ${on ? '' : css.askAlone}`} aria-haspopup="dialog"
-          style={on && hideAt ? { left: Math.max(8, hideAt.x - 12), top: Math.max(8, hideAt.y - 30) } : undefined}>
-          {t('guide_chat_button')}
-        </button>
+      {/* The chat button in the corner: his face (two blinking eyes) on a midnight disc. He stands on it (the engine
+          docks on [data-guide-dock]), so it stays in the page while it's out of sight, only faded and inert. */}
+      <button
+        ref={(el) => { if (el && refocus.current && !chatOpen) { refocus.current = false; el.focus({ preventScroll: true }); } }}
+        type="button"
+        data-guide-dock=""
+        onClick={openChat}
+        aria-haspopup="dialog"
+        aria-label={t('guide_chat_title')}
+        inert={!ready || tucked || chatOpen}
+        className={`guide-launch ${css.launcher} ${!ready || tucked || chatOpen ? css.launcherAway : ''}`}
+      >
+        <span className={css.launcherEyes} aria-hidden="true"><i /><i /></span>
+        <span className={css.launcherTip} aria-hidden="true">{t('guide_chat_button')}</span>
+      </button>
+      {teaser && ready && !tucked && !chatOpen && (
+        // his opening line, by his button: "Let's talk" opens the chat with it
+        <div role="status" className={`guide-teaser ${css.teaser} ${on ? '' : css.teaserAlone}`}>
+          <p>{withName(teaser.answer.reply, teaser.name)}</p>
+          <div>
+            <button type="button" onClick={() => { setStart({ id: Date.now(), seed: teaser }); openChat(); }}>{t('guide_chat_teaser_reply')}</button>
+            <button type="button" onClick={() => setTeaser(null)}>{t('guide_chat_teaser_later')}</button>
+          </div>
+        </div>
       )}
-      {(on || chatOnly) && <GuideChat api={api} open={chatOpen} onClose={closeChat} robot={on} onOut={setChatOut} />}
+      {ready && <GuideChat api={api} open={chatOpen} onClose={closeChat} robot={on} onOut={setChatOut} start={start} />}
     </>
   );
 }
