@@ -321,8 +321,8 @@ export function createChip(canvas: HTMLCanvasElement, onLost: () => void, onFail
   gl.bindVertexArray(null);
   const nodeCount = network.nodes.length / 4;
 
-  const fontFamily = () => getComputedStyle(canvas).getPropertyValue('--font-space-grotesk').trim() || 'sans-serif';
-  const monoFamily = () => getComputedStyle(canvas).getPropertyValue('--font-jetbrains-mono').trim() || 'monospace';
+  const fontFamily = () => getComputedStyle(canvas).getPropertyValue('--font-heading').trim() || 'sans-serif';
+  const monoFamily = () => getComputedStyle(canvas).getPropertyValue('--font-jakarta').trim() || 'sans-serif';
 
   // ---- Everything printed: drawn once the site's fonts are in, so the first sight of the board is the sharp one ----
   const aniso = gl.getExtension('EXT_texture_filter_anisotropic');

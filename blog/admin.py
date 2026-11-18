@@ -12,7 +12,7 @@ class BlogAdmin(admin.ModelAdmin):
             'fields': ('title', 'tag', 'date', 'image', 'content', 'link')
         }),
         ('SEO Settings', {
-            'fields': ('meta_title', 'meta_description', 'focus_keyword', 'image_alt'),
+            'fields': ('slug', 'meta_title', 'meta_description', 'focus_keyword', 'image_alt'),
             'description': 'These fields explicitly customize how this blog post appears in Google Search and social media sharing.'
         }),
     )

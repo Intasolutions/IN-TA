@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
 from rest_framework.throttling import ScopedRateThrottle
 from .models import Blog, Subscriber
@@ -9,6 +10,14 @@ class BlogViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+
+    def get_object(self):
+        """A post by its web address (slug), or by its number: links shared before posts had addresses still work."""
+        key = self.kwargs[self.lookup_field]
+        lookup = {'pk': int(key)} if key.isdigit() else {'slug__iexact': key}
+        post = get_object_or_404(self.get_queryset(), **lookup)
+        self.check_object_permissions(self.request, post)
+        return post
 
 class SubscriberViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """

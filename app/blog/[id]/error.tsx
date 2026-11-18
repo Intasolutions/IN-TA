@@ -33,7 +33,7 @@ export default function ArticleError({ reset }: { error: Error; reset: () => voi
   });
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center bg-canvas px-4 pb-16 pt-[calc(var(--header-h)+2rem)] text-center text-midnight">
+    <main id="main" className="flex min-h-svh flex-col items-center justify-center bg-canvas px-4 pb-16 pt-[calc(var(--header-h)+2rem)] text-center text-midnight">
       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue sm:text-[11px]">Blog</p>
       <h1 className="heading-section mt-3">
         {gaveUp ? 'This article is taking too long.' : 'Getting the article.'}

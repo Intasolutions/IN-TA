@@ -4,11 +4,14 @@ import { useCallback, useState } from 'react';
 import NavProgress from './components/NavProgress';
 import SmoothScroll from './components/SmoothScroll';
 import PageLoader from './components/PageLoader';
+import SkipLink from './components/SkipLink';
 import { RevealProvider, useReveal } from './context/RevealContext';
 import { SiteProvider } from './site/SiteContext';
 import type { Site } from './site/site';
-// WhatsApp button hidden site-wide for now; re-enable by restoring the import and <WhatsAppButton /> below
-// import WhatsAppButton from './components/WhatsAppButton';
+// The WhatsApp button, on every page (it steps aside while the hero's buttons are on screen)
+import WhatsAppButton from './components/WhatsAppButton';
+// The website guide beside it: a 3D character, on computers only, fetched after the page is ready
+import Guide from './components/guide/Guide';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [opening, setOpening] = useState(true);
@@ -20,9 +23,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <SkipLink />
       {opening && <PageLoader onReady={playIntro} onGone={removeOpening} />}
       <NavProgress />
       <SmoothScroll>{children}</SmoothScroll>
+      <WhatsAppButton />
+      <Guide />
     </>
   );
 }

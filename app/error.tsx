@@ -26,7 +26,7 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
   return (
     <>
       <Header />
-      <main className="flex min-h-svh items-center bg-canvas text-midnight">
+      <main id="main" className="flex min-h-svh items-center bg-canvas text-midnight">
         <div className="mx-auto grid w-full max-w-[1520px] items-center gap-10 px-4 pb-16 pt-[calc(var(--header-h)+2rem)] sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
           <div>
             <p className="inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue sm:text-[11px] sm:tracking-[0.3em]">

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useGSAPWhenNear } from './useGSAPWhenNear';
 import Icon from './Icon';
 import { useText } from '../site/SiteContext';
 import { accent, listOf } from '../site/site';
@@ -202,7 +203,7 @@ export default function Work({ initial = null }: { initial?: Project[] | null })
   const gallery = projects?.slice(0, GALLERY_COUNT) ?? [];
 
   // Header reveal
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const move = (v: number) => (calm ? 0 : v);
@@ -224,7 +225,7 @@ export default function Work({ initial = null }: { initial?: Project[] | null })
   );
 
   // Gallery motion (needs the cards to exist)
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       if (!projects?.length) return;
       const root = ref.current!;

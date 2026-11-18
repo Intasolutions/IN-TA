@@ -11,8 +11,7 @@ import Scramble from './Scramble';
 import EdgePing from './EdgePing';
 import OfficeStatus from './OfficeStatus';
 import Marquee from './Marquee';
-import { useReveal } from '../context/RevealContext';
-import { useShownOnArrival } from '../context/usePlayIntro';
+import { usePlayIntro, useShownOnArrival } from '../context/usePlayIntro';
 import { useSite, useText } from '../site/SiteContext';
 import { accent, listOf } from '../site/site';
 
@@ -39,9 +38,10 @@ export default function Hero() {
   const [titleTop, titleBottom] = accent(t('home_hero_title'));
   const heroRef = useRef<HTMLElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
-  const { isIntroReady } = useReveal();
   // already on screen when the scripts arrived (a reload, or a slow connection): it stays just as it is
   const shownOnArrival = useShownOnArrival();
+  const introRef = useRef<gsap.core.Timeline | null>(null);
+  const playedRef = usePlayIntro(introRef);
   const [scrambleKey, setScrambleKey] = useState(0);
 
   // The gradient shimmer animates background-position, which repaints on the main thread every frame;
@@ -57,7 +57,9 @@ export default function Hero() {
     return () => io.disconnect();
   }, []);
 
-  // Entrance sequence — waits until the loader / route mask has cleared
+  // Entrance sequence: built once while the opening is still on screen, and played when it clears (usePlayIntro).
+  // It used to be torn down and built again at that moment, and building it measures every letter of the headline:
+  // on a phone that held the page frozen for over a second just as it appeared.
   useGSAP(
     () => {
       if (shownOnArrival) return;
@@ -96,9 +98,10 @@ export default function Hero() {
         }, 1.3 + i * 0.08);
       });
 
-      if (isIntroReady) tl.play();
+      introRef.current = tl;
+      if (playedRef.current) tl.progress(1);
     },
-    { scope: heroRef, dependencies: [isIntroReady, shownOnArrival], revertOnUpdate: true },
+    { scope: heroRef, dependencies: [shownOnArrival] },
   );
 
   // Cursor interactions + scroll-away parallax
@@ -318,7 +321,7 @@ export default function Hero() {
             <h1
               data-hero="tilt"
               aria-label={`${titleTop} ${titleBottom}`.trim()}
-              className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.04em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
+              className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.02em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
             >
               <span className="block overflow-hidden pb-[0.06em]">
                 {[...titleTop].map((ch, i) => (

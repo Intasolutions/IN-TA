@@ -7,10 +7,45 @@ import type { Metadata } from 'next';
 export const SITE_URL = 'https://www.in-tasolutions.com';
 export const SITE_NAME = 'IN-TA Solutions';
 
-/** The preview shown when a page without a picture of its own is shared */
-export const SHARE_IMAGE = { url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: 'IN-TA Solutions: Engineering Digital Excellence' };
+/**
+ * The preview shown when a page without a picture of its own is shared: the INTA logo, made from public/logo/logo.jpg.
+ * Give a new picture a new file name: WhatsApp, LinkedIn and Facebook keep showing a cached picture for an address they know.
+ */
+export const SHARE_IMAGE = { url: `${SITE_URL}/inta-share.jpg`, width: 1200, height: 630, alt: 'IN-TA Solutions logo' };
 
 type Image = { url: string; width?: number; height?: number; alt?: string };
+
+/** About as long as a title gets before Google cuts it off in results */
+const TITLE_FITS = 60;
+
+/**
+ * A page's title with the company name after it, as long as it isn't there already (titles written in the admin often
+ * include it) and the whole still fits in a search result. A long title is better whole than cut off at the name.
+ */
+export function brandedTitle(title: string) {
+  const clean = title.trim().replace(/\s*[|\-–—:]\s*$/, '');
+  if (/in-?ta\s+solutions/i.test(clean)) return clean;
+  const branded = `${clean} | ${SITE_NAME}`;
+  return branded.length <= TITLE_FITS ? branded : clean;
+}
+
+/**
+ * The title for search results: one that runs past what Google shows loses its trailing company name first (Google
+ * already shows the site's name above every result, from the home page's WebSite markup). Otherwise as written.
+ */
+export function searchTitle(title: string) {
+  const clean = title.trim();
+  if (clean.length <= TITLE_FITS) return clean;
+  return clean.replace(/\s*[|\-–—:]\s*in-?ta\s+solutions\s*$/i, '') || clean;
+}
+
+/** Text cut to what search results show (about 160 characters), at a whole word */
+export function snippet(text: string, max = 160) {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), 0)).replace(/[\s,;:.–—-]+$/, '')}…`;
+}
 
 /** A full address on the site, from a path like /services/web-development */
 export const absolute = (path: string) => (path === '/' ? SITE_URL : `${SITE_URL}${path}`);
@@ -37,19 +72,22 @@ export function pageMetadata({
   tags?: string[];
 }): Metadata {
   const images = [image?.url ? image : SHARE_IMAGE];
+  // longer wording from the admin is cut at a whole word rather than mid-word by the search engine
+  const text = snippet(description);
   return {
-    title,
-    description,
+    // (shares keep the whole title: they have room for it)
+    title: searchTitle(title),
+    description: text,
     alternates: { canonical: path },
     openGraph: {
       title,
-      description,
+      description: text,
       url: absolute(path),
       siteName: SITE_NAME,
       locale: 'en_IN',
       images,
       ...(type === 'article' ? { type, publishedTime, modifiedTime, tags } : { type }),
     },
-    twitter: { card: 'summary_large_image', title, description, images: images.map((i) => i.url) },
+    twitter: { card: 'summary_large_image', title, description: text, images: images.map((i) => i.url) },
   };
 }

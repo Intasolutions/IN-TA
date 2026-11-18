@@ -12,7 +12,7 @@ import { homeJsonLd, jsonLdHtml } from '../site/schema';
 const Home = async () => {
   const [site, lists] = await Promise.all([getSite(), getHomeLists()]);
   return (
-    <main className="bg-canvas text-midnight">
+    <main id="main" className="bg-canvas text-midnight">
       <HeroSlider />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(homeJsonLd(site)) }} />

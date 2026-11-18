@@ -5,6 +5,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useGSAPWhenNear } from './useGSAPWhenNear';
 import Icon from './Icon';
 import { useSite, useText } from '../site/SiteContext';
 import { accent } from '../site/site';
@@ -96,7 +97,7 @@ export default function Capabilities() {
   const [titlePlain, titleBright] = accent(t('home_cap_title'));
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       const root = ref.current!;
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

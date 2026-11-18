@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Header from '../../components/Header';
@@ -5,7 +6,7 @@ import Footer from '../../components/Footer';
 import ServiceDetail from '../../components/services/detail/ServiceDetail';
 import { toDetail, type ApiService, type RelatedService } from '../../components/services/detail/types';
 import { partOf } from '../../components/services/floorplan';
-import { absolute, pageMetadata } from '../../site/seo';
+import { absolute, brandedTitle, pageMetadata } from '../../site/seo';
 import { breadcrumbs, jsonLdHtml, organizationRef } from '../../site/schema';
 import { API_TAG } from '../../site/cache';
 
@@ -29,20 +30,23 @@ async function fromLocal(path: string) {
     }
 }
 
-async function getService(slug: string): Promise<ServiceResponse | null> {
+/**
+ * A service, or null if there's no such service. If the API can't answer (it can be asleep on Render) this throws
+ * rather than saying the service doesn't exist: a "not found" would be kept as the page for an hour and tell search
+ * engines the page is gone. A failed render is never kept: visitors get the last good version, or the error page.
+ */
+const getService = cache(async (slug: string): Promise<ServiceResponse | null> => {
+    if (!/^[\w-]+$/.test(slug)) return null;
     const local = await fromLocal(`/api/services/${slug}/`);
     if (local) return local;
-    try {
-        const res = await fetch(`${apiBase}/api/services/${slug}/`, {
-            next: { revalidate: 3600, tags: [API_TAG] } // Revalidate every hour
-        });
-        if (!res.ok) return null;
-        return res.json();
-    } catch (error) {
-        console.error('Error fetching service:', error);
-        return null;
-    }
-}
+    const res = await fetch(`${apiBase}/api/services/${slug}/`, {
+        next: { revalidate: 3600, tags: [API_TAG] },
+        signal: AbortSignal.timeout(12000),
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`The services API answered ${res.status}`);
+    return res.json();
+});
 
 async function getRelated(): Promise<RelatedService[]> {
     try {
@@ -61,9 +65,27 @@ async function getRelated(): Promise<RelatedService[]> {
     }
 }
 
+/**
+ * The service at this address, also when it's typed in other capitals (/services/marketing for /services/Marketing).
+ * Such an address shows the same page, and its canonical address names the real one. It deliberately doesn't
+ * redirect: two addresses that differ only in capitals can share one entry in the page cache (they do on Windows),
+ * and a redirect kept there in place of the real page would send the real address round in a loop.
+ */
+const findService = cache(async (slug: string): Promise<ServiceResponse | null> => {
+    const exact = await getService(slug);
+    if (exact) return exact;
+    const same = (await getRelated()).find((s) => s.slug.toLowerCase() === slug.toLowerCase() && s.slug !== slug);
+    return same ? getService(same.slug) : null;
+});
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
-    const service = await getService(slug);
+    let service: ServiceResponse | null = null;
+    try {
+        service = await findService(slug);
+    } catch {
+        return { title: 'Services | IN-TA Solutions' };
+    }
 
     if (!service) {
         return {
@@ -71,13 +93,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         };
     }
 
-    const title = service.meta_title || `${service.title} Services | IN-TA Solutions`;
-    const description = service.meta_description || service.short_description || `Professional ${service.title} services by IN-TA Solutions.`;
+    const title = brandedTitle(service.meta_title?.trim() || `${service.title.trim()} Services`);
+    const description = service.meta_description?.trim() || service.short_description?.trim() || `Professional ${service.title} services by IN-TA Solutions.`;
     return {
         ...pageMetadata({
             title,
             description,
-            path: `/services/${slug}`,
+            path: `/services/${service.slug || slug}`,
             image: service.image ? { url: service.image, alt: service.image_alt || service.title } : null,
         }),
         ...(service.focus_keyword ? { keywords: service.focus_keyword } : {}),
@@ -104,7 +126,7 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: Props) {
     const { slug } = await params;
-    const [api, related] = await Promise.all([getService(slug), getRelated()]);
+    const [api, related] = await Promise.all([findService(slug), getRelated()]);
 
     if (!api) {
         notFound();

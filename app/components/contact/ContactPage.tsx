@@ -482,7 +482,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
   const noDefault = (e: ReactPointerEvent) => e.stopPropagation();
 
   return (
-    <main ref={rootRef} className="inside-grid relative overflow-x-clip text-white">
+    <main id="main" ref={rootRef} className="inside-grid relative overflow-x-clip text-white">
       <div aria-hidden="true" className="patch-glow pointer-events-none absolute inset-x-0 top-0 h-[900px]" />
 
       <section aria-labelledby="contact-title" className="relative mx-auto w-full max-w-[1320px] px-4 pb-10 pt-[calc(var(--header-h)+1.5rem)] sm:px-6 sm:pb-16 sm:pt-[calc(var(--header-h)+2.25rem)]">

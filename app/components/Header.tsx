@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Icon from './Icon';
 import MainNav, { type NavLink } from './MainNav';
+import { lockScroll } from './SmoothScroll';
 
 // Home is only offered away from the home page
 const HOME_LINK: NavLink = { name: 'Home', href: '/' };
@@ -40,6 +41,7 @@ export default function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const lastScrollY = useRef(0);
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   // Hide on scroll down, reveal on scroll up (checked at most once per frame)
   useEffect(() => {
@@ -61,9 +63,25 @@ export default function Header() {
     };
   }, []);
 
+  // While the phone menu is open the page behind it stays still, and Escape closes it (focus back on the button)
   useEffect(() => {
-    document.body.style.overflow = isMobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (!isMobileOpen) return;
+    lockScroll(true);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setIsMobileOpen(false);
+      menuButton.current?.focus();
+    };
+    // grown to a laptop's width with the menu open: there is no menu any more, so nothing may stay locked
+    const wide = window.matchMedia('(min-width: 1024px)');
+    const onWide = () => wide.matches && setIsMobileOpen(false);
+    document.addEventListener('keydown', onKey);
+    wide.addEventListener('change', onWide);
+    return () => {
+      lockScroll(false);
+      document.removeEventListener('keydown', onKey);
+      wide.removeEventListener('change', onWide);
+    };
   }, [isMobileOpen]);
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
@@ -123,6 +141,7 @@ export default function Header() {
               <Icon name="arrow_outward" className="text-[16px]" />
             </Link>
             <button
+              ref={menuButton}
               type="button"
               onClick={() => setIsMobileOpen((o) => !o)}
               className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg border border-brand-blue/20 bg-canvas text-midnight hover:text-brand-blue transition-colors"
@@ -141,6 +160,9 @@ export default function Header() {
         {/* MOBILE MENU */}
         <nav
           id="mobile-nav"
+          aria-label="Menu"
+          // closed, its links are out of reach: Tab and screen readers skip them instead of landing on hidden links
+          inert={!isMobileOpen}
           data-lenis-prevent
           className={`lg:hidden overflow-hidden transition-[max-height] duration-500 ease-out
             ${isMobileOpen ? 'max-h-[calc(100dvh_-_var(--header-h))] overflow-y-auto border-t border-brand-blue/10' : 'max-h-0'}`}

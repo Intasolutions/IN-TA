@@ -5,6 +5,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useGSAPWhenNear } from './useGSAPWhenNear';
 import Icon from './Icon';
 import Scramble from './Scramble';
 import { useText } from '../site/SiteContext';
@@ -31,7 +32,7 @@ export default function Philosophy() {
   // Bumped each time a card becomes active, to replay its tag scramble
   const [tagKeys, setTagKeys] = useState(() => STEP_ICONS.map(() => 0));
 
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const move = (v: number) => (calm ? 0 : v);

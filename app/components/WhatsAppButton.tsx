@@ -26,17 +26,21 @@ export default function WhatsAppButton() {
   const yTo = useRef<gsap.QuickToFunc | null>(null);
   const hoverTl = useRef<gsap.core.Timeline | null>(null);
 
-  // Tuck the button away while an element marked [data-floating-clear] (e.g. the hero CTAs)
-  // is on screen, so it never covers them. Keyed by path so it resets on navigation.
+  // Tuck the button away while any element marked [data-floating-clear] is on screen (the hero's buttons, the footer's
+  // back-to-top row), so it never covers them. Keyed by path so it resets on navigation.
   const pathname = usePathname();
   const [tuckedOn, setTuckedOn] = useState<string | null>(null);
   const tucked = tuckedOn === pathname;
 
   useEffect(() => {
-    const target = document.querySelector('[data-floating-clear]');
-    if (!target) return;
-    const io = new IntersectionObserver(([entry]) => setTuckedOn(entry.isIntersecting ? pathname : null));
-    io.observe(target);
+    const targets = [...document.querySelectorAll('[data-floating-clear]')];
+    if (!targets.length) return;
+    const seen = new Set<Element>();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)));
+      setTuckedOn(seen.size ? pathname : null);
+    });
+    targets.forEach((t) => io.observe(t));
     return () => io.disconnect();
   }, [pathname]);
 

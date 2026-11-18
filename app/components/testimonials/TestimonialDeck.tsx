@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { useGSAPWhenNear } from '../useGSAPWhenNear';
 import Icon from '../Icon';
 import Avatar from './Avatar';
 import { STATIC_GRADIENT, useTestimonials, type Testimonial } from './data';
@@ -93,7 +94,7 @@ export default function TestimonialDeck({ initial = null }: { initial?: Testimon
   useEffect(() => { api.current = { next, prev }; });
 
   // ---- Header + deck reveal ----
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       const move = (v: number) => (calm() ? 0 : v);
       const tl = gsap

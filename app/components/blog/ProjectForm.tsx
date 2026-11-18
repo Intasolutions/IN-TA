@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, type FormEvent } from 'react';
+import { track } from '@vercel/analytics';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Icon from '../Icon';
@@ -58,6 +59,7 @@ export default function ProjectForm({ defaultInterest, kicker = 'Work with us', 
         body: JSON.stringify({ name: name.trim(), phone: phone.trim(), interest }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      track('Enquiry', { form: 'work with us', interest });
       setStatus('sent');
       setName('');
       setPhone('');

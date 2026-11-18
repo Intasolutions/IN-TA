@@ -1,29 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import 'lenis/dist/lenis.css';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import ClientLayout from './ClientLayout';
+import { fontVariables } from './fonts';
 import { LOADER_SCRIPT } from './site/loader';
 import { getSite } from './site/server';
 import { withoutDocuments } from './components/legal/document';
 import { textOf } from './site/site';
 import { pageMetadata, SITE_NAME, SITE_URL } from './site/seo';
-
-const jakarta = Plus_Jakarta_Sans({
-  variable: '--font-jakarta',
-  subsets: ['latin'],
-  style: ['normal', 'italic'],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
-  subsets: ['latin'],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-jetbrains-mono',
-  subsets: ['latin'],
-});
 
 // Material Symbols, limited to the icons the site uses (keeps the font tiny).
 // Add new icon names here — the list must stay in alphabetical order.
@@ -64,7 +49,7 @@ export default async function RootLayout({
   const site = await getSite();
   return (
     // the opening's script below may mark <html> before React takes over the page
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: LOADER_SCRIPT }} />
         {/* without scripts the opening could never end: the page shows straight away */}
@@ -79,9 +64,11 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${jakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
+        className="antialiased"
       >
         <ClientLayout site={{ ...site, text: withoutDocuments(site.text) }}>{children}</ClientLayout>
+        {/* visits counted without cookies (Vercel Web Analytics; see the Privacy page) */}
+        <Analytics />
       </body>
     </html>
   );

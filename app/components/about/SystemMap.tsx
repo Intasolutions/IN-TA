@@ -18,7 +18,7 @@ import EarthReturn from './EarthReturn';
 import type { MapClient } from './clients';
 import { createGlobe } from './globe';
 import { useSite, useText } from '../../site/SiteContext';
-import { accent, coords, countryName, hoursShort } from '../../site/site';
+import { accent, coords, countInWords, countryName, hoursShort } from '../../site/site';
 import { clamp01, drawMap, makeTrace, smooth, TARGET, viewOf, type LandDetail, type Point, type Trace } from './mapCanvas';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -135,7 +135,7 @@ function Core({ className = '' }: { className?: string }) {
 
 function Heading({ count }: { count: number }) {
   const t = useText();
-  const [plain, bright] = accent(t('about_services_title', { n: count }));
+  const [plain, bright] = accent(t('about_services_title', { n: countInWords(count) }));
   return (
     <div data-sm="head" className="motion-safe:invisible motion-safe:opacity-0 text-center">
       <span className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] uppercase font-bold text-[#9dbbff] mb-2">

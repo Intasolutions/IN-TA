@@ -104,7 +104,7 @@ export default function ArticlePage({ article, related }: { article: Article; re
   );
 
   return (
-    <main ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
+    <main id="main" ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
       {/* How far through the article */}
       <div aria-hidden="true" data-article="progress" className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0 bg-linear-to-r from-brand-blue to-[#7fa6ff]" />
 

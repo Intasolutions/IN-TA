@@ -74,10 +74,10 @@ export default async function Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(faq) }} />}
       <Header />
-      <main>
+      <main id="main">
         <ServiceChip services={services} />
         {/* (over the board's fixed canvas, so it needs its own place in the stacking order and its own white) */}
-        <FaqSection page="services" className="relative bg-white" />
+        <FaqSection page="services" className="relative bg-canvas" />
       </main>
       <Footer />
     </>

@@ -135,7 +135,11 @@ export function toDetail(api: ApiService): DetailService {
     capabilities: (api.capabilities ?? []).map((c) => ({ id: c.id, title: c.title, description: c.description ?? '', points: c.points ?? [], image: c.image ?? null })),
     features: (api.features ?? []).map(nameOf).filter(Boolean),
     technologies: (api.technologies ?? []).map((t) => ({ name: nameOf(t), logo: typeof t === 'string' ? null : (t.logo ?? null) })).filter((t) => t.name),
-    benefits: (api.benefits ?? []).map((b) => ({ id: b.id, title: b.title, description: b.description ?? '' })),
+    // a description that only repeats the title (left like that in the admin) says nothing: treated as missing
+    benefits: (api.benefits ?? []).map((b) => {
+      const description = b.description?.trim() ?? '';
+      return { id: b.id, title: b.title, description: description.toLowerCase() === b.title.trim().toLowerCase() ? '' : description };
+    }),
     gallery: (api.gallery ?? []).filter((g) => g.image).map((g) => ({ id: g.id, image: g.image, caption: g.caption ?? '', alt: g.alt_text || g.caption || '' })),
     // (an API from before the shared questions marks up every one, as it always did)
     faqs: (api.faqs ?? []).map((f) => ({ id: f.id, question: f.question, answer: f.answer, main: f.main ?? true })),
@@ -155,5 +159,7 @@ export function splitAccent(title: string): [string, string] {
   if (marked >= 0) return [title.slice(0, marked).trim(), title.slice(marked + 1).replace('|', ' ').trim()];
   const words = title.trim().split(/\s+/);
   if (words.length < 2) return ['', title];
-  return [words.slice(0, -1).join(' '), words[words.length - 1]];
+  // a closing aside like "(2026)" isn't a word to stress on its own: it takes the word before it along
+  const take = words.length > 2 && /^\(.*\)$/.test(words[words.length - 1]) ? 2 : 1;
+  return [words.slice(0, -take).join(' '), words.slice(-take).join(' ')];
 }

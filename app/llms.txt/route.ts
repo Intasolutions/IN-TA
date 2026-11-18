@@ -4,6 +4,7 @@ import { API_TAG } from '../site/cache';
 import { getSite } from '../site/server';
 import { absolute, SITE_NAME } from '../site/seo';
 import { addressLines, FAQ_PAGES, textOf } from '../site/site';
+import { postPath } from '../components/blog/posts';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -11,7 +12,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 export const revalidate = 3600;
 
 type ApiService = { slug: string; title: string; short_description?: string | null; is_active?: boolean; faqs?: { question: string; answer: string }[] };
-type ApiPost = { id: number; title: string; meta_description?: string | null };
+type ApiPost = { id: number; slug?: string | null; title: string; meta_description?: string | null };
 
 async function list<T>(path: string): Promise<T[]> {
   try {
@@ -54,7 +55,7 @@ export async function GET() {
     item('Blog', '/blog', textOf(site, 'seo_blog_description')),
     item('Contact', '/contact', textOf(site, 'seo_contact_description')),
     ...(live.length ? ['', '## Services', '', ...live.map((s) => item(s.title, `/services/${s.slug}`, s.short_description))] : []),
-    ...(posts.length ? ['', '## Articles', '', ...posts.filter((p) => p.title).map((p) => item(p.title, `/blog/${p.id}`, p.meta_description))] : []),
+    ...(posts.length ? ['', '## Articles', '', ...posts.filter((p) => p.title).map((p) => item(p.title, postPath(p), p.meta_description))] : []),
     ...(questions.length ? ['', '## Questions and answers', '', ...questions.map((f) => `- **${plain(f.q)}** ${plain(f.a)}`)] : []),
     '',
     '## Optional',

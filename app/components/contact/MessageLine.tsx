@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { track } from '@vercel/analytics';
 import Icon from '../Icon';
 import { apiBase } from '../blog/data';
 import { COUNTRIES } from '../../contact/data/countries';
@@ -101,6 +102,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
         throw new Error(String(res.status));
       }
       setSent({ name: payload.name.split(/\s+/)[0], email: payload.email });
+      track('Enquiry', { form: 'contact page' });
       setStatus('sent');
       onSent();
       setName('');

@@ -6,6 +6,7 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useGSAPWhenNear } from '../useGSAPWhenNear';
 import Icon from '../Icon';
 import ProjectForm from './ProjectForm';
 import { BlogHead, Cover, PostsFallback, ViewAll, shimmer } from './parts';
@@ -27,7 +28,7 @@ export default function BlogSection({ initial = null }: { initial?: Post[] | nul
   const none = posts?.length === 0;
 
   // ---- Heading + enquiry band reveal (independent of the posts, which can take a while on a cold API) ----
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       const move = (v: number) => (calm() ? 0 : v);
       const tl = gsap
@@ -57,7 +58,7 @@ export default function BlogSection({ initial = null }: { initial?: Post[] | nul
   );
 
   // ---- Rows: rules draw across, titles rise out of their masks; on scroll the rows ease in from alternate sides ----
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       if (!list.length) return;
       const still = calm();

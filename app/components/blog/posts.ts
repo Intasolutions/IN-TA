@@ -3,6 +3,8 @@
 
 export type ApiPost = {
   id: number;
+  /** The post's web address (an older API doesn't send it: then the post's number is its address) */
+  slug?: string | null;
   title: string;
   date: string;
   tag?: string | null;
@@ -82,12 +84,15 @@ const excerptOf = (text: string, max = 170) => {
   return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
 };
 
+/** A post's address on the site: /blog/<its slug>, or /blog/<its number> while the API has no slugs */
+export const postPath = (b: Pick<ApiPost, 'id' | 'slug'>) => `/blog/${b.slug?.trim() || b.id}`;
+
 export function toPost(b: ApiPost): Post {
   const body = plainText(b.content ?? '');
   const tags = tagsOf(b.tag ?? '');
   return {
     id: b.id,
-    href: `/blog/${b.id}`,
+    href: postPath(b),
     title: b.title.trim(),
     date: formatDate(b.date),
     iso: b.date,

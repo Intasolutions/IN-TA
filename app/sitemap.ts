@@ -3,6 +3,7 @@ import { updatedOf } from './components/legal/document';
 import { getSite } from './site/server';
 import { absolute } from './site/seo';
 import { API_TAG } from './site/cache';
+import { postPath } from './components/blog/posts';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -11,7 +12,7 @@ export const revalidate = 3600;
 
 type Dated = { updated_at?: string | null };
 type ApiService = Dated & { slug: string; is_active?: boolean };
-type ApiPost = Dated & { id: number; date?: string };
+type ApiPost = Dated & { id: number; slug?: string | null; date?: string };
 type ApiProject = Dated & { is_active?: boolean };
 
 async function list<T>(path: string): Promise<T[]> {
@@ -66,6 +67,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/privacy', updatedOf(site, 'privacy').date),
     entry('/security', updatedOf(site, 'security').date),
     ...live.map((s) => entry(`/services/${s.slug}`, dateOf(s.updated_at))),
-    ...posts.map((p) => entry(`/blog/${p.id}`, postDate(p))),
+    ...posts.map((p) => entry(postPath(p), postDate(p))),
   ];
 }

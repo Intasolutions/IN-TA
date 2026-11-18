@@ -107,7 +107,7 @@ export default function LegalPage({ kicker, title, accent, lead, updated, sectio
   };
 
   return (
-    <main ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
+    <main id="main" ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
       {/* ---- Title ---- */}
       <section aria-labelledby="legal-title" className={`${CONTAINER} pb-8 pt-[calc(var(--header-h)+1.5rem)] sm:pb-10 sm:pt-[calc(var(--header-h)+2.5rem)]`}>
         <p data-lg="kicker" className={`inline-flex items-center gap-3 text-brand-blue sm:tracking-[0.3em] ${LABEL}`}>
@@ -194,7 +194,7 @@ export default function LegalPage({ kicker, title, accent, lead, updated, sectio
       {others.length > 0 && (
         <section data-lg="others" aria-labelledby="legal-others" className="border-t border-midnight/10 bg-white/50">
           <div className={`${CONTAINER} py-12 sm:py-16`}>
-            <h2 id="legal-others" className={`text-midnight/65 ${LABEL}`}>Also read</h2>
+            <h2 id="legal-others" className={`text-midnight/65 ${LABEL.replace('font-mono', 'font-display')}`}>Also read</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:gap-6">
               {others.map((d) => (
                 <Link

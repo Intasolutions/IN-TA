@@ -7,7 +7,8 @@ export { SITE_URL };
 
 const LEGAL_NAME = 'IN-TA Solutions Pvt Ltd';
 const ALSO_KNOWN_AS = ['INTA Solutions', 'IN-TA Solutions'];
-const LOGO = `${SITE_URL}/logo/logo.jpg`;
+// Square, because Google shows the logo in a square or circle (the favicon and app icons come from the same logo.jpg)
+const LOGO = `${SITE_URL}/logo/inta-logo-square.png`;
 const ORG_ID = `${SITE_URL}/#organization`;
 const BUSINESS_ID = `${SITE_URL}/#business`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
@@ -123,6 +124,19 @@ export function contactJsonLd(site: Site) {
     name: 'Contact IN-TA Solutions',
     url: absolute('/contact'),
     mainEntity: business(site),
+  };
+}
+
+/** The about page: the company itself, under the same @id as everywhere else */
+export function aboutJsonLd(site: Site) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About IN-TA Solutions',
+    url: absolute('/about'),
+    inLanguage: 'en-IN',
+    isPartOf: { '@id': WEBSITE_ID },
+    mainEntity: organization(site),
   };
 }
 

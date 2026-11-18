@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type RefObject } from 'react';
+import { track } from '@vercel/analytics';
 import Image from 'next/image';
 import Link from 'next/link';
 import gsap from 'gsap';
@@ -14,7 +15,7 @@ import { usePlayIntro } from '../../context/usePlayIntro';
 import { createChip, type ChipEngine } from './chipEngine';
 import { AI_BLOCK, BLOCKS, boardOf, centreOf, HERO, KIND, linkBetween, nameOf, NOW, PLAN, STANDARD_SERVICES, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
 import { useText } from '../../site/SiteContext';
-import { accent, linesOf, standardText } from '../../site/site';
+import { accent, countInWords, linesOf, standardText } from '../../site/site';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
 import { buildScore, cameraAt, flyBetween, FOV, mixCameras, orderKeys, paceOf, ramp, smooth, smoother, type Camera, type Key, fieldOfView } from './score';
 
@@ -49,7 +50,6 @@ const CARD_WIDTH = 'max-w-[36rem] [@media(min-aspect-ratio:23/20)]:max-w-[min(34
 const ZOOMED = '[data-zoom]';
 const screenZoom = (w: number, h: number) => Math.min(1.9, Math.max(1, Math.min(w / 1480, h / 800))).toFixed(3);
 
-const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
 // The readout changes over to the next part a little way into the flight
 const TARGET_AT = 0.55;
 
@@ -225,6 +225,7 @@ function OrderAnswer({ order, onClose }: { order: ActiveOrder; onClose: () => vo
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      track('Enquiry', { form: 'services order' });
       setStep('sent');
     } catch {
       setStep('error');
@@ -316,22 +317,81 @@ function OrderAnswer({ order, onClose }: { order: ActiveOrder; onClose: () => vo
 type NavItem = { id: string; label: string };
 
 /** Shortcuts between the parts. On its own, so that passing a part while scrolling doesn't re-render the page. */
-function StopsNav({ items, currentRef, onGo }: { items: NavItem[]; currentRef: RefObject<(i: number) => void>; onGo: (id: string) => void }) {
+function StopsNav({ items, currentRef, onGo, onSkip }: { items: NavItem[]; currentRef: RefObject<(i: number) => void>; onGo: (id: string) => void; onSkip: () => void }) {
   const [current, setCurrent] = useState(-1);
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     currentRef.current = setCurrent;
   }, [currentRef]);
+  // the phone menu closes with a tap anywhere else, or Escape
+  useEffect(() => {
+    if (!menu) return;
+    const away = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setMenu(false);
+    document.addEventListener('pointerdown', away);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('pointerdown', away);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [menu]);
+  const pick = (fn: () => void) => {
+    setMenu(false);
+    fn();
+  };
   return (
-    <nav data-chip="nav" data-zoom aria-label="Parts on the board" className="invisible opacity-0 fixed right-3 xl:right-5 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2.5 rounded-full bg-white/95 px-2 py-3 shadow-md ring-1 ring-brand-blue/15 transition-opacity duration-500 lg:flex">
-      {items.map((item, i) => (
-        <button key={item.id} type="button" onClick={() => onGo(item.id)} aria-current={current === i ? 'true' : undefined} className="group relative flex h-2.5 w-2.5 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-blue">
-          <span className="pointer-events-none absolute right-full top-1/2 mr-4 -translate-y-1/2 whitespace-nowrap rounded bg-white px-1.5 py-0.5 font-mono text-[9px] xl:text-[10px] uppercase tracking-wider text-midnight opacity-0 shadow-sm ring-1 ring-brand-blue/20 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-            {item.label}
-          </span>
-          <span className={`block rounded-full transition-[width,height,background-color] duration-300 ${current === i ? 'h-2.5 w-2.5 bg-brand-blue' : 'h-1.5 w-1.5 bg-midnight/25 group-hover:bg-midnight'}`} />
+    <>
+      <nav data-chip="nav" data-zoom aria-label="Parts on the board" className="invisible opacity-0 fixed right-3 xl:right-5 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-2.5 rounded-full bg-white/95 px-2 py-3 shadow-md ring-1 ring-brand-blue/15 transition-opacity duration-500 lg:flex">
+        {items.map((item, i) => (
+          <button key={item.id} type="button" onClick={() => onGo(item.id)} aria-current={current === i ? 'true' : undefined} className="group relative flex h-2.5 w-2.5 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-blue">
+            <span className="pointer-events-none absolute right-full top-1/2 mr-4 -translate-y-1/2 whitespace-nowrap rounded bg-white px-1.5 py-0.5 font-mono text-[9px] xl:text-[10px] uppercase tracking-wider text-midnight opacity-0 shadow-sm ring-1 ring-brand-blue/20 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+              {item.label}
+            </span>
+            <span className={`block rounded-full transition-[width,height,background-color] duration-300 ${current === i ? 'h-2.5 w-2.5 bg-brand-blue' : 'h-1.5 w-1.5 bg-midnight/25 group-hover:bg-midnight'}`} />
+          </button>
+        ))}
+      </nav>
+      {/* Phones and tablets: the same stops as a menu, and the enquiry form at the end (shown once past the opening words) */}
+      <div ref={menuRef} data-chip="skip" className="invisible opacity-0 fixed right-3 sm:right-6 top-[max(env(safe-area-inset-top),0.5rem)] z-20 transition-opacity duration-500 lg:hidden">
+        <button
+          type="button"
+          aria-expanded={menu}
+          aria-controls="chip-stops"
+          onClick={() => setMenu((m) => !m)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-midnight shadow-md ring-1 ring-brand-blue/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+        >
+          Services
+          <svg aria-hidden="true" viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${menu ? 'rotate-180' : ''}`}><path d="M4 6l4 4 4-4" /></svg>
         </button>
-      ))}
-    </nav>
+        <ul
+          id="chip-stops"
+          className={`absolute right-0 mt-2 w-[min(17rem,calc(100vw-1.5rem))] max-h-[min(70svh,30rem)] overflow-y-auto overscroll-contain rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-brand-blue/15 origin-top-right transition-[opacity,scale] duration-200 ${menu ? 'opacity-100 scale-100' : 'pointer-events-none invisible opacity-0 scale-95'}`}
+        >
+          {items.map((item, i) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                onClick={() => pick(() => onGo(item.id))}
+                aria-current={current === i ? 'true' : undefined}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left font-mono text-[11px] uppercase tracking-wider font-bold transition-colors ${current === i ? 'bg-brand-blue text-white' : 'text-midnight hover:bg-canvas'}`}
+              >
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${current === i ? 'bg-white' : 'bg-brand-blue/40'}`} />
+                {item.label}
+              </button>
+            </li>
+          ))}
+          <li className="mt-1 border-t border-brand-blue/10 pt-1">
+            <button type="button" onClick={() => pick(onSkip)} className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left font-mono text-[11px] uppercase tracking-wider font-bold text-brand-blue hover:bg-canvas">
+              Enquiry form
+              <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" /></svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </>
   );
 }
 
@@ -381,7 +441,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
   // A service the admin hasn't put on a part is listed above the board, so it still has a way in
   const placed = new Set(board.at.values());
   const extras = services.filter((s) => !placed.has(s));
-  const [planHeading, planBright] = accent(t('services_plan_title', { n: NUMBER_WORDS[shown.length + 1] ?? String(shown.length + 1) }));
+  const [planHeading, planBright] = accent(t('services_plan_title', { n: countInWords(shown.length + 1) }));
   const planParts = [...shown.map(({ beat }) => beat.block), AI_BLOCK, YOUR_BLOCK];
   const jumpList = [{ id: AI_BLOCK.id, name: ai.title, featured: true }, ...shown.map(({ beat, service }) => ({ id: beat.block.id, name: service.title, featured: false }))];
 
@@ -1228,16 +1288,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       </dl>
       {/* The name of the part under the hand */}
       <div data-chip="tip" aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 rounded-md bg-midnight px-2 py-1 font-mono text-[10px] uppercase tracking-wider font-bold text-white opacity-0 transition-opacity duration-200" />
-      <button
-        type="button"
-        data-chip="skip"
-        onClick={skip}
-        aria-label="Skip to the enquiry form"
-        className="invisible opacity-0 fixed right-3 sm:right-6 top-[max(env(safe-area-inset-top),0.5rem)] z-20 inline-flex items-center gap-1 rounded-lg bg-white/95 px-2.5 py-1 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-midnight shadow-md ring-1 ring-brand-blue/15 transition-opacity duration-500 lg:hidden"
-      >
-        Skip <Icon name="south" className="text-[13px]" />
-      </button>
-      <StopsNav items={score.stops} currentRef={navChangedRef} onGo={go} />
+      <StopsNav items={score.stops} currentRef={navChangedRef} onGo={go} onSkip={skip} />
     </div>
   );
 }

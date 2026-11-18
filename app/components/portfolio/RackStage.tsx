@@ -112,7 +112,7 @@ const KeyShapes = memo(function KeyShapes() {
           ))}
         </g>
         {KEYS.map((row, r) => (
-          <g key={r} id={`rack-legends-${r}`} fontFamily="ui-monospace, monospace" fontWeight={600} fontSize={r === 0 ? 20 : 27} textAnchor="middle">
+          <g key={r} id={`rack-legends-${r}`} style={{ fontFamily: 'var(--font-jakarta), sans-serif' }} fontWeight={600} fontSize={r === 0 ? 20 : 27} textAnchor="middle">
             {row.map((key) => (
               <text key={key.label} x={key.x * 100 + key.w * 50} y={key.y * 100 + key.h * 50 + (r === 0 ? 7 : 9)}>{keyName(key.label)}</text>
             ))}

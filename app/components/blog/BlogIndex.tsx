@@ -169,7 +169,7 @@ export default function BlogIndex({ initial }: { initial: Post[] }) {
   );
 
   return (
-    <main ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
+    <main id="main" ref={rootRef} className="overflow-x-clip bg-canvas text-midnight">
       <section aria-labelledby="blog-title" className={`${CONTAINER} pb-5 pt-[calc(var(--header-h)+1.5rem)] sm:pb-6 sm:pt-[calc(var(--header-h)+2.5rem)]`}>
         <div data-blog="head" className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:items-end lg:gap-10">
           <div>

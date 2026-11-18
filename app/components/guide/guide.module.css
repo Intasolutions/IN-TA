@@ -1,0 +1,54 @@
+/* The website guide (Guide.tsx). The box covers the window and never moves (so resizing the canvas is never a layout
+   shift); the engine sizes and places the canvas inside it: docked on top of the WhatsApp button, or the whole window
+   while he's carried, falling or walking home. Nothing here takes clicks; the engine tests the pointer against him.
+   (Kept out of globals.css: the dev server sometimes stops picking up edits there; modules always reload.) */
+.host { position: fixed; inset: 0; z-index: 9998; pointer-events: none; opacity: 0; transition: opacity 0.4s ease; }
+.host.on { opacity: 1; }
+.host.tucked { opacity: 0; }
+.host canvas { position: absolute; left: 0; top: 0; display: block; width: 150px; height: 170px; }
+
+/* the speech bubble over his head, typed out. Guide.tsx places it: --tail is how far his head is from the bubble's
+   middle (the bubble slides to stay on screen, the tail stays on him); data-below puts it under his head near the top.
+   The whole line sits in it hidden from the start, so its size is set before the typing begins. */
+.say { position: fixed; z-index: 10000; transform: translate(-50%, calc(-100% - 12px)); max-width: 230px; width: max-content; padding: 8px 12px; border-radius: 14px;
+  background: #fff; color: var(--color-midnight); font: 700 13px/1.3 var(--font-jakarta), system-ui, sans-serif; text-align: left; pointer-events: none;
+  box-shadow: 0 12px 28px -12px rgb(1 7 43 / 0.45), 0 0 0 1px rgb(1 7 43 / 0.06);
+  transform-origin: calc(50% + var(--tail, 0px)) 100%; animation: say-in 0.3s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.say[data-below] { transform: translate(-50%, 0); transform-origin: calc(50% + var(--tail, 0px)) 0; }
+.say::after { content: ''; position: absolute; left: calc(50% + var(--tail, 0px)); bottom: -6px; width: 12px; height: 12px; margin-left: -6px; background: #fff; transform: rotate(45deg); }
+.say[data-below]::after { bottom: auto; top: -6px; }
+.full { visibility: hidden; }
+.typed { position: absolute; inset: 8px 12px; }
+@keyframes say-in { from { opacity: 0; scale: 0.7; } }
+
+/* a puff of dust where he lands or skids (--size 0–1: how hard) */
+.dust i { position: absolute; left: -6px; top: -8px; width: 12px; height: 12px; border-radius: 50%; background: rgb(150 162 190 / 0.5);
+  animation: puff 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+.dust i:nth-child(1) { --dx: -30px; --dy: -6px; }
+.dust i:nth-child(2) { --dx: -15px; --dy: -14px; animation-duration: 0.7s; }
+.dust i:nth-child(3) { --dx: 0px; --dy: -18px; animation-duration: 0.65s; }
+.dust i:nth-child(4) { --dx: 16px; --dy: -12px; animation-duration: 0.75s; }
+.dust i:nth-child(5) { --dx: 32px; --dy: -5px; }
+@keyframes puff {
+  from { transform: translate(0, 0) scale(0.4); opacity: 0.9; }
+  to { transform: translate(calc(var(--dx) * var(--size, 1)), calc(var(--dy) * var(--size, 1))) scale(calc(0.8 + var(--size, 1))); opacity: 0; }
+}
+
+.z { position: fixed; z-index: 10000; font: 700 14px var(--font-jakarta), sans-serif; color: var(--color-midnight); pointer-events: none; animation: z-rise 2s ease-in infinite; }
+@keyframes z-rise { 0% { opacity: 0; transform: translate(0, 0) scale(0.7); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(12px, -22px) scale(1.3); } }
+
+/* "Hide", shown a moment while the pointer is over him (or after a tap); Guide.tsx puts it beside his head */
+.hide { position: fixed; z-index: 9999; left: calc(100% - 92px); top: calc(100% - 262px); padding: 3px 9px; border-radius: 999px; background: rgb(255 255 255 / 0.92); color: var(--color-midnight);
+  font: 700 10px var(--font-jakarta), sans-serif; letter-spacing: 0.08em; text-transform: uppercase; box-shadow: 0 4px 14px -6px rgb(1 7 43 / 0.4);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+.hide.shown { opacity: 1; pointer-events: auto; }
+.hide:focus-visible { opacity: 1; pointer-events: auto; outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
+
+/* stars round his head after a missed jump */
+.fx { position: fixed; z-index: 10000; pointer-events: none; width: 0; height: 0; }
+.stars { animation: fade 1.9s linear forwards; }
+.stars i { position: absolute; left: -7px; top: -9px; font-style: normal; font-size: 19px; color: #ffcf33; text-shadow: 0 0 2px #13235e, 0 1px 0 #13235e; animation: orbit 0.8s linear infinite; }
+.stars i:nth-child(2) { animation-delay: -0.27s; }
+.stars i:nth-child(3) { animation-delay: -0.54s; }
+@keyframes orbit { 0% { transform: translate(22px, 0) scale(1); } 25% { transform: translate(0, 7px) scale(1.25); } 50% { transform: translate(-22px, 0) scale(1); } 75% { transform: translate(0, -7px) scale(0.7); opacity: 0.6; } 100% { transform: translate(22px, 0) scale(1); } }
+@keyframes fade { 0%, 82% { opacity: 1; } 100% { opacity: 0; } }

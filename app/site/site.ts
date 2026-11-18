@@ -250,14 +250,18 @@ function dayRuns(days: number[]) {
 
 const joinWords = (parts: string[]) => (parts.length < 2 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`);
 
-/** Mon–Sat · 9 AM–5 PM IST (spaced: 9 AM – 5 PM) */
-export function hoursShort(site: Site, spaced = false) {
+/** Mon–Sat · 9 AM–5 PM IST, written the same way everywhere it's shown */
+export function hoursShort(site: Site) {
   const days = dayRuns(site.hours.days)
     .map((r) => (r.length > 2 ? `${SHORT_DAYS[r[0]]}–${SHORT_DAYS[r[r.length - 1]]}` : r.map((d) => SHORT_DAYS[d]).join(', ')))
     .join(', ');
-  const dash = spaced ? ' – ' : '–';
-  return `${days} · ${clockOf(minutesOf(site.hours.opens))}${dash}${clockOf(minutesOf(site.hours.closes))} IST`;
+  return `${days} · ${clockOf(minutesOf(site.hours.opens))}–${clockOf(minutesOf(site.hours.closes))} IST`;
 }
+
+const NUMBER_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+
+/** A count for a heading, as a word up to ten ("Eight services."), as a figure above that */
+export const countInWords = (n: number) => NUMBER_WORDS[n] ?? String(n);
 
 /** Monday to Saturday */
 export const daysLong = (site: Site) =>

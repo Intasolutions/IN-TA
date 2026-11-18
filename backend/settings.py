@@ -135,7 +135,8 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # templates/ comes first: it holds the admin's base_site.html, which adds the website's fonts
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -227,3 +228,11 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'intasolutionpvtltd@gmail.com')
 SERVER_EMAIL = os.getenv('SERVER_EMAIL', EMAIL_HOST_USER)
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 ADMINS = [(os.getenv('ADMIN_NAME', 'Site Admin'), os.getenv('ADMIN_EMAIL', EMAIL_HOST_USER))]
+
+# The blog editor's writing area: CKEditor's own styles, then the website's fonts
+# (django-ckeditor merges this into its defaults, so only this setting changes)
+CKEDITOR_CONFIGS = {
+    'default': {
+        'contentsCss': ['/' + STATIC_URL.lstrip('/') + 'ckeditor/ckeditor/contents.css', '/' + STATIC_URL.lstrip('/') + 'home/site-fonts.css'],
+    },
+}

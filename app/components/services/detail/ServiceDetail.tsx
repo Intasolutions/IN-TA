@@ -207,7 +207,7 @@ export default function ServiceDetail({ service, related }: { service: DetailSer
   );
 
   return (
-    <main ref={rootRef} className="bg-midnight text-white">
+    <main id="main" ref={rootRef} className="bg-midnight text-white">
       {block ? (
         <PartStage key={service.slug} service={service} block={block} others={others} board={board} formId={lastId} insideId={firstId} facts={facts} part={part} title={service.text.hero_title || service.title} words={say} />
       ) : (

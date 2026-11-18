@@ -13,6 +13,8 @@ class TagSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     hero = serializers.ImageField(read_only=True)
+    case_study = serializers.BooleanField(source="has_case_study", read_only=True)
+    services = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -28,9 +30,20 @@ class ProjectSerializer(serializers.ModelSerializer):
             "featured",
             "order",
             "is_active",
+            "case_study",
+            "challenge",
+            "solution",
+            "outcome",
+            "stack",
+            "meta_description",
+            "services",
             "created_at",
             "updated_at",
         )
+
+    def get_services(self, obj):
+        """The services this project used (Services > a service > its projects), for links from the project's page."""
+        return [{"title": s.title, "slug": s.slug} for s in obj.services.all() if s.is_active]
 
 
 class GalleryItemSerializer(serializers.ModelSerializer):

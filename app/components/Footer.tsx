@@ -6,6 +6,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useGSAPWhenNear } from './useGSAPWhenNear';
 import Icon from './Icon';
 import { IstClock } from './Header';
 import { useOfficeStatus } from './OfficeStatus';
@@ -70,7 +71,7 @@ export function useSocials() {
   return SOCIAL_ICONS.filter((s) => socials[s.key]).map((s) => ({ name: s.name, href: socials[s.key], icon: s.icon }));
 }
 
-const HEAD = 'mb-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-white/45';
+const HEAD = 'mb-3 font-display text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-white/45';
 
 /** Label that rolls up to a blue copy of itself when its link (a `group/roll`) is hovered or focused */
 function Roll({ children }: { children: string }) {
@@ -98,7 +99,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
   let charIndex = 0; // running index across the sign-off line, for the hover wave delay
 
-  useGSAP(
+  useGSAPWhenNear(
     () => {
       const root = ref.current!;
       const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -298,7 +299,7 @@ export default function Footer() {
             </div>
 
             <nav aria-label="Footer" className="lg:col-span-2">
-              <h3 data-ft="item" className={HEAD}>Explore</h3>
+              <h2 data-ft="item" className={HEAD}>Explore</h2>
               <ul className="space-y-2">
                 {EXPLORE.map((l) => (
                   <li key={l.href} data-ft="item">
@@ -311,7 +312,7 @@ export default function Footer() {
             </nav>
 
             <div className="lg:col-span-3">
-              <h3 data-ft="item" className={HEAD}>Services</h3>
+              <h2 data-ft="item" className={HEAD}>Services</h2>
               <ul className="space-y-2">
                 {site.services.map((s) => (
                   <li key={s.slug} data-ft="item">
@@ -324,7 +325,7 @@ export default function Footer() {
             </div>
 
             <div className="col-span-2 lg:col-span-3">
-              <h3 data-ft="item" className={HEAD}>Visit us</h3>
+              <h2 data-ft="item" className={HEAD}>Visit us</h2>
               {/* the office's postal address, marked as the company's address */}
               <address className="not-italic">
                 <a
@@ -347,10 +348,10 @@ export default function Footer() {
               </address>
               <p data-ft="item" className="mt-2.5 flex items-center gap-2.5 text-sm text-white/60">
                 <Icon name="schedule" className="text-[18px] text-[#7fa6ff]" />
-                {hoursShort(site, true)}
+                {hoursShort(site)}
               </p>
 
-              <h3 data-ft="item" className={`${HEAD} mt-6`}>Follow</h3>
+              <h2 data-ft="item" className={`${HEAD} mt-6`}>Follow</h2>
               <ul className="flex flex-wrap gap-2">
                 {socials.map((s) => (
                   <li key={s.name} data-ft="item">
@@ -393,6 +394,7 @@ export default function Footer() {
               <button
                 type="button"
                 data-ft="mag"
+                data-floating-clear
                 onClick={scrollToTop}
                 aria-label="Back to top"
                 className="group/top relative flex w-10 h-10 items-center justify-center rounded-full text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7fa6ff]"

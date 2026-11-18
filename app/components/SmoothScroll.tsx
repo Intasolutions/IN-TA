@@ -11,10 +11,26 @@ ScrollTrigger.config({ ignoreMobileResize: true });
 
 let instance: Lenis | null = null;
 
+/** The visitor's device asks for less motion: the page scrolls natively and jumps instead of gliding */
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /** Smooth-scroll to a position on the page */
 export function scrollToY(y: number) {
   if (instance) instance.scrollTo(y, { duration: 1.8 });
-  else window.scrollTo({ top: y, behavior: 'smooth' });
+  else window.scrollTo({ top: y, behavior: reducedMotion() ? 'auto' : 'smooth' });
+}
+
+/**
+ * Holds the page still (while the phone menu is open) or lets it scroll again. Lenis scrolls the page itself, so
+ * `overflow: hidden` on <body> doesn't stop a wheel or trackpad: stopping Lenis does, and clips <html> for touch.
+ */
+export function lockScroll(locked: boolean) {
+  if (instance) {
+    if (locked) instance.stop();
+    else instance.start();
+  } else {
+    document.documentElement.style.overflow = locked ? 'hidden' : '';
+  }
 }
 
 /** Straight to a position on the page, with no scrolling in between */
@@ -33,6 +49,9 @@ export function scrollToTop() {
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // Asked for less motion: no smoothing at all, the browser's own scrolling (ScrollTrigger follows it by itself)
+    if (reducedMotion()) return;
+
     // lerp 0.1 is Lenis's own default: smooth, but the page stops soon after the wheel does instead of drifting on
     // (0.075 kept it gliding for about a second, which felt laggy, most of all when stopping at the top)
     const lenis = new Lenis({

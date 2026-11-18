@@ -1,26 +1,35 @@
 import { cache } from 'react';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import ArticlePage, { type Article } from '../../components/blog/ArticlePage';
 import { articleHtml } from '../../components/blog/body.server';
 import { apiBase, plainText, relatedTo, serviceSlugOf, toPost, type ApiPost, type Post } from '../../components/blog/posts';
 
-import { absolute, pageMetadata } from '../../site/seo';
+import { absolute, brandedTitle, pageMetadata } from '../../site/seo';
 import { breadcrumbs, jsonLdHtml, organizationRef } from '../../site/schema';
 import { API_TAG } from '../../site/cache';
 
 const RELATED = 3;
 
 type Props = {
+  /** The post's address: its slug, or its number (the old addresses, which redirect to the slug) */
   params: Promise<{ id: string }>;
 };
+
+/**
+ * Posts are built the first time someone asks for one and then kept (and rebuilt hourly, or at once when the admin
+ * saves). Without this the route would be rendered afresh on every visit and never cached by the CDN.
+ */
+export async function generateStaticParams() {
+  return [];
+}
 
 /**
  * A post, or null if there's no such post. If the API can't answer (it can be asleep) this throws rather than saying
  * the post doesn't exist: the error page keeps trying, and that failure is never kept as the page.
  */
 const getPost = cache(async (id: string): Promise<ApiPost | null> => {
-  if (!/^\d+$/.test(id)) return null;
+  if (!/^[\w-]+$/.test(id)) return null;
   const res = await fetch(`${apiBase()}/api/blog/posts/${id}/`, { next: { revalidate: 3600, tags: [API_TAG] }, signal: AbortSignal.timeout(12000) });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`The blog API answered ${res.status}`);
@@ -61,8 +70,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!api) return { title: 'Article not found | IN-TA Solutions' };
 
   const post = toPost(api);
-  const title = `${api.meta_title?.trim() || post.title} | IN-TA Solutions`;
-  const description = api.meta_description?.trim() || plainText(api.content ?? '').slice(0, 160);
+  const title = brandedTitle(api.meta_title?.trim() || post.title);
+  const description = api.meta_description?.trim() || plainText(api.content ?? '');
   return pageMetadata({
     title,
     description,
@@ -81,6 +90,10 @@ export default async function Page({ params }: Props) {
   if (!api) notFound();
 
   const post = toPost(api);
+  // An old numbered address moves for good to the post's own. One typed in other capitals isn't redirected: it shows
+  // the post with the real address as canonical, because addresses differing only in capitals can share one entry in
+  // the page cache, and a redirect stored there in place of the post would loop.
+  if (/^\d+$/.test(id) && post.href !== `/blog/${id}`) permanentRedirect(post.href);
   const [posts, service] = await Promise.all([getPosts(), getService(serviceSlugOf(api.link))]);
   const article: Article = { ...post, html: articleHtml(api.content ?? ''), url: absolute(post.href), service };
 

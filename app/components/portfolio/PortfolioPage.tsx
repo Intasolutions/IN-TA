@@ -204,7 +204,7 @@ export default function PortfolioPage({ initial }: { initial: Work }) {
   );
 
   return (
-    <main ref={rootRef} className="bg-midnight text-white">
+    <main id="main" ref={rootRef} className="bg-midnight text-white">
       {reduced ? <StillList projects={work.projects} onView={onView} /> : <RackStage projects={work.projects} siteCount={work.sites.length} formId={FORM_ID} nextId={work.sites.length ? MORE_ID : FORM_ID} onView={onView} />}
 
       <div className="inside-grid relative overflow-x-clip">
