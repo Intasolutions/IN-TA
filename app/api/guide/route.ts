@@ -12,7 +12,7 @@ import {
   ACTIONS, GESTURES, LIMITS, MOODS, NO_LEAD,
   type Action, type Answer, type AskMode, type AskReply, type AskRequest, type ChatTurn, type Gesture, type LeadInfo, type Mood, type TourStep,
 } from '../../components/guide/chatTypes';
-import { aiConfigured, cleanPage, facts, fail, gemini, limiter, line, pageBlock, pagesOf, regionOk, sameSite, str } from './shared';
+import { aiConfigured, aiSetup, cleanPage, facts, fail, gemini, limiter, line, pageBlock, pagesOf, regionOk, sameSite, str } from './shared';
 
 const allowAsk = limiter(6, 60);
 const allowOpener = limiter(3, 12); // his own openers: a couple per visit at most
@@ -20,7 +20,8 @@ const allowOpener = limiter(3, 12); // his own openers: a couple per visit at mo
 /** Whether the chat can be used from here at all (asked when the visitor opens it) */
 export async function GET(request: Request) {
   if (!regionOk(request)) return Response.json({ available: false, reason: 'region' });
-  if (!aiConfigured()) return Response.json({ available: false, reason: 'busy' });
+  // (setup says what's missing on the host, e.g. the key not set for this deployment: nothing secret)
+  if (!aiConfigured()) return Response.json({ available: false, reason: 'busy', setup: aiSetup() });
   return Response.json({ available: true });
 }
 

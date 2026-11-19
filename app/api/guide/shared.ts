@@ -11,11 +11,19 @@
 import { linesOf, textOf, type Site } from '../../site/site';
 import { LIMITS, type PageContext, type Unavailable } from '../../components/guide/chatTypes';
 
-const MODELS = (process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite,gemini-3.1-flash-lite')
-  .split(',').map((m) => m.trim()).filter((m) => /^[\w.-]+$/.test(m));
+const DEFAULT_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+/** a value as pasted into the host's settings: spaces, line breaks and wrapping quotes taken off */
+const tidy = (v: string | undefined) => (v ?? '').trim().replace(/^(['"])(.*)\1$/, '$2').trim();
+// model names as Google lists them; "models/gemini-…" works too. Nothing usable: the standard ones.
+const listed = tidy(process.env.GEMINI_MODEL).split(',').map((m) => m.trim().replace(/^models\//, '')).filter((m) => /^[\w.-]+$/.test(m));
+const MODELS = listed.length ? listed : DEFAULT_MODELS;
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
+const apiKey = () => tidy(process.env.GEMINI_API_KEY);
 
-export const aiConfigured = () => !!process.env.GEMINI_API_KEY && MODELS.length > 0;
+export const aiConfigured = () => apiKey().length > 0;
+
+/** What's missing for the AI, without showing anything secret (the chat route reports it, so it can be checked live) */
+export const aiSetup = () => (apiKey() ? 'ok' : process.env.GEMINI_API_KEY === undefined ? 'GEMINI_API_KEY is not set for this deployment' : 'GEMINI_API_KEY is empty');
 
 // The EEA (the EU, Iceland, Liechtenstein, Norway, and the EU's outermost regions with codes of their own), the UK
 // (and the islands under its crown) and Switzerland
@@ -62,7 +70,7 @@ let restUntil = 0;
 
 /** Ask Gemini for JSON in this shape; null when no model could answer (each tried in turn) */
 export async function gemini(request: { system: string; contents: unknown[]; schema: object; temperature: number; maxTokens: number }): Promise<Record<string, unknown> | null> {
-  const key = process.env.GEMINI_API_KEY;
+  const key = apiKey();
   if (!key || Date.now() < restUntil) return null;
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: request.system }] },
