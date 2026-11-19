@@ -36,10 +36,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Added without an index: the unique step below makes the column's indexes. (With one here as well, PostgreSQL
+        # was asked for the same "_like" index twice and the migration failed on Render; SQLite has no such index.)
         migrations.AddField(
             model_name='blog',
             name='slug',
-            field=models.SlugField(blank=True, max_length=80, null=True),
+            field=models.SlugField(blank=True, max_length=80, null=True, db_index=False),
         ),
         migrations.RunPython(fill_slugs, migrations.RunPython.noop),
         migrations.AlterField(
