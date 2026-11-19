@@ -10,12 +10,11 @@ import { scrollToY } from '../SmoothScroll';
 import { whatsappLink } from '../whatsappTopic';
 import { LIMITS, NO_LEAD, withName, type Answer, type AskMode, type AskReply, type ChatTurn, type LeadInfo, type Mood, type Unavailable } from './chatTypes';
 import { journeyText } from './journey';
-import StartForm, { type Details } from './StartForm';
 import { clip, pageContext, short } from './pageContext';
 import type { Guide as GuideApi } from './engine';
 import css from './guide.module.css';
 
-// The robot's chat. It starts with a short form (StartForm: name, and a phone number or an email), then he talks:
+// The robot's chat. He starts by asking their name and how to reach them (they answer in the chat), then he talks:
 // he greets them by name, guides them round the site (walks to things, tours pages, takes them to other pages),
 // learns what they need and recommends the right service. Questions go to app/api/guide/route.ts (Google's Gemini);
 // the visitor's name, phone and email never do: the AI writes {name} and it's filled in here, and a number or email
@@ -42,6 +41,7 @@ type Activity =
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 // ---- the visitor and their conversation, for this visit: who they are, and where it's saved ----
+type Details = { name: string; phone: string; email: string };
 type Me = Details & { id?: number; token?: string };
 const ME = 'inta-guide-me';
 const readMe = (): Me | null => { try { return JSON.parse(sessionStorage.getItem(ME) ?? 'null'); } catch { return null; } };
@@ -63,6 +63,36 @@ function keepBack(text: string) {
   });
   return { sent, email: emails[0] ?? '', phone };
 }
+
+// ---- getting to know them: he asks their name and how to reach them, and they answer in the chat ----
+// Their answers stay in the browser and go only to our database with the conversation, never to the AI, so these are
+// read here: "I'm Anu", "hi, this is anu k", "Anu, we need an ERP" (the rest is a question he answers once he knows them).
+const HELLO = /^(?:(?:hi|hello|hey|hai|hlo|good (?:morning|afternoon|evening))\b[\s,!.]*)+/i;
+const INTRO = /^(?:i am|i'm|im|my name is|my name's|name is|name's|this is|it's|its|call me|myself|me)\s+/i;
+const QUESTION = /^(?:what|how|can|could|do|does|is|are|who|where|when|why|which|would|will|i need|i want|we need|we want|need|want|show|tell|give|price|cost|looking)\b/i;
+const TITLE = /\b(dr|mr|mrs|ms|prof)\.\s*/gi; // "Dr. Asha": the dot isn't the end of a sentence
+const SIDE = /\s+(?:here|this side|speaking)$/i; // "Sneha here", "Rahul this side"
+const NAME_WORD = /^[\p{L}][\p{L}'’.-]{0,24}$/u;
+
+function readName(text: string): { name: string; question: string } {
+  const greeted = text.replace(HELLO, '').trim();
+  const s = greeted.replace(INTRO, '').replace(TITLE, '$1 ').trim();
+  const introduced = s.replace(TITLE, '') !== greeted.replace(TITLE, '');
+  if (!s) return { name: '', question: '' };
+  // the first part is the name; whatever follows it ("…, we need an ERP") is a question for later
+  const split = s.match(/^(.*?)(?:\s*(?:[,;!?]|\.(?:\s|$)|\s-\s|\s+(?:and|&)\s+)\s*)([\s\S]*)$/);
+  const head = (split ? split[1] : s).replace(SIDE, '').trim();
+  const tail = (split ? split[2] : '').replace(/^(?:and|&)\s+/i, '').trim();
+  const words = head.split(/\s+/).filter(Boolean);
+  const asking = !introduced && (QUESTION.test(head) || (!tail && words.length > 1 && /\?\s*$/.test(s)));
+  if (asking || !words.length || words.length > 4 || !words.every((w) => NAME_WORD.test(w))) {
+    return { name: '', question: introduced ? '' : text.trim() };
+  }
+  const name = words.map((w) => (w === w.toLowerCase() ? w[0].toUpperCase() + w.slice(1) : w)).join(' ');
+  return { name, question: tail.split(/\s+/).length >= 3 ? tail : '' };
+}
+
+type IntakeLine = { id: number; from: 'guide' | 'visitor'; text: string; note?: boolean };
 const CONTINUE = 'inta-guide-continue'; // he's taking them to this page, and will carry on guiding there
 
 const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
@@ -156,7 +186,13 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
   const name = me?.name.split(/\s+/)[0] ?? '';
   const reasonText = (r: Unavailable) => t(r === 'region' ? 'guide_chat_region' : r === 'limit' ? 'guide_chat_limit' : 'guide_chat_busy');
 
-  // his opening line, asked for while the visitor fills in the form, and a question waiting for it
+  // getting to know them (before `me`): what he asked and they answered, and what he has so far
+  const [intake, setIntake] = useState<IntakeLine[]>([]);
+  const [intakeTyped, setIntakeTyped] = useState(0);
+  const [step, setStep] = useState<'name' | 'contact'>('name');
+  const draft = useRef<Details>({ name: '', phone: '', email: '' });
+
+  // his opening line, asked for while he gets to know them, and a question waiting for it
   const opener = useRef<Promise<Fetched | null> | null>(null);
   const waiting = useRef<string>('');
   const started = useRef(false);
@@ -279,7 +315,54 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
     take(got, q, mode);
   };
 
-  /** the form's done: they're in, the conversation starts on the server, and he greets them (the line's ready) */
+  /** one line of the getting-to-know-you part, his or theirs */
+  const intakeSays = (from: IntakeLine['from'], text: string, note = false) => {
+    setIntake((l) => [...l, { id: nextId(), from, text, note }]);
+    if (from === 'guide') setAnnounce(text);
+  };
+
+  /** their answer to his question (their name, or how to reach them); he asks again for whatever is still missing */
+  const answer = async (raw: string) => {
+    const text = raw.replace(/\s+/g, ' ').trim().slice(0, LIMITS.question);
+    if (!text || thinking) return;
+    setQuestion('');
+    intakeSays('visitor', text);
+    const d = draft.current;
+    const kept = keepBack(text);
+    if (kept.email) d.email = kept.email;
+    if (kept.phone) d.phone = kept.phone;
+    let asked = false;
+    if (!d.name) {
+      // (their number or email taken out first, so it's never read as part of a name)
+      const words = text.replace(EMAIL, ' ').replace(PHONE, (m) => (digits(m) >= 7 && digits(m) <= 15 ? ' ' : m)).replace(/\s+/g, ' ').trim();
+      const got = readName(words);
+      if (got.name) d.name = got.name;
+      if (got.question) { asked = true; waiting.current ||= got.question; }
+    }
+    const first = d.name.split(/\s+/)[0] ?? '';
+    // a moment to "think", as he does with every answer
+    setThinking(true);
+    await wait(reducedMotion() ? 150 : 650);
+    setThinking(false);
+    if (!d.name) {
+      setMood(asked ? 'happy' : 'surprised');
+      intakeSays('guide', t(asked ? 'guide_chat_question_first' : 'guide_chat_need_name'));
+      return;
+    }
+    if (!d.phone && !d.email) {
+      const again = step === 'contact';
+      setStep('contact');
+      setMood(again ? 'surprised' : 'happy');
+      if (!again) api.current?.gesture('wave', 'happy');
+      intakeSays('guide', t(again ? 'guide_chat_need_contact' : 'guide_chat_ask_contact', { name: first }), true);
+      return;
+    }
+    api.current?.gesture('thumbs_up', 'happy');
+    intakeSays('guide', t('guide_chat_thanks', { name: first }));
+    begin({ ...d });
+  };
+
+  /** he knows who they are: the conversation starts on the server, and he greets them (the line's ready) */
   const begin = async (details: Details) => {
     const who: Me = { ...details };
     keepMe(who);
@@ -323,8 +406,8 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
 
   // straight to typing with a keyboard (on a phone the keyboard waits for a tap, so it doesn't cover the chat)
   useEffect(() => {
-    if (open && me && window.matchMedia('(pointer: fine)').matches) input.current?.focus({ preventScroll: true });
-  }, [open, me]);
+    if (open && window.matchMedia('(pointer: fine)').matches) input.current?.focus({ preventScroll: true });
+  }, [open]);
 
   // opened with something: his line from the teaser, or a question (the Contact page, a link elsewhere)
   const opened = useEffectEvent((how: NonNullable<ChatStart>) => {
@@ -352,7 +435,7 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
     return () => window.clearTimeout(timer);
   }, [pathname, open]);
 
-  useEffect(() => { list.current?.scrollTo({ top: list.current.scrollHeight, behavior: 'smooth' }); }, [messages, thinking, typedUpTo, me]);
+  useEffect(() => { list.current?.scrollTo({ top: list.current.scrollHeight, behavior: 'smooth' }); }, [messages, thinking, typedUpTo, me, intake, intakeTyped]);
 
   // he's out on the page: the robot shows (Guide.tsx hides him while the chat simply sits open)
   const out = open && (activity.kind === 'walking' || activity.kind === 'looking' || !!tourAt);
@@ -479,6 +562,8 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
   const folded = busy && !peek;
   const look = thinking ? 'thinking' : activity.kind !== 'idle' || tourAt ? 'busy' : mood;
   const chips = linesOf(t('guide_chat_suggestions'));
+  // the empty box says what he's waiting for
+  const box = me ? t('guide_chat_placeholder') : step === 'name' ? t('guide_chat_name_box') : t('guide_chat_contact_box');
   const lastGuide = [...messages].reverse().find((m): m is GuideMsg => m.from === 'guide');
 
   return (
@@ -524,13 +609,23 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
               <p className={css.fromGuide}>{reasonText(closed)}</p>
               <a className={`${css.cta} ${css.ctaMain}`} href={wa('')} target="_blank" rel="noopener noreferrer">{t('guide_chat_whatsapp')}<Icon name="north_east" className="text-[14px]" /></a>
             </>
-          ) : !me ? (
-            // first, who they are: then he talks
-            <>
-              <p className={css.fromGuide}>{t('guide_chat_start_intro')}</p>
-              <StartForm onDone={begin} />
-            </>
           ) : (
+            <>
+              {/* first he gets to know them, in the chat: their name, then how to reach them */}
+              {(!me || intake.length > 0) && <p className={css.fromGuide}>{t('guide_chat_start_intro')}</p>}
+              {intake.map((l) => (l.from === 'visitor' ? (
+                <p key={l.id} className={css.fromVisitor}>{l.text}</p>
+              ) : (
+                <div key={l.id} className={css.guideTurn}>
+                  <p className={css.fromGuide}>
+                    {l.id > intakeTyped ? <Typed text={l.text} onDone={() => setIntakeTyped(l.id)} /> : l.text}
+                  </p>
+                  {l.note && l.id <= intakeTyped && <p className={css.intakeNote}><Icon name="lock" className="text-[12px]" />{t('guide_chat_contact_note')}</p>}
+                </div>
+              )))}
+            </>
+          )}
+          {!closed && me && (
             <>
               {!messages.length && !thinking && <p className={css.fromGuide}>{withName(t('guide_chat_hello'), name)}</p>}
               {!messages.some((m) => m.from === 'visitor') && !thinking && chips.length > 0 && (
@@ -580,10 +675,11 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
         </div>
         <p className="sr-only" aria-live="polite">{announce}</p>
 
-        {!closed && me && (
-          <form className={css.chatForm} onSubmit={(e) => { e.preventDefault(); ask(question); }}>
+        {!closed && (
+          <form className={css.chatForm} onSubmit={(e) => { e.preventDefault(); if (me) ask(question); else answer(question); }}>
             <input ref={input} value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={LIMITS.question}
-              placeholder={t('guide_chat_placeholder')} aria-label={t('guide_chat_placeholder')} enterKeyHint="send" autoComplete="off" />
+              placeholder={box} aria-label={box} enterKeyHint="send"
+              autoComplete={me ? 'off' : step === 'name' ? 'name' : 'off'} autoCapitalize={!me && step === 'name' ? 'words' : 'sentences'} />
             <button type="submit" disabled={thinking || !question.trim()} aria-label={t('guide_chat_send')}>
               <Icon name="arrow_upward" className="text-[18px]" />
             </button>

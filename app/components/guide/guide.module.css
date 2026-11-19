@@ -183,21 +183,8 @@
 .chatNote a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
 .chatNote a:hover { color: var(--ink); }
 
-/* his ask for their details, inside the chat: it goes to our team, not to the AI */
-.lead { align-self: stretch; display: flex; flex-direction: column; gap: 4px; margin-top: 2px; padding: 14px; border-radius: 16px; background: #fff; border: 1px solid rgb(1 68 181 / 0.18);
-  box-shadow: 0 10px 24px -16px rgb(1 7 43 / 0.35); }
-.leadTitle { margin-bottom: 6px; font-weight: 700; font-size: 13px; line-height: 1.4; color: var(--ink); }
-.lead label { margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
-.lead input { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid rgb(1 7 43 / 0.12); background: var(--soft); color: var(--ink); font-size: 16px; }
-@media (min-width: 640px) { .lead input { font-size: 13.5px; } }
-.lead input:focus { outline: none; background: #fff; border-color: rgb(1 68 181 / 0.55); box-shadow: 0 0 0 3px rgb(1 68 181 / 0.08); }
-.lead button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; padding: 10px 14px; border-radius: 999px;
-  background: var(--color-brand-blue); color: #fff; font-weight: 700; font-size: 13px; transition: background-color 0.2s, opacity 0.2s; }
-.lead button:hover:not(:disabled) { background: var(--ink); }
-.lead button:disabled { opacity: 0.5; }
-.leadProblem { margin-top: 6px; font-size: 12px; color: #c0392b; }
-.leadNote { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 6px; font-size: 11px; color: var(--muted); }
-.trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+/* under his question about how to reach them: their details go to our team, not to the AI */
+.intakeNote { display: flex; align-items: center; gap: 4px; margin: 4px 0 0 2px; font-size: 11px; color: var(--muted); }
 
 /* his opening line, offered by his button when the visitor has been reading a while */
 .teaser { position: fixed; z-index: 9999; right: 16px; bottom: 236px; width: min(300px, calc(100vw - 32px)); padding: 14px 16px; border-radius: 18px 18px 6px 18px;
