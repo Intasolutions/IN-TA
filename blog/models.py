@@ -60,7 +60,8 @@ class Blog(models.Model):
         ordering = ['-date']
 
 class Subscriber(models.Model):
-    """An enquiry from the "Have a project in mind?" form. Its options are the services in the admin."""
+    """An enquiry from the "Tell us what you'd like to fix" form. Its options are the "What do you need?" list in Page
+    wording (Enquiry form), plus a service's own name on that service's page."""
 
     # The options the form offered before it listed the services. Still accepted, so that a page built before the change
     # (or a visitor who opened it then) can still send.
@@ -70,9 +71,17 @@ class Subscriber(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
-    interest = models.CharField(max_length=200, help_text='The service picked on the form.')
+    email = models.EmailField('business email', blank=True, help_text='Empty on enquiries sent before the form asked for it.')
+    phone = models.CharField('phone / WhatsApp', max_length=20, blank=True, help_text='Optional on the form since it asks for an email.')
+    company = models.CharField(max_length=120, blank=True)
+    interest = models.CharField('what they need', max_length=200, help_text='The option picked on the form.')
+    message = models.CharField('the problem, in a line', max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'enquiry'
+        verbose_name_plural = 'enquiries'
 
     def __str__(self):
         return f"{self.name} - {self.interest}"

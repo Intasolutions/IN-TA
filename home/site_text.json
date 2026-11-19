@@ -15,9 +15,11 @@
         ["home_hero_focus", "Focus areas beside it (separate with commas)", "ENTERPRISE ERP, AI PIPELINES, HIGH-CONCURRENCY WEB"],
         ["home_hero_badge", "Badge above the title", "CUSTOM SOFTWARE · AI · MOBILE APPS"],
         ["home_hero_tagline", "Line beside the badge", "LET'S BUILD WHAT'S NEXT"],
-        ["home_hero_title", "Big title (| before the second, blue line)", "Smarter |custom software & AI for your business"],
-        ["home_hero_text", "Paragraph under the title", "We forge hyper-scaled software architecture, resilient manufacturing execution backends, and fine-tuned AI ecosystems for enterprise leaders across Kerala and global markets."],
-        ["home_hero_cta_primary", "Main button", "Explore Selected Work"],
+        ["home_hero_title", "Big title (| before the second, blue line)", "Software that fits |how your business actually runs"],
+        ["home_hero_text", "Paragraph under the title", "Custom software, ERP/MES, AI automation and websites for manufacturers, traders, clinics and hospitality businesses in Kerala, Bangalore and the GCC."],
+        ["home_hero_points", "Benefit points under the paragraph (one per line; the words before the first : are bold)", "Enter data once: orders, stock, production and billing connected in one system instead of scattered sheets.\nBookings and enquiries that reach you: websites with click-to-call, working enquiry forms and WhatsApp built in.\nLess manual follow-up: AI automation for reminders, confirmations and routine updates."],
+        ["home_hero_cta_primary", "Main button", "Book a 15-minute conversation"],
+        ["home_hero_cta_check", "Offer button beside the main one, e.g. \"Get a free website & booking-flow check\". It opens the enquiry form with Website picked and the offer written in. Leave empty to show the About button instead", ""],
         ["home_hero_cta_about", "Second button (it opens the About page)", "Who We Are"]
       ]
     },
@@ -170,10 +172,30 @@
       ]
     },
     {
+      "name": "Enquiry form (most pages)",
+      "about": "The \"Tell us what you'd like to fix\" form near the end of most pages. A service's own page can change its heading and the option it starts on (Services > the service > Enquiry form). Enquiries arrive in Blog > Enquiries and are emailed to the team.",
+      "items": [
+        ["enquiry_kicker", "Small line", "Work with us"],
+        ["enquiry_title", "Heading", "Tell us what you'd like to fix"],
+        ["enquiry_text", "Text", "Share a few details and one line about the problem, and we'll reach out to set up a short call."],
+        ["enquiry_name", "Name box", "Name"],
+        ["enquiry_email", "Email box", "Business email"],
+        ["enquiry_whatsapp", "WhatsApp box (it can be left empty)", "WhatsApp number (optional)"],
+        ["enquiry_company", "Company box", "Company"],
+        ["enquiry_need", "The question above the options", "What do you need?"],
+        ["enquiry_needs", "The options (separate with commas). A service's page can add the service's own name", "ERP/MES, Custom software, Automation, Website"],
+        ["enquiry_problem", "Problem box", "A line about the problem"],
+        ["enquiry_problem_hint", "Example under the problem box", "e.g. “Stock never matches” or “We miss calls after hours”"],
+        ["enquiry_button", "Send button", "Send my enquiry"],
+        ["enquiry_note", "Line under the button", "We reply within one working day. No spam, no sharing your details."],
+        ["enquiry_success", "After sending (the first line is bold)", "Thanks – we've got it.\nWe'll be in touch soon to set up a short call."]
+      ]
+    },
+    {
       "name": "WhatsApp messages",
       "about": "The message a chat starts with when a visitor taps the WhatsApp button. It depends on the page they tap it from, and they can change it before sending. Leave a box empty to use the standard wording shown under it; {service} and {post} are filled in by the website.",
       "items": [
-        ["whatsapp_home", "Home page (and any page without its own message)", "Hi IN-TA Solutions! I found you on your website and I'd like to talk about a project."],
+        ["whatsapp_home", "Home page (and any page without its own message)", "Hi IN-TA, I'm interested in [ERP / a website / automation] for my business in [city]. Can we talk?"],
         ["whatsapp_services", "Services page", "Hi! I'm looking at your services and I'd like help choosing the right one for my business."],
         ["whatsapp_service", "A service's page ({service} is the service's name)", "Hi! I'm interested in {service} for my business. Could you tell me more?"],
         ["whatsapp_portfolio", "Work page", "Hi! I saw your work on your website. I'd like something similar for my business."],
@@ -181,7 +203,8 @@
         ["whatsapp_post", "A blog post ({post} is the post's title)", "Hi! I just read “{post}” on your blog and I have a question."],
         ["whatsapp_post_service", "A blog post with a related service ({post} is the post's title, {service} the service's name)", "Hi! I just read “{post}” on your blog. I'd like to know more about {service}."],
         ["whatsapp_about", "About page", "Hi! I was reading about IN-TA Solutions and I'd like to talk to your team."],
-        ["whatsapp_contact", "Contact page", "Hi! I'd like to talk about a project."]
+        ["whatsapp_contact", "Contact page", "Hi! I'd like to talk about a project."],
+        ["whatsapp_button", "The floating WhatsApp button (bottom left): its label", "Chat on WhatsApp"]
       ]
     },
     {

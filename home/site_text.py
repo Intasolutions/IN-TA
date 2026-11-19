@@ -20,3 +20,12 @@ def changed_text(saved):
     if not isinstance(saved, dict):
         return {}
     return {k: v for k, v in saved.items() if k in TEXT_KEYS and isinstance(v, str) and v.strip()}
+
+
+STANDARD = {key: text for _, items in SITE_TEXT for key, _, text in items}
+
+
+def text_of(saved, key):
+    """One wording as the website shows it: as changed in the admin, else the standard text."""
+    value = saved.get(key) if isinstance(saved, dict) else None
+    return value.strip() if isinstance(value, str) and value.strip() else STANDARD.get(key, '')

@@ -8,9 +8,10 @@ import SkipLink from './components/SkipLink';
 import { RevealProvider, useReveal } from './context/RevealContext';
 import { SiteProvider } from './site/SiteContext';
 import type { Site } from './site/site';
-// The website guide: the chat button in the corner (his face), with the 3D robot standing on it, fetched after the
-// page is ready. WhatsApp is in the header (HeaderWhatsApp).
+// The website guide: the chat button in the bottom right corner (his face), with the 3D robot standing on it, fetched
+// after the page is ready. The WhatsApp button has the bottom left corner.
 import Guide from './components/guide/Guide';
+import WhatsAppButton from './components/WhatsAppButton';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [opening, setOpening] = useState(true);
@@ -26,6 +27,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       {opening && <PageLoader onReady={playIntro} onGone={removeOpening} />}
       <NavProgress />
       <SmoothScroll>{children}</SmoothScroll>
+      <WhatsAppButton />
       <Guide />
     </>
   );

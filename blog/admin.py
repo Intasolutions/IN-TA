@@ -19,7 +19,8 @@ class BlogAdmin(admin.ModelAdmin):
 
 @admin.register(Subscriber)
 class SubscriberAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'interest', 'created_at')
+    list_display = ('name', 'company', 'email', 'phone', 'interest', 'created_at')
     list_filter = ('interest', 'created_at')
-    search_fields = ('name', 'phone')
+    search_fields = ('name', 'company', 'email', 'phone', 'message')
     readonly_fields = ('created_at',)
+    fields = ('name', 'company', 'email', 'phone', 'interest', 'message', 'created_at')

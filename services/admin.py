@@ -92,9 +92,13 @@ class ServiceCapabilityInline(admin.StackedInline):
 
 
 def interest_choices():
-    """The enquiry form's options: the services the website lists, as it lists them."""
+    """What the enquiry form can start on: its own options ("What do you need?" in Page wording), or a service's name."""
+    from home.models import SiteSettings
+    from home.site_text import text_of
+
+    needs = [n.strip() for n in text_of(SiteSettings.load().page_text, "enquiry_needs").split(",") if n.strip()]
     titles = Service.objects.filter(is_active=True).order_by("order", "title").values_list("title", flat=True)
-    return [("", "This service")] + [(title, title) for title in titles]
+    return [("", "This service's name")] + [(n, n) for n in needs] + [(t, t) for t in titles if t not in needs]
 
 
 class PageTextForm(forms.ModelForm):
@@ -154,7 +158,7 @@ def page_text_form():
         required=False,
         label="Option picked first on the form",
         choices=interest_choices,
-        help_text="The form lists every service. On this service's page it starts on this one unless you pick another.",
+        help_text="On this service's page the form starts on this option. \"This service's name\" adds the service's name to the form's options and picks it.",
     )
     return type(PageTextForm)("ServicePageForm", (PageTextForm,), declared)
 

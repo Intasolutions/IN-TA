@@ -11,7 +11,7 @@ import { useSocials } from '../Footer';
 import { underHeader } from '../underHeader';
 import { useOfficeStatus } from '../OfficeStatus';
 import { useSite, useText } from '../../site/SiteContext';
-import { accent, addressLines, coords, daysLong, hoursShort, mapUrl, phoneDigits, phoneHref, timeLong, TIME_ZONE } from '../../site/site';
+import { accent, addressLines, coords, daysLong, hoursShort, mapUrl, phoneHref, timeLong, TIME_ZONE, whatsappDigits } from '../../site/site';
 import { whatsappLink, whatsappMessage } from '../whatsappTopic';
 import { openGuideChat } from '../guide/openChat';
 import { calm } from '../blog/data';
@@ -124,7 +124,7 @@ export default function ContactPage({ children }: { children?: ReactNode }) {
   const phone = { href: phoneHref(site.phone), label: site.phone };
   const email = site.email;
   // WhatsApp lives on this page only: its first line is already written (Page wording > WhatsApp messages)
-  const whatsapp = whatsappLink(phoneDigits(site.phone), whatsappMessage(site, '/contact', null));
+  const whatsapp = whatsappLink(whatsappDigits(site), whatsappMessage(site, '/contact', null));
   const [titlePlain, titleBright] = accent(t('contact_title'));
   const portValue = (id: PortId) =>
     ({

@@ -69,8 +69,8 @@ PAGE_TEXT = (
     )),
     ("Enquiry form", (
         ("form_kicker", "Small line", "Work with us"),
-        ("form_title", "Heading", "Have a project in mind?"),
-        ("form_text", "Text", "Share your details and we'll reach out to talk through how we can build it."),
+        ("form_title", "Heading", "Tell us what you'd like to fix"),
+        ("form_text", "Text", "Share a few details and one line about the problem, and we'll reach out to set up a short call."),
     )),
 )
 

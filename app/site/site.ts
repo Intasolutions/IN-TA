@@ -17,6 +17,8 @@ export type Faq = { q: string; a: string; main: boolean };
 export type Site = {
   phone: string;
   email: string;
+  /** The WhatsApp number when it isn't the phone number ('' = the phone): use whatsappDigits() */
+  whatsapp: string;
   address: { street: string; locality: string; district: string; region: string; postal_code: string; country: string };
   map: { lat: number; lng: number; url: string };
   /** days: 0 = Sunday; opens and closes: 'HH:MM', India time */
@@ -56,6 +58,7 @@ const LOGOS: Record<string, string> = {
 export const DEFAULT_SITE: Site = {
   phone: '+91 94475 95381',
   email: 'info@in-tasolutions.com',
+  whatsapp: '',
   address: { street: 'Thonichal', locality: 'Mananthavady', district: 'Wayanad', region: 'Kerala', postal_code: '670645', country: 'IN' },
   map: { lat: 11.8021, lng: 76.0232, url: '' },
   hours: { days: [1, 2, 3, 4, 5, 6], opens: '09:00', closes: '17:00' },
@@ -197,6 +200,8 @@ export const linesOf = (text: string) => text.split('\n').map((s) => s.trim()).f
 
 export const phoneHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
 export const phoneDigits = (phone: string) => phone.replace(/\D/g, '');
+/** The number WhatsApp chats open with: its own from Site settings, else the phone number */
+export const whatsappDigits = (site: Site) => phoneDigits(site.whatsapp || site.phone);
 
 export const mapUrl = (site: Site) => site.map.url || `https://www.google.com/maps/search/?api=1&query=${site.map.lat},${site.map.lng}`;
 
@@ -334,6 +339,7 @@ export function toSite(api: unknown, apiBase = ''): Site {
   return {
     phone: filled(a.phone, d.phone),
     email: filled(a.email, d.email),
+    whatsapp: str(a.whatsapp, ''),
     address: {
       street: str(a.address?.street, d.address.street),
       locality: str(a.address?.locality, d.address.locality),

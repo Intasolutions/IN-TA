@@ -62,7 +62,7 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteSettings
-        fields = ['phone', 'email', 'address', 'map', 'hours', 'socials', 'metrics', 'text', 'services', 'stack', 'counts', 'questions', 'faq', 'updated_at']
+        fields = ['phone', 'email', 'whatsapp', 'address', 'map', 'hours', 'socials', 'metrics', 'text', 'services', 'stack', 'counts', 'questions', 'faq', 'updated_at']
 
     def get_address(self, obj):
         return {k: getattr(obj, k) for k in ('street', 'locality', 'district', 'region', 'postal_code', 'country')}

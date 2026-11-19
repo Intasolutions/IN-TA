@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -13,9 +14,13 @@ import OfficeStatus from './OfficeStatus';
 import Marquee from './Marquee';
 import { usePlayIntro, useShownOnArrival } from '../context/usePlayIntro';
 import { useSite, useText } from '../site/SiteContext';
-import { accent, listOf } from '../site/site';
+import { accent, linesOf, listOf } from '../site/site';
+import { ENQUIRY_ID, openEnquiry } from './blog/enquiry';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+const SECONDARY =
+  'px-6 py-4 rounded-xl bg-white hover:bg-canvas border border-brand-blue/30 hover:border-brand-blue text-midnight hover:text-brand-blue font-mono text-[12px] sm:text-[13px] tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-sm font-semibold active:scale-[0.97]';
 
 // The words and the figures are set in the admin (Site settings)
 
@@ -36,6 +41,13 @@ export default function Hero() {
   const { metrics } = useSite();
   const t = useText();
   const [titleTop, titleBottom] = accent(t('home_hero_title'));
+  // "Enter data once: orders, stock…" → ['Enter data once', 'orders, stock…']
+  const points = linesOf(t('home_hero_points')).map((line) => {
+    const at = line.indexOf(':');
+    return at > 0 ? [line.slice(0, at).trim(), line.slice(at + 1).trim()] : ['', line];
+  });
+  const offer = t('home_hero_cta_check').trim();
+  const router = useRouter();
   const heroRef = useRef<HTMLElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   // already on screen when the scripts arrived (a reload, or a slow connection): it stays just as it is
@@ -326,9 +338,17 @@ export default function Hero() {
               className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.02em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
             >
               <span className="block overflow-hidden pb-[0.06em]">
+                {/* each word holds together, so a longer first line wraps between words, never inside one */}
                 <span aria-hidden="true">
-                  {[...titleTop].map((ch, i) => (
-                    <span key={i} className="hero-char inline-block">{ch}</span>
+                  {titleTop.split(/\s+/).filter(Boolean).map((word, w, words) => (
+                    <span key={w}>
+                      <span className="inline-block whitespace-nowrap">
+                        {[...word].map((ch, i) => (
+                          <span key={i} className="hero-char inline-block">{ch}</span>
+                        ))}
+                      </span>
+                      {w < words.length - 1 && ' '}
+                    </span>
                   ))}
                 </span>
                 <span className="hero-title-sr sr-only" data-label={titleTop} />
@@ -364,28 +384,63 @@ export default function Hero() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mt-8 sm:mt-12 items-end">
-            <p data-hero="fade" className="lg:col-span-6 max-w-2xl text-midnight/85 text-base sm:text-lg lg:text-xl leading-relaxed">
-              {t('home_hero_text')}
-            </p>
-            <div data-hero="fade" data-floating-clear className="lg:col-span-6 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-start lg:justify-end gap-3 sm:gap-4">
+            <div className="lg:col-span-7 max-w-3xl">
+              <p data-hero="fade" className="text-midnight/85 text-base sm:text-lg lg:text-xl leading-relaxed">
+                {t('home_hero_text')}
+              </p>
+              {/* what changes for them, one point per line; the words before the first colon are the point */}
+              {points.length > 0 && (
+                <ul data-hero="fade" className="mt-5 sm:mt-6 space-y-2.5 sm:space-y-3">
+                  {points.map(([lead, rest], i) => (
+                    <li key={i} className="flex gap-3 text-[15px] sm:text-base leading-snug text-midnight/80">
+                      <span aria-hidden="true" className="mt-[0.3em] flex w-4 h-4 shrink-0 items-center justify-center rounded-[5px] bg-brand-blue text-white">
+                        <Icon name="check" className="text-[13px] font-bold" />
+                      </span>
+                      <span>
+                        {lead && <strong className="font-semibold text-midnight">{lead}{rest ? ':' : ''}</strong>}
+                        {rest && ` ${rest}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div data-hero="fade" data-floating-clear data-whatsapp-clear="(max-width: 1023.98px)" className="lg:col-span-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-start lg:justify-end gap-3 sm:gap-4">
               <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
-                <Link
-                  href="/portfolio"
-                  className="kinetic-cta-btn px-8 py-4 rounded-xl bg-brand-blue hover:bg-midnight text-white font-mono text-[12px] sm:text-[13px] tracking-wider uppercase font-semibold flex items-center justify-center gap-3 group active:scale-[0.97]"
+                {/* books a short call: it opens the enquiry form further down (or the Contact page, if this page has none) */}
+                <a
+                  href={`#${ENQUIRY_ID}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!openEnquiry()) router.push('/contact');
+                  }}
+                  className="kinetic-cta-btn px-7 py-4 rounded-xl bg-brand-blue hover:bg-midnight text-white font-mono text-[12px] sm:text-[13px] tracking-wider uppercase font-semibold flex items-center justify-center gap-3 group active:scale-[0.97]"
                 >
+                  <Icon name="call" className="text-[18px]" />
                   <span>{t('home_hero_cta_primary')}</span>
-                  <Icon name="north_east" className="text-[18px] group-hover:rotate-45 transition-transform duration-300" />
-                </Link>
+                </a>
               </span>
               <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
-                <Link
-                  href="/about"
-                  className="px-6 py-4 rounded-xl bg-white hover:bg-canvas border border-brand-blue/30 hover:border-brand-blue text-midnight hover:text-brand-blue font-mono text-[12px] sm:text-[13px] tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 shadow-sm font-semibold active:scale-[0.97]"
-                >
-                  {/* (it opens the About page: its words and its globe say so) */}
-                  <Icon name="travel_explore" className="text-brand-blue text-[18px]" />
-                  <span>{t('home_hero_cta_about')}</span>
-                </Link>
+                {offer ? (
+                  // the offer (when one is set in the admin): the form opens on Website, with the offer written in
+                  <a
+                    href={`#${ENQUIRY_ID}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!openEnquiry({ need: 'Website', note: offer })) router.push('/contact');
+                    }}
+                    className={SECONDARY}
+                  >
+                    <Icon name="fact_check" className="text-brand-blue text-[18px]" />
+                    <span>{offer}</span>
+                  </a>
+                ) : (
+                  <Link href="/about" className={SECONDARY}>
+                    {/* (it opens the About page: its words and its globe say so) */}
+                    <Icon name="travel_explore" className="text-brand-blue text-[18px]" />
+                    <span>{t('home_hero_cta_about')}</span>
+                  </Link>
+                )}
               </span>
             </div>
           </div>

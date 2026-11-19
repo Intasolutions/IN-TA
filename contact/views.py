@@ -5,8 +5,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.response import Response
-from django.core.mail import mail_admins, send_mail
 from django.conf import settings
+
+from home.mail import admins_later, send_later
 
 from .models import ChatConversation, ContactMessage
 from .serializers import ChatStartSerializer, ContactSerializer
@@ -38,28 +39,21 @@ class ContactViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.Ge
         user_agent = request.META.get('HTTP_USER_AGENT', '')[:300]
         obj = serializer.save(source=source, user_agent=user_agent)
 
-        # notify admins (development: printed to console if console backend)
-        try:
-            subject = f"New contact: {obj.name}"
-            message = (
-                f"Name: {obj.name}\nEmail: {obj.email}\nPhone: {obj.phone}\nCountry: {obj.country}\nSubmit request: {'Yes' if obj.is_request else 'No'}\n\nMessage:\n{obj.message}\n\nSource: {obj.source}\nUser agent: {obj.user_agent}"
-            )
-            mail_admins(subject, message)
-
-            # send a confirmation email to the sender as well
-            try:
-                from_email = settings.DEFAULT_FROM_EMAIL
-                user_subject = "Thanks for contacting IN-TA Solutions"
-                user_message = (
-                    f"Hi {obj.name},\n\nThanks for reaching out. We've received your message and will get back to you shortly.\n\nSummary:\nName: {obj.name}\nEmail: {obj.email}\nPhone: {obj.phone}\nCountry: {obj.country}\n\nMessage:\n{obj.message}\n\n— IN-TA Solutions"
-                )
-                send_mail(user_subject, user_message, from_email, [obj.email])
-            except Exception:
-                # don't fail the request for mail delivery issues
-                pass
-        except Exception:
-            # never fail the request because of notification
-            pass
+        # notify the team, and confirm to the sender (in the background: the visitor doesn't wait for the mail server)
+        admins_later(
+            f"New contact: {obj.name}",
+            f"Name: {obj.name}\nEmail: {obj.email}\nPhone: {obj.phone}\nCountry: {obj.country}\n"
+            f"Submit request: {'Yes' if obj.is_request else 'No'}\n\nMessage:\n{obj.message}\n\n"
+            f"Source: {obj.source}\nUser agent: {obj.user_agent}",
+        )
+        send_later(
+            "Thanks for contacting IN-TA Solutions",
+            f"Hi {obj.name},\n\nThanks for reaching out. We've received your message and will get back to you shortly.\n\n"
+            f"Summary:\nName: {obj.name}\nEmail: {obj.email}\nPhone: {obj.phone}\nCountry: {obj.country}\n\n"
+            f"Message:\n{obj.message}\n\n— IN-TA Solutions",
+            settings.DEFAULT_FROM_EMAIL,
+            [obj.email],
+        )
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -85,22 +79,19 @@ class ChatViewSet(viewsets.GenericViewSet):
         serializer = ChatStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         chat = serializer.save(token=secrets.token_urlsafe(24), source=str(request.data.get('source', ''))[:200])
-        # the team hears about it at once
-        try:
-            mail_admins(
-                f"New chat with the website robot: {chat.name}",
-                '\n'.join([
-                    f"Name: {chat.name}",
-                    f"Phone / WhatsApp: {chat.phone or '-'}",
-                    f"Email: {chat.email or '-'}",
-                    f"Started on: {chat.source or '-'}",
-                    f"Pages they had looked at: {chat.pages or '-'}",
-                    '',
-                    'The conversation keeps filling in the admin: Contact > Robot chats.',
-                ]),
-            )
-        except Exception:
-            pass
+        # the team hears about it at once (in the background)
+        admins_later(
+            f"New chat with the website robot: {chat.name}",
+            '\n'.join([
+                f"Name: {chat.name}",
+                f"Phone / WhatsApp: {chat.phone or '-'}",
+                f"Email: {chat.email or '-'}",
+                f"Started on: {chat.source or '-'}",
+                f"Pages they had looked at: {chat.pages or '-'}",
+                '',
+                'The conversation keeps filling in the admin: Contact > Robot chats.',
+            ]),
+        )
         return Response({'id': chat.id, 'token': chat.token}, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])

@@ -189,7 +189,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Contact', {
             'description': 'Shown in the header, the footer, the contact page and to search engines. Changes reach the website within five minutes.',
-            'fields': ('phone', 'email'),
+            'fields': ('phone', 'whatsapp', 'email'),
         }),
         ('Address and map', {
             'fields': ('street', 'locality', 'district', 'region', 'postal_code', 'country', 'latitude', 'longitude', 'map_url'),

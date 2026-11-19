@@ -326,7 +326,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   // pointing at WhatsApp in the header: he looks up at it and says so; at his chat button: he looks down and invites you
   const onWaHover = (e: PointerEvent) => {
     const target = e.target as Element | null;
-    const wa = target?.closest?.('a[aria-label="Chat on WhatsApp"]');
+    const wa = target?.closest?.('a[aria-label="Chat on WhatsApp"], a[data-whatsapp]');
     const mine = wa ? null : target?.closest?.('[data-guide-dock]');
     if ((!wa && !mine) || state !== 'home' || now() < busyUntil || chat.on) return;
     busyUntil = now() + rand(2000, 2600);

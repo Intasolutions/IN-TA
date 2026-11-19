@@ -44,6 +44,7 @@ class SiteSettings(models.Model):
 
     phone = models.CharField(max_length=32, default='+91 94475 95381', help_text="As it should be shown, with the country code, e.g. +91 94475 95381.")
     email = models.EmailField(default='info@in-tasolutions.com')
+    whatsapp = models.CharField('WhatsApp number', max_length=32, blank=True, help_text="The number the WhatsApp buttons open a chat with, with the country code. Leave empty to use the phone number above.")
 
     street = models.CharField(max_length=120, default='Thonichal', help_text="Street or area, e.g. Thonichal.")
     locality = models.CharField(max_length=80, default='Mananthavady', help_text="Town, e.g. Mananthavady.")

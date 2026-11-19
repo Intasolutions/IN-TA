@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useEffectEvent, useId, useRef, useState, type RefObject } from 'react';
 import { useSite, useText } from '../../site/SiteContext';
-import { linesOf, phoneDigits } from '../../site/site';
+import { linesOf, whatsappDigits } from '../../site/site';
 import Icon from '../Icon';
 import { scrollToY } from '../SmoothScroll';
 import { whatsappLink } from '../whatsappTopic';
@@ -376,7 +376,7 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
     return () => { vv.removeEventListener('resize', fit); vv.removeEventListener('scroll', fit); };
   }, [open]);
 
-  const wa = (q: string) => whatsappLink(phoneDigits(site.phone), q);
+  const wa = (q: string) => whatsappLink(whatsappDigits(site), q);
   const mark = (id: number, done: string) => setMessages((m) => m.map((x) => (x.id === id && x.from === 'guide' ? { ...x, done } : x)));
 
   /** the element an answer points at: a spot from this question, or a section (its heading) */

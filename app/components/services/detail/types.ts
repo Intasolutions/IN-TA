@@ -72,8 +72,8 @@ const STANDARD_WORDS = {
   connected_title: 'It connects | to these.',
   board_link: 'See the whole board',
   form_kicker: 'Work with us',
-  form_title: 'Have a project in mind?',
-  form_text: "Share your details and we'll reach out to talk through how we can build it.",
+  form_title: "Tell us what you'd like to fix",
+  form_text: "Share a few details and one line about the problem, and we'll reach out to set up a short call.",
 };
 
 export type WordKey = keyof typeof STANDARD_WORDS;
