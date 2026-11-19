@@ -12,12 +12,9 @@
       "name": "Home: opening",
       "items": [
         ["home_hero_kicker", "Small line at the top", "Since 2023 · Websites · Mobile Apps · Custom Software · AI"],
-        ["home_hero_focus", "Focus areas beside it (separate with commas)", "ENTERPRISE ERP, AI PIPELINES, HIGH-CONCURRENCY WEB"],
-        ["home_hero_badge", "Badge above the title", "CUSTOM SOFTWARE · AI · MOBILE APPS"],
-        ["home_hero_tagline", "Line beside the badge", "LET'S BUILD WHAT'S NEXT"],
         ["home_hero_title", "Big title (| before the second, blue line)", "Software that fits |how your business actually runs"],
         ["home_hero_text", "Paragraph under the title", "Custom software, ERP/MES, AI automation and websites for manufacturers, traders, clinics and hospitality businesses in Kerala, Bangalore and the GCC."],
-        ["home_hero_points", "Benefit points under the paragraph (one per line; the words before the first : are bold)", "Enter data once: orders, stock, production and billing connected in one system instead of scattered sheets.\nBookings and enquiries that reach you: websites with click-to-call, working enquiry forms and WhatsApp built in.\nLess manual follow-up: AI automation for reminders, confirmations and routine updates."],
+        ["home_hero_points", "Short benefit points under the paragraph (one per line, a few words each)", "Orders, stock & billing in one system\nEnquiries that actually reach you\nLess manual follow-up"],
         ["home_hero_cta_primary", "Main button", "Book a 15-minute conversation"],
         ["home_hero_cta_check", "Offer button beside the main one, e.g. \"Get a free website & booking-flow check\". It opens the enquiry form with Website picked and the offer written in. Leave empty to show the About button instead", ""],
         ["home_hero_cta_about", "Second button (it opens the About page)", "Who We Are"]

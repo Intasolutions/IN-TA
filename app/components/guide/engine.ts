@@ -91,7 +91,7 @@ export type Guide = {
 
 // docked: a box standing on top of the WhatsApp button, his feet just on it (this size at his full size)
 const DOCK = { w: 150, h: 170 };
-const SLEEP_AFTER = 22000;
+const SLEEP_AFTER = 45000; // ms with no pointer movement before he may doze (he stays lively a good while first)
 const GRAVITY = 2600; // px/s²
 const WALK = 150; // px/s
 const FLOOR_GAP = 10; // px from the bottom of the window to where his feet touch the floor
@@ -472,7 +472,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     moodOf(beat.mood);
     playGesture(beat.gesture);
     speak('plan', [], { text: beat.say, delay: rand(150, 350) });
-    nextStrollAt = now() + rand(16000, 26000);
+    nextStrollAt = now() + rand(9000, 14000);
   }
   function pickUp() {
     state = 'carried';
@@ -618,7 +618,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     ({ x: me.x, y: me.y } = homeOf());
     look.on = true;
     play(base = 'Idle');
-    nextStrollAt = now() + rand(18000, 34000);
+    nextStrollAt = now() + rand(9000, 15000);
   }
   function wake() {
     if (state === 'asleep') {
@@ -636,7 +636,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   // something on the page (a heading, a picture, a button), you (straight out of the screen, with a little drift), or
   // nothing in particular (the Idle clip's own glances about)
   const gaze = { el: null as Element | null, viewer: false, dx: 0, dy: 0, until: now() + rand(1500, 3000) };
-  let fidgetAt = now() + rand(12000, 22000);
+  let fidgetAt = now() + rand(8000, 14000);
   function lookAt(el: Element | null, ms: number) {
     Object.assign(gaze, { el, viewer: !el, dx: rand(-40, 40), dy: rand(-30, 10), until: now() + ms });
   }
@@ -655,7 +655,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   const stroll = { spot: null as Spot | null, x: 0, phase: 'walk' as 'walk' | 'look', until: 0, visits: 0, silent: false, hold: false, caption: '', beat: null as PlanBeat | null };
   // the chat: open (he stays on his button watching it, no walks, remarks or naps), and working on an answer
   const chat = { on: false, panel: null as Element | null, thinking: false };
-  let nextStrollAt = now() + rand(12000, 20000);
+  let nextStrollAt = now() + rand(5000, 8000); // soon after he arrives, he goes to show something
   let strollsSinceMove = 0;
   let lastScroll = 0;
   const looked = new WeakSet<Element>(); // each thing on the page gets one look per visit
@@ -763,7 +763,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     if (planned && !planned.el) { beatHere(planned.beat); return; }
     if (planned) beatsDone.add(planned.beat);
     const spot: Spot | null = planned?.el ? { el: planned.el, kind: 'heading', text: '' } : pickSpot(sec);
-    if (!spot) { nextStrollAt = now() + rand(15000, 25000); return; }
+    if (!spot) { nextStrollAt = now() + rand(8000, 12000); return; }
     stroll.spot = spot; stroll.visits = 0; stroll.phase = 'walk'; stroll.silent = false; stroll.beat = planned?.beat ?? null;
     strollsSinceMove += 1;
     busyUntil = Infinity;
@@ -1053,16 +1053,16 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
         waveCooldown = now() + rand(8000, 12000);
         busyUntil = now() + 1800;
         play('Wave', { speed: rand(0.9, 1.1) });
-      } else if (!chat.on && sec && !scrolling && now() - sectionSince > 1400 && now() > talkCooldown && !talkedAbout.has(sectionKeyOf(sec))) {
+      } else if (!chat.on && sec && !scrolling && now() - sectionSince > 900 && now() > talkCooldown && !talkedAbout.has(sectionKeyOf(sec))) {
         // settled on a new part of the page: most of the time a word about it (once each), a gesture to go with it
-        talkCooldown = now() + rand(8000, 12000);
-        if (Math.random() < 0.65) {
+        talkCooldown = now() + rand(5000, 8000);
+        if (Math.random() < 0.9) {
           const said = sayAboutSection(sec, () => play(any(['Wave', 'ThumbsUp', 'Yes'] as const)));
           if (said) busyUntil = now() + Math.min(said, 3500);
         } else talkedAbout.add(sectionKeyOf(sec));
-      } else if (!chat.on && now() > nextStrollAt && !scrolling && !pointerNear && strollsSinceMove < 3 && document.visibilityState === 'visible') {
+      } else if (!chat.on && now() > nextStrollAt && !scrolling && !pointerNear && strollsSinceMove < 5 && document.visibilityState === 'visible') {
         startStroll();
-      } else if (!chat.on && ((quiet > SLEEP_AFTER && strollsSinceMove >= 2) || quiet > SLEEP_AFTER * 3)) {
+      } else if (!chat.on && ((quiet > SLEEP_AFTER && strollsSinceMove >= 4) || quiet > SLEEP_AFTER * 3)) {
         state = 'asleep';
         look.on = false;
         feel('Sad', 0.5);
@@ -1070,7 +1070,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
         hooks.sleeping(true, headAt());
       } else if (base === 'Idle' && !chat.thinking && now() > fidgetAt) {
         // fidgets: a little dance step, a nod, a thumbs up to nobody in particular
-        fidgetAt = now() + rand(14000, 30000);
+        fidgetAt = now() + rand(10000, 18000);
         busyUntil = now() + 2500;
         const move = any(['Dance', 'Yes', 'ThumbsUp', 'Dance'] as const);
         play(move, { then: () => play('Idle') });
@@ -1128,7 +1128,7 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     chat(on, panel) {
       chat.on = on; chat.panel = panel; chat.thinking = false;
       if (on) { wake(); gaze.until = 0; }
-      else nextStrollAt = Math.max(nextStrollAt, now() + rand(15000, 25000));
+      else nextStrollAt = Math.max(nextStrollAt, now() + rand(8000, 13000));
     },
     think(on) {
       chat.thinking = on;

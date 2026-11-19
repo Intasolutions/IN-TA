@@ -12,6 +12,7 @@ import { arrived, engagement, journeyText, spent } from './journey';
 import { OPEN_CHAT } from './openChat';
 import { pageContext, spotByText } from './pageContext';
 import css from './guide.module.css';
+import { restingZone, watchCover } from '../clearance';
 
 // The website guide: a small 3D character beside the WhatsApp button, on every page (mounted once in ClientLayout, so
 // he stays put as the visitor moves between pages). The 3D engine (./engine, with three.js) is only fetched on a
@@ -345,24 +346,18 @@ export default function Guide() {
   // the cursor shows he can be picked up (the "Hide" button stays a moment after the pointer leaves him: see hot above)
   useEffect(() => { document.documentElement.classList.toggle('guide-hot', hot); }, [hot]);
 
-  // he and his button step aside where [data-floating-clear] shows (the hero's buttons, the footer's back-to-top row), and
-  // where [data-guide-clear] shows, on the screens its value names as a media query (the services board on phones and
-  // tablets, whose cards sit just above the button: he and his bubble would cover their words)
+  // he and his button step aside only where they would cover [data-floating-clear] (the hero's buttons, the footer's
+  // back-to-top row) or [data-guide-clear] on the screens its media query names (the services board's cards on phones
+  // and tablets, the enquiry form's send button): his button, and the room he stands in above it (see clearance.ts)
   useEffect(() => {
-    const targets = [...document.querySelectorAll('[data-floating-clear], [data-guide-clear]')];
     api.current?.moved();
-    if (!targets.length) return;
-    const seen = new Set<Element>();
-    const applies = (el: Element) => {
-      const media = (el as HTMLElement).dataset.guideClear;
-      return !media || window.matchMedia(media).matches;
-    };
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => (e.isIntersecting && applies(e.target) ? seen.add(e.target) : seen.delete(e.target)));
-      setTuckedOn(seen.size ? pathname : null);
-    });
-    targets.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    const S = window.innerWidth < 640 || window.innerHeight < 560 ? 0.68 : window.innerWidth < 1024 ? 0.82 : 1;
+    return watchCover(
+      '[data-floating-clear], [data-guide-clear]',
+      () => restingZone(document.querySelector<HTMLElement>('[data-guide-dock]'), 12, { top: Math.round(112 * S) + 16, left: 16 }),
+      (covered) => setTuckedOn(covered ? pathname : null),
+      (el) => !el.dataset.guideClear || window.matchMedia(el.dataset.guideClear).matches,
+    );
   }, [pathname]);
 
   // no drawing while he's tucked away, hidden, or the tab isn't being looked at; a hello when the visitor comes back

@@ -9,12 +9,11 @@ import { useGSAP } from '@gsap/react';
 import HeroCanvas from './HeroCanvas';
 import Icon from './Icon';
 import Scramble from './Scramble';
-import EdgePing from './EdgePing';
 import OfficeStatus from './OfficeStatus';
 import Marquee from './Marquee';
 import { usePlayIntro, useShownOnArrival } from '../context/usePlayIntro';
 import { useSite, useText } from '../site/SiteContext';
-import { accent, linesOf, listOf } from '../site/site';
+import { accent, linesOf } from '../site/site';
 import { ENQUIRY_ID, openEnquiry } from './blog/enquiry';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -41,11 +40,8 @@ export default function Hero() {
   const { metrics } = useSite();
   const t = useText();
   const [titleTop, titleBottom] = accent(t('home_hero_title'));
-  // "Enter data once: orders, stock…" → ['Enter data once', 'orders, stock…']
-  const points = linesOf(t('home_hero_points')).map((line) => {
-    const at = line.indexOf(':');
-    return at > 0 ? [line.slice(0, at).trim(), line.slice(at + 1).trim()] : ['', line];
-  });
+  // a few words each ("Point: explanation" shows only the point, so the opening stays light)
+  const points = linesOf(t('home_hero_points')).map((line) => line.split(':')[0].trim()).filter(Boolean);
   const offer = t('home_hero_cta_check').trim();
   const router = useRouter();
   const heroRef = useRef<HTMLElement>(null);
@@ -84,7 +80,6 @@ export default function Hero() {
       tl.from('[data-hero="rule"]', { scaleX: 0, duration: 1.4, ease: 'power3.inOut', stagger: 0.2 }, 0)
         .from('[data-hero="datum"] > :not([data-hero="rule"])', { y: move(12), autoAlpha: 0, duration: 0.7, stagger: 0.08 }, 0.15)
         .call(() => setScrambleKey((k) => k + 1), [], 0.2)
-        .from('[data-hero="badge"] > *', { y: move(16), autoAlpha: 0, duration: 0.8, stagger: 0.08 }, 0.3)
         .from('.hero-char', { yPercent: move(115), rotate: move(6), autoAlpha: calm ? 0 : 1, duration: 1.2, stagger: 0.035 }, 0.35)
         .fromTo(
           '[data-hero="gradient"]',
@@ -93,7 +88,6 @@ export default function Hero() {
           0.75,
         )
         .from('[data-hero="fade"]', { y: move(28), autoAlpha: 0, duration: 1, stagger: 0.12 }, 1.05)
-        .from('[data-hero="hud"]', { scale: calm ? 1 : 0.85, autoAlpha: 0, duration: 0.9, stagger: 0.15, ease: 'back.out(1.7)' }, 1.2)
         .from('[data-hero="metric"]', { y: move(24), autoAlpha: 0, duration: 0.9, stagger: 0.08 }, 1.2);
 
       // Stats count up from zero
@@ -281,7 +275,8 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative min-h-[calc(100svh_-_var(--header-h))] flex flex-col justify-between max-w-[1520px] mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-10 sm:pb-12">
+      <div className="relative min-h-[calc(100svh_-_var(--header-h))] flex flex-col justify-between max-w-[1520px] mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20 md:pb-24">
+        {/* (the room at the bottom keeps the figures clear of the floating WhatsApp and chat buttons) */}
         {/* Architectural datum */}
         <div data-hero="datum" className="relative flex flex-wrap items-center justify-between pb-5 gap-4">
             <div className="inline-flex items-center gap-3">
@@ -293,40 +288,14 @@ export default function Hero() {
                 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.1em] min-[400px]:tracking-[0.16em] sm:tracking-[0.25em] text-brand-blue font-bold"
               />
             </div>
-            <div className="hidden sm:flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] tracking-widest text-midnight/70 font-semibold">
-              {listOf(t('home_hero_focus')).map((area) => (
-                <span key={area} className="flex items-center gap-1.5">
-                  <span className="text-brand-blue font-bold">+</span>
-                  <Scramble text={area} playKey={scrambleKey} duration={750} />
-                </span>
-              ))}
+            <div className="hidden sm:block">
+              <OfficeStatus />
             </div>
           <span data-hero="rule" className="absolute bottom-0 left-0 right-0 h-px bg-brand-blue/20 origin-left" />
         </div>
 
         {/* Centerpiece */}
         <div data-hero="center" className="my-auto py-8">
-          <div data-hero="badge" className="flex flex-wrap items-center gap-x-4 gap-y-3 mb-5 sm:mb-6">
-            <div className="inline-flex flex-wrap items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-md bg-white/95 border border-brand-blue/25 text-brand-blue font-mono text-[10px] sm:text-[11px] tracking-wide shadow-sm">
-              <span className="hidden sm:inline text-midnight font-bold">IN-TA SOLUTIONS</span>
-              <span className="hidden sm:inline text-brand-blue/40">•</span>
-              <span className="font-semibold">{t('home_hero_badge')}</span>
-            </div>
-            <span className="inline-flex items-center gap-3">
-              <span className="relative flex items-center justify-center w-6 h-6" aria-hidden="true">
-                <span className="sonar-wave w-6 h-6" />
-                <span className="sonar-wave sonar-wave-2 w-6 h-6" />
-                <span className="w-2.5 h-2.5 rounded-full bg-brand-blue relative z-10" />
-              </span>
-              <Scramble
-                text={t('home_hero_tagline')}
-                playKey={scrambleKey}
-                duration={800}
-                className="font-mono text-[10px] text-brand-blue font-semibold uppercase tracking-wider"
-              />
-            </span>
-          </div>
-
           <div className="relative [perspective:1200px]">
             {/* The title once in the page text, as search engines read it ("Smarter software & AI for your business").
                 The first line's letters are separate inline-block spans for the entrance, which screen readers would spell
@@ -335,7 +304,7 @@ export default function Hero() {
                 the text together and reported the title twice */}
             <h1
               data-hero="tilt"
-              className="font-display font-extrabold text-[length:clamp(2.75rem,min(13vw,19svh),7rem)] leading-[0.92] tracking-[-0.02em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
+              className="font-display font-extrabold text-[length:clamp(2.4rem,min(10.5vw,14svh),5.75rem)] leading-[0.95] tracking-[-0.02em] text-midnight uppercase max-w-7xl [transform-style:preserve-3d]"
             >
               <span className="block overflow-hidden pb-[0.06em]">
                 {/* each word holds together, so a longer first line wraps between words, never inside one */}
@@ -364,49 +333,27 @@ export default function Hero() {
               </span>
             </h1>
 
-            {/* Floating HUD badges (desktop) */}
-            <div
-              data-hero="hud"
-              data-magnetic="0.12"
-              aria-hidden="true"
-              className="hidden xl:flex absolute top-4 right-16 p-3.5 rounded-xl bg-white/95 border border-brand-blue/30 shadow-lg shadow-brand-blue/10 flex-col gap-1"
-            >
-              <EdgePing />
-            </div>
-
-            <div
-              data-hero="hud"
-              data-magnetic="0.12"
-              className="hidden xl:flex absolute bottom-2 right-4 p-3 rounded-xl bg-white/95 border border-brand-blue/30 shadow-lg shadow-brand-blue/10 flex-col gap-1"
-            >
-              <OfficeStatus />
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mt-8 sm:mt-12 items-end">
-            <div className="lg:col-span-7 max-w-3xl">
-              <p data-hero="fade" className="text-midnight/85 text-base sm:text-lg lg:text-xl leading-relaxed">
-                {t('home_hero_text')}
-              </p>
-              {/* what changes for them, one point per line; the words before the first colon are the point */}
-              {points.length > 0 && (
-                <ul data-hero="fade" className="mt-5 sm:mt-6 space-y-2.5 sm:space-y-3">
-                  {points.map(([lead, rest], i) => (
-                    <li key={i} className="flex gap-3 text-[15px] sm:text-base leading-snug text-midnight/80">
-                      <span aria-hidden="true" className="mt-[0.3em] flex w-4 h-4 shrink-0 items-center justify-center rounded-[5px] bg-brand-blue text-white">
-                        <Icon name="check" className="text-[13px] font-bold" />
-                      </span>
-                      <span>
-                        {lead && <strong className="font-semibold text-midnight">{lead}{rest ? ':' : ''}</strong>}
-                        {rest && ` ${rest}`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div data-hero="fade" data-floating-clear className="lg:col-span-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-start lg:justify-end gap-3 sm:gap-4">
-              <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
+          <div className="mt-6 sm:mt-8 max-w-3xl">
+            <p data-hero="fade" className="text-midnight/80 text-base sm:text-lg lg:text-xl leading-relaxed">
+              {t('home_hero_text')}
+            </p>
+            {/* what changes for them, in a few words each */}
+            {points.length > 0 && (
+              <ul data-hero="fade" className="mt-4 sm:mt-5 flex flex-wrap gap-x-5 gap-y-2">
+                {points.map((point, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm sm:text-[15px] font-semibold text-midnight">
+                    <span aria-hidden="true" className="flex w-4 h-4 shrink-0 items-center justify-center rounded-[5px] bg-brand-blue text-white">
+                      <Icon name="check" className="text-[13px]" />
+                    </span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div data-hero="fade" data-floating-clear className="mt-7 sm:mt-8 flex flex-col items-start sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
+              <span data-magnetic="0.35" data-radius="140" className="inline-block max-w-full">
                 {/* books a short call: it opens the enquiry form further down (or the Contact page, if this page has none) */}
                 <a
                   href={`#${ENQUIRY_ID}`}
@@ -420,7 +367,7 @@ export default function Hero() {
                   <span>{t('home_hero_cta_primary')}</span>
                 </a>
               </span>
-              <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
+              <span data-magnetic="0.35" data-radius="140" className="inline-block max-w-full">
                 {offer ? (
                   // the offer (when one is set in the admin): the form opens on Website, with the offer written in
                   <a
@@ -445,15 +392,6 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Live badges for phones/tablets — the floating versions above only fit from xl */}
-          <div className="xl:hidden mt-8 grid grid-cols-2 gap-3 sm:gap-4 max-w-2xl">
-            <div data-hero="hud" aria-hidden="true" className="p-3 sm:p-3.5 rounded-xl bg-white/95 border border-brand-blue/30 shadow-md shadow-brand-blue/5">
-              <EdgePing />
-            </div>
-            <div data-hero="hud" className="p-3 sm:p-3.5 rounded-xl bg-white/95 border border-brand-blue/30 shadow-md shadow-brand-blue/5">
-              <OfficeStatus />
-            </div>
-          </div>
         </div>
 
         {/* Metrics strip */}
@@ -469,7 +407,6 @@ export default function Hero() {
                   <span data-count={m.value}>{m.value}</span>
                   <span className="text-brand-blue text-xl sm:text-2xl font-bold">{m.unit}</span>
                 </dd>
-                <dd className="text-xs text-midnight/60 mt-1">{m.note}</dd>
               </div>
             ))}
           </dl>

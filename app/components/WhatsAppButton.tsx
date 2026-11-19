@@ -3,13 +3,14 @@
 // The floating "Chat on WhatsApp" button, bottom left on every page (the robot's chat button has the bottom right). The
 // chat opens with a message written for the page it was opened from (Page wording > WhatsApp messages), and the number
 // is Site settings' WhatsApp number, or the phone number when that's empty.
-// It steps aside while [data-floating-clear] is on screen (the hero's buttons, the footer's back-to-top row), and
+// It steps aside only where it would cover [data-floating-clear] (the hero's buttons, the footer's back-to-top row) or
 // [data-whatsapp-clear] on the screens its media query names (the enquiry form's send button on phones and tablets).
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSite, useText } from '../site/SiteContext';
 import { whatsappDigits } from '../site/site';
 import { useWhatsAppTopic, whatsappLink, whatsappMessage } from './whatsappTopic';
+import { restingZone, watchCover } from './clearance';
 
 export default function WhatsAppButton() {
   const site = useSite();
@@ -21,21 +22,18 @@ export default function WhatsAppButton() {
   const [tuckedOn, setTuckedOn] = useState<string | null>(null);
   const tucked = tuckedOn === pathname;
 
-  useEffect(() => {
-    const targets = [...document.querySelectorAll<HTMLElement>('[data-floating-clear], [data-whatsapp-clear]')];
-    if (!targets.length) return;
-    const applies = (el: HTMLElement) => !el.dataset.whatsappClear || window.matchMedia(el.dataset.whatsappClear).matches;
-    const seen = new Set<Element>();
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => (e.isIntersecting && applies(e.target as HTMLElement) ? seen.add(e.target) : seen.delete(e.target)));
-      setTuckedOn(seen.size ? pathname : null);
-    });
-    targets.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [pathname]);
+  // steps aside only where it would cover one of them (see clearance.ts)
+  const button = useRef<HTMLAnchorElement>(null);
+  useEffect(() => watchCover(
+    '[data-floating-clear], [data-whatsapp-clear]',
+    () => restingZone(button.current),
+    (covered) => setTuckedOn(covered ? pathname : null),
+    (el) => !el.dataset.whatsappClear || window.matchMedia(el.dataset.whatsappClear).matches,
+  ), [pathname]);
 
   return (
     <a
+      ref={button}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
