@@ -23,6 +23,7 @@ import css from './guide.module.css';
 const MET = 'inta-guide-met'; // he has greeted this browser before
 const HIDDEN = 'inta-guide-hidden'; // hidden by the visitor, for this visit
 const PLAN = 'inta-guide-plan:'; // + the page's address: Gemini's plan for it, kept for this visit
+const SLOW = 'inta-guide-slow'; // this device couldn't draw him smoothly: the chat button alone, for this visit
 const CHATTED = 'inta-guide-chatted'; // the visitor has opened the chat this visit: he doesn't nudge any more
 const NUDGES = 'inta-guide-nudges'; // how many times he has opened the conversation himself this visit (two at most)
 
@@ -152,7 +153,7 @@ export default function Guide() {
   useEffect(() => {
     // hidden by the visitor, or where he can't run (less motion asked for, a small device): the chat button is still
     // there, once the opening is done
-    if (read(() => sessionStorage, HIDDEN) || !canRun()) return afterOpening(() => setChatOnly(true));
+    if (read(() => sessionStorage, HIDDEN) || read(() => sessionStorage, SLOW) || !canRun()) return afterOpening(() => setChatOnly(true));
     let stopped = false;
     let idle = 0;
     const cancelOpening = afterOpening(() => {
@@ -199,6 +200,16 @@ export default function Guide() {
             },
             firstVisit,
             lines: () => lines.current(),
+            // too slow here: he goes, and the chat button (which still opens the chat) stays, for the rest of the visit
+            tooSlow: () => {
+              write(() => sessionStorage, SLOW, '1');
+              setBubble(null);
+              setZz(null);
+              api.current?.stop();
+              api.current = null;
+              setOn(false);
+              setChatOnly(true);
+            },
           }))
           .then((g) => {
             if (stopped) { g.stop(); return; }

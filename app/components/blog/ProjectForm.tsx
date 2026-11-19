@@ -17,6 +17,8 @@ const FIELD =
   'block w-full h-11 rounded-xl border px-4 text-[15px] outline-none transition-[border-color,background-color,box-shadow] duration-200 focus:ring-4 focus:ring-brand-blue/15 disabled:opacity-60 ' +
   'bg-white/[0.06] border-white/15 text-white placeholder:text-white/35 focus:border-[#7fa6ff] focus:bg-white/[0.09] aria-invalid:border-[#ffb4b4]/70';
 const ERROR = 'mt-1.5 block text-xs text-[#ffb4b4]';
+// where the floating buttons (WhatsApp, the robot's chat) can cover the send button
+const UNDER_FLOATING = '(max-width: 1023.98px)';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 type Field = 'name' | 'email' | 'whatsapp' | 'company' | 'need' | 'problem';
@@ -234,8 +236,8 @@ export default function ProjectForm({ defaultInterest, kicker, title, text }: { 
                 <span id="pf-problem-hint" className="mt-1.5 block text-xs text-white/50">{t('enquiry_problem_hint')}</span>
               ))}
 
-              {/* 4. send */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+              {/* 4. send (on phones and tablets the floating WhatsApp and chat buttons step aside while it's on screen) */}
+              <div data-guide-clear={UNDER_FLOATING} data-whatsapp-clear={UNDER_FLOATING} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
                 <button
                   type="submit"
                   disabled={busy}

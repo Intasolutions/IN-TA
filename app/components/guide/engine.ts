@@ -64,6 +64,8 @@ export type GuideHooks = {
   fx: (kind: 'stars' | 'wobble' | 'dust', at: { x: number; y: number }, size?: number) => void;
   firstVisit: boolean;
   lines: () => GuideLines;
+  /** This device can't draw him without slowing the page down: he has stopped, and the chat button carries on alone */
+  tooSlow: () => void;
 };
 
 export type Guide = {
@@ -875,11 +877,21 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
   await renderer.compileAsync(scene, camera);
 
   // ---- the loop: animate, place, turn the head, draw ----
-  // every frame, at the screen's own rate: the box is small, and anything less shows as a stutter while he stands still
+  // every frame, at the screen's own rate: the box is small, and anything less shows as a stutter while he stands still.
+  // That holds where a frame is cheap. Each frame's own work is timed: on a slower phone he is drawn every 2nd, 3rd or
+  // 4th frame instead, so he never takes the whole processor (on a 4x slower CPU he used to keep the page from ever
+  // going idle), and where even that is too much he leaves the page to the chat button alone (hooks.tooSlow).
   let last = performance.now();
+  let cost = 0; // ms of work per drawn frame, smoothed
+  let drawn = 0;
+  let every = 1; // drawn once in this many frames
+  let skipped = 0;
   renderer.setAnimationLoop((t) => {
     if (paused) { last = t; return; }
-    const dt = Math.min(0.05, Math.max(0, (t - last) / 1000));
+    if (++skipped < every) return; // (last stays put, so the next drawn frame moves him on by the whole time)
+    skipped = 0;
+    const began = performance.now();
+    const dt = Math.min(0.05 * every, Math.max(0, (t - last) / 1000));
     last = t;
     host.dataset.state = state;
     hooks.anchor(headAt());
@@ -1067,6 +1079,17 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     }
 
     renderer.render(scene, camera);
+
+    // the frame budget (see above): judged after a short warm-up, on a slowly moving average, so one busy frame changes nothing
+    const spent = performance.now() - began;
+    cost = drawn ? cost * 0.95 + spent * 0.05 : spent;
+    if (++drawn > 40) {
+      every = cost > 18 ? 4 : cost > 10 ? 3 : cost > 5 ? 2 : 1;
+      if (cost > 30 && drawn > 120) {
+        renderer.setAnimationLoop(null);
+        hooks.tooSlow();
+      }
+    }
   });
 
   intro();

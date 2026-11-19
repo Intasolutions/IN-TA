@@ -357,7 +357,7 @@ export default function Hero() {
                 {/* Gradient text only paints inside its box, so pad it to include the g/y descenders */}
                 <span
                   data-hero="gradient"
-                  className="font-serif italic font-light normal-case text-gradient-shimmer inline-block pr-2 pb-[0.16em] leading-[1.02]"
+                  className="font-serif italic font-light normal-case text-gradient-shimmer inline-block pr-2 pb-[0.16em] leading-[1.02] [text-wrap:balance]"
                 >
                   {titleBottom}
                 </span>
@@ -405,7 +405,7 @@ export default function Hero() {
                 </ul>
               )}
             </div>
-            <div data-hero="fade" data-floating-clear data-whatsapp-clear="(max-width: 1023.98px)" className="lg:col-span-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-start lg:justify-end gap-3 sm:gap-4">
+            <div data-hero="fade" data-floating-clear className="lg:col-span-5 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-start lg:justify-end gap-3 sm:gap-4">
               <span data-magnetic="0.35" data-radius="140" className="block sm:inline-block">
                 {/* books a short call: it opens the enquiry form further down (or the Contact page, if this page has none) */}
                 <a
