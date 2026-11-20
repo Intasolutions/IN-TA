@@ -59,15 +59,18 @@ function ProjectCard({ project }: { project: Project }) {
   const t = useText();
   const host = hostname(project.external_url);
   const isLive = Boolean(host);
+  // a project with a case study opens it; otherwise its live site, or the Work page
+  const caseHref = project.case_study ? `/portfolio/${project.slug}` : '';
+  const external = !caseHref && isLive;
   // the small label above the title: the tag that names the client's industry (the list is in Site settings), else the first
   const industries = listOf(t('home_work_industries')).map((name) => name.toLowerCase());
   const industry = (project.tags.find((tag) => industries.includes(tag.name.trim().toLowerCase())) ?? project.tags[0])?.name ?? '';
 
   return (
     <li data-g="card" className={`${CARD_SIZE} shrink-0 snap-center will-change-transform`}>
-      <a
-        href={isLive ? project.external_url : '/portfolio'}
-        {...(isLive ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      <Link
+        href={caseHref || (isLive ? project.external_url : '/portfolio')}
+        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         data-g="inner"
         className="group relative flex h-full w-full flex-col overflow-hidden rounded-3xl bg-midnight text-white shadow-xl shadow-brand-blue/10 will-change-transform
           focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-blue"
@@ -133,13 +136,13 @@ function ProjectCard({ project }: { project: Project }) {
             </span>
           </span>
           <span data-g="arrow" className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white text-midnight flex items-center justify-center transition-[background-color,color,scale] duration-300 group-hover:bg-brand-blue group-hover:text-white group-hover:scale-110">
-            <Icon name="north_east" className="text-[20px] sm:text-[22px] transition-transform duration-300 group-hover:rotate-45" />
+            <Icon name={caseHref ? 'east' : 'north_east'} className={`text-[20px] sm:text-[22px] transition-transform duration-300 ${caseHref ? 'group-hover:translate-x-0.5' : 'group-hover:rotate-45'}`} />
           </span>
         </span>
         {/* Dims cards at the edges of the coverflow */}
         <span data-g="dim" aria-hidden="true" className="pointer-events-none absolute inset-0 z-30 rounded-3xl bg-midnight opacity-0" />
-        <span className="sr-only">{isLive ? `Visit ${project.title} (opens in a new tab)` : `${project.title}: see the portfolio`}</span>
-      </a>
+        <span className="sr-only">{caseHref ? `${t('case_open')}: ${project.title}` : isLive ? `Visit ${project.title} (opens in a new tab)` : `${project.title}: see the portfolio`}</span>
+      </Link>
     </li>
   );
 }

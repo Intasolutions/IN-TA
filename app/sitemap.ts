@@ -13,7 +13,7 @@ export const revalidate = 3600;
 type Dated = { updated_at?: string | null };
 type ApiService = Dated & { slug: string; is_active?: boolean };
 type ApiPost = Dated & { id: number; slug?: string | null; date?: string };
-type ApiProject = Dated & { is_active?: boolean };
+type ApiProject = Dated & { slug?: string; is_active?: boolean; case_study?: boolean };
 
 async function list<T>(path: string): Promise<T[]> {
   try {
@@ -68,5 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/security', updatedOf(site, 'security').date),
     ...live.map((s) => entry(`/services/${s.slug}`, dateOf(s.updated_at))),
     ...posts.map((p) => entry(postPath(p), postDate(p))),
+    // the projects with a page of their own (their case study)
+    ...projects.filter((p) => p.is_active !== false && p.case_study && p.slug).map((p) => entry(`/portfolio/${p.slug}`, dateOf(p.updated_at))),
   ];
 }

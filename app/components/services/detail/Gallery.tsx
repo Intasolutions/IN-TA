@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Icon from '../../Icon';
 import { optimisable, type DetailImage, type DetailProject } from './types';
+import { useText } from '../../../site/SiteContext';
 
 gsap.registerPlugin(useGSAP);
 
@@ -17,6 +18,7 @@ const PICTURE = 'object-contain transition-transform duration-700 group-hover:sc
 
 /** In real use: finished work and pictures on one row that can be dragged and flicked. Nothing is ever cropped. */
 export default function Gallery({ images, projects, liveTag }: { images: DetailImage[]; projects: DetailProject[]; liveTag: string }) {
+  const caseLabel = useText()('case_open');
   const rootRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLUListElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -120,12 +122,19 @@ export default function Gallery({ images, projects, liveTag }: { images: DetailI
                 <span className="heading-sub block text-white">{p.title}</span>
                 {p.role && <span className="mt-0.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-[#9dbbff]">{p.role}</span>}
                 {p.summary && <span className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/80">{p.summary}</span>}
+                {p.caseStudy && <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#9dbbff] sm:text-[11px]">{caseLabel} <Icon name="east" className="text-[13px] transition-transform duration-300 group-hover:translate-x-0.5" /></span>}
               </span>
             </>
           );
           return (
             <li key={`p${p.id}`} data-shot className="w-[min(84vw,36rem)] shrink-0 snap-start">
-              {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" draggable={false} className={CARD}>{body}</a> : <Link href="/portfolio" draggable={false} className={CARD}>{body}</Link>}
+              {p.caseStudy ? (
+                <Link href={`/portfolio/${p.slug}`} draggable={false} className={CARD}>{body}</Link>
+              ) : p.url ? (
+                <a href={p.url} target="_blank" rel="noopener noreferrer" draggable={false} className={CARD}>{body}</a>
+              ) : (
+                <Link href="/portfolio" draggable={false} className={CARD}>{body}</Link>
+              )}
             </li>
           );
         })}

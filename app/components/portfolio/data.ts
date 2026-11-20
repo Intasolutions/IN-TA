@@ -10,12 +10,17 @@ export type ApiProject = {
   tags?: { name: string }[];
   external_url?: string | null;
   is_active?: boolean;
+  /** it has a page of its own (/portfolio/<slug>) */
+  case_study?: boolean;
 };
 
 export type ApiSite = { id: number; title: string; image?: string | null; href?: string | null; is_active?: boolean };
 
 export type RackProject = {
   id: number;
+  slug: string;
+  /** it has a page of its own: its case study */
+  caseStudy: boolean;
   title: string;
   /** what comes after a dash in the title in the admin: "iGen Properties – Property Management Software" */
   sub: string;
@@ -68,6 +73,8 @@ export function toWork(projects: ApiProject[], sites: ApiSite[], base: string, u
         const url = usable(p.external_url);
         return {
           id: p.id,
+          slug: p.slug,
+          caseStudy: !!p.case_study,
           title,
           sub,
           role: p.role?.trim() ?? '',

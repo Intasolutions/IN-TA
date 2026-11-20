@@ -133,6 +133,36 @@
       ]
     },
     {
+      "name": "Case study pages (a project's own page)",
+      "about": "Each project with \"What the client needed\" and \"What we built\" filled in (Portfolio > Projects) gets a page of its own. These are the words around that project's own text.",
+      "items": [
+        ["case_kicker", "Small line above the project name", "Case study"],
+        ["case_open", "Button that opens a project's case study (on the Work page, the home page's project cards and service pages)", "Read the case study"],
+        ["case_back", "Link back to the Work page", "All our work"],
+        ["case_read", "Button that goes down to the story", "How we built it"],
+        ["case_visit", "Button to the live site", "Visit the site"],
+        ["case_no_link", "Address bar when the project has no public link", "No public link"],
+        ["case_need_kicker", "The brief: small line", "The brief"],
+        ["case_need_title", "The brief: heading (| before the blue words)", "What the client | needed"],
+        ["case_built_kicker", "The build: small line", "The build"],
+        ["case_built_title", "The build: heading (| before the blue words)", "What we | built"],
+        ["case_result_kicker", "The result: small line (shown only when the project has a result written)", "The outcome"],
+        ["case_result_title", "The result: heading (| before the blue words)", "The | result"],
+        ["case_tools_kicker", "Tools: small line", "Under the hood"],
+        ["case_tools_title", "Tools: heading (| before the blue words)", "Tools we | used"],
+        ["case_services_kicker", "Services: small line", "Services"],
+        ["case_services_title", "Services: heading (| before the blue words)", "The services | behind it"],
+        ["case_services_link", "Services: link on each service", "See the service"],
+        ["case_next_kicker", "Next project: small line", "Next in the rack"],
+        ["case_next_link", "Next project: link", "Open the case study"],
+        ["case_end_title", "Last project: heading over the link back to the Work page (| before the blue words)", "Back to | the rack"],
+        ["case_end_text", "Last project: text", "See every project we have built, live in the rack."],
+        ["case_form_kicker", "Enquiry form: small line", "Your project"],
+        ["case_form_title", "Enquiry form: heading (| before the blue words)", "Want something | like this?"],
+        ["case_form_text", "Enquiry form: text", "Tell us what your business needs, and we'll tell you how we would build it."]
+      ]
+    },
+    {
       "name": "Blog page",
       "items": [
         ["blog_kicker", "Small line", "Blog // Latest writing"],
@@ -196,6 +226,7 @@
         ["whatsapp_services", "Services page", "Hi! I'm looking at your services and I'd like help choosing the right one for my business."],
         ["whatsapp_service", "A service's page ({service} is the service's name)", "Hi! I'm interested in {service} for my business. Could you tell me more?"],
         ["whatsapp_portfolio", "Work page", "Hi! I saw your work on your website. I'd like something similar for my business."],
+        ["whatsapp_project", "A project's case study page ({project} is the project's name)", "Hi! I saw {project} in your work. I'd like something similar for my business."],
         ["whatsapp_blog", "Blog page", "Hi! I was reading your blog and I have a question."],
         ["whatsapp_post", "A blog post ({post} is the post's title)", "Hi! I just read “{post}” on your blog and I have a question."],
         ["whatsapp_post_service", "A blog post with a related service ({post} is the post's title, {service} the service's name)", "Hi! I just read “{post}” on your blog. I'd like to know more about {service}."],
@@ -288,6 +319,7 @@
         ["seo_services_description", "Services: description", "AI solutions, custom software, websites, mobile apps, UI/UX design, digital marketing, SEO and media production for businesses in Wayanad, Kerala and abroad."],
         ["seo_portfolio_title", "Portfolio: title", "Our Work | Websites, Apps & Software Projects | IN-TA Solutions"],
         ["seo_portfolio_description", "Portfolio: description", "See websites, mobile apps and custom software we've built for hospitals, retailers, academies and businesses in India and abroad."],
+        ["seo_case_title", "A project's case study page: title ({project} is the project's name; its search description is the project's own)", "{project} Case Study"],
         ["seo_blog_title", "Blog: title", "Blog | AI, Software & Business Tips | IN-TA Solutions"],
         ["seo_blog_description", "Blog: description", "Practical articles on AI, custom software, automation and digital growth for businesses in Kerala, from the IN-TA Solutions team."],
         ["seo_contact_title", "Contact: title", "Contact Us | Software & AI Company in Wayanad, Kerala"],

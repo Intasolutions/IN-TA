@@ -1,12 +1,12 @@
 'use client';
 
 // What the visitor is looking at, for the WhatsApp button's ready-written message: a page that is about one service
-// (a service's page) or one blog post (with its related service, when it has one) says so with <WhatsAppTopic />.
-// Every other page is recognised from its address.
+// (a service's page), one blog post (with its related service, when it has one) or one project (its case study) says
+// so with <WhatsAppTopic />. Every other page is recognised from its address.
 import { useEffect, useSyncExternalStore } from 'react';
 import { textOf, type Site } from '../site/site';
 
-type Topic = { path: string; service?: string; post?: string };
+type Topic = { path: string; service?: string; post?: string; project?: string };
 
 let current: Topic | null = null;
 const listeners = new Set<() => void>();
@@ -23,14 +23,14 @@ const subscribe = (l: () => void) => {
 export const useWhatsAppTopic = () => useSyncExternalStore(subscribe, () => current, () => null);
 
 /** Tells the WhatsApp button what this page is about, while the page is on screen */
-export function WhatsAppTopic({ service, post }: { service?: string | null; post?: string | null }) {
+export function WhatsAppTopic({ service, post, project }: { service?: string | null; post?: string | null; project?: string | null }) {
   useEffect(() => {
-    const topic: Topic = { path: window.location.pathname, service: service?.trim() || undefined, post: post?.trim() || undefined };
+    const topic: Topic = { path: window.location.pathname, service: service?.trim() || undefined, post: post?.trim() || undefined, project: project?.trim() || undefined };
     publish(topic);
     return () => {
       if (current === topic) publish(null);
     };
-  }, [service, post]);
+  }, [service, post, project]);
   return null;
 }
 
@@ -44,6 +44,9 @@ export function whatsappMessage(site: Site, pathname: string, topic: Topic | nul
     return here.service
       ? textOf(site, 'whatsapp_post_service', { post: here.post, service: here.service })
       : textOf(site, 'whatsapp_post', { post: here.post });
+  }
+  if (path.startsWith('/portfolio/')) {
+    return here?.project ? textOf(site, 'whatsapp_project', { project: here.project }) : textOf(site, 'whatsapp_portfolio');
   }
   if (path.startsWith('/services/')) {
     // the page's own name for itself, or the service's name from Services while the page is still arriving

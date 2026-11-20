@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -20,7 +21,8 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 const FORM_ID = 'start-project';
 const MORE_ID = 'more-sites';
 const CONTAINER = 'mx-auto w-full max-w-[1520px] px-4 sm:px-6';
-const ROUND = 'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white transition-colors duration-300 hover:bg-white hover:text-midnight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff]';
+const CASE = 'kinetic-cta-btn inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-midnight transition-colors duration-300 hover:bg-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] sm:text-xs';
+const STILL_FRAME = 'relative block aspect-[16/9] w-full overflow-hidden rounded-xl border border-white/15 bg-[#050b2a]';
 const VISIT = 'kinetic-cta-btn inline-flex items-center gap-2 rounded-xl bg-brand-blue px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors duration-300 hover:bg-white hover:text-midnight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] sm:text-xs';
 
 // Whether the visitor has asked for less motion, the same on the server and in the first paint
@@ -88,7 +90,7 @@ function MoreSites({ sites }: { sites: RackSite[] }) {
 }
 
 /** With animations off: the same work, one project after another */
-function StillList({ projects, onView }: { projects: RackProject[]; onView: (p: RackProject) => void }) {
+function StillList({ projects }: { projects: RackProject[] }) {
   const t = useText();
   const [titlePlain, titleBright] = accent(t('portfolio_title'));
   return (
@@ -103,14 +105,23 @@ function StillList({ projects, onView }: { projects: RackProject[]; onView: (p: 
           const [plain, bright] = splitAccent(p.title);
           return (
             <li key={p.id} className="grid items-center gap-5 lg:grid-cols-2 lg:gap-10">
-              <button type="button" onClick={() => onView(p)} aria-label={`Full view: ${p.title}`} className="relative block aspect-[16/9] w-full cursor-zoom-in overflow-hidden rounded-xl border border-white/15 bg-[#050b2a]">
-                {p.hero && <Image src={p.hero} alt={`${p.title}: the finished work`} fill sizes="(min-width: 1024px) 50vw, 100vw" quality={90} unoptimized={!optimisable(p.hero)} className="object-contain" />}
-              </button>
+              {p.caseStudy ? (
+                <Link href={`/portfolio/${p.slug}`} tabIndex={-1} aria-hidden="true" className={STILL_FRAME}>
+                  {p.hero && <Image src={p.hero} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" quality={90} unoptimized={!optimisable(p.hero)} className="object-contain" />}
+                </Link>
+              ) : (
+                <div className={STILL_FRAME}>
+                  {p.hero && <Image src={p.hero} alt={`${p.title}: the finished work`} fill sizes="(min-width: 1024px) 50vw, 100vw" quality={90} unoptimized={!optimisable(p.hero)} className="object-contain" />}
+                </div>
+              )}
               <div>
                 {(p.role || p.sub) && <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">{p.role || p.sub}</p>}
                 <h2 className="heading-project mt-2 text-white">{plain && <>{plain} </>}<span className="heading-accent-dark">{bright}</span></h2>
                 <p className="mt-3 text-[15px] leading-relaxed text-white/85 sm:text-base">{p.summary}</p>
-                {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer" className={`${VISIT} mt-4`}>Visit the site <Icon name="north_east" className="text-[14px]" /></a>}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {p.caseStudy && <Link href={`/portfolio/${p.slug}`} className={CASE}>{t('case_open')} <Icon name="east" className="text-[14px]" /></Link>}
+                  {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer" className={VISIT}>Visit the site <Icon name="north_east" className="text-[14px]" /></a>}
+                </div>
               </div>
             </li>
           );
@@ -120,58 +131,10 @@ function StillList({ projects, onView }: { projects: RackProject[]; onView: (p: 
   );
 }
 
-/** Everything about one project, with its picture at full size */
-function FullView({ project, onClose }: { project: RackProject | null; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (project && !d.open) d.showModal();
-    if (!project && d.open) d.close();
-  }, [project]);
-  const [plain, bright] = splitAccent(project?.title ?? '');
-  return (
-    <dialog
-      ref={ref}
-      onClose={onClose}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      aria-label={project ? `Full view: ${project.title}` : 'Full view'}
-      className="fixed inset-0 m-0 h-svh max-h-none w-screen max-w-none bg-midnight/95 p-3 text-white backdrop:bg-midnight/80 sm:p-6"
-    >
-      {project && (
-        <div data-lenis-prevent className="mx-auto flex h-full max-w-[1400px] flex-col gap-4 overflow-y-auto lg:flex-row lg:items-center lg:gap-8 lg:overflow-hidden">
-          <div className="relative w-full shrink-0 lg:min-h-0 lg:flex-[1.9] lg:self-stretch">
-            <div className="relative aspect-[16/9] w-full lg:absolute lg:inset-0 lg:aspect-auto">
-              {project.hero && <Image key={project.id} src={project.hero} alt={`${project.title}: the finished work`} fill sizes="(min-width: 1024px) 66vw, 100vw" quality={90} unoptimized={!optimisable(project.hero)} className="object-contain" />}
-            </div>
-          </div>
-          <div className="lg:flex-1">
-            {(project.role || project.sub) && <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#9dbbff] sm:text-[11px]">{project.role || project.sub}</p>}
-            <h2 className="heading-project mt-2 text-white">{plain && <>{plain} </>}<span className="heading-accent-dark">{bright}</span></h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-white/85 sm:text-base">{project.summary}</p>
-            {project.tags.length > 0 && (
-              <ul className="mt-4 flex flex-wrap gap-1.5">
-                {project.tags.map((t) => <li key={t} className="rounded-md border border-white/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#9dbbff]">{t}</li>)}
-              </ul>
-            )}
-            {project.url && <a href={project.url} target="_blank" rel="noopener noreferrer" className={`${VISIT} mt-5`}>Visit the site <Icon name="north_east" className="text-[14px]" /></a>}
-          </div>
-        </div>
-      )}
-      <button type="button" onClick={onClose} aria-label="Close" className={`${ROUND} absolute right-3 top-3 sm:right-5 sm:top-5`}><Icon name="close" className="text-[18px]" /></button>
-    </dialog>
-  );
-}
-
 export default function PortfolioPage({ initial }: { initial: Work }) {
   const rootRef = useRef<HTMLElement>(null);
   const [work, setWork] = useState(initial);
-  const [view, setView] = useState<RackProject | null>(null);
   const reduced = useReducedMotion();
-  const onView = useCallback((p: RackProject) => setView(p), []);
-  const onClose = useCallback(() => setView(null), []);
 
   // Our API host can be asleep when the page is built: if nothing came through, ask again from here
   const empty = work.projects.length === 0;
@@ -205,7 +168,7 @@ export default function PortfolioPage({ initial }: { initial: Work }) {
 
   return (
     <main id="main" ref={rootRef} className="bg-midnight text-white">
-      {reduced ? <StillList projects={work.projects} onView={onView} /> : <RackStage projects={work.projects} siteCount={work.sites.length} formId={FORM_ID} nextId={work.sites.length ? MORE_ID : FORM_ID} onView={onView} />}
+      {reduced ? <StillList projects={work.projects} /> : <RackStage projects={work.projects} siteCount={work.sites.length} formId={FORM_ID} nextId={work.sites.length ? MORE_ID : FORM_ID} />}
 
       <div className="inside-grid relative overflow-x-clip">
         {work.sites.length > 0 && (
@@ -224,7 +187,6 @@ export default function PortfolioPage({ initial }: { initial: Work }) {
         </div>
       </div>
 
-      <FullView project={view} onClose={onClose} />
     </main>
   );
 }

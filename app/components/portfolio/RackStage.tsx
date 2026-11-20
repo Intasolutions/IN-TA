@@ -1,7 +1,8 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -147,7 +148,18 @@ function Plate({ project, index, off, onGo }: { project: RackProject; index: num
   );
 }
 
-const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }: { project: RackProject; index: number; row: number; off: boolean; near: boolean; onGo: (i: number) => void; onView: (p: RackProject) => void }) {
+/** A project's screen: it opens the project's case study, when it has one */
+function RackScreen({ project, children }: { project: RackProject; children: ReactNode }) {
+  const style = { aspectRatio: 'var(--r, 1.9)' };
+  if (!project.caseStudy) return <span className="relative block w-full overflow-hidden bg-[#050b2a]" style={style}>{children}</span>;
+  return (
+    <Link href={`/portfolio/${project.slug}`} aria-label={`Case study: ${project.title}`} className="group pointer-events-auto relative block w-full overflow-hidden bg-[#050b2a] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[#9dbbff]" style={style}>
+      {children}
+    </Link>
+  );
+}
+
+const Unit = memo(function Unit({ project, index, row, off, near, onGo }: { project: RackProject; index: number; row: number; off: boolean; near: boolean; onGo: (i: number) => void }) {
   return (
     <>
     {/* The drawer's shadow, falling on the units below it */}
@@ -240,7 +252,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
             {/* the page loading, as the screen wakes */}
             <span data-load aria-hidden="true" className="rack-fx absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-linear-to-r from-[#2563eb] to-[#9dbbff]" />
           </div>
-          <button type="button" onClick={() => onView(project)} aria-label={`Full view: ${project.title}`} className="group pointer-events-auto relative block w-full cursor-zoom-in overflow-hidden bg-[#050b2a] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[#9dbbff]" style={{ aspectRatio: 'var(--r, 1.9)' }}>
+          <RackScreen project={project}>
             {near && project.hero && (
               <Image
                 src={project.hero}
@@ -260,9 +272,11 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
                 }}
               />
             )}
-            <span aria-hidden="true" className="absolute right-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-midnight/85 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-              <Icon name="open_in_full" className="text-[15px]" />
-            </span>
+            {project.caseStudy && (
+              <span aria-hidden="true" className="absolute right-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-midnight/85 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                <Icon name="east" className="text-[15px]" />
+              </span>
+            )}
             {/* The screen waking as the lid lifts: dark, then our logo and a progress bar, then the page comes in from the top behind a line of light */}
             <span data-cover aria-hidden="true" className="rack-fx pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-[3%] bg-[#02061c]">
               <span data-boot className="flex h-[13%] w-[24%] flex-col items-center justify-center gap-2 opacity-0">
@@ -275,7 +289,7 @@ const Unit = memo(function Unit({ project, index, row, off, near, onGo, onView }
             </span>
             {/* the glass catching the light, seen best while the screen is dark */}
             <span data-glare aria-hidden="true" className="rack-fx rack-glare pointer-events-none absolute inset-0 opacity-0" />
-          </button>
+          </RackScreen>
           </div>
         </div>
         <div aria-hidden="true" className="rack-lid-back absolute inset-0 flex items-center justify-center overflow-hidden rounded-t-[10px] [backface-visibility:hidden] [transform:rotateY(180deg)_translateZ(6px)]">
@@ -337,7 +351,8 @@ const FleetCard = memo(function FleetCard({ project, index, onGo }: { project: R
 });
 
 /** A project's name, what it was and what it does, beside its screen */
-const Words = memo(function Words({ project, onView }: { project: RackProject; onView: (p: RackProject) => void }) {
+const Words = memo(function Words({ project }: { project: RackProject }) {
+  const t = useText();
   const [plain, bright] = splitAccent(project.title);
   const kicker = project.role || project.sub;
   return (
@@ -364,14 +379,16 @@ const Words = memo(function Words({ project, onView }: { project: RackProject; o
         </ul>
       )}
       <div className="mt-3 flex shrink-0 flex-wrap gap-2 sm:mt-4">
+        {project.caseStudy && (
+          <Link href={`/portfolio/${project.slug}`} className="kinetic-cta-btn inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-midnight transition-colors duration-300 hover:bg-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] sm:text-xs">
+            {t('case_open')} <Icon name="east" className="text-[14px]" />
+          </Link>
+        )}
         {project.url && (
           <a href={project.url} target="_blank" rel="noopener noreferrer" className="kinetic-cta-btn inline-flex items-center gap-2 rounded-xl bg-brand-blue px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors duration-300 hover:bg-white hover:text-midnight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] sm:text-xs">
             Visit the site <Icon name="north_east" className="text-[14px]" />
           </a>
         )}
-        <button type="button" onClick={() => onView(project)} className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors duration-300 hover:border-[#9dbbff] hover:text-[#9dbbff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9dbbff] sm:text-xs">
-          Full view <Icon name="open_in_full" className="text-[14px]" />
-        </button>
       </div>
     </article>
   );
@@ -395,14 +412,14 @@ function RackNav({ items, currentRef, onGo }: { items: { index: number; title: s
   );
 }
 
-type Props = { projects: RackProject[]; siteCount: number; formId: string; nextId: string; onView: (p: RackProject) => void };
+type Props = { projects: RackProject[]; siteCount: number; formId: string; nextId: string };
 
 /**
  * The work as a server rack. Each project is a console in it: scrolling slides its drawer out, flips its screen up and
  * turns it on, shuts it, and moves on to the next. At rest the screen is exactly one to one with the display, so the
  * picture is as sharp as the file. The last slot is empty.
  */
-function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
+function RackStage({ projects, siteCount, formId, nextId }: Props) {
   const t = useText();
   const [titlePlain, titleBright] = accent(t('portfolio_title'));
   const [emptyPlain, emptyBright] = accent(t('portfolio_empty_title'));
@@ -595,7 +612,7 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
         ambientEl.style.left = `${cx}px`;
         ambientEl.style.top = `${Math.round(hinge * 0.55)}px`;
 
-        // the words are longer than the room on some screens; "Full view" has all of them
+        // the words are longer than the room on some screens; the case study has all of them
         units.forEach(({ words }) => {
           const summary = words.querySelector<HTMLElement>('[data-summary]');
           if (summary) summary.dataset.cut = String(summary.scrollHeight > summary.clientHeight + 2);
@@ -1234,7 +1251,7 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
           </div>
 
           {projects.map((project, i) => (
-            <Unit key={project.id} project={project} index={i} row={ROWS_ABOVE + i} off={!stopSet.has(i)} near={nearSet.has(i)} onGo={goTo} onView={onView} />
+            <Unit key={project.id} project={project} index={i} row={ROWS_ABOVE + i} off={!stopSet.has(i)} near={nearSet.has(i)} onGo={goTo} />
           ))}
 
           {/* The rest of the rack, falling back a little while a laptop is open */}
@@ -1316,7 +1333,7 @@ function RackStage({ projects, siteCount, formId, nextId, onView }: Props) {
         {/* ---- One project at a time ---- */}
         {projects.map((project, i) => (
           <div key={project.id} data-words={i} className="invisible absolute z-10 flex items-start opacity-0 [@media(min-aspect-ratio:23/20)]:items-center" style={{ left: 'var(--words-x)', width: 'var(--words-w)', top: 'var(--words-top)', bottom: 'var(--words-bottom)' }}>
-            <Words project={project} onView={onView} />
+            <Words project={project} />
           </div>
         ))}
 

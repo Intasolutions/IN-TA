@@ -67,10 +67,12 @@ class ServiceCapabilitySerializer(serializers.ModelSerializer):
 class ServiceProjectSerializer(serializers.ModelSerializer):
     hero = serializers.SerializerMethodField()
     tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    # whether the project has its own page on the website (/portfolio/<slug>), for the link from the service's page
+    case_study = serializers.BooleanField(source="has_case_study", read_only=True)
 
     class Meta:
         model = Project
-        fields = ("id", "title", "slug", "role", "summary", "hero", "tags", "external_url")
+        fields = ("id", "title", "slug", "role", "summary", "hero", "tags", "external_url", "case_study")
 
     def get_hero(self, obj):
         return absolute_url(self, obj.hero)

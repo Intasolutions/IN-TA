@@ -12,6 +12,8 @@ export type Project = {
   external_url: string;
   featured: boolean;
   order: number;
+  /** it has a page of its own (/portfolio/<slug>) */
+  case_study?: boolean;
 };
 
 /** The projects as the API sends them, featured first, then in their order */
