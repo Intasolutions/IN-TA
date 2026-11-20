@@ -752,9 +752,30 @@ export async function startGuide(host: HTMLElement, canvas: HTMLCanvasElement, h
     for (const x of list) { r -= x.w; if (r <= 0) return x; }
     return list[list.length - 1];
   };
+  // Where he stands is never in front of something to click or type in (a button, a link, a form box): on a short
+  // screen the page's buttons can sit in the strip he walks along. He takes the nearest clear place beside it.
+  const CLICKABLE = 'a, button, input, select, textarea, label, summary, [role="button"], [tabindex]:not([tabindex="-1"])';
+  const OURS = '[data-guide-dock], [data-whatsapp]'; // the floating buttons are no reason to step aside
+  const clearAt = (x: number) => {
+    const top = floorY() - HEIGHT;
+    for (const dx of [-30 * S, 0, 30 * S]) {
+      for (const share of [0.2, 0.55, 0.9]) {
+        const hit = document.elementFromPoint(x + dx, top + HEIGHT * share);
+        if (hit && hit.closest(CLICKABLE) && !hit.closest(OURS)) return false;
+      }
+    }
+    return true;
+  };
   const standX = (el: Element) => {
     const r = el.getBoundingClientRect();
-    return clamp(r.left + r.width / 2 + rand(-24, 24), 50 * S, Math.min(window.innerWidth - 170 * S, homeOf().x - 70 * S));
+    const lo = 50 * S, hi = Math.min(window.innerWidth - 170 * S, homeOf().x - 70 * S);
+    const want = clamp(r.left + r.width / 2 + rand(-24, 24), lo, hi);
+    for (let step = 0; step <= 10; step++) {
+      for (const x of step ? [want - step * 40 * S, want + step * 40 * S] : [want]) {
+        if (x >= lo && x <= hi && clearAt(x)) return x;
+      }
+    }
+    return want; // nowhere clear: he'll only stand there for a moment
   };
 
   function startStroll() {

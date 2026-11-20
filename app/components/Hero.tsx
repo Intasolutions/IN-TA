@@ -13,7 +13,7 @@ import OfficeStatus from './OfficeStatus';
 import Marquee from './Marquee';
 import { usePlayIntro, useShownOnArrival } from '../context/usePlayIntro';
 import { useSite, useText } from '../site/SiteContext';
-import { accent, linesOf } from '../site/site';
+import { accent, hoursShort, linesOf, phoneHref } from '../site/site';
 import { ENQUIRY_ID, openEnquiry } from './blog/enquiry';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -37,7 +37,8 @@ function formatMetric(n: number, { prefix, decimals, pad }: NonNullable<ReturnTy
 }
 
 export default function Hero() {
-  const { metrics } = useSite();
+  const site = useSite();
+  const { metrics } = site;
   const t = useText();
   const [titleTop, titleBottom] = accent(t('home_hero_title'));
   // a few words each ("Point: explanation" shows only the point, so the opening stays light)
@@ -288,7 +289,8 @@ export default function Hero() {
                 className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.1em] min-[400px]:tracking-[0.16em] sm:tracking-[0.25em] text-brand-blue font-bold"
               />
             </div>
-            <div className="hidden sm:block">
+            {/* (from xl it moves into the card beside the buttons) */}
+            <div className="hidden sm:block xl:hidden">
               <OfficeStatus />
             </div>
           <span data-hero="rule" className="absolute bottom-0 left-0 right-0 h-px bg-brand-blue/20 origin-left" />
@@ -335,7 +337,8 @@ export default function Hero() {
 
           </div>
 
-          <div className="mt-6 sm:mt-8 max-w-3xl">
+          <div className="mt-6 sm:mt-8 xl:flex xl:items-end xl:justify-between xl:gap-16">
+          <div className="max-w-3xl">
             <p data-hero="fade" className="text-midnight/80 text-base sm:text-lg lg:text-xl leading-relaxed">
               {t('home_hero_text')}
             </p>
@@ -390,6 +393,22 @@ export default function Hero() {
                 )}
               </span>
             </div>
+          </div>
+
+          {/* Large screens: the office, open or not, and a number to call, beside the buttons (real details from Site settings) */}
+          <aside
+            data-hero="fade"
+            data-magnetic="0.12"
+            aria-label={`${site.address.district} office`}
+            className="hidden xl:flex flex-col gap-3 w-[300px] shrink-0 p-5 rounded-2xl bg-white/90 border border-brand-blue/25 shadow-lg shadow-brand-blue/10"
+          >
+            <OfficeStatus />
+            <a href={phoneHref(site.phone)} className="group inline-flex items-center gap-2.5 font-display text-2xl font-extrabold text-midnight hover:text-brand-blue transition-colors">
+              <Icon name="call" className="text-[20px] text-brand-blue" />
+              <span>{site.phone}</span>
+            </a>
+            <p className="font-mono text-[10px] tracking-wider uppercase text-midnight/60">{hoursShort(site)}</p>
+          </aside>
           </div>
 
         </div>

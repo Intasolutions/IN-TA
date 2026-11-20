@@ -520,7 +520,11 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
 
       // One timeline for all the words on the page, in screens of the full-length page (driven by the scroll through
       // the pace, below: on a phone the services take less scrolling)
-      const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+      // (immediateRender: false: every part this timeline brings in starts out `invisible` in the markup, so its words need
+      // no starting position until the scroll reaches them. Applying them all up front cost one forced layout per word,
+      // as GSAP re-reads each transform after a fromTo's first write: on a phone that froze the page for ~1.7 s as it
+      // opened. Now each part's few words are set up as it arrives.)
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'none', immediateRender: false } });
       tl.to({}, { duration: S.total }, 0);
       tl.to('[data-hero="copy"]', { y: -50, autoAlpha: 0, duration: 0.34, ease: 'sine.in' }, S.hero.out).to('[data-hero="shade"]', { autoAlpha: 0, duration: 0.3 }, S.hero.out + 0.08);
 
