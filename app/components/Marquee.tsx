@@ -60,7 +60,9 @@ export default function Marquee() {
 
       const tick = (_time: number, deltaMs: number) => {
         if (!onScreen) return;
-        const dt = Math.min(deltaMs, 50) / 1000;
+        // real elapsed time, so a tablet busy drawing the hero background at a low frame rate keeps the strip at its
+        // speed instead of slowing with it (only a long pause, like a tab coming back, is cut short)
+        const dt = Math.min(deltaMs, 250) / 1000;
         x += (BASE_SPEED + boost) * dir * pace.v * dt;
         if (x <= -rowWidth) x += rowWidth;
         if (x > 0) x -= rowWidth;
@@ -86,7 +88,11 @@ export default function Marquee() {
       const io = new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; });
       io.observe(wrap);
 
-      const onEnter = () => gsap.to(pace, { v: 0.15, duration: 0.6, ease: 'power2.out', overwrite: true });
+      // Slows under a mouse only. A finger on a tablet "enters" it too (even just to scroll) and isn't always reported
+      // leaving, which left the strip crawling at 15% as if it had stopped.
+      const onEnter = (e: PointerEvent) => {
+        if (e.pointerType === 'mouse') gsap.to(pace, { v: 0.15, duration: 0.6, ease: 'power2.out', overwrite: true });
+      };
       const onLeave = () => gsap.to(pace, { v: 1, duration: 0.6, ease: 'power2.out', overwrite: true });
       wrap.addEventListener('pointerenter', onEnter);
       wrap.addEventListener('pointerleave', onLeave);
