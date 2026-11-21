@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePagePath } from '../site/usePagePath';
 import Icon from './Icon';
 import MainNav, { type NavLink } from './MainNav';
 import { lockScroll } from './SmoothScroll';
@@ -37,7 +37,7 @@ export function IstClock() {
 }
 
 export default function Header() {
-  const pathname = usePathname();
+  const pathname = usePagePath();
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const lastScrollY = useRef(0);

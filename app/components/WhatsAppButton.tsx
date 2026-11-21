@@ -6,8 +6,8 @@
 // It steps aside only where it would cover [data-floating-clear] (the hero's buttons, the footer's back-to-top row) or
 // [data-whatsapp-clear] on the screens its media query names (the enquiry form's send button on phones and tablets).
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { useSite, useText } from '../site/SiteContext';
+import { usePagePath } from '../site/usePagePath';
 import { whatsappDigits } from '../site/site';
 import { useWhatsAppTopic, whatsappLink, whatsappMessage } from './whatsappTopic';
 import { restingZone, watchCover } from './clearance';
@@ -15,7 +15,7 @@ import { restingZone, watchCover } from './clearance';
 export default function WhatsAppButton() {
   const site = useSite();
   const t = useText();
-  const pathname = usePathname();
+  const pathname = usePagePath();
   const topic = useWhatsAppTopic();
   const href = whatsappLink(whatsappDigits(site), whatsappMessage(site, pathname, topic));
   const label = t('whatsapp_button');

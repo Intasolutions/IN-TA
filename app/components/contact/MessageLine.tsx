@@ -7,6 +7,7 @@ import { apiBase } from '../blog/data';
 import { COUNTRIES } from '../../contact/data/countries';
 import { useSite } from '../../site/SiteContext';
 import { phoneHref } from '../../site/site';
+import { pixelEvent } from '../../site/pixel';
 
 const LABEL = 'mb-1.5 block font-mono text-[10px] font-bold uppercase tracking-wider text-white/70';
 const FIELD = 'block h-12 w-full rounded-xl border bg-white/[0.06] px-4 text-base text-white outline-none transition-[border-color,background-color,box-shadow] duration-200 placeholder:text-white/35 focus:bg-white/[0.09] focus:ring-4 focus:ring-[#3b7bf7]/25 sm:text-[15px]';
@@ -103,6 +104,7 @@ export default function MessageLine({ onKey, onSending, onSent }: Props) {
       }
       setSent({ name: payload.name.split(/\s+/)[0], email: payload.email });
       track('Enquiry', { form: 'contact page' });
+      pixelEvent('Lead', { content_name: 'contact page' });
       setStatus('sent');
       onSent();
       setName('');

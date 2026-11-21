@@ -382,7 +382,8 @@ export default function Footer() {
         <div className="relative mt-8 lg:mt-10 pt-4">
           <span data-ft="rule" aria-hidden="true" className="absolute inset-x-0 top-0 h-px bg-white/15 origin-left" />
           <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 font-mono text-xs uppercase tracking-wider text-white/50">
-            <p>© {year} IN-TA Solutions Pvt Ltd. All rights reserved.</p>
+            {/* the server's year can trail the visitor's on New Year's night (UTC vs IST): not a hydration error */}
+            <p suppressHydrationWarning>© {year} IN-TA Solutions Pvt Ltd. All rights reserved.</p>
             <div className="flex items-center gap-5 sm:gap-6">
               <Link href="/terms" className="group/roll inline-flex py-1 hover:text-white">
                 <Roll>Terms</Roll>

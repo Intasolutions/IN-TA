@@ -9,6 +9,7 @@ import { apiBase, calm } from './data';
 import { ENQUIRY_ID, onEnquiry } from './enquiry';
 import { useSite, useText } from '../../site/SiteContext';
 import { linesOf, listOf, phoneHref } from '../../site/site';
+import { pixelEvent } from '../../site/pixel';
 
 gsap.registerPlugin(useGSAP);
 
@@ -122,6 +123,7 @@ export default function ProjectForm({ defaultInterest, kicker, title, text }: { 
       }
       if (!res.ok) throw new Error(String(res.status));
       track('Enquiry', { form: 'enquiry', interest: values.need });
+      pixelEvent('Lead', { content_name: 'enquiry form', content_category: values.need });
       setStatus('sent');
       setValues({ ...EMPTY, need: values.need });
     } catch {

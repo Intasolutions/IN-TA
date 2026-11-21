@@ -66,7 +66,7 @@ export const BLOCKS: Block[] = [
     rect: [0.5, -0.16, 1, 0.28],
     short: 'Marketing',
     part: 'Signal block',
-    standard: { slug: 'Marketing', title: 'Digital Marketing' },
+    standard: { slug: 'marketing', title: 'Digital Marketing' },
     shot: { az: 24, el: 42, w: 0.74 },
   },
   {

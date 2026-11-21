@@ -311,7 +311,7 @@
     {
       "name": "Search engines",
       "items": [
-        ["seo_home_title", "Home: title", "Software, AI & Automation Company in Wayanad, Kerala | IN-TA Solutions"],
+        ["seo_home_title", "Home: title", "Custom Software, AI & App Company in Wayanad, Kerala | IN-TA Solutions"],
         ["seo_home_description", "Home: description", "Custom software, mobile apps, AI and WhatsApp automation for businesses in Kerala and abroad, from lead bots to ERP systems. Call +91 94475 95381."],
         ["seo_about_title", "About: title", "About Us | Software & AI Company in Wayanad, Kerala"],
         ["seo_about_description", "About: description", "IN-TA Solutions is a software and AI company in Mananthavady, Wayanad. Since 2023 we've built websites, apps, custom software and AI tools for businesses in India, Canada, Georgia and the UAE."],
@@ -327,6 +327,12 @@
         ["seo_business_description", "Company description given to search engines", "Software and AI company in Wayanad, Kerala, building AI solutions, custom software, websites and mobile apps for businesses in India, Canada, Georgia and the UAE."],
         ["seo_area_served", "Towns and regions the company serves (separate with commas)", "Mananthavady, Kalpetta, Sulthan Bathery, Wayanad, Kozhikode, Kannur, Kerala, India, Canada, Georgia, UAE"],
         ["seo_google_profile", "Google Business Profile link (its Share link from Google Maps). Search engines are told it is the same business as the website. Leave empty if you have none", ""]
+      ]
+    },
+    {
+      "name": "Advertising",
+      "items": [
+        ["facebook_pixel_id", "Meta (Facebook) Pixel ID: the number from Meta Events Manager > Data sources. While it's filled in, the site tells Meta about page visits, sent enquiries and taps on WhatsApp, phone and email, so you can measure Facebook and Instagram ads, and the Privacy page says so. Leave empty to turn it off", ""]
       ]
     }
   ]

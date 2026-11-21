@@ -66,6 +66,14 @@ html {
   line-height: 1;
   user-select: none;
 }
+/* <Icon>: 1em of its wrapper (this selector outranks Google's 24px); the font's ligature turns the name into the glyph */
+.material-symbols-outlined[data-icon] {
+  font-size: 1em;
+  line-height: 1;
+}
+.material-symbols-outlined[data-icon]::before {
+  content: attr(data-icon);
+}
 
 @keyframes marquee {
   from { transform: translate3d(0, 0, 0); }

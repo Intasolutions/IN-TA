@@ -68,6 +68,11 @@ class SiteCountsTests(TestCase):
 class QuestionTests(TestCase):
     """The shared questions: on the pages they are given to, a few per page, each told to search engines on one page."""
 
+    def setUp(self):
+        from .models import Question
+
+        Question.objects.all().delete()  # start without the questions data migrations add (e.g. 0011's About ones)
+
     def ask(self, question, pages='', services=(), **kw):
         from .models import Question
 

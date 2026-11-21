@@ -16,6 +16,7 @@ import { createChip, type ChipEngine } from './chipEngine';
 import { AI_BLOCK, BLOCKS, boardOf, centreOf, HERO, KIND, linkBetween, nameOf, NOW, PLAN, STANDARD_SERVICES, YOUR_BLOCK, type Block, type ChipService, type Point } from './floorplan';
 import { useText } from '../../site/SiteContext';
 import { accent, countInWords, linesOf, standardText } from '../../site/site';
+import { pixelEvent } from '../../site/pixel';
 import { errorAt, routeOrder, type OrderChoice } from './orders';
 import { buildScore, cameraAt, flyBetween, mixCameras, orderKeys, paceOf, ramp, smooth, smoother, type Camera, type Key } from './score';
 
@@ -231,6 +232,7 @@ function OrderAnswer({ order, onClose }: { order: ActiveOrder; onClose: () => vo
       });
       if (!res.ok) throw new Error(String(res.status));
       track('Enquiry', { form: 'services order' });
+      pixelEvent('Lead', { content_name: 'services order' });
       setStep('sent');
     } catch {
       setStep('error');

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import legal from '../../../home/legal_text.json';
-import { accent, type Site } from '../../site/site';
+import { accent, textOf, type Site } from '../../site/site';
+import { pixelIdOf } from '../../site/pixel';
 import type { LegalDocument, LegalSection } from './LegalPage';
 
 // The Terms, Privacy and Security pages, as written in the admin (Site settings > Page wording) or the standard text
@@ -179,7 +180,13 @@ export function legalDocument(site: Site, doc: DocName): LegalDocument {
     accent: blue,
     lead: say(site, doc, 'lead'),
     updated: { iso: updated.iso, label: updated.label },
-    sections: sectionsOf(say(site, doc, 'body').replace(/\{email\}/g, () => site.email), me.subject),
+    sections: sectionsOf(
+      say(site, doc, 'body')
+        // the Privacy page describes the Meta Pixel only while it is on (Site settings > Page wording > Advertising)
+        .replace(/\{tracking\}/g, () => say(site, doc, pixelIdOf(textOf(site, 'facebook_pixel_id')) ? 'tracking_on' : 'tracking_off'))
+        .replace(/\{email\}/g, () => site.email),
+      me.subject,
+    ),
     others: DOCS.filter((d) => d.name !== doc).map((d) => ({ href: d.href, name: accent(say(site, d.name, 'title')).filter(Boolean).join(' '), about: say(site, d.name, 'card') })),
   };
 }

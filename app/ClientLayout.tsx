@@ -12,6 +12,7 @@ import type { Site } from './site/site';
 // after the page is ready. The WhatsApp button has the bottom left corner.
 import Guide from './components/guide/Guide';
 import WhatsAppButton from './components/WhatsAppButton';
+import FacebookPixel from './components/FacebookPixel';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [opening, setOpening] = useState(true);
@@ -29,6 +30,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <SmoothScroll>{children}</SmoothScroll>
       <WhatsAppButton />
       <Guide />
+      <FacebookPixel />
     </>
   );
 }

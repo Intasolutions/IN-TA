@@ -126,7 +126,7 @@ export const DEFAULT_SITE: Site = {
         icon: 'devices',
       },
     },
-    { title: 'Digital Marketing', slug: 'Marketing', card: null },
+    { title: 'Digital Marketing', slug: 'marketing', card: null },
     { title: 'UI/UX Design', slug: 'ui-ux-design', card: null },
     {
       title: 'SEO, AEO & GEO Services',

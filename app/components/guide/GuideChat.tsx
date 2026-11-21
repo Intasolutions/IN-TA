@@ -11,6 +11,7 @@ import { whatsappLink } from '../whatsappTopic';
 import { LIMITS, NO_LEAD, withName, type Answer, type AskMode, type AskReply, type ChatTurn, type LeadInfo, type Mood, type Unavailable } from './chatTypes';
 import { journeyText } from './journey';
 import { clip, pageContext, short } from './pageContext';
+import { pixelEvent } from '../../site/pixel';
 import type { Guide as GuideApi } from './engine';
 import css from './guide.module.css';
 
@@ -218,6 +219,7 @@ export default function GuideChat({ api, open, onClose, robot, onOut, start }: {
         });
         if (!res.ok) throw new Error(`start ${res.status}`);
         ({ id, token } = await res.json());
+        pixelEvent('Lead', { content_name: 'robot chat' }); // the chat now holds their name and contact
         const saved = { ...who, id, token };
         keepMe(saved);
         meRef.current = saved;
