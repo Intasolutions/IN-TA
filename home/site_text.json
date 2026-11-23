@@ -334,8 +334,8 @@
       "about": "The Meta Pixel, and the cookie prompt that asks visitors before it starts. Answers are kept as proof in Contact > Cookie choices.",
       "items": [
         ["facebook_pixel_id", "Meta (Facebook) Pixel ID: the number from Meta Events Manager > Data sources. While it's filled in, visitors outside the EEA, the UK and Switzerland are asked first (the cookie prompt below), and for those who allow it the site tells Meta about page visits, button taps, sent enquiries and taps on WhatsApp, phone and email, so you can measure Facebook and Instagram ads; the Privacy page says so. Leave empty to turn it off (the prompt goes too)", ""],
-        ["consent_title", "Cookie prompt: heading (changing it or the text below asks every visitor again)", "Can we measure our ads?"],
-        ["consent_text", "Cookie prompt: text. Say what the Pixel does and how to change your mind (the Privacy Policy link follows it)", "With your OK, we use the Meta Pixel to see which Facebook and Instagram ads bring people here. It sets cookies and tells Meta the pages you open and the buttons you tap on our site, never what you type. It stays off unless you allow it, and you can change your mind at any time under Cookie settings at the bottom of every page."],
+        ["consent_title", "Cookie prompt: heading (changing it or the text below asks every visitor again)", "Cookies"],
+        ["consent_text", "Cookie prompt: text. Keep it short: what the cookies are for (the Privacy Policy link follows it and has the details)", "We'd like to use cookies to measure our Facebook and Instagram ads. They stay off unless you allow them."],
         ["consent_more", "Cookie prompt: the link to the Privacy Policy", "Privacy Policy"],
         ["consent_allow", "Cookie prompt: the yes button", "Allow"],
         ["consent_decline", "Cookie prompt: the no button (as big as the yes button)", "No thanks"],

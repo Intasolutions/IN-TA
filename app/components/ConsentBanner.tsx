@@ -103,8 +103,8 @@ export default function ConsentBanner() {
           shadow-[0_24px_60px_-18px_rgba(1,7,43,0.45)] transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none
           ${shown ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
       >
-        <div className="flex flex-col gap-4">
-          <div className="min-w-0">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <div className="min-w-0 flex-1">
             <h2 id="consent-title" className="font-display text-[16px] font-bold leading-snug">
               {t('consent_title')}
             </h2>
@@ -116,7 +116,7 @@ export default function ConsentBanner() {
             </p>
             {current && <p className="mt-2 text-[12px] font-semibold text-midnight/70">{t(current.ads ? 'consent_state_on' : 'consent_state_off')}</p>}
           </div>
-          <div className="flex gap-2 sm:justify-end">
+          <div className="flex shrink-0 gap-2">
             <button type="button" onClick={() => answer(false)} className={`${BUTTON} bg-white text-midnight ring-1 ring-inset ring-midnight/25 hover:ring-midnight/50`}>
               {t('consent_decline')}
             </button>

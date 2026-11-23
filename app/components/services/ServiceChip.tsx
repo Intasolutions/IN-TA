@@ -527,12 +527,16 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       // as GSAP re-reads each transform after a fromTo's first write: on a phone that froze the page for ~1.7 s as it
       // opened. Now each part's few words are set up as it arrives.)
       const tl = gsap.timeline({ paused: true, defaults: { ease: 'none', immediateRender: false } });
+      // ...except each part's own fade in: with immediateRender off, GSAP 3.13 doesn't put a part back to hidden when the
+      // scroll goes back up past where it came in, so scrolling up left every part on screen at once. Setting the ~15
+      // parts' starting opacity up front is cheap (no transforms, so no layout reads).
+      const SHOWN = { immediateRender: true };
       tl.to({}, { duration: S.total }, 0);
       tl.to('[data-hero="copy"]', { y: -50, autoAlpha: 0, duration: 0.34, ease: 'sine.in' }, S.hero.out).to('[data-hero="shade"]', { autoAlpha: 0, duration: 0.3 }, S.hero.out + 0.08);
 
       const planEl = root.querySelector('[data-beat="plan"]');
       const planQ = gsap.utils.selector(planEl);
-      tl.fromTo(planEl, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.14, ease: 'sine.inOut' }, S.plan.in)
+      tl.fromTo(planEl, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.14, ease: 'sine.inOut', ...SHOWN }, S.plan.in)
         .fromTo(planQ('[data-w]'), { y: 14, autoAlpha: 0 }, { ...rise, duration: 0.14, stagger: 0.012 }, S.plan.in)
         .fromTo(planQ('[data-b]'), { y: 14, autoAlpha: 0 }, { ...rise, duration: 0.14 }, S.plan.in + 0.1)
         .to(planEl, { autoAlpha: 0, duration: 0.14, ease: 'sine.inOut' }, S.plan.out);
@@ -540,7 +544,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       const card = (el: Element | null, a: number, b: number) => {
         if (!el) return;
         const q = gsap.utils.selector(el);
-        tl.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.16, ease: 'sine.inOut' }, a)
+        tl.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.16, ease: 'sine.inOut', ...SHOWN }, a)
           .fromTo(q('[data-in]'), { y: 22 }, { y: 0, duration: 0.2, ease: 'sine.out' }, a)
           .fromTo(q('[data-k]'), { y: 8, autoAlpha: 0 }, { ...rise, duration: 0.1 }, a + 0.03)
           .fromTo(q('[data-t]'), { yPercent: 100 }, { yPercent: 0, duration: 0.16, ease: 'sine.out' }, a + 0.04)
@@ -558,7 +562,7 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       const line = (name: string, a: number, b: number) => {
         const el = root.querySelector(`[data-beat="${name}"]`);
         const q = gsap.utils.selector(el);
-        tl.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06, ease: 'sine.inOut' }, a)
+        tl.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06, ease: 'sine.inOut', ...SHOWN }, a)
           .fromTo(q('[data-w]'), { y: 14, autoAlpha: 0 }, { ...rise, duration: 0.12, stagger: 0.01 }, a)
           .to(el, { autoAlpha: 0, duration: 0.12, ease: 'sine.inOut' }, b);
       };
@@ -567,11 +571,11 @@ export default function ServiceChip({ services }: { services: ChipService[] }) {
       line('ai-b2', S.ai.b2[0], S.ai.b2[1] - 0.04);
       line('ai-b3', S.ai.b3[0], S.ai.b3[1] - 0.04);
       const askEl = root.querySelector('[data-beat="ai-ask"]');
-      tl.fromTo(askEl, { y: 18, autoAlpha: 0 }, { ...rise, duration: 0.16 }, S.ai.ask[0]).to(askEl, { y: -14, autoAlpha: 0, duration: 0.12, ease: 'sine.in' }, S.ai.ask[1] - 0.04);
+      tl.fromTo(askEl, { y: 18, autoAlpha: 0 }, { ...rise, duration: 0.16, ...SHOWN }, S.ai.ask[0]).to(askEl, { y: -14, autoAlpha: 0, duration: 0.12, ease: 'sine.in' }, S.ai.ask[1] - 0.04);
 
       const closeEl = root.querySelector('[data-beat="close"]');
       const closeQ = gsap.utils.selector(closeEl);
-      tl.fromTo(closeEl, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.08, ease: 'sine.inOut' }, S.close.arrive - 0.3)
+      tl.fromTo(closeEl, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.08, ease: 'sine.inOut', ...SHOWN }, S.close.arrive - 0.3)
         .fromTo(closeQ('[data-w]'), { y: 14, autoAlpha: 0 }, { ...rise, duration: 0.14, stagger: 0.012 }, S.close.arrive - 0.3)
         .fromTo(closeQ('[data-b]'), { y: 14, autoAlpha: 0 }, { ...rise, duration: 0.16 }, S.close.arrive - 0.12);
 
