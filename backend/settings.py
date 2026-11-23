@@ -21,26 +21,37 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env (optional)
 import os
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 load_dotenv(BASE_DIR / ".env")
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-%^b-76cqtnl^frgky94(6=8bz-&v7t)a%g3)ia4f1u71$1is-_",
-)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Off on Render (which always sets RENDER), on for local development; DJANGO_DEBUG=True/False overrides either.
 # With it on, any error page shows the public the code and the site's URL patterns, so it must stay off live.
 DEBUG = os.getenv("DJANGO_DEBUG", "False" if os.getenv("RENDER") else "True") == "True"
 
+# SECURITY WARNING: keep the secret key used in production secret!
+# It signs the admin's sessions and tokens. Live it must come from DJANGO_SECRET_KEY (Render > Environment): the
+# repository is public, so a key written in this file is known to everyone. Only a local run (DEBUG on) falls back
+# to a throwaway one; the live API refuses to start without its own.
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY is not set. Add it in Render > Environment (a long random value).")
+    SECRET_KEY = "local-development-only-not-a-secret"
+
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    
+    # browsers keep to HTTPS for this host for a year (this host only: no subdomains, no preload list)
+    SECURE_HSTS_SECONDS = 31536000
+
+# How long the visitors' messages, enquiries, robot chats and cookie choices are kept before they're deleted
+# (home/retention.py). The Privacy page says 24 months: change both together.
+DATA_RETENTION_DAYS = int(os.getenv("DATA_RETENTION_DAYS", "730"))
+
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
@@ -85,16 +96,13 @@ MIDDLEWARE = [
 ]
 
 # CORS configuration
+# The website's own addresses. A website running on this computer (localhost:3000) is trusted only while developing:
+# the live API doesn't take browser requests from a page served on someone's own machine.
+_SITE_ORIGINS = "https://in-tasolutions.com,https://www.in-tasolutions.com" + (",http://localhost:3000" if DEBUG else "")
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS",
-    "https://in-tasolutions.com,https://www.in-tasolutions.com,http://localhost:3000"
-).split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", _SITE_ORIGINS).split(",")
 
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED_ORIGINS",
-    "https://in-tasolutions.com,https://www.in-tasolutions.com,http://localhost:3000"
-).split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", _SITE_ORIGINS).split(",")
 CORS_ALLOW_CREDENTIALS = True
 
 # Django REST Framework defaults (simple, change as needed)
@@ -107,6 +115,8 @@ REST_FRAMEWORK = {
         "forms": "20/hour",
         # the website robot's chats saving their messages
         "chat": "240/hour",
+        # answers to the website's cookie prompt (contact.ConsentRecord)
+        "consent": "60/hour",
     },
 }
 

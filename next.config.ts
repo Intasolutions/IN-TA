@@ -3,16 +3,24 @@ import type { NextConfig } from "next";
 // The API this build talks to (the same fallback as the pages use)
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
+// A backend on this computer (development and local test builds); the live site uses Render's API and Cloudinary
+const LOCAL_API = /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(API_URL);
+
 const nextConfig: NextConfig = {
+  // no "X-Powered-By: Next.js" header: it only tells the world what the site runs on
+  poweredByHeader: false,
   images: {
     qualities: [75, 90],
     // Next 16 won't optimise images from this computer's own addresses unless told to: only when the backend is a
-    // local one (development and local test builds). The live site, on Render's API and Cloudinary, keeps the guard.
-    dangerouslyAllowLocalIP: /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/|$)/.test(API_URL),
+    // local one. The live site keeps the guard, and doesn't list the local addresses at all.
+    dangerouslyAllowLocalIP: LOCAL_API,
     remotePatterns: [
-      // a backend running on this computer, while developing
-      { protocol: "http", hostname: "127.0.0.1", port: "8000", pathname: "/media/**" },
-      { protocol: "http", hostname: "localhost", port: "8000", pathname: "/media/**" },
+      ...(LOCAL_API
+        ? [
+            { protocol: "http" as const, hostname: "127.0.0.1", port: "8000", pathname: "/media/**" },
+            { protocol: "http" as const, hostname: "localhost", port: "8000", pathname: "/media/**" },
+          ]
+        : []),
       // everything uploaded in the admin lives on Cloudinary
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],

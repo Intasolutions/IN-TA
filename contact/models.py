@@ -53,3 +53,25 @@ class ChatConversation(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.phone or self.email})"
+
+
+class ConsentRecord(models.Model):
+    """An answer to the website's cookie prompt (components/ConsentBanner.tsx), which asks before the Meta Pixel starts.
+
+    Kept as proof of what was asked and answered: the law puts it on us to show that someone agreed. It holds nothing
+    about who they are: a random code their browser made, the answer, the version of the prompt's wording, the page and
+    the time. A changed answer (from Cookie settings) adds a new record with the same code.
+    """
+    browser = models.CharField(max_length=40, help_text="A random code kept in the visitor's browser with their answer.")
+    allowed = models.BooleanField(help_text='Whether they allowed the Meta Pixel.')
+    version = models.CharField(max_length=40, help_text="The version of the prompt's wording they answered.")
+    page = models.CharField(max_length=200, blank=True, help_text='The page they answered on.')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Cookie choice'
+        verbose_name_plural = 'Cookie choices'
+
+    def __str__(self):
+        return f"{'Allowed' if self.allowed else 'Declined'} · {self.browser[:8]}…"

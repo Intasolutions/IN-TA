@@ -1,5 +1,6 @@
-// Meta (Facebook) Pixel. It is on only while Site settings > Page wording > Advertising holds a Pixel ID; the Privacy
-// page then describes it (legal_privacy_tracking_on) instead of saying the site uses no tracking tools.
+// Meta (Facebook) Pixel. It is on only while Site settings > Page wording > Advertising holds a Pixel ID and the visitor
+// has allowed it in the cookie prompt (site/consent.ts). While there's an ID, the Privacy page describes it
+// (legal_privacy_tracking_on) instead of saying the site uses no tracking tools.
 
 type Fbq = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void;
@@ -22,17 +23,43 @@ export function pixelIdOf(text: string | undefined) {
   return /^\d{6,20}$/.test(id) ? id : null;
 }
 
-/** Tells Meta about an enquiry or a contact click. Does nothing while the Pixel is off */
+// Whether the visitor has allowed it on this page (site/consent.ts): nothing reaches Meta otherwise
+let allowed = false;
+
+/** Tells Meta about an enquiry or a contact click. Does nothing while the Pixel is off or not allowed */
 export function pixelEvent(name: 'Lead' | 'Contact', params?: Record<string, string>) {
-  window.fbq?.('track', name, params);
+  if (allowed) window.fbq?.('track', name, params);
+}
+
+/** The cookie's own host and each parent domain (Meta sets _fbp on the top one, e.g. .in-tasolutions.com) */
+const cookieDomains = (host: string) => {
+  const parts = host.split('.');
+  const out = [''];
+  for (let i = 0; i < parts.length - 1; i++) out.push(parts.slice(i).join('.'), `.${parts.slice(i).join('.')}`);
+  return out;
+};
+
+/** After "No thanks" in Cookie settings: Meta's script stops sending, and its cookies on this site are removed */
+export function stopPixel() {
+  allowed = false;
+  window.fbq?.('consent', 'revoke');
+  for (const name of ['_fbp', '_fbc'])
+    for (const domain of cookieDomains(window.location.hostname))
+      document.cookie = `${name}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ''}`;
 }
 
 /**
- * Meta's base code: a queue that collects calls at once, and the real script fetched once the page has finished
- * loading and the browser is idle, so it never delays the page. Meta's script counts later page changes by itself.
+ * Only after the visitor allows it (components/ConsentBanner.tsx). Meta's base code: a queue that collects calls at
+ * once, and the real script fetched once the page has finished loading and the browser is idle, so it never delays the
+ * page. Meta's script counts later page changes by itself.
  */
 export function startPixel(id: string) {
-  if (window.fbq) return;
+  allowed = true;
+  if (window.fbq) {
+    // allowed again after a "No thanks" on this same page
+    window.fbq('consent', 'grant');
+    return;
+  }
   // queued as an `arguments` object, exactly as Meta's own snippet does
   const fbq = function () {
     // eslint-disable-next-line prefer-rest-params

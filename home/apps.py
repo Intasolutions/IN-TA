@@ -6,6 +6,8 @@ class HomeConfig(AppConfig):
     name = 'home'
 
     def ready(self):
-        from .revalidate import connect
+        from . import retention, revalidate
 
-        connect()
+        revalidate.connect()
+        # visitors' messages, enquiries, chats and cookie choices are deleted after DATA_RETENTION_DAYS
+        retention.connect()

@@ -13,6 +13,8 @@ import type { Site } from './site/site';
 import Guide from './components/guide/Guide';
 import WhatsAppButton from './components/WhatsAppButton';
 import FacebookPixel from './components/FacebookPixel';
+// asks before the Meta Pixel starts (only while the admin has a Pixel ID)
+import ConsentBanner from './components/ConsentBanner';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [opening, setOpening] = useState(true);
@@ -31,6 +33,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <WhatsAppButton />
       <Guide />
       <FacebookPixel />
+      <ConsentBanner />
     </>
   );
 }

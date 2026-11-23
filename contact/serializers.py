@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ChatConversation, ContactMessage
+from .models import ChatConversation, ConsentRecord, ContactMessage
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -68,3 +68,20 @@ class ChatStartSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'phone': 'Please give us a phone number or an email address'})
         data.pop('honeypot', None)
         return data
+
+
+class ConsentSerializer(serializers.ModelSerializer):
+    """An answer to the cookie prompt: the browser's random code, the answer, the wording's version and the page."""
+
+    class Meta:
+        model = ConsentRecord
+        fields = ('browser', 'allowed', 'version', 'page')
+
+    def validate_browser(self, value):
+        value = value.strip()
+        if not (8 <= len(value) <= 40) or not all(c.isalnum() or c in '-_' for c in value):
+            raise serializers.ValidationError('Not a browser code')
+        return value
+
+    def validate_page(self, value):
+        return (value or '').strip()[:200]

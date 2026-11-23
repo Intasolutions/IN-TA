@@ -2,11 +2,13 @@ from django.contrib import admin, messages
 from django.utils.html import format_html, format_html_join
 from django.conf import settings
 from django.core.mail import mail_admins, send_mail
-from .models import ChatConversation, ContactMessage
+from home.retention import RetentionAdminMixin
+
+from .models import ChatConversation, ConsentRecord, ContactMessage
 
 
 @admin.register(ContactMessage)
-class ContactMessageAdmin(admin.ModelAdmin):
+class ContactMessageAdmin(RetentionAdminMixin, admin.ModelAdmin):
     list_display = ('name', 'email', 'phone', 'country', 'is_request', 'created_at', 'reviewed')
     list_filter = ('reviewed', 'created_at', 'country')
     search_fields = ('name', 'email', 'message', 'phone')
@@ -50,7 +52,7 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
 
 @admin.register(ChatConversation)
-class ChatConversationAdmin(admin.ModelAdmin):
+class ChatConversationAdmin(RetentionAdminMixin, admin.ModelAdmin):
     """Every conversation with the website robot: who they are, what they need, and the whole chat."""
     list_display = ('name', 'phone', 'email', 'service', 'message_count', 'updated_at', 'reviewed')
     list_filter = ('reviewed', 'created_at')
@@ -92,3 +94,19 @@ class ChatConversationAdmin(admin.ModelAdmin):
     def mark_reviewed(self, request, queryset):
         queryset.update(reviewed=True)
     mark_reviewed.short_description = 'Mark selected chats as reviewed'
+
+
+@admin.register(ConsentRecord)
+class ConsentRecordAdmin(RetentionAdminMixin, admin.ModelAdmin):
+    """Answers to the website's cookie prompt (Meta Pixel), kept as proof of what was asked and answered. They can't be
+    changed here: a visitor who changes their mind adds a new one (same browser code)."""
+    list_display = ('created_at', 'allowed', 'version', 'page', 'browser')
+    list_filter = ('allowed', 'version', 'created_at')
+    search_fields = ('browser',)
+    readonly_fields = ('browser', 'allowed', 'version', 'page', 'created_at')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

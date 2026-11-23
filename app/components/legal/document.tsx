@@ -74,6 +74,13 @@ function linkTo(href: string, children: ReactNode, key: string, subject: string)
         {children}
       </a>
     );
+  // [Cookie settings](#cookie-settings): opens the cookie prompt again (components/ConsentBanner.tsx listens for it)
+  if (href === '#cookie-settings')
+    return (
+      <a key={key} href={href}>
+        {children}
+      </a>
+    );
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(href)) return linkTo(`mailto:${href}`, children, key, subject);
   return <span key={key}>{children}</span>; // anything else (javascript: and the like) stays plain words
 }

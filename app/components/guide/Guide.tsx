@@ -13,6 +13,7 @@ import { OPEN_CHAT } from './openChat';
 import { pageContext, spotByText } from './pageContext';
 import css from './guide.module.css';
 import { restingZone, watchCover } from '../clearance';
+import { afterOpening } from '../../site/afterOpening';
 
 // The website guide: a small 3D character beside the WhatsApp button, on every page (mounted once in ClientLayout, so
 // he stays put as the visitor moves between pages). The 3D engine (./engine, with three.js) is only fetched on a
@@ -38,16 +39,6 @@ function canRun() {
   const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
   if (nav.connection?.saveData || (nav.deviceMemory ?? 8) < 4 || (navigator.hardwareConcurrency ?? 8) < 4) return false;
   try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; }
-}
-
-/** Once the opening screen has cleared (or straight away when it didn't play) */
-function afterOpening(go: () => void) {
-  const state = document.documentElement.dataset.loader;
-  if (state === 'seen' || state === 'left') { go(); return () => {}; }
-  const done = () => { window.clearTimeout(fallback); go(); };
-  const fallback = window.setTimeout(done, 7000);
-  window.addEventListener('inta:opening-done', done, { once: true });
-  return () => { window.clearTimeout(fallback); window.removeEventListener('inta:opening-done', done); };
 }
 
 type Bubble = { text: string; x: number; y: number; ms: number; id: number } | null;

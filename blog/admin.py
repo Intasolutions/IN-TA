@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Blog, Subscriber
+from home.retention import RetentionAdminMixin
 
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
@@ -18,7 +19,7 @@ class BlogAdmin(admin.ModelAdmin):
     )
 
 @admin.register(Subscriber)
-class SubscriberAdmin(admin.ModelAdmin):
+class SubscriberAdmin(RetentionAdminMixin, admin.ModelAdmin):
     list_display = ('name', 'company', 'email', 'phone', 'interest', 'created_at')
     list_filter = ('interest', 'created_at')
     search_fields = ('name', 'company', 'email', 'phone', 'message')

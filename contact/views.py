@@ -10,7 +10,22 @@ from django.conf import settings
 from home.mail import admins_later, send_later
 
 from .models import ChatConversation, ContactMessage
-from .serializers import ChatStartSerializer, ContactSerializer
+from .serializers import ChatStartSerializer, ConsentSerializer, ContactSerializer
+
+
+class ConsentViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """Answers to the website's cookie prompt (contact.ConsentRecord). Anyone may add one; nobody can read them here:
+    they're in the admin (Contact > Cookie choices)."""
+    serializer_class = ConsentSerializer
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'consent'
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'saved': True}, status=status.HTTP_201_CREATED)
 
 
 class ContactViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):

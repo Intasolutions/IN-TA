@@ -14,6 +14,7 @@ import { useOfficeStatus } from './OfficeStatus';
 import { scrollToTop } from './SmoothScroll';
 import { useSite, useText } from '../site/SiteContext';
 import { accent, addressLines, hoursShort, mapUrl, phoneHref, type Site } from '../site/site';
+import { openConsentPrompt, useConsentApplies } from '../site/consent';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -91,6 +92,7 @@ function Roll({ children }: { children: string }) {
 export default function Footer() {
   const site = useSite();
   const t = useText();
+  const cookies = useConsentApplies();
   const socials = useSocials();
   const [street, region] = addressLines(site);
   // The sign-off line, revealed letter by letter
@@ -384,7 +386,7 @@ export default function Footer() {
           <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 font-mono text-xs uppercase tracking-wider text-white/50">
             {/* the server's year can trail the visitor's on New Year's night (UTC vs IST): not a hydration error */}
             <p suppressHydrationWarning>© {year} IN-TA Solutions Pvt Ltd. All rights reserved.</p>
-            <div className="flex items-center gap-5 sm:gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 sm:gap-x-6">
               <Link href="/terms" className="group/roll inline-flex py-1 hover:text-white">
                 <Roll>Terms</Roll>
               </Link>
@@ -394,6 +396,12 @@ export default function Footer() {
               <Link href="/security" className="group/roll inline-flex py-1 hover:text-white">
                 <Roll>Security</Roll>
               </Link>
+              {/* only while the cookie prompt applies to this visit (a Meta Pixel ID, outside the EEA/UK/CH) */}
+              {cookies && (
+                <button type="button" onClick={openConsentPrompt} className="group/roll inline-flex py-1 uppercase hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7fa6ff]">
+                  <Roll>{t('consent_settings')}</Roll>
+                </button>
+              )}
               <button
                 type="button"
                 data-ft="mag"
